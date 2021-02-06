@@ -1,7 +1,7 @@
 import requests
-import bs4
+import config
 import abc
-
+import time
 
 
 class AbstractLoader(metaclass=abc.ABCMeta):
@@ -10,17 +10,24 @@ class AbstractLoader(metaclass=abc.ABCMeta):
         self.url: str = None
         self.session = session
         self.response: requests.Response = None
-
-    @property
-    def ok(self) -> bool:
-        return self.response.ok
+        self.ok = False
 
     @property
     def html(self) -> bool:
         return self.response.content
 
-    def load(self):
-        self.response = self.session.get(self.url)
+    def load(self, nbtry=config.nbtry):
+        i = 0
+        while i < nbtry:
+            try:
+                self.response = self.session.get(self.url, timeout=config.timeout)
+                self.ok = self.response.ok
+                i = nbtry
+                time.sleep(config.sleep)
+            except Exception:
+                self.ok = False
+                i += 1
+
 
 class GoogleLoader(AbstractLoader):
 
@@ -39,6 +46,7 @@ class AmeliLoader(AbstractLoader):
     def post(self, s: str, loc=""):
         data = {"ps_nom": s, "type": "ps", "ps_localisation": loc, "ps_proximite": False}
         self.response = self.session.post(self.post_url, data=data, allow_redirects=True)
+        self.ok = self.response.ok
         return self.response.history[0].headers["Location"] != "/modifier_votre_recherche.html"
 
 
@@ -52,7 +60,7 @@ class AmeliPageLoader(AbstractLoader):
         self.url = f"http://annuairesante.ameli.fr/professionnels-de-sante/recherche/liste-resultats-page-{self.page}-par_page-20-tri-nom_asc.html"
 
 
-class AmeliDetailLoader(AbstractLoader):
+class AmeliDetailsLoader(AbstractLoader):
 
     def __init__(self, session: requests.Session, id):
         super().__init__(session)

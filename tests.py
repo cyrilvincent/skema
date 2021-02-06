@@ -64,32 +64,50 @@ class SkemaTests(unittest.TestCase):
             p.soup_nbpage()
             self.assertEqual(50, p.nbpage)
 
-    def test_pageitems(self):
+    def test_pageentities(self):
         with requests.Session() as session:
             l = loaders.AmeliLoader(session)
             l.post("VINCENT")
             l = loaders.AmeliPageLoader(session)
             l.load()
             p = parsers.AmeliPageParser(l.html)
-            p.soup_items()
-            self.assertEqual(20, len(p.items))
+            p.soup_entities()
+            self.assertEqual(20, len(p.entities))
 
-    def test_details(self):
+    def test_pagesoup(self):
         with requests.Session() as session:
             l = loaders.AmeliLoader(session)
             l.post("VINCENT", "38")
             l = loaders.AmeliPageLoader(session)
             l.load()
             p = parsers.AmeliPageParser(l.html)
-            p.soup_items()
-            id = list(p.items.keys())[0]
-            l = loaders.AmeliDetailLoader(session, id)
-            l.load()
-            p = parsers.AmeliDetailsParser(l.html)
-            p.soup_phone()
-            self.assertEqual("0625994386", p.phone)
-            p.soup_convention()
-            self.assertEqual("Conventionné", p.convention)
+            p.soup_entities()
+            e = p.entities["A7ozkjI3NjK2"]
+            self.assertIsNotNone(e)
+            self.assertEqual("Conventionné", e.convention)
+            self.assertEqual("0625994386", e.phone)
+            self.assertEqual("Masseur-kinésithérapeute", e.speciality)
+            self.assertEqual("VINCENT", e.fname)
+            self.assertTrue(e.vitale)
+            self.assertEqual("KINE DU SPORT BERRIAT<br/>5 RUE PIERRE SEMARD<br/>38000 GRENOBLE", e.address)
+            self.assertIsNone(e.honoraire)
+
+    # def test_details(self):
+    #     with requests.Session() as session:
+    #         l = loaders.AmeliLoader(session)
+    #         l.post("VINCENT", "38")
+    #         l = loaders.AmeliPageLoader(session)
+    #         l.load()
+    #         p = parsers.AmeliPageParser(l.html)
+    #         p.soup_items()
+    #         id = list(p.items.keys())[0]
+    #         l = loaders.AmeliDetailsLoader(session, id)
+    #         l.load()
+    #         p = parsers.AmeliDetailsParser(l.html)
+    #         p.soup_phone()
+    #         self.assertEqual("0625994386", p.phone)
+    #         p.soup_convention()
+    #         self.assertEqual("Conventionné", p.convention)
 
 
 if __name__ == '__main__':
