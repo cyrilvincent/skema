@@ -12,6 +12,7 @@ def load(path):
     """
     ext = path.split(".")[-1]
     logging.info(f"Load {path}")
+    db = None
     try:
         if ext == "pickle":
             with open(path, "rb") as f:

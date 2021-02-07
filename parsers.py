@@ -2,6 +2,7 @@ import bs4
 import re
 from typing import List, Dict
 
+
 class Entity:
 
     def __init__(self, id, name):
@@ -16,6 +17,7 @@ class Entity:
         self.address = None
         self.honoraire = None
 
+
 class AmeliPageParser:
 
     def __init__(self, html):
@@ -28,16 +30,19 @@ class AmeliPageParser:
         tag = self.soup.find("img", attrs={"alt": " - Aller à la dernière page"})
         if tag is not None:
             href = tag.parent.attrs["href"]
-            regex = r'/professionnels-de-sante/recherche/liste-resultats-page-([\d]+)-par_page-20-tri-nom_asc.html'
-            match = re.match(regex, href)
-            self.nbpage = int(match[1])
+            regex = r'/professionnels-de-sante/recherche/liste-resultats-page-([\d]+)-par_page-20-tri-[\w]+_asc.html'
+            try:
+                match = re.match(regex, href)
+                self.nbpage = int(match[1])
+            except Exception as ex:
+                print(f"WARNING: soup_nbpage {ex}")
 
     def soup_entities(self):
         tags = self.soup.find_all("strong")
         for tag in tags:
-            name = tag.contents[0]
+            name = str(tag.contents[0])
             href = tag.parent.attrs["href"]
-            fname = tag.nextSibling
+            fname = str(tag.nextSibling)
             if fname is not None:
                 fname = fname.strip()
             regex = r'/professionnels-de-sante/recherche/fiche-detaillee-([\d\w]+).html'
@@ -51,6 +56,7 @@ class AmeliPageParser:
             entity.fname = fname
             entity.vitale = self.soup_vitale(root)
             entity.address = self.soup_address(root)
+            entity.honoraire = self.soup_honoraire(root)
             self.entities[id] = entity
 
     def soup_convention(self, root):
@@ -58,19 +64,19 @@ class AmeliPageParser:
         if tag != None:
             a = tag.findChildren("a")
             if len(a) > 0:
-                return a[0].contents[0]
+                return str(a[0].contents[0])
         return None
 
     def soup_phone(self, root):
         tag = root.find("div", attrs={"class": "tel"})
         if tag is not None:
-           return tag.contents[0].replace('\xa0', '')
+           return str(tag.contents[0]).replace('\xa0', '')
         return None
 
     def soup_speciality(self, root):
         tag = root.find("div", attrs={"class": "specialite"})
         if tag is not None:
-           return tag.contents[0]
+           return str(tag.contents[0])
         return None
 
     def soup_vitale(self, root):

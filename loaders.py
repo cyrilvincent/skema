@@ -43,11 +43,18 @@ class AmeliLoader(AbstractLoader):
         self.url = "http://annuairesante.ameli.fr/"
         self.post_url = "http://annuairesante.ameli.fr/recherche.html"
 
-    def post(self, s: str, loc=""):
-        data = {"ps_nom": s, "type": "ps", "ps_localisation": loc, "ps_proximite": False}
-        self.response = self.session.post(self.post_url, data=data, allow_redirects=True)
-        self.ok = self.response.ok
-        return self.response.history[0].headers["Location"] != "/modifier_votre_recherche.html"
+    def post(self, s: str, loc="", nbtry=config.nbtry * 2):
+        i = 0
+        while i < nbtry:
+            try:
+                data = {"ps_nom": s, "type": "ps", "ps_localisation": loc, "ps_proximite": False}
+                self.response = self.session.post(self.post_url, data=data, allow_redirects=True, timeout=config.timeout * 2)
+                self.ok = self.response.ok
+                return self.response.history[0].headers["Location"] != "/modifier_votre_recherche.html"
+            except:
+                self.ok = False
+                i += 1
+
 
 
 class AmeliPageLoader(AbstractLoader):
