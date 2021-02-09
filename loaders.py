@@ -13,18 +13,21 @@ class AbstractLoader(metaclass=abc.ABCMeta):
         self.ok = False
 
     @property
-    def html(self) -> bool:
+    def html(self):
         return self.response.content
 
     def load(self, nbtry=config.nbtry):
+        self.load_retry(self.url, nbtry)
+
+    def load_retry(self, url, nbtry=config.nbtry):
         i = 0
         while i < nbtry:
             try:
-                self.response = self.session.get(self.url, timeout=config.timeout)
+                self.response = self.session.get(url, timeout=config.timeout)
                 self.ok = self.response.ok
                 i = nbtry
                 time.sleep(config.sleep)
-            except Exception:
+            except:
                 self.ok = False
                 i += 1
 
@@ -56,7 +59,6 @@ class AmeliLoader(AbstractLoader):
                 i += 1
 
 
-
 class AmeliPageLoader(AbstractLoader):
 
     # 2 lettres + dept
@@ -65,6 +67,10 @@ class AmeliPageLoader(AbstractLoader):
         super().__init__(session)
         self.page = page
         self.url = f"http://annuairesante.ameli.fr/professionnels-de-sante/recherche/liste-resultats-page-{self.page}-par_page-20-tri-nom_asc.html"
+        self.url_desc = self.url.replace("asc", "desc")
+
+    def load_desc(self):
+        return self.load_retry(self.url_desc)
 
 
 class AmeliDetailsLoader(AbstractLoader):
@@ -76,5 +82,8 @@ class AmeliDetailsLoader(AbstractLoader):
 
 
 if __name__ == '__main__':
-    gl = GoogleLoader()
-    gl.load()
+    with requests.Session() as session:
+        print("Ping Ameli")
+        gl = AmeliLoader(session)
+        gl.load()
+        print("OK")

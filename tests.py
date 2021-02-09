@@ -4,6 +4,7 @@ import config
 import loaders
 import requests
 import parsers
+import pickles2csv
 
 
 class SkemaTests(unittest.TestCase):
@@ -91,6 +92,26 @@ class SkemaTests(unittest.TestCase):
             self.assertTrue(e.vitale)
             self.assertEqual("KINE DU SPORT BERRIAT<br/>5 RUE PIERRE SEMARD<br/>38000 GRENOBLE", e.address)
             self.assertIsNone(e.honoraire)
+            e = p.entities["A7o1kjoyNjaz"]
+            self.assertEqual("Honoraires libres", e.honoraire)
+
+    def test_honoraire(self):
+        with requests.Session() as session:
+            l = loaders.AmeliLoader(session)
+            l.post("ACHARD ANTHEAUME", "21")
+            l = loaders.AmeliPageLoader(session)
+            l.load()
+            p = parsers.AmeliPageParser(l.html)
+            p.soup_entities()
+            e = p.entities["ArMwkjI5Nje6"]
+            self.assertEqual("Conventionné", e.honoraire)
+
+    def test_dept(self):
+        self.assertEqual("38", pickles2csv.get_dept_from_cp("38000"))
+        self.assertEqual("971", pickles2csv.get_dept_from_cp("97100"))
+        self.assertEqual("2A", pickles2csv.get_dept_from_cp("20100"))
+        self.assertEqual("2B", pickles2csv.get_dept_from_cp("20200"))
+        self.assertEqual("98", pickles2csv.get_dept_from_cp("98000"))
 
     # def test_details(self):
     #     with requests.Session() as session:

@@ -30,9 +30,9 @@ class AmeliPageParser:
         tag = self.soup.find("img", attrs={"alt": " - Aller à la dernière page"})
         if tag is not None:
             href = tag.parent.attrs["href"]
-            regex = r'/professionnels-de-sante/recherche/liste-resultats-page-([\d]+)-par_page-20-tri-[\w]+_asc.html'
+            regex = r'/professionnels-de-sante/recherche/liste-resultats-page-([\d]+)-par_page-20-tri-\w+_\w+.html'
             try:
-                match = re.match(regex, href)
+                match = re.search(regex, href)
                 self.nbpage = int(match[1])
             except Exception as ex:
                 print(f"WARNING: soup_nbpage {ex}")
@@ -40,13 +40,13 @@ class AmeliPageParser:
     def soup_entities(self):
         tags = self.soup.find_all("strong")
         for tag in tags:
-            name = str(tag.contents[0])
+            name = str(tag.contents[0]).replace(",", " ")
             href = tag.parent.attrs["href"]
             fname = str(tag.nextSibling)
             if fname is not None:
-                fname = fname.strip()
+                fname = fname.strip().replace(",", " ")
             regex = r'/professionnels-de-sante/recherche/fiche-detaillee-([\d\w]+).html'
-            match = re.match(regex, href)
+            match = re.search(regex, href)
             id = match[1]
             entity = Entity(id, name)
             root = tag.parent.parent.parent.parent
@@ -61,7 +61,7 @@ class AmeliPageParser:
 
     def soup_convention(self, root):
         tag = root.find("div", attrs={"class": "convention"})
-        if tag != None:
+        if tag is not None:
             a = tag.findChildren("a")
             if len(a) > 0:
                 return str(a[0].contents[0])
@@ -70,13 +70,13 @@ class AmeliPageParser:
     def soup_phone(self, root):
         tag = root.find("div", attrs={"class": "tel"})
         if tag is not None:
-           return str(tag.contents[0]).replace('\xa0', '')
+            return str(tag.contents[0]).replace('\xa0', '')
         return None
 
     def soup_speciality(self, root):
         tag = root.find("div", attrs={"class": "specialite"})
         if tag is not None:
-           return str(tag.contents[0])
+            return str(tag.contents[0])
         return None
 
     def soup_vitale(self, root):
@@ -89,13 +89,17 @@ class AmeliPageParser:
             s = ""
             for c in tag.contents:
                 s += str(c)
-            return s
+            return s.replace(",", " ")
         return None
 
     def soup_honoraire(self, root):
         tag = root.find("div", attrs={"class": "type_honoraires"})
         if tag is not None:
-           return tag.contents[0]
+            a = tag.find("a")
+            if a is None:
+                return str(tag.contents[0])
+            else:
+                return str(a.contents[0])
         return None
 
     def soups(self):
