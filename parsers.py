@@ -1,132 +1,58 @@
 import bs4
-import re
-from typing import List, Dict
+from typing import Dict
 
 
-class Entity:
+class Review:
 
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.fname = None
-        self.phone = None
-        self.convention = None
-        self.dept = None
-        self.speciality = None
-        self.vitale = False
+        self.business = None
+        self.note = None
+        self.nbreview = None
         self.address = None
-        self.honoraire = None
 
 
-class AmeliPageParser:
+class MapsParser:
 
     def __init__(self, html):
         self.html = html
         self.soup = bs4.BeautifulSoup(html, "html.parser")
-        self.nbpage = 1
-        self.entities: Dict[str, Entity] = {}
+        self.reviews: Dict[str, Review] = {}
+        self.pane: bs4.element.Tag = None
 
-    def soup_nbpage(self):
-        tag = self.soup.find("img", attrs={"alt": " - Aller à la dernière page"})
-        if tag is not None:
-            href = tag.parent.attrs["href"]
-            regex = r'/professionnels-de-sante/recherche/liste-resultats-page-([\d]+)-par_page-20-tri-\w+_\w+.html'
-            try:
-                match = re.search(regex, href)
-                self.nbpage = int(match[1])
-            except Exception as ex:
-                print(f"WARNING: soup_nbpage {ex}")
+    def soup_pane(self):
+        self.pane = self.soup.find("div", attrs={"id": "pane"})
+        if self.pane is None:
+            print(f"ERROR: soup_pane div pane not found")
 
-    def soup_entities(self):
-        tags = self.soup.find_all("strong")
-        for tag in tags:
-            name = str(tag.contents[0]).replace(",", " ")
-            href = tag.parent.attrs["href"]
-            fname = str(tag.nextSibling)
-            if fname is not None:
-                fname = fname.strip().replace(",", " ")
-            regex = r'/professionnels-de-sante/recherche/fiche-detaillee-([\d\w]+).html'
-            match = re.search(regex, href)
-            id = match[1]
-            entity = Entity(id, name)
-            root = tag.parent.parent.parent.parent
-            entity.convention = self.soup_convention(root)
-            entity.phone = self.soup_phone(root)
-            entity.speciality = self.soup_speciality(root)
-            entity.fname = fname
-            entity.vitale = self.soup_vitale(root)
-            entity.address = self.soup_address(root)
-            entity.honoraire = self.soup_honoraire(root)
-            self.entities[id] = entity
+    def soup_name(self):
+        h1 = self.pane.find("h1")
+        span = h1.find("span")
+        return str(span.contents[0]).strip().upper()
 
-    def soup_convention(self, root):
-        tag = root.find("div", attrs={"class": "convention"})
-        if tag is not None:
-            a = tag.findChildren("a")
-            if len(a) > 0:
-                return str(a[0].contents[0])
+    def soup_note(self):
+        span = self.pane.find("span", attrs={"class", "section-star-display"})
+        if span is not None:
+            return float(span.contents[0].replace(",", "."))
         return None
 
-    def soup_phone(self, root):
-        tag = root.find("div", attrs={"class": "tel"})
-        if tag is not None:
-            return str(tag.contents[0]).replace('\xa0', '')
+    def soup_nbreview(self):
+        span = self.pane.find("span", attrs={"class", "reviews-tap-area"})
+        if span is not None:
+            btn = span.find("button")
+            if btn is not None:
+                s = str(btn.contents[0])
+                return int(s[:-5])
         return None
 
-    def soup_speciality(self, root):
-        tag = root.find("div", attrs={"class": "specialite"})
-        if tag is not None:
-            return str(tag.contents[0])
+    def soup_business(self):
+        btn = self.pane.find("div", attrs={"jsaction", "pane.rating.category"})
+        if btn is not None:
+            return str(btn.contents[0]).strip().upper()
         return None
 
-    def soup_vitale(self, root):
-        tag = root.find("img", attrs={"alt": "Ce professionnel de santé accepte la carte Vitale"})
-        return tag is not None
-
-    def soup_address(self, root):
-        tag = root.find("div", attrs={"class": "adresse"})
-        if tag is not None:
-            s = ""
-            for c in tag.contents:
-                s += str(c)
-            return s.replace(",", " ")
+    def soup_address(self):
         return None
 
-    def soup_honoraire(self, root):
-        tag = root.find("div", attrs={"class": "type_honoraires"})
-        if tag is not None:
-            a = tag.find("a")
-            if a is None:
-                return str(tag.contents[0])
-            else:
-                return str(a.contents[0])
-        return None
 
-    def soups(self):
-        self.soup_nbpage()
-        self.soup_entities()
-
-
-# class AmeliDetailsParser:
-#
-#     def __init__(self, html):
-#         self.html = html
-#         self.soup = bs4.BeautifulSoup(html, "html.parser")
-#         self.phone = None
-#         self.convention = None
-#
-#     def soup_phone(self):
-#         tag = self.soup.find("h2", attrs={"class": "tel"})
-#         if tag is not None:
-#             self.phone = tag.contents[0].replace('\xa0', '')
-#
-#     def soup_convention(self):
-#         tag = self.soup.find("div", attrs={"class": "convention"})
-#         if tag != None:
-#             a = tag.findChildren("a")
-#             if len(a) > 0:
-#                 self.convention = a[0].contents[0]
-#
-#     def soups(self):
-#         self.soup_phone()
-#         self.soup_convention()

@@ -2,3 +2,4 @@ numpy
 scipy
 pandas
 beautifulsoup4
+selenium

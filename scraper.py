@@ -133,22 +133,6 @@ class AmeliScrapperService:
         elif not self.loader.ok:
             self.error(self.loader.url)
 
-    # def _details(self, items, q, dept, page, nbpage):
-    #     for id in items.keys():
-    #         if id not in self.db:
-    #             self.log(f"Load {items[id]}@{id}", q, dept, page, nbpage)
-    #             self.details_loader = loaders.AmeliDetailsLoader(self.session, id)
-    #             self.details_loader.load()
-    #             if self.details_loader.ok:
-    #                 parser = parsers.AmeliDetailsParser(self.details_loader.html)
-    #                 parser.soups()
-    #                 entity = Entity(id, items[id], dept)
-    #                 entity.phone = parser.phone
-    #                 entity.convention = parser.convention
-    #                 self.db[id] = entity
-    #             else:
-    #                 self.error(self.details_loader.url)
-
     def _low_details(self, items, dept):
         for id in items.keys():
             if id not in self.db:

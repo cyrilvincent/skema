@@ -4,131 +4,48 @@ import config
 import loaders
 import requests
 import parsers
-import pickles2csv
+import urllib.parse
+import selenium.webdriver
 
 
 class SkemaTests(unittest.TestCase):
+
+    browser = selenium.webdriver.Chrome()
 
     def test_config(self):
         print(f"V{config.version}")
         print(f"NP: {np.__version__}")
 
-    def test_google(self):
-        with requests.Session() as session:
-            l = loaders.GoogleLoader(session)
-            l.load()
-            self.assertTrue(l.response.ok)
+    def test_selenium(self):
+        SkemaTests.browser.get("http://www.cyrilvincent.com")
+        html = SkemaTests.browser.page_source
+        self.assertIsNotNone(html)
 
-    def test_ameli(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.load()
-            self.assertTrue(l.response.ok)
+    def test_maps(self):
+        l = loaders.MapsLoader(SkemaTests.browser)
+        l.load()
+        # browser.add_cookie({'domain': '.google.com', 'expiry': 2146723198, 'httpOnly': False, 'name': 'CONSENT', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'YES+FR.fr+V10+BX'})
+        # browser.add_cookie({'domain': 'www.google.com', 'expiry': 1613003483, 'httpOnly': False, 'name': 'UULE', 'path': '/', 'secure': True, 'value': 'a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNjEyOTgxODgyODA3MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDQ1MDk4NTA5NwogIGxvbmdpdHVkZV9lNzogNTU4MDU4ODIKfQpyYWRpdXM6IDIwMDAwCnByb3ZlbmFuY2U6IDYK'})
+        # browser.add_cookie({'domain': '.google.com', 'expiry': 1628793080, 'httpOnly': True, 'name': 'NID', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': '209=PKy9a4qj0N-6NoIM6EpYj5YXO3Ou5BqaR99At-pmiEI6Vxo2yzWiJxufnCfPUmpeXGEA_jPyrlSvgWVR2VAs38dubXqtXX6zVIH71ExZlxeacD5MUXkTfj9lnDfeOcaByatRW6obhzZ3TwU2d3T-6ZHM7fDPH7qD-RwvXJtpr6A'})
+        self.assertTrue(l.response.ok)
 
-    def test_post(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            res = l.post("VINCENT", "38")
-            self.assertTrue(l.ok)
-            self.assertTrue(res)
+    def test_maps_get(self):
+        l = loaders.MapsLoader(SkemaTests.browser)
+        s = "Cyril Vincent Conseil 970 avenue Leopold Fabre"
+        q = urllib.parse.quote_plus(s)
+        self.assertEqual("Cyril+Vincent+Conseil+970+avenue+Leopold+Fabre", q)
+        l.get(q)
+        self.assertTrue(l.response.ok)
 
-    def test_post_404(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            res = l.post("XYZ", "38")
-            self.assertFalse(res)
+    def test_parser(self):
+        l = loaders.MapsLoader(SkemaTests.browser)
+        s = "Pavaday Christelle, 51 Place Pierre Chabert, 38250 Villard-de-Lans"
+        l.get(urllib.parse.quote_plus(s))
+        p = parsers.MapsParser(l.html)
+        p.soup_pane()
+        self.assertIsNotNone(p.pane)
+        self.assertEqual("PAVADAY CHRISTELLE", p.soup_name())
 
-    def test_amelipageloader(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("VINCENT", "38")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            self.assertTrue(l.response.ok)
-
-    def test_amelipageparser(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("VINCENT", "38")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            p = parsers.AmeliPageParser(l.html)
-            self.assertIsNotNone(p.soup)
-
-    def test_nbpage(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("VI")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            p = parsers.AmeliPageParser(l.html)
-            p.soup_nbpage()
-            self.assertEqual(50, p.nbpage)
-
-    def test_pageentities(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("VINCENT")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            p = parsers.AmeliPageParser(l.html)
-            p.soup_entities()
-            self.assertEqual(20, len(p.entities))
-
-    def test_pagesoup(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("VINCENT", "38")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            p = parsers.AmeliPageParser(l.html)
-            p.soup_entities()
-            e = p.entities["A7ozkjI3NjK2"]
-            self.assertIsNotNone(e)
-            self.assertEqual("Conventionné", e.convention)
-            self.assertEqual("0625994386", e.phone)
-            self.assertEqual("Masseur-kinésithérapeute", e.speciality)
-            self.assertEqual("VINCENT", e.fname)
-            self.assertTrue(e.vitale)
-            self.assertEqual("KINE DU SPORT BERRIAT<br/>5 RUE PIERRE SEMARD<br/>38000 GRENOBLE", e.address)
-            self.assertIsNone(e.honoraire)
-            e = p.entities["A7o1kjoyNjaz"]
-            self.assertEqual("Honoraires libres", e.honoraire)
-
-    def test_honoraire(self):
-        with requests.Session() as session:
-            l = loaders.AmeliLoader(session)
-            l.post("ACHARD ANTHEAUME", "21")
-            l = loaders.AmeliPageLoader(session)
-            l.load()
-            p = parsers.AmeliPageParser(l.html)
-            p.soup_entities()
-            e = p.entities["ArMwkjI5Nje6"]
-            self.assertEqual("Conventionné", e.honoraire)
-
-    def test_dept(self):
-        self.assertEqual("38", pickles2csv.get_dept_from_cp("38000"))
-        self.assertEqual("971", pickles2csv.get_dept_from_cp("97100"))
-        self.assertEqual("2A", pickles2csv.get_dept_from_cp("20100"))
-        self.assertEqual("2B", pickles2csv.get_dept_from_cp("20200"))
-        self.assertEqual("98", pickles2csv.get_dept_from_cp("98000"))
-
-    # def test_details(self):
-    #     with requests.Session() as session:
-    #         l = loaders.AmeliLoader(session)
-    #         l.post("VINCENT", "38")
-    #         l = loaders.AmeliPageLoader(session)
-    #         l.load()
-    #         p = parsers.AmeliPageParser(l.html)
-    #         p.soup_items()
-    #         id = list(p.items.keys())[0]
-    #         l = loaders.AmeliDetailsLoader(session, id)
-    #         l.load()
-    #         p = parsers.AmeliDetailsParser(l.html)
-    #         p.soup_phone()
-    #         self.assertEqual("0625994386", p.phone)
-    #         p.soup_convention()
-    #         self.assertEqual("Conventionné", p.convention)
 
 
 if __name__ == '__main__':
