@@ -63,7 +63,6 @@ if __name__ == '__main__':
         l.cookies()
         l = MapsLoader(browser)
         l.load()
-        c = l.browser.get_cookies()
         s = "Pavaday Christelle, 51 Place Pierre Chabert, 38250 Villard-de-Lans"
         l.post(s)
         p = parsers.MapsParser(l.html)
