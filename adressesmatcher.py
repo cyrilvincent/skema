@@ -9,6 +9,7 @@ import time
 
 time0 = time.perf_counter()
 
+
 class AdresseMatcher:
 
     def __init__(self):
@@ -24,14 +25,13 @@ class AdresseMatcher:
         self.nbbp = 0
         self.nbscorelow = 0
 
-
     def match_adresse_string(self, adresse):
-        s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".","").replace("ST ", "SAINT ").strip()
+        s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".", "").replace("ST ", "SAINT ").strip()
         # if s == 'PHARMACIE ENTRE DEUX GUIERS ZA CHAMP PERROUD AVENUE MONTCELET 38380 ENTRE DEUX GUIERS':
         #     print("toto")
         if "BP" in s:
             self.nbbp += 1
-        regex = r"(\d{4,5})" # Faire {4,5} pour 01
+        regex = r"(\d{5})"
         match = re.findall(regex, s)
         if len(match) > 0:
             cp = match[-1]
@@ -74,23 +74,23 @@ class AdresseMatcher:
         max = 0
         res = 0
         for item in l:
-            if item.startswith(s):
-                return item, 0.99
-            if s.startswith(item):
-                return item, 0.98
-            sm = difflib.SequenceMatcher(None, s, item)
-            if sm.ratio() > max:
-                max = sm.ratio()
-                res = item
+            if item != "":
+                if item.startswith(s):
+                    return item, 0.99
+                if s.startswith(item):
+                    return item, 0.98
+                sm = difflib.SequenceMatcher(None, s, item)
+                if sm.ratio() > max:
+                    max = sm.ratio()
+                    res = item
         return res, max
 
-    def load_adresses(self):
-        print("Load adresses.pickle")
-        indexdb = cyrilload.load(f"{config.adresse_path}/adresses.pickle")
+    def load_adresses(self, dept):
+        indexdb = cyrilload.load(f"{config.adresse_path}/adresses-{dept:02d}.pickle")
         self.db = indexdb["db"]
         self.communes_db = indexdb["communes"]
         self.cps_db = indexdb["cps"]
-        print(f"Load addresses.pickle in {int(time.perf_counter() - time0)}s")
+        print(f"Load adresses-{dept:02d}.pickle in {int(time.perf_counter() - time0)}s")
 
     def find_nearest_less_cp(self, cp):
         min = 99999
@@ -123,7 +123,7 @@ class AdresseMatcher:
             self.nbbadcp += 1
             res = self.find_nearest_less_cp(cp)
             score = 0.9 if "CEDEX" in commune else 0.5
-            #print(f"Warning CP {cp}=>{res} {int(score*100)}%")
+            # print(f"Warning CP {cp}=>{res} {int(score*100)}%")
             return res, score
 
     def match_commune(self, commune, communes):
@@ -143,20 +143,19 @@ class AdresseMatcher:
         adresses_voie = [e.nom_voie for e in entities if e.code_postal == cp]
         if street == "":
             self.nbnostreet += 1
-            return adresses[0], 0
+            street = "PLACE MAIRIE EGLISE"
+        if street in adresses:
+            return street, 1
+        if street in adresses_voie:
+            index = adresses_voie.index(street)
+            return adresses[index], 1
+        street_res, score = self.gestalts(street, adresses)
+        street2_res, score2 = self.gestalts(street, adresses_voie)
+        if score + 0.1 > score2:
+            return street_res, score
         else:
-            if street in adresses:
-                return street, 1
-            if street in adresses_voie:
-                index = adresses_voie.index(street)
-                return adresses[index], 1
-            street_res, score = self.gestalts(street, adresses)
-            street2_res, score2 = self.gestalts(street, adresses_voie)
-            if score + 0.1 > score2:
-                return street_res, score
-            else:
-                index = adresses_voie.index(street2_res)
-                return adresses[index], score2
+            index = adresses_voie.index(street2_res)
+            return adresses[index], score2
 
     def match_num(self, commune, adresse, num):
         ids = self.communes_db[commune]
@@ -174,7 +173,7 @@ class AdresseMatcher:
                 score = max(0.5, 1 - (abs(num - res) / max(nums)))
                 return res, score
 
-    def load_ameli(self):
+    def load_ameli(self, dept):
         with open("data/ameli/ameli-all.csv") as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -182,14 +181,13 @@ class AdresseMatcher:
                 res = self.match_adresse_string(adresse)
                 if res is None:
                     self.nbcperror += 1
-                    #print(f"ERROR no CP {adresse}")
+                    # print(f"ERROR no CP {adresse}")
                 else:
                     cp = res[0]
                     commune = res[1]
                     num = res[2]
                     street = res[3]
-                    dept = 75
-                    if (dept * 1000) <= cp < (dept + 1) * 1000: # Temporary
+                    if (dept * 1000) <= cp < (dept + 1) * 1000:
                         self.nb += 1
                         if self.nb % 100 == 0:
                             print(f"Parse {self.nb} addresses in {int(time.perf_counter() - time0)}s")
@@ -204,9 +202,7 @@ class AdresseMatcher:
                         entity.nom_afnor, score = self.match_street(entity.commune, street, entity.code_postal)
                         entity.scores.append(score)
                         if score < 0.5:
-                            #print(f"Warning street {street}=>{entity.nom_afnor} @{int(score * 100)}% {entity.code_postal} {entity.commune} ")
-                            # if street == "PHARMACIE ENTRE DEUX GUIERS ZA CHAMP PERROUD AVENUE MONTCELET":
-                            #     print("toto")
+                            # print(f"Warning street {street}=>{entity.nom_afnor} @{int(score * 100)}% {entity.code_postal} {entity.commune} ")
                             self.nberrorstreet += 1
                         entity.numero, score = self.match_num(entity.commune, entity.nom_afnor, num)
                         entity.scores.append(score)
@@ -215,20 +211,18 @@ class AdresseMatcher:
                             print(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.numero} {entity.nom_afnor} {entity.code_postal} {entity.commune} vs {adresse}")
                         ids = self.communes_db[entity.commune]
                         entity.id = [self.db[id].id for id in ids if self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor][0]
-
-
-
-
         print(self.nb, self.nbcperror, self.nbbadcp, self.nbnostreet, self.nbbp)
+
 
 if __name__ == '__main__':
     l = AdresseMatcher()
-    l.load_adresses()
-    l.load_ameli()
+    dept = 5
+    l.load_adresses(dept)
+    l.load_ameli(dept)
     # No CP: 13
     # Bad CP: 165/9693 = 1.7%
     # NoStreet: 59/9693 = 0.6%
     # BP: 74/9693 = 1.0%
     # 38 : 2.9% accuracy @ 0.8
-    # 05 : 15.3% accuracy @ 0.8
+    # 05 : 14.5% accuracy @ 0.8
     # 75 : 0.2% accuracy @ 0.8

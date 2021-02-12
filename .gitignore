@@ -3,6 +3,7 @@
 
 **/data/ameli/**
 **/data/old/**
+**/data/adresse/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

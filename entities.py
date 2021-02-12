@@ -7,7 +7,6 @@ class AdresseEntity:
         self.nom_afnor = ""
         self.nom_voie = ""
         self.code_postal = 0
-        self.code_insee = 0
         self.commune = ""
         self.commune_old = ""
         self.lon = 0
