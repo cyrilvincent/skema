@@ -1,0 +1,14 @@
+class AdresseEntity:
+
+    def __init__(self, id):
+        self.id = id
+        self.numero = 0
+        self.rep = ""
+        self.nom_afnor = ""
+        self.code_postal = 0
+        self.code_insee = 0
+        self.commune = ""
+        self.commune_old = ""
+        self.lon = 0
+        self.lat = 0
+        self.score = 0

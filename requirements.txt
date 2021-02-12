@@ -3,3 +3,4 @@ scipy
 pandas
 beautifulsoup4
 selenium
+unidecode
