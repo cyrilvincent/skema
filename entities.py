@@ -11,4 +11,8 @@ class AdresseEntity:
         self.commune_old = ""
         self.lon = 0
         self.lat = 0
-        self.score = 0
+        self.scores = []
+
+    @property
+    def score(self):
+        return sum([s for s in self.scores]) / len(self.scores)
