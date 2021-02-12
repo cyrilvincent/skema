@@ -7,6 +7,8 @@ import config
 import entities
 import time
 
+time0 = time.perf_counter()
+
 class AdresseMatcher:
 
     def __init__(self):
@@ -113,10 +115,14 @@ class AdresseMatcher:
     def match_cp(self, cp, commune):
         if cp in self.cps_db:
             return cp, 1
+        elif 75100 <= cp < 75200:
+            self.nbbadcp += 1
+            cp, score = self.match_cp(cp - 100, commune)
+            return cp, 0.9
         else:
             self.nbbadcp += 1
             res = self.find_nearest_less_cp(cp)
-            score = 0.95 if "CEDEX" in commune else 0.5
+            score = 0.9 if "CEDEX" in commune else 0.5
             #print(f"Warning CP {cp}=>{res} {int(score*100)}%")
             return res, score
 
@@ -129,28 +135,35 @@ class AdresseMatcher:
         else:
             return self.gestalts(commune, communes)
 
-    def match_street(self, commune, street):
+    def match_street(self, commune, street, cp):
         street = street.replace("CH ", "CHEMIN ").replace("AV ", "AVENUE ").replace("PL ", "PLACE ").replace("BD ", "BOULEVARD ")
+        ids = self.communes_db[commune]
+        entities = [self.db[id] for id in ids]
+        adresses = [e.nom_afnor for e in entities if e.code_postal == cp]
+        adresses_voie = [e.nom_voie for e in entities if e.code_postal == cp]
         if street == "":
             self.nbnostreet += 1
-            id = list(self.communes_db[commune])[0]
-            return self.db[id].nom_afnor, 0
+            return adresses[0], 0
         else:
-            ids = self.communes_db[commune]
-            entities = [self.db[id] for id in ids]
-            adresses = [e.nom_afnor for e in entities]
-            streets = [a for a in adresses if a == street]
-            if len(streets) > 0:
-                return streets[0], 1
+            if street in adresses:
+                return street, 1
+            if street in adresses_voie:
+                index = adresses_voie.index(street)
+                return adresses[index], 1
+            street_res, score = self.gestalts(street, adresses)
+            street2_res, score2 = self.gestalts(street, adresses_voie)
+            if score + 0.1 > score2:
+                return street_res, score
             else:
-                return self.gestalts(street, adresses)
+                index = adresses_voie.index(street2_res)
+                return adresses[index], score2
 
     def match_num(self, commune, adresse, num):
         ids = self.communes_db[commune]
         entities = [self.db[id] for id in ids]
         if num == 0:
             nums = [e.numero for e in entities if e.nom_afnor == adresse]
-            return int(sum(nums) / len(nums)), 0.6
+            return nums[0], 0.6
         else:
             founds = [e.numero for e in entities if e.nom_afnor == adresse and e.numero == num]
             if len(founds) > 0:
@@ -175,7 +188,8 @@ class AdresseMatcher:
                     commune = res[1]
                     num = res[2]
                     street = res[3]
-                    if 5000 <= cp < 6000: # Temporary
+                    dept = 75
+                    if (dept * 1000) <= cp < (dept + 1) * 1000: # Temporary
                         self.nb += 1
                         if self.nb % 100 == 0:
                             print(f"Parse {self.nb} addresses in {int(time.perf_counter() - time0)}s")
@@ -187,19 +201,20 @@ class AdresseMatcher:
                         entity.scores.append(score)
                         # if score < 0.8:
                         #     print(f"Warning commune {entity.code_postal} {commune}=>{entity.commune} @{int(score*100)}%")
-                        entity.nom_afnor, score = self.match_street(entity.commune, street)
+                        entity.nom_afnor, score = self.match_street(entity.commune, street, entity.code_postal)
                         entity.scores.append(score)
                         if score < 0.5:
                             #print(f"Warning street {street}=>{entity.nom_afnor} @{int(score * 100)}% {entity.code_postal} {entity.commune} ")
                             # if street == "PHARMACIE ENTRE DEUX GUIERS ZA CHAMP PERROUD AVENUE MONTCELET":
                             #     print("toto")
                             self.nberrorstreet += 1
-                        entity.num, score = self.match_num(entity.commune, entity.nom_afnor, num)
+                        entity.numero, score = self.match_num(entity.commune, entity.nom_afnor, num)
                         entity.scores.append(score)
-                        if entity.score < 0.75:
+                        if entity.score < 0.8:
                             self.nbscorelow += 1
-                            print(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.nom_afnor} {entity.code_postal} {entity.commune} vs {adresse}")
-
+                            print(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.numero} {entity.nom_afnor} {entity.code_postal} {entity.commune} vs {adresse}")
+                        ids = self.communes_db[entity.commune]
+                        entity.id = [self.db[id].id for id in ids if self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor][0]
 
 
 
@@ -207,7 +222,6 @@ class AdresseMatcher:
         print(self.nb, self.nbcperror, self.nbbadcp, self.nbnostreet, self.nbbp)
 
 if __name__ == '__main__':
-    time0 = time.perf_counter()
     l = AdresseMatcher()
     l.load_adresses()
     l.load_ameli()
@@ -215,5 +229,6 @@ if __name__ == '__main__':
     # Bad CP: 165/9693 = 1.7%
     # NoStreet: 59/9693 = 0.6%
     # BP: 74/9693 = 1.0%
-    # 38 : 2.1% accuracy @ 0.8
-    # 05 : 7.5% accuracy @ 0.75
+    # 38 : 2.9% accuracy @ 0.8
+    # 05 : 15.3% accuracy @ 0.8
+    # 75 : 0.2% accuracy @ 0.8

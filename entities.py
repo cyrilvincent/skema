@@ -5,6 +5,7 @@ class AdresseEntity:
         self.numero = 0
         self.rep = ""
         self.nom_afnor = ""
+        self.nom_voie = ""
         self.code_postal = 0
         self.code_insee = 0
         self.commune = ""

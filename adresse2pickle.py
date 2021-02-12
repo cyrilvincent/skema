@@ -32,6 +32,7 @@ class AdresseParser:
                 e.numero = int(row["numero"])
                 e.rep = row["rep"]
                 e.nom_afnor = row["nom_afnor"]
+                e.nom_voie = unidecode.unidecode(row["nom_voie"].upper()).replace("'", " ").replace("-", " ").replace("ST ","SAINT ")
                 e.code_insee = int(row["code_insee"])
                 e.commune = row["libelle_acheminement"].replace("'", " ").replace("-", " ").replace("ST ","SAINT ")
                 if e.commune.endswith("(LE)"):
