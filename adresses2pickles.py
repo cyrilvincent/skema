@@ -26,7 +26,12 @@ class AdresseParser:
                 self.load(f"{config.adresse_path}/{item}")
 
     def normalize(self, s):
-        return unidecode.unidecode(s.upper()).replace("'", " ").replace("-", " ").replace("ST ", "SAINT ")
+        s = unidecode.unidecode(s.upper()).replace("'", " ").replace("-", " ").replace("ST ", "SAINT ")
+        if s.endswith("(LE)"):
+            s = "LE "+s[:-4]
+        elif s.endswith("(LA)"):
+            s = "LA "+s[:-4]
+        return s.strip()
 
     def load(self, path):
         print(f"Load {path}")
@@ -50,6 +55,8 @@ class AdresseParser:
                 e.commune = self.normalize(row["nom_commune"])
                 e.code_postal = int(row["code_postal"])
                 e.commune_old = self.normalize(row["nom_ancienne_commune"])
+                if e.commune_old == "":
+                    e.commune_old = self.normalize(row["libelle_acheminement"])
                 e.lon = float(row["lon"])
                 e.lat = float(row["lat"])
                 e.code_insee = row["code_insee"]
@@ -99,9 +106,10 @@ class AdresseParser:
         self.nb += 1
         self.db[e.id] = e
 
+
 if __name__ == '__main__':
-    print("Adresse2Pickle")
-    print("==============")
+    print("Adresses 2 Pickles")
+    print("==================")
     print(f"V{config.version}")
     print()
     time0 = time.perf_counter()

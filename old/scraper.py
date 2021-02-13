@@ -1,6 +1,6 @@
 import config
 import requests
-import loaders
+from old import loaders
 import parsers
 import sys
 import time

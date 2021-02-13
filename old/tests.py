@@ -1,9 +1,8 @@
 import unittest
 import numpy as np
 import config
-import loaders
+from old import loaders
 import requests
-import parsers
 import urllib.parse
 
 

@@ -7,6 +7,7 @@ import config
 import entities
 import time
 import argparse
+import special
 
 time0 = time.perf_counter()
 
@@ -28,9 +29,8 @@ class AdresseMatcher:
         self.numrow = 0
 
     def match_adresse_string(self, adresse):
-        s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".", "").replace("ST ", "SAINT ").strip()
-        # if s == 'PHARMACIE ENTRE DEUX GUIERS ZA CHAMP PERROUD AVENUE MONTCELET 38380 ENTRE DEUX GUIERS':
-        #     print("toto")
+        s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".", "")
+        s = s.replace("ST ", "SAINT ").strip()
         if "BP" in s:
             self.nbbp += 1
         regex = r"(\d{5})"
@@ -42,7 +42,8 @@ class AdresseMatcher:
             cp = int(cp)
             s = s[:index]
             num = 0
-            keys = ["RUE", "AVENUE", "AV ", "PLACE", "PL ", "CHEMIN", "CH ", "BD ", "BOULEVARD", "IMPASSE", "ZA ", "ZI ", "ROUTE", "ZAE "]
+            keys = ["RUE", "AVENUE", "AV ", "PLACE", "PL ", "CHEMIN", "CH ", "BD ", "BOULEVARD", "IMPASSE", "ZA ",
+                    "ZI ", "ROUTE", "ZAE "]
             index = self.find_multiple(keys, s)
             street = s.strip()
             ss = s if index == -1 else s[:index]
@@ -77,14 +78,12 @@ class AdresseMatcher:
         res = 0
         for item in l:
             if item != "":
-                if item.startswith(s):
+                if item.startswith(s) or s.startswith(item):
                     return item, 0.99
-                if item.endswith(s):
-                    return item, 0.98
-                if s.startswith(item):
-                    return item, 0.97
-                if s.endswith(item):
-                    return item, 0.96
+                if item.endswith(s) or s.endswith(item):
+                    return item, 0.95
+                if s in item or item in s:
+                    return item, 0.9
                 sm = difflib.SequenceMatcher(None, s, item)
                 if sm.ratio() > max:
                     max = sm.ratio()
@@ -128,6 +127,7 @@ class AdresseMatcher:
         return res
 
     def match_cp(self, cp, commune):
+        cp = special.cp_cedex(cp)
         if cp in self.cps_db:
             return cp, 1
         elif 75100 <= cp < 75200:
@@ -141,7 +141,8 @@ class AdresseMatcher:
             # print(f"Warning CP {cp}=>{res} {int(score*100)}%")
             return res, score
 
-    def match_commune(self, commune, communes):
+    def match_commune(self, commune, communes, cp):
+        commune = special.commune(cp, commune)
         if "CEDEX" in commune:
             index = commune.find("CEDEX")
             commune = commune[:index].strip()
@@ -151,7 +152,10 @@ class AdresseMatcher:
             return self.gestalts(commune, communes)
 
     def match_street(self, commune, street, cp):
-        street = street.replace("CH ", "CHEMIN ").replace("AV ", "AVENUE ").replace("PL ", "PLACE ").replace("BD ", "BOULEVARD ")
+        street = special.street(cp, street)
+        street = street.replace("CABINET ", "").replace("MEDICAL ", "").replace("CLINIQUE ", "")
+        street = street.replace("CH ", "CHEMIN ").replace("AV ", "AVENUE ").replace("PL ", "PLACE ")
+        street = street.replace("BD ", "BOULEVARD ")
         ids = self.communes_db[commune]
         entities = [self.db[id] for id in ids]
         adresses = [e.nom_afnor for e in entities if e.code_postal == cp]
@@ -197,7 +201,7 @@ class AdresseMatcher:
     def get_cp_by_commune(self, commune, oldcp):
         if commune in self.communes_db:
             ids = self.communes_db[commune]
-            dept = str(oldcp)[:2] if oldcp >= 10000 else "0"+str(oldcp)[:1]
+            dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
             for id in ids:
                 e = self.db[id]
                 if e.commune == commune and str(e.code_postal)[:2] == dept:
@@ -223,9 +227,9 @@ class AdresseMatcher:
                     num = res[2]
                     street = res[3]
                     if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
-                        (dept == 201 and 20000 <= cp < 20200) or \
-                        (dept == 202 and 20200 <= cp < 21000) or \
-                        (dept > 970 and (dept * 100) <= cp < (dept + 1) * 100):
+                            (dept == 201 and 20000 <= cp < 20200) or \
+                            (dept == 202 and 20200 <= cp < 21000) or \
+                            (dept > 970 and (dept * 100) <= cp < (dept + 1) * 100):
                         self.nb += 1
                         if self.nb % 100 == 0:
                             print(f"Parse {self.nb} addresses in {int(time.perf_counter() - time0)}s")
@@ -233,7 +237,7 @@ class AdresseMatcher:
                         entity.code_postal, score = self.match_cp(cp, commune)
                         entity.scores.append(score)
                         communes = self.cps_db[entity.code_postal]
-                        entity.commune, score = self.match_commune(commune, communes)
+                        entity.commune, score = self.match_commune(commune, communes, entity.code_postal)
                         entity.scores.append(score)
                         if score < 0.75:
                             cp, score = self.get_cp_by_commune(commune, entity.code_postal)
@@ -244,7 +248,8 @@ class AdresseMatcher:
                                 entity.scores[-1] = score
                                 entity.scores[-2] = 0.5
                             else:
-                                print(f"[{self.numrow}] Warning commune {entity.code_postal} {commune}=>{entity.commune} @{int(score*100)}%")
+                                print(
+                                    f"[{self.numrow}] Warning commune {entity.code_postal} {commune}=>{entity.commune} @{int(score * 100)}%")
                         entity.nom_afnor, score = self.match_street(entity.commune, street, entity.code_postal)
                         entity.scores.append(score)
                         if score < 0.5:
@@ -256,7 +261,9 @@ class AdresseMatcher:
                             self.nbscorelow += 1
                             print(f"[{self.numrow}] Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.numero} {entity.nom_afnor} {entity.code_postal} {entity.commune} vs {adresse}")
                         ids = self.communes_db[entity.commune]
-                        entity.id = [self.db[id].id for id in ids if self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor][0]
+                        entity.id = [self.db[id].id for id in ids if
+                                     self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor][
+                            0]
         print(self.nb, self.nbcperror, self.nbbadcp, self.nbnostreet, self.nbbp)
 
     def load_by_depts(self, depts=None):
@@ -272,14 +279,14 @@ if __name__ == '__main__':
     print("Adresses Matcher")
     print(f"V{config.version}")
     print()
-    parser = argparse.ArgumentParser(description="Ameli Scrapper")
+    parser = argparse.ArgumentParser(description="Adresses Matcher")
     parser.add_argument("-d", "--dept", help="Departments list in python format, eg [5,38,06]")
     args = parser.parse_args()
     l = AdresseMatcher()
     if args.dept is None:
-        l.load_by_depts([5])
+        l.load_by_depts([69])
     else:
-        l.load_by_depts(args.dept)
+        l.load_by_depts(eval(args.dept))
     # No CP: 13
     # Bad CP: 165/9693 = 1.7%
     # NoStreet: 59/9693 = 0.6%

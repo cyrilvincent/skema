@@ -1,92 +1,79 @@
 import requests
 import config
 import abc
+import urllib
+import selenium.webdriver
+import parsers
 import time
 
 
-class AbstractLoader(metaclass=abc.ABCMeta):
+class SeleniumLoader(metaclass=abc.ABCMeta):
 
-    def __init__(self, session: requests.Session):
+    def __init__(self, browser):
         self.url: str = None
-        self.session = session
-        self.response: requests.Response = None
+        self.browser: selenium.webdriver.Chrome = browser
         self.ok = False
 
     @property
     def html(self):
-        return self.response.content
+        return self.browser.page_source
 
-    def load(self, nbtry=config.nbtry):
-        self.load_retry(self.url, nbtry)
-
-    def load_retry(self, url, nbtry=config.nbtry):
-        i = 0
-        while i < nbtry:
-            try:
-                self.response = self.session.get(url, timeout=config.timeout)
-                self.ok = self.response.ok
-                i = nbtry
-                time.sleep(config.sleep)
-            except:
-                self.ok = False
-                i += 1
+    def load(self, url=None):
+        if url is None:
+            url = self.url
+        print(f"Load {url}")
+        self.browser.get(url)
+        time.sleep(config.sleep)
+        self.ok = len(self.html) > 1000
 
 
-class GoogleLoader(AbstractLoader):
+class GoogleLoader(SeleniumLoader):
 
     def __init__(self, session: requests.Session):
         super().__init__(session)
-        self.url = "http://www.google.com/"
+        self.url = "http://www.google.fr"
+
+    def cookies(self):
+        self.browser.add_cookie({'domain': '.google.com', 'expiry': 2146723198, 'httpOnly': False, 'name': 'CONSENT', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'YES+FR.fr+V10+BX'})
+        self.browser.add_cookie({'domain': 'www.google.com', 'expiry': 1613003483, 'httpOnly': False, 'name': 'UULE', 'path': '/', 'secure': True, 'value': 'a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNjEyOTgxODgyODA3MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDQ1MDk4NTA5NwogIGxvbmdpdHVkZV9lNzogNTU4MDU4ODIKfQpyYWRpdXM6IDIwMDAwCnByb3ZlbmFuY2U6IDYK'})
+        self.browser.add_cookie({'domain': '.google.com', 'expiry': 1628793080, 'httpOnly': True, 'name': 'NID', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': '209=PKy9a4qj0N-6NoIM6EpYj5YXO3Ou5BqaR99At-pmiEI6Vxo2yzWiJxufnCfPUmpeXGEA_jPyrlSvgWVR2VAs38dubXqtXX6zVIH71ExZlxeacD5MUXkTfj9lnDfeOcaByatRW6obhzZ3TwU2d3T-6ZHM7fDPH7qD-RwvXJtpr6A'})
 
 
-class MapsLoader(AbstractLoader):
+class MapsLoader(SeleniumLoader):
 
     def __init__(self, session: requests.Session):
         super().__init__(session)
         self.url = "http://www.google.com/maps?hl=fr"
-        self.geturl = "http://www.google.com/maps/place/{q}?hl=fr"
 
-    def get(self, q):
-        return self.load_retry(self.geturl.replace("{q}", q))
-
-
-class AmeliLoader(AbstractLoader):
-
-    def __init__(self, session: requests.Session):
-        super().__init__(session)
-        self.url = "http://annuairesante.ameli.fr/"
-        self.post_url = "http://annuairesante.ameli.fr/recherche.html"
-
-    def post(self, s: str, loc="", nbtry=config.nbtry * 2):
-        i = 0
-        while i < nbtry:
-            try:
-                data = {"ps_nom": s, "type": "ps", "ps_localisation": loc, "ps_proximite": False}
-                self.response = self.session.post(self.post_url, data=data, allow_redirects=True, timeout=config.timeout * 2)
-                self.ok = self.response.ok
-                return self.response.history[0].headers["Location"] != "/modifier_votre_recherche.html"
-            except:
-                self.ok = False
-                i += 1
-
-
-class AmeliPageLoader(AbstractLoader):
-
-    # 2 lettres + dept
-
-    def __init__(self, session: requests.Session, page=1):
-        super().__init__(session)
-        self.page = page
-        self.url = f"http://annuairesante.ameli.fr/professionnels-de-sante/recherche/liste-resultats-page-{self.page}-par_page-20-tri-nom_asc.html"
-        self.url_desc = self.url.replace("asc", "desc")
-
-    def load_desc(self):
-        return self.load_retry(self.url_desc)
+    def post(self, q):
+        print(f"Post {q}")
+        tag = self.browser.find_element_by_id("searchboxinput")
+        tag.clear()
+        tag.send_keys(q)
+        btn = self.browser.find_element_by_id("searchbox-searchbutton")
+        btn.click()
+        time.sleep(config.sleep)
+        self.ok = len(self.html) > 1000
 
 
 if __name__ == '__main__':
-    with requests.Session() as session:
-        print("Ping Ameli")
-        gl = AmeliLoader(session)
-        gl.load()
-        print("OK")
+    with selenium.webdriver.Chrome() as browser:
+        l = GoogleLoader(browser)
+        l.load()
+        l.cookies()
+        l = MapsLoader(browser)
+        l.load()
+        s = "Pavaday Christelle, 51 Place Pierre Chabert, 38250 Villard-de-Lans"
+        l.post(s)
+        p = parsers.MapsParser(l.html)
+        p.soup_pane()
+        print(p.soup_name())
+        print(p.soup_note())
+        print(p.soup_nbreview())
+        s = "stade de neige lans en vercors"
+        l.post(s)
+        p = parsers.MapsParser(l.html)
+        p.soup_pane()
+        print(p.soup_name())
+        print(p.soup_note())
+        print(p.soup_nbreview())
