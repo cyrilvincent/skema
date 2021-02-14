@@ -27,10 +27,11 @@ class AdresseMatcher:
         self.nbbp = 0
         self.nbscorelow = 0
         self.numrow = 0
+        self.nberror500 = 0
 
     def match_adresse_string(self, adresse):
         s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".", "")
-        s = s.replace("ST ", "SAINT ").strip()
+        s = s.replace("ST ", "SAINT ").replace("/", " ").strip()
         if "BP" in s:
             self.nbbp += 1
         regex = r"(\d{5})"
@@ -74,7 +75,7 @@ class AdresseMatcher:
         return -1
 
     def gestalts(self, s, l):
-        max = 0
+        max = -1
         res = 0
         for item in l:
             if item != "":
@@ -115,7 +116,7 @@ class AdresseMatcher:
         return res
 
     def find_nearest_num(self, num, nums):
-        res = nums[0]
+        res = 0
         difmin = 99999
         for n in nums:
             dif = abs(num - n)
@@ -181,11 +182,14 @@ class AdresseMatcher:
         entities = [self.db[id] for id in ids]
         if num == 0:
             nums = [e.numero for e in entities if e.nom_afnor == adresse]
-            num = nums[0]
-            if num == 0:
-                return 0, 1
+            if len(nums) > 0:
+                num = nums[0]
+                if num == 0:
+                    return 0, 1
+                else:
+                    return num, 0.8
             else:
-                return num, 0.8
+                return 0, 0
         else:
             founds = [e.numero for e in entities if e.nom_afnor == adresse and e.numero == num]
             if len(founds) > 0:
@@ -233,6 +237,7 @@ class AdresseMatcher:
                         self.nb += 1
                         if self.nb % 100 == 0:
                             print(f"Parse {self.nb} addresses in {int(time.perf_counter() - time0)}s")
+                        cp, commune, street = special.cp_commune_adresse(cp, commune, street)
                         entity = entities.AdresseEntity(0)
                         entity.code_postal, score = self.match_cp(cp, commune)
                         entity.scores.append(score)
@@ -261,9 +266,14 @@ class AdresseMatcher:
                             self.nbscorelow += 1
                             print(f"[{self.numrow}] Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.numero} {entity.nom_afnor} {entity.code_postal} {entity.commune} vs {adresse}")
                         ids = self.communes_db[entity.commune]
-                        entity.id = [self.db[id].id for id in ids if
-                                     self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor][
-                            0]
+                        found = [self.db[id].id for id in ids if self.db[id].numero == entity.numero and self.db[id].nom_afnor == entity.nom_afnor]
+                        if len(found) > 0:
+                            entity.id = found[0]
+                        else:
+                            print(f"[{self.numrow}] ERROR UNKNOWN {res}")
+                            input("Press Enter")
+                            self.nberror500 += 1
+
         print(self.nb, self.nbcperror, self.nbbadcp, self.nbnostreet, self.nbbp)
 
     def load_by_depts(self, depts=None):
@@ -284,7 +294,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     l = AdresseMatcher()
     if args.dept is None:
-        l.load_by_depts([69])
+        l.load_by_depts([59])
     else:
         l.load_by_depts(eval(args.dept))
     # No CP: 13

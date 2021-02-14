@@ -14,7 +14,14 @@ def cp_cedex(cp):
         res = 38100
     if cp == 20184:
         res = 20090
+    if cp == 59430:
+        res = 59140
     return res
+
+def cp_commune_adresse(cp, commune, adresse):
+    if cp == 59160 and commune == "LOMME" and "AVENUE DE DUNKERQUE" in adresse:
+        return 59000, "LILLE", adresse
+    return cp, commune, adresse
 
 def commune(cp, commune):
     if cp // 1000 == 20:

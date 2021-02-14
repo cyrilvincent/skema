@@ -27,6 +27,7 @@ class AdresseParser:
 
     def normalize(self, s):
         s = unidecode.unidecode(s.upper()).replace("'", " ").replace("-", " ").replace("ST ", "SAINT ")
+        s = s.replace("/", " ")
         if s.endswith("(LE)"):
             s = "LE "+s[:-4]
         elif s.endswith("(LA)"):
@@ -115,4 +116,4 @@ if __name__ == '__main__':
     time0 = time.perf_counter()
     p = AdresseParser()
     p.scan()
-    print(f"Create {p.nb // 2} pickles in {int(time.perf_counter() - time0)}s")
+    print(f"Create {p.nbfile // 2} pickles in {int(time.perf_counter() - time0)}s")
