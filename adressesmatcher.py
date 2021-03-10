@@ -84,23 +84,6 @@ class AdresseMatcher:
                 return s.find(k)
         return -1
 
-    def gestalts(self, s, l):
-        max = -1
-        res = 0
-        for item in l:
-            if item != "":
-                if item.startswith(s) or s.startswith(item):
-                    return item, 0.99
-                if item.endswith(s) or s.endswith(item):
-                    return item, 0.95
-                if s in item or item in s:
-                    return item, 0.9
-                sm = difflib.SequenceMatcher(None, s, item)
-                if sm.ratio() > max:
-                    max = sm.ratio()
-                    res = item
-        return res, max
-
     def load_adresses(self, dept):
         s = f"{dept:02d}"
         if dept == 201:
@@ -114,28 +97,6 @@ class AdresseMatcher:
         self.communes_db = indexdb["communes"]
         self.cps_db = indexdb["cps"]
         print(f"Load adresses-{s}.pickle in {int(time.perf_counter() - time0)}s")
-
-    def find_nearest_less_cp(self, cp):
-        min = 99999
-        res = 0
-        for k in self.cps_db.keys():
-            dif = cp - k
-            if 0 <= dif < min:
-                min = dif
-                res = k
-        return res
-
-    def find_nearest_num(self, num, nums):
-        res = 0
-        difmin = 99999
-        for n in nums:
-            dif = abs(num - n)
-            if dif % 2 == 1:
-                dif *= 3
-            if dif < difmin:
-                res = n
-                difmin = dif
-        return res
 
     def match_cp(self, cp, commune):
         # cp = special.cp_cedex(cp)
@@ -161,7 +122,8 @@ class AdresseMatcher:
         else:
             print(f"WARNING BAD COMMUNE row {self.numrow}: {commune}")
             self.nbbadcommune += 1
-            return self.gestalts(commune, communes)
+            return 0, 0
+            #return self.gestalts(commune, communes)
 
     def normalize_street(self, street):
         street = street.replace("CH ", "CHEMIN ").replace("AV ", "AVENUE ").replace("PL ", "PLACE ")
@@ -220,11 +182,12 @@ class AdresseMatcher:
                 return num, 1
             else:
                 nums = [e.numero for e in entities if e.nom_afnor == adresse]
-                res = self.find_nearest_num(num, nums)
-                if res == 0:
-                    return 0, 1
-                else:
-                    return res, 0.5
+                # res = self.find_nearest_num(num, nums)
+                # if res == 0:
+                #     return 0, 1
+                # else:
+                #     return res, 0.5
+                return 0, 1
 
     def get_cp_by_commune(self, commune, oldcp):
         if commune in self.communes_db:
@@ -308,10 +271,18 @@ class AdresseMatcher:
                                 entity.adresseid = found[0]
                                 entity.lon = self.db[entity.adresseid].lon
                                 entity.lat = self.db[entity.adresseid].lat
+                                print(f"Lon: {entity.lon} Lat: {entity.lat}")
+                                entity.x = self.db[entity.adresseid].x
+                                entity.y = self.db[entity.adresseid].y
+                                entity.code_insee = self.db[entity.adresseid].code_insee
+                                entity.matchadresse = f"{self.db[entity.adresseid].numero} "
+                                entity.matchadresse += f"{self.db[entity.adresseid].nom_afnor} "
+                                entity.matchadresse += f"{self.db[entity.adresseid].code_postal} "
+                                entity.matchadresse += self.db[entity.adresseid].commune
                                 self.psentities.append(entity)
                             else:
                                 print(f"[{self.numrow}] ERROR UNKNOWN {entity.adresse3}")
-                                input("Press Enter")
+                                # input("Press Enter")
                                 self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
@@ -324,7 +295,7 @@ class AdresseMatcher:
 
     def load_by_depts(self, depts=None):
         if depts is None:
-            depts = list(range(1, 21)) + list(range(21, 96))
+            depts = list(range(1, 21)) + list(range(21, 96)) + [201, 202]
         for dept in depts:
             print(f"Load dept {dept}")
             l.load_adresses(dept)
@@ -338,8 +309,7 @@ class AdresseMatcher:
                 # f.write(f"{e.cp};{e.commune};")
                 for i in range(31):
                     f.write(f"{e.values[i]};")
-                f.write(f"{e.adresseid};{e.lon};{e.lat}\n")
-
+                f.write(f"{e.adresseid};{e.matchadresse};{e.code_insee};{e.lon};{e.lat};{e.x};{e.y}\n")
 
 
 if __name__ == '__main__':
@@ -351,12 +321,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     l = AdresseMatcher()
     if args.dept is None:
-        l.load_by_depts([38])
+        l.load_by_depts([1])
     else:
         l.load_by_depts(eval(args.dept))
     l.save_entities()
 
-    # 01
+    # 01 100s
     # Nb PS: 19766
     # Nb No num: 3568  18.1%
     # Nb Bad CP: 601  3.0%
@@ -365,4 +335,28 @@ if __name__ == '__main__':
     # Nb Bad Street: 8518  43.1%
     # Nb Bad Num: 8518  43.1%
 
+    # 38
+    # Nb PS: 48927
+    # Nb No num: 3491  7.1%
+    # Nb Bad CP: 2181  4.5%
+    # Nb Commune not found: 2649  5.4%
+    # Nb No Street: 11  0.0%
+    # Nb Bad Street: 15776  32.2%
+    # Nb Bad Num: 15776  32.2%
 
+# Pb et solutions
+# Pas d'entête de colonne => en rajouter : 0.1j
+# Rapidité => Indexation par pickle (cp, commune, rue) : 0.5j
+# Pb de RAM : Gérer le fichier adresse-france en indexation nécessite > 16Go de RAM => Gestion par département : 0.5j
+# Matching Commune => Pattern matching + score fiabilité : 0.5j
+# Matching Rue => Pattern matching uniquement sur les adresses du CP, prendre la + proche + score fiabilité : 0.5j
+# 2A 2B : 0.1j
+# Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.1j
+# Gestion des anciennes adresses => 1 adresse peut avoir 2 valeurs: nom_voie, nom_afnor, (lieux-dits?) : 0.1j
+# Rue uniquement adresse3 tenir compte de adresse2 et 4 : 0.25j
+# CEDEX => Gestion du CP le plus proche en dessous sauf 75 : 0.1j
+# Si mauvais CP + Mauvaise commune chercher d'abord la commune puis déduire le CP : 0.25j
+# Si mauvais num chercher le + proche : 0.1j
+# Département ruraux : pas de numéro, gestion des lieux dits : 1j
+# Mise en prod : 0.25j
+# Réunions : 2*0.25j

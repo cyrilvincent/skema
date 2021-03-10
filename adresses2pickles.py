@@ -61,6 +61,8 @@ class AdresseParser:
                 e.lon = float(row["lon"])
                 e.lat = float(row["lat"])
                 e.code_insee = row["code_insee"]
+                e.x = float(row["x"])
+                e.y = float(row["y"])
                 self.make_index(e)
         print(f"Found {self.nbfile} files and {len(self.db)} adresses in {int(time.perf_counter() - time0)}s")
         cyrilload.save(self.indexdb, path.replace(".csv", ""), method="pickle")

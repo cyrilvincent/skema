@@ -1,10 +1,7 @@
 **/.idea/**
 *.pickle
 
-**/data/ameli/**
-**/data/old/**
-**/data/adresse/**
-**/data/ps/**
+**/data/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

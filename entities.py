@@ -12,6 +12,8 @@ class AdresseEntity:
         self.lon = 0
         self.lat = 0
         self.code_insee = ""
+        self.x = 0
+        self.y = 0
 
 class PSEntity:
 
@@ -56,6 +58,10 @@ class PSEntity:
         self.v31 = ""
         self.lon = 0
         self.lat = 0
+        self.code_insee = ""
+        self.x = 0
+        self.y = 0
+        self.matchadresse = ""
 
 
     @property
