@@ -4,6 +4,7 @@
 **/data/ameli/**
 **/data/old/**
 **/data/adresse/**
+**/data/ps/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

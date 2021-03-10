@@ -1,7 +1,6 @@
 import unittest
 import adressesmatcher
 import config
-import AdresseParser
 
 
 class SkemaTests(unittest.TestCase):

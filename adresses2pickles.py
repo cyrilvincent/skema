@@ -63,31 +63,7 @@ class AdresseParser:
                 e.code_insee = row["code_insee"]
                 self.make_index(e)
         print(f"Found {self.nbfile} files and {len(self.db)} adresses in {int(time.perf_counter() - time0)}s")
-        ldpath = path.replace('adresses-', 'lieux-dits-').replace('.csv', '-beta.csv')
-        self.load_lieuxdits(ldpath)
         cyrilload.save(self.indexdb, path.replace(".csv", ""), method="pickle")
-
-    def load_lieuxdits(self, path):
-        self.nbfile += 1
-        print(f"Load {path}")
-        self.numrow = 1
-        with open(path, encoding="utf8") as f:
-            reader = csv.DictReader(f, delimiter=';')
-            for row in reader:
-                self.numrow += 1
-                e = entities.AdresseEntity(row["id"])
-                e.nom_afnor = self.normalize(row["nom_lieu_dit"])
-                e.commune = self.normalize(row["nom_commune"])
-                e.code_postal = int(row["code_postal"])
-                e.commune_old = self.normalize(row["nom_ancienne_commune"])
-                e.code_insee = row["code_insee"]
-                try:
-                    e.lon = float(row["lon"])
-                    e.lat = float(row["lat"])
-                except:
-                    continue
-                self.make_index(e)
-        print(f"Found {self.nbfile} files and {len(self.db)} adresses in {int(time.perf_counter() - time0)}s")
 
     def make_index(self, e):
         if e.commune not in self.communes:
@@ -116,4 +92,4 @@ if __name__ == '__main__':
     time0 = time.perf_counter()
     p = AdresseParser()
     p.scan()
-    print(f"Create {p.nbfile // 2} pickles in {int(time.perf_counter() - time0)}s")
+    print(f"Create {p.nbfile // 1} pickles in {int(time.perf_counter() - time0)}s")
