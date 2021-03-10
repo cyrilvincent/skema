@@ -7,7 +7,7 @@ import config
 import entities
 import time
 import argparse
-import special
+#import special
 
 time0 = time.perf_counter()
 

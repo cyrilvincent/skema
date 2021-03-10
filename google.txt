@@ -1,8 +1,0 @@
-Google My Business
-https://developers.google.com/my-business/content/overview?hl=fr
-Project Name: Skema
-Project id: skema-304317
-Project number: 107830675066
-Reviews: https://developers.google.com/my-business/content/review-data?hl=fr
-Create GMB : https://www.wordstream.com/blog/ws/2020/06/10/create-google-my-business-account
-Rules : https://developers.google.com/my-business/content/policies
