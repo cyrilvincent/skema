@@ -1,12 +1,17 @@
-Installer Python 3.9+ depuis Python.org en cochant la case Add Python to Path
+Installer Python 3.9+ 64 bits depuis Python.org en cochant la case Add Python to Path
 Installer Git depuis git-scm.com
 Ouvrir une console
 Dans le répertoire de votre choix taper git clone https://github.com/cyrilvincent/skema
-Renommer skema dans le nom du projet
+Renommer skema vers le nom du projet
 Taper python -m pip install -r requirements.txt
 Dans le projet créer le répertoire data
 Dans data créer les répertoires adresse et ps
 Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
 Dézipper les adresses dans data/adresse
-Télécharger ps-tarifs.csv dans data/ps et le renommer ps-tarifs-21-03.csv (année, mois)
+Télécharger ps-tarifs.csv dans data/ps et le renommer ps-tarifs-YY-MM.csv où YY = année et MM = mois
+Provisoire
+    Télécharger https://www.cyrilvincent.com/download/ps-tarifs-small.csv dans data/ps
+    Télécharger https://www.cyrilvincent.com/download/adresses-01.pickle dans data/adresse
+    Pour tester le fichier ps-tarifs-small.csv taper python repositories.py
+    Pour tester le proto taper python adressesmatcher.py, le résultat est dans data/res.csv
 

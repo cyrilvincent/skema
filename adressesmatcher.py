@@ -305,6 +305,7 @@ class AdresseMatcher:
 
 if __name__ == '__main__':
     print("Adresses Matcher")
+    print("================")
     print(f"V{config.version}")
     print()
     parser = argparse.ArgumentParser(description="Adresses Matcher")

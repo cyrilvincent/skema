@@ -18,7 +18,7 @@ class AdresseEntity:
 
 class PSEntity:
 
-    nb = 43
+    nb = 42
     originalnb = 33
 
     def __init__(self):
