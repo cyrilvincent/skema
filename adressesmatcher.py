@@ -203,18 +203,16 @@ class AdresseMatcher:
                     return e.code_postal, 0.9
         return oldcp, 0
 
-    def update_entity(self, entity, adresseid):
+    def update_entity(self, entity, adresseid, score):
         entity.adresseid = adresseid
-        entity.lon = self.db[entity.adresseid].lon
-        entity.lat = self.db[entity.adresseid].lat
-        entity.x = self.db[entity.adresseid].x
-        entity.y = self.db[entity.adresseid].y
-        entity.codeinsee = self.db[entity.adresseid].code_insee
-        s = f"{self.db[entity.adresseid].numero} "
-        s += f"{self.db[entity.adresseid].nom_afnor} "
-        s += f"{self.db[entity.adresseid].code_postal} "
-        s += self.db[entity.adresseid].commune
-        entity.matchadresse = s
+        entity.adressescore = score
+        a = self.db[entity.adresseid]
+        entity.lon = a.lon
+        entity.lat = a.lat
+        entity.x = a.x
+        entity.y = a.y
+        entity.codeinsee = a.code_insee
+        entity.matchadresse = f"{a.numero} {a.nom_afnor} {a.code_postal} {a.commune}"
 
     def load_ps(self, file, dept):
         self.cps_db[0] = [] #TO REMOVE
@@ -237,7 +235,7 @@ class AdresseMatcher:
                     entity.rownum = self.rownum
                     self.repo.row2entity(entity, row)
                     if entity.id in self.keys:
-                        self.update_entity(entity, self.keys[entity.id])
+                        self.update_entity(entity, self.keys[entity.id][0], self.keys[entity.id][1])
                         self.pss.append(entity)
                     else:
                         commune = self.normalize_commune(entity.commune)
@@ -276,9 +274,9 @@ class AdresseMatcher:
                                 ids = self.communes_db[commune]
                                 found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
                                 if len(found) > 0:
-                                    self.update_entity(entity, found[0])
+                                    self.update_entity(entity, found[0], entity.score)
                                     self.pss.append(entity)
-                                    self.keys[entity.id] = entity.adresseid
+                                    self.keys[entity.id] = (entity.adresseid, entity.score)
                                 else:
                                     print(f"[{self.rownum}] ERROR UNKNOWN {entity.adresse3}")
                                     # input("Press Enter")

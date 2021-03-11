@@ -15,10 +15,13 @@ class AdresseEntity:
         self.x = 0
         self.y = 0
 
+    def __repr__(self):
+        return f"Adresse ({self.id}) {self.numero} {self.nom_afnor} {self.code_postal} {self.commune}"
+
 
 class PSEntity:
 
-    nb = 42
+    nb = 43
     originalnb = 33
 
     def __init__(self):
@@ -26,11 +29,11 @@ class PSEntity:
         self.v = []
         for i in range(PSEntity.nb):
             self.v.append("")
-        for i in range(38, 42):
-            self.v[i] = 0
+        for i in range(38, 43):
+            self.v[i] = 0.0
         self.v[7] = 0
-        self.v[33] = self.updateid()
-        self.v[34] = 0
+        self.updateid()
+        self.rownum = 0
 
     @property
     def nom(self):
@@ -66,7 +69,7 @@ class PSEntity:
     @property
     def score(self):
         if len(self.scores) == 0:
-            return 0
+            return 0.0
         return sum([s for s in self.scores]) / len(self.scores)
 
     @property
@@ -132,6 +135,14 @@ class PSEntity:
     @y.setter
     def y(self, value):
         self.v[41] = value
+
+    @property
+    def adressescore(self):
+        return self.v[42]
+
+    @adressescore.setter
+    def adressescore(self, value):
+        self.v[42] = value
 
     def __repr__(self):
         return f"{self.id} [{self.rownum}]"

@@ -7,7 +7,10 @@ class PSRepository:
         with open("data/res.csv","w") as f:
             for e in pss:
                 for i in range(entities.PSEntity.nb):
-                    f.write(f"{e.v[i]};")
+                    if i == 42:
+                        f.write(f"{e.v[42]:.3f};")
+                    else:
+                        f.write(f"{e.v[i]};")
                 f.write("\n")
 
     def row2entity(self, entity, row):

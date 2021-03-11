@@ -9,7 +9,8 @@ Dans le projet créer le répertoire data
 Dans data créer les répertoires adresse et ps
 Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
 Dézipper les adresses dans data/adresse
-Télécharger ps-tarifs.csv dans data/ps et le renommer ps-tarifs-YY-MM.csv où YY = année et MM = mois
+Télécharger ps-tarifs.csv dans data/ps depuis https://www.data.gouv.fr/fr/datasets/annuaire-sante-de-la-cnam/
+Renommer le fichier en ps-tarifs-YY-MM.csv où YY = année et MM = mois
 Provisoire
     Télécharger https://www.cyrilvincent.com/download/ps-tarifs-small.csv dans data/ps
     Télécharger https://www.cyrilvincent.com/download/adresses-01.pickle dans data/adresse
