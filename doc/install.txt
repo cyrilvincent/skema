@@ -1,0 +1,12 @@
+Installer Python 3.9+ depuis Python.org en cochant la case Add Python to Path
+Installer Git depuis git-scm.com
+Ouvrir une console
+Dans le répertoire de votre choix taper git clone https://github.com/cyrilvincent/skema
+Renommer skema dans le nom du projet
+Taper python -m pip install -r requirements.txt
+Dans le projet créer le répertoire data
+Dans data créer les répertoires adresse et ps
+Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
+Dézipper les adresses dans data/adresse
+Télécharger ps-tarifs.csv dans data/ps et le renommer ps-tarifs-21-03.csv (année, mois)
+

@@ -7,7 +7,7 @@ import config
 import entities
 import time
 import argparse
-#import special
+import repositories
 
 time0 = time.perf_counter()
 
@@ -23,11 +23,13 @@ class AdresseMatcher:
         self.nbnostreet = 0
         self.nbbadstreet = 0
         self.nbscorelow = 0
-        self.numrow = 0
+        self.rownum = 0
         self.nberror500 = 0
         self.nonum = 0
         self.nbbadcommune = 0
-        self.psentities = []
+        self.pss = []
+        self.repo = repositories.PSRepository()
+        self.keys = {}
 
     def split_num(self, s):
         regex = r"(\d+)"
@@ -108,7 +110,7 @@ class AdresseMatcher:
         #     return cp, 0.9
         else:
             self.nbbadcp += 1
-            print(f"WARNING BAD CP row {self.numrow}: {cp}")
+            print(f"WARNING BAD CP row {self.rownum}: {cp}")
             return 0, 0
             # res = self.find_nearest_less_cp(cp)
             # score = 0.8 if "CEDEX" in commune else 0.5
@@ -120,7 +122,7 @@ class AdresseMatcher:
         if commune in communes:
             return commune, 1
         else:
-            print(f"WARNING BAD COMMUNE row {self.numrow}: {commune}")
+            print(f"WARNING BAD COMMUNE row {self.rownum}: {commune}")
             self.nbbadcommune += 1
             return 0, 0
             #return self.gestalts(commune, communes)
@@ -201,115 +203,104 @@ class AdresseMatcher:
                     return e.code_postal, 0.9
         return oldcp, 0
 
-    def row2entity(self, entity, row):
-        entity.tel = row[9]
-        entity.genre = row[0]
-        entity.prenom = row[2]
-        entity.nom = row[1]
-        for i in range(33):
-            entity.values.append(row[i])
+    def update_entity(self, entity, adresseid):
+        entity.adresseid = adresseid
+        entity.lon = self.db[entity.adresseid].lon
+        entity.lat = self.db[entity.adresseid].lat
+        entity.x = self.db[entity.adresseid].x
+        entity.y = self.db[entity.adresseid].y
+        entity.codeinsee = self.db[entity.adresseid].code_insee
+        s = f"{self.db[entity.adresseid].numero} "
+        s += f"{self.db[entity.adresseid].nom_afnor} "
+        s += f"{self.db[entity.adresseid].code_postal} "
+        s += self.db[entity.adresseid].commune
+        entity.matchadresse = s
 
-    def load_ps(self, dept):
+    def load_ps(self, file, dept):
         self.cps_db[0] = [] #TO REMOVE
-        file = "data/ps/ps-tarifs-small.csv"
-        file = "data/ps/ps-tarifs-21-03.csv"
-        self.psentities = []
+        self.pss = []
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
-            self.numrow = 1
+            self.rownum = 0
             for row in reader:
-                self.numrow += 1
+                self.rownum += 1
                 cp = int(row[7])
                 if cp < 1000 or cp > 99999:
-                    print(f"ERROR CP row {self.numrow}: {cp}")
+                    print(f"ERROR CP row {self.rownum}: {cp}")
                 if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
                         (dept == 201 and 20000 <= cp < 20200) or \
                         (dept == 202 and 20200 <= cp < 21000):
                     self.nb += 1
-                    entity = entities.PSEntity()
                     if self.nb % 100 == 0:
                         print(f"Parse {self.nb} PS in {int(time.perf_counter() - time0)}s")
-                    commune = self.normalize_commune(row[8])
-                    entity.cp, score = self.match_cp(cp, commune)
-                    entity.scores.append(score)
-                    communes = self.cps_db[entity.cp]
-                    entity.commune, score = self.match_commune(commune, communes, entity.cp)
-                    entity.scores.append(score)
-                    if entity.commune != 0: #TO REMOVE
-                        adresse3 = self.normalize_street(row[5])
-                        num, entity.adresse3 = self.split_num(adresse3)
-                        entity.adresse1 = row[3]
-                        entity.adresse2 = row[4]
-                        entity.adresse4 = row[6]
-                        self.row2entity(entity, row)
-                        # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
-                        # if score < 0.75:
-                        #     cp, score = self.get_cp_by_commune(commune, entity.code_postal)
-                        #     if cp != entity.code_postal:
-                        #         print(f"[{self.numrow}] Warning Bad CP {entity.code_postal}=>{cp} {commune}")
-                        #         entity.code_postal = cp
-                        #         entity.commune = commune
-                        #         entity.scores[-1] = score
-                        #         entity.scores[-2] = 0.5
-                        #     else:
-                        #         print(
-                        #             f"[{self.numrow}] Warning commune {entity.code_postal} {commune}=>{entity.commune} @{int(score * 100)}%")
-                        entity.matchstreet, score = self.match_street(entity.commune, entity.adresse3, entity.adresse4, entity.cp)
+                    entity = entities.PSEntity()
+                    entity.rownum = self.rownum
+                    self.repo.row2entity(entity, row)
+                    if entity.id in self.keys:
+                        self.update_entity(entity, self.keys[entity.id])
+                        self.pss.append(entity)
+                    else:
+                        commune = self.normalize_commune(entity.commune)
+                        cp, score = self.match_cp(cp, commune)
                         entity.scores.append(score)
-                        if score < 0.5:
-                            self.nbscorelow += 1
-                            # print(f"Warning street {street}=>{entity.nom_afnor} @{int(score * 100)}% {entity.code_postal} {entity.commune} ")
-                        else: # TO REMOVE
-                            entity.num, score = self.match_num(entity.commune, entity.matchstreet, num)
+                        communes = self.cps_db[cp]
+                        commune, score = self.match_commune(commune, communes, cp)
+                        entity.scores.append(score)
+                        if commune != 0:  #TO REMOVE
+                            adresse3 = self.normalize_street(entity.adresse3)
+                            num, adresse3 = self.split_num(adresse3)
+
+                            # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
+                            # if score < 0.75:
+                            #     cp, score = self.get_cp_by_commune(commune, entity.code_postal)
+                            #     if cp != entity.code_postal:
+                            #         print(f"[{self.numrow}] Warning Bad CP {entity.code_postal}=>{cp} {commune}")
+                            #         entity.code_postal = cp
+                            #         entity.commune = commune
+                            #         entity.scores[-1] = score
+                            #         entity.scores[-2] = 0.5
+                            #     else:
+                            #         print(
+                            #             f"[{self.numrow}] Warning commune {entity.code_postal} {commune}=>{entity.commune} @{int(score * 100)}%")
+                            matchadresse, score = self.match_street(commune, adresse3, entity.adresse4, cp)
                             entity.scores.append(score)
-                            if entity.score < 0.8:
+                            if score < 0.5:
                                 self.nbscorelow += 1
-                                #print(f"[{self.numrow}] Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
-                            ids = self.communes_db[entity.commune]
-                            found = [self.db[id].id for id in ids if self.db[id].numero == entity.num and self.db[id].nom_afnor == entity.matchstreet]
-                            if len(found) > 0:
-                                entity.adresseid = found[0]
-                                entity.lon = self.db[entity.adresseid].lon
-                                entity.lat = self.db[entity.adresseid].lat
-                                print(f"Lon: {entity.lon} Lat: {entity.lat}")
-                                entity.x = self.db[entity.adresseid].x
-                                entity.y = self.db[entity.adresseid].y
-                                entity.code_insee = self.db[entity.adresseid].code_insee
-                                entity.matchadresse = f"{self.db[entity.adresseid].numero} "
-                                entity.matchadresse += f"{self.db[entity.adresseid].nom_afnor} "
-                                entity.matchadresse += f"{self.db[entity.adresseid].code_postal} "
-                                entity.matchadresse += self.db[entity.adresseid].commune
-                                self.psentities.append(entity)
-                            else:
-                                print(f"[{self.numrow}] ERROR UNKNOWN {entity.adresse3}")
-                                # input("Press Enter")
-                                self.nberror500 += 1
+                                # print(f"Warning street {street}=>{entity.nom_afnor} @{int(score * 100)}% {entity.code_postal} {entity.commune} ")
+                            else: # TO REMOVE
+                                numero, score = self.match_num(commune, matchadresse, num)
+                                entity.scores.append(score)
+                                if entity.score < 0.8:
+                                    self.nbscorelow += 1
+                                    #print(f"[{self.numrow}] Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
+                                ids = self.communes_db[commune]
+                                found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
+                                if len(found) > 0:
+                                    self.update_entity(entity, found[0])
+                                    self.pss.append(entity)
+                                    self.keys[entity.id] = entity.adresseid
+                                else:
+                                    print(f"[{self.rownum}] ERROR UNKNOWN {entity.adresse3}")
+                                    # input("Press Enter")
+                                    self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
+        print(f"Nb Unique PS: {len(self.keys)}")
         print(f"Nb No num: {self.nonum} {(self.nonum / self.nb) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / self.nb) * 100 : .1f}%")
         print(f"Nb Commune not found: {self.nbbadcommune} {(self.nbbadcommune / self.nb) * 100 : .1f}%")
         print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / self.nb) * 100 : .1f}%")
         print(f"Nb Bad Street: {self.nbbadstreet} {(self.nbbadstreet / self.nb) * 100 : .1f}%")
         print(f"Nb Bad Num: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
+        print(f"Nb Unknown Error: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
 
-    def load_by_depts(self, depts=None):
+    def load_by_depts(self, file, depts=None):
         if depts is None:
             depts = list(range(1, 21)) + list(range(21, 96)) + [201, 202]
         for dept in depts:
             print(f"Load dept {dept}")
             l.load_adresses(dept)
-            l.load_ps(dept)
-
-    def save_entities(self):
-        with open("data/res.csv","w") as f:
-            for e in self.psentities:
-                # f.write(f"{e.genre};{e.nom};{e.prenom};")
-                # f.write(f"{e.adresse1};{e.adresse2};{e.adresse3};{e.adresse4}")
-                # f.write(f"{e.cp};{e.commune};")
-                for i in range(31):
-                    f.write(f"{e.values[i]};")
-                f.write(f"{e.adresseid};{e.matchadresse};{e.code_insee};{e.lon};{e.lat};{e.x};{e.y}\n")
+            l.load_ps(file, dept)
 
 
 if __name__ == '__main__':
@@ -317,14 +308,17 @@ if __name__ == '__main__':
     print(f"V{config.version}")
     print()
     parser = argparse.ArgumentParser(description="Adresses Matcher")
+    #parser.add_argument("path", help="Path")
     parser.add_argument("-d", "--dept", help="Departments list in python format, eg [5,38,06]")
     args = parser.parse_args()
     l = AdresseMatcher()
+    file = "data/ps/ps-tarifs-small.csv"
+    #file = "data/ps/ps-tarifs-21-03.csv"
     if args.dept is None:
-        l.load_by_depts([1])
+        l.load_by_depts(file, [1])
     else:
         l.load_by_depts(eval(args.dept))
-    l.save_entities()
+    l.repo.save_entities(file, l.pss)
 
     # 01 100s
     # Nb PS: 19766
@@ -333,7 +327,7 @@ if __name__ == '__main__':
     # Nb Commune not found: 718  3.6%
     # Nb No Street: 13  0.1%
     # Nb Bad Street: 8518  43.1%
-    # Nb Bad Num: 8518  43.1%
+    # Nb Bad Num: 8518  43.1% (0.7% si gestalt ??)
 
     # 38
     # Nb PS: 48927
@@ -345,18 +339,26 @@ if __name__ == '__main__':
     # Nb Bad Num: 15776  32.2%
 
 # Pb et solutions
+# Nom du projet ?
 # Pas d'entête de colonne => en rajouter : 0.1j
-# Rapidité => Indexation par pickle (cp, commune, rue) : 0.5j
+# Rapidité si pattern matching => Indexation par pickle (cp, commune, rue) : 0.5j
+# Rapidité => Si une adresse est déjà trouvée pour une clé ne pas la rechercher
 # Pb de RAM : Gérer le fichier adresse-france en indexation nécessite > 16Go de RAM => Gestion par département : 0.5j
-# Matching Commune => Pattern matching + score fiabilité : 0.5j
+# Matching Commune => Pattern matching uniquement sur les communes du CP + score fiabilité (très fiable en ville) : 0.5j
+# Matching Commune => Si mauvais score chercher adresse4 (lieux dits?) : 0.1j
 # Matching Rue => Pattern matching uniquement sur les adresses du CP, prendre la + proche + score fiabilité : 0.5j
+# Matching Rue => Si mauvais score ajouter adresse2 et 4 (lieux dits?) : 0.1j
+# Matching Num => Si pas de num ou mauvais num chercher le + proche : 0.1j
 # 2A 2B : 0.1j
 # Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.1j
 # Gestion des anciennes adresses => 1 adresse peut avoir 2 valeurs: nom_voie, nom_afnor, (lieux-dits?) : 0.1j
-# Rue uniquement adresse3 tenir compte de adresse2 et 4 : 0.25j
+# Rue uniquement adresse3 tenir compte de adresse2 et 4? : 0.25j
 # CEDEX => Gestion du CP le plus proche en dessous sauf 75 : 0.1j
 # Si mauvais CP + Mauvaise commune chercher d'abord la commune puis déduire le CP : 0.25j
 # Si mauvais num chercher le + proche : 0.1j
-# Département ruraux : pas de numéro, gestion des lieux dits : 1j
+# Département ruraux : pas de numéro, BD lieux dits : 2j
+# Si mauvaise adresse ou pas d'adresse prendre centre du village ?
 # Mise en prod : 0.25j
 # Réunions : 2*0.25j
+# Accuracy prévision, normal(38) : 90-95%, dense(75) : 95-99%, campagne(05) sans lieux dits : 75-80%
+
