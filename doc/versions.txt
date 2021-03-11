@@ -1,0 +1,5 @@
+V0.0.1.DEV
+POC
+Matching de ps-tarifs-small.csv vers adresses-01.pickle, non paramétrable
+Matching uniquement par égalité sans indexation
+Création des res.csv résultat de la fusion par égalité quasi parfaite, pas de gestion des échecs

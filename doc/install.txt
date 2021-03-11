@@ -1,3 +1,4 @@
+V0.0.1.DEV
 Installer Python 3.9+ 64 bits depuis Python.org en cochant la case Add Python to Path
 Installer Git depuis git-scm.com
 Ouvrir une console
@@ -14,4 +15,5 @@ Provisoire
     Télécharger https://www.cyrilvincent.com/download/adresses-01.pickle dans data/adresse
     Pour tester le fichier ps-tarifs-small.csv taper python repositories.py
     Pour tester le proto taper python adressesmatcher.py, le résultat est dans data/res.csv
+
 
