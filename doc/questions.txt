@@ -2,25 +2,25 @@
 # Nom du projet ?
 # Rapidité => Indexation des adresses  (cp, commune, rue) par pickle (NoSql) réutilisable : 1j (Sql : 5j)
 # Rapidité => Indéxation des PS avec création d'une clé : 0.1j
-# Rapidité => Si une adresse est déjà trouvée pour une clé ne pas la rechercher : 0.1j
+# Rapidité => Si une adresse est déjà trouvée pour une clé ne pas la rechercher : 0.1j (17 rows per PS)
 # Pb de RAM => Gérer le fichier adresse-france en indexation nécessite > 16Go de RAM => Gestion par département : 0.25j
 # Matching CP (Cedex et BP) => Gestion du CP le plus proche en dessous sauf 75 : 0.1j
 # Matching Commune => Pattern matching uniquement sur les communes du CP + score fiabilité (très fiable en ville) : 0.5j
-# Matching Commune => Si mauvais score chercher adresse4 (lieux dits?) : 0.1j
+# Matching Commune => Si mauvais score chercher adresse4 : 0.1j
 # Matching Rue => Pattern matching uniquement sur les adresses de la commune, prendre la + proche + score fiabilité : 0.5j
-# Matching Rue => Si mauvais score ajouter adresse2 et 4 (lieux dits?) : 0.1j
+# Matching Rue => Si mauvais score ajouter adresse2 (lieux dits?) : 0.1j
 # Matching Num => Si pas de num ou mauvais num chercher le + proche : 0.1j
 # 2A 2B : 0.1j
 # Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.25j
 # Gestion des anciennes adresses => 1 adresse peut avoir 2 valeurs: nom_voie, nom_afnor, (lieux-dits?) : 0.1j
 # Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
 # Département ruraux, pas de numéro => BD lieux dits : 2j
-# Si mauvaise adresse ou pas d'adresse => prendre centre du village ?
+# Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Gestion des cas spéciaux => Fichier de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
 # 59160 LOMME => 5900 LILLE ca dépend de la rue
-# Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non gérer dans le bd adresse
-# Mise en prod : 0.25j
-# Réunions : 2*0.25j
+# Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans le bd adresse
+# Mise en prod, doc : 0.25j
+# Réunions : 3*0.1j
 # Accuracy prévision, normal(38) : 90-95%, dense(75) : 95-99%, campagne(05) sans lieux dits : 75-80%

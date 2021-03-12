@@ -31,7 +31,7 @@ class AdresseMatcher:
         self.pss_db = []
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
-        self.keys = {}
+        self.keys_db = {}
 
     def split_num(self, s):
         regex = r"(\d+)"
@@ -265,8 +265,8 @@ class AdresseMatcher:
                     entity = entities.PSEntity()
                     entity.rownum = self.rownum
                     self.ps_repo.row2entity(entity, row)
-                    if entity.id in self.keys:
-                        self.update_entity(entity, self.keys[entity.id][0], self.keys[entity.id][1])
+                    if entity.id in self.keys_db:
+                        self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
                         self.pss_db.append(entity)
                     else:
                         commune = self.normalize_commune(entity.commune)
@@ -275,7 +275,6 @@ class AdresseMatcher:
                         communes = self.cps_db[cp]
                         adresse4 = self.normalize_street(entity.adresse4)
                         commune, score = self.match_commune(commune, adresse4, communes, cp)
-                        # Essayer aussi avec adresse4
                         entity.scores.append(score)
                         if commune != 0:  # TO REMOVE
                             adresse3 = self.normalize_street(entity.adresse3)
@@ -313,14 +312,14 @@ class AdresseMatcher:
                                 if len(found) > 0:
                                     self.update_entity(entity, found[0], entity.score)
                                     self.pss_db.append(entity)
-                                    self.keys[entity.id] = (entity.adresseid, entity.score)
+                                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
                                 else:
                                     print(f"[{self.rownum}] ERROR UNKNOWN {entity.adresse3}")
-                                    # input("Press Enter")
                                     self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
-        print(f"Nb Unique PS: {len(self.keys)}")
+        print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
+        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
         print(f"Nb No num: {self.nonum} {(self.nonum / self.nb) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / self.nb) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / self.nb) * 100 : .1f}%")
@@ -328,7 +327,7 @@ class AdresseMatcher:
         print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / self.nb) * 100 : .1f}%")
         print(f"Nb Bad Street: {self.nbbadstreet} {(self.nbbadstreet / self.nb) * 100 : .1f}%")
         print(f"Nb Bad Num: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
-        print(f"Nb Unknown Error: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
+        print(f"Nb Error 500: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
 
     def load_by_depts(self, file, depts=None):
         if depts is None:
@@ -337,9 +336,8 @@ class AdresseMatcher:
             print(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db = l.a_repo.load_adresses(dept, time0)
             l.load_ps(file, dept)
-        i = file.index(".csv")
-        file = file[:i] + "-adresses.csv"
         print(f"Match {self.nb} PS in {int(time.perf_counter() - time0)}s")
+        file = file.replace(".csv", "-adresses.csv")
         self.ps_repo.save_entities(file, l.pss_db)
         print(f"Saved {self.nb} PS in {int(time.perf_counter() - time0)}s")
 

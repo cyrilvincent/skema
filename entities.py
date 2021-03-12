@@ -65,7 +65,8 @@ class PSEntity:
 
     @property
     def id(self):
-        return f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}".replace(" ", "_").strip()
+        s = f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}"
+        return s.replace("'", "").replace("-", "").replace("/", "").replace(" ", "").strip()
 
     def updateid(self):
         self.v[33] = self.id
@@ -149,7 +150,7 @@ class PSEntity:
         self.v[42] = value
 
     def __repr__(self):
-        return f"PS: {self.id} [{self.rownum}]"
+        return f"[{self.rownum}] PS: {self.id}"
 
 
 if __name__ == '__main__':
