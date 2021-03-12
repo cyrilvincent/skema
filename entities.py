@@ -44,6 +44,10 @@ class PSEntity:
         return self.v[2]
 
     @property
+    def adresse2(self):
+        return self.v[4]
+
+    @property
     def adresse3(self):
         return self.v[5]
 
@@ -145,7 +149,7 @@ class PSEntity:
         self.v[42] = value
 
     def __repr__(self):
-        return f"{self.id} [{self.rownum}]"
+        return f"PS: {self.id} [{self.rownum}]"
 
 
 if __name__ == '__main__':
