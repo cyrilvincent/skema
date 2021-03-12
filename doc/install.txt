@@ -11,7 +11,10 @@
     # Télécharger https://www.cyrilvincent.com/download/ps-tarifs-small.csv dans data/ps
     # Télécharger https://www.cyrilvincent.com/download/adresses-01.pickle dans data/adresse
     # Pour tester le fichier ps-tarifs-small.csv taper python repositories.py
-    # Pour tester le proto taper python adressesmatcher.py, le résultat est dans data/res.csv
+    # Pour tester le proto taper python adressesmatcher.py data/ps/ps-tarifs-small.csv -d [1]
+    # Le fichier est généré est  data/ps/ps-tarifs-small-adresses.csv
+    # Pour avoir l'aide taper python adressesmatcher.py --help
+    # -d [1] signifie uniquement le département 01, le seul qui marche pour le moment
 # Facultatif pour le moment
     # Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
     # Dézipper les adresses dans data/adresse

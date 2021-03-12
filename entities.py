@@ -65,7 +65,7 @@ class PSEntity:
 
     @property
     def id(self):
-        return f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}".replace(" ", "_")
+        return f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}".replace(" ", "_").strip()
 
     def updateid(self):
         self.v[33] = self.id

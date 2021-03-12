@@ -249,14 +249,13 @@ class AdresseMatcher:
     def load_ps(self, file, dept):
         self.cps_db[0] = []  # TO REMOVE
         self.pss_db = []
+        print(f"Parse {file}")
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
             self.rownum = 0
             for row in reader:
                 self.rownum += 1
                 cp = int(row[7])
-                if cp < 1000 or cp > 97999:
-                    print(f"ERROR CP row {self.rownum}: {cp}")
                 if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
                         (dept == 201 and 20000 <= cp < 20200) or \
                         (dept == 202 and 20200 <= cp < 21000):
@@ -338,7 +337,11 @@ class AdresseMatcher:
             print(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db = l.a_repo.load_adresses(dept, time0)
             l.load_ps(file, dept)
+        i = file.index(".csv")
+        file = file[:i] + "-adresses.csv"
+        print(f"Match {self.nb} PS in {int(time.perf_counter() - time0)}s")
         self.ps_repo.save_entities(file, l.pss_db)
+        print(f"Saved {self.nb} PS in {int(time.perf_counter() - time0)}s")
 
 
 if __name__ == '__main__':
@@ -347,17 +350,14 @@ if __name__ == '__main__':
     print(f"V{config.version}")
     print()
     parser = argparse.ArgumentParser(description="Adresses Matcher")
-    # parser.add_argument("path", help="Path")
+    parser.add_argument("path", help="Path")
     parser.add_argument("-d", "--dept", help="Departments list in python format, eg [5,38,06]")
     args = parser.parse_args()
     l = AdresseMatcher()
-    file = "data/ps/ps-tarifs-small.csv"
-    #file = "data/ps/ps-tarifs-21-03.csv"
     if args.dept is None:
-        l.load_by_depts(file, [1])
+        l.load_by_depts(args.path)
     else:
-        l.load_by_depts(eval(args.dept))
-
+        l.load_by_depts(args.path, eval(args.dept))
 
     # 38
     # Nb PS: 48927
@@ -374,5 +374,4 @@ if __name__ == '__main__':
     # Nb Commune not found: 718  3.6% (+3.0%)
     # Nb No Street: 13  0.1%
     # Nb Bad Street: 8518  43.1% (+6.7%)
-
 
