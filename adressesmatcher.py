@@ -28,10 +28,15 @@ class AdresseMatcher:
         self.nbcedexbp = 0
         self.nonum = 0
         self.nbbadcommune = 0
+        self.total = 1
+        self.i = 0
         self.pss_db = []
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
+
+    def log(self, msg):
+        print(f"{int(time.perf_counter() - time0)}s {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
 
     def split_num(self, s):
         regex = r"(\d+)"
@@ -141,11 +146,11 @@ class AdresseMatcher:
             return cp, score * 0.9
         else:
             self.nbbadcp += 1
-            print(f"[{self.rownum}] WARNING BAD CP: {cp}")
+            self.log(f"WARNING BAD CP: {cp}")
             return 0, 0.0
             # res = self.find_nearest_less_cp(cp)
             # score = 0.8  # if "CEDEX" in commune else 0.5
-            # print(f"[{self.rownum}] Warning CP {cp}=>{res} {int(score*100)}%")
+            # self.log(f"Warning CP {cp}=>{res} {int(score*100)}%")
             # return res, 0.8
 
     def match_commune(self, commune, adresse4, communes, cp):
@@ -155,7 +160,7 @@ class AdresseMatcher:
         elif adresse4 != "" and adresse4 in communes:
             return adresse4, 0.9
         else:
-            print(f"[{self.rownum}] WARNING BAD COMMUNE: {commune}")
+            self.log(f"WARNING BAD COMMUNE: {commune}")
             self.nbbadcommune += 1
             return 0, 0.0
             # commune, score = self.gestalts(commune, communes)
@@ -181,10 +186,10 @@ class AdresseMatcher:
             return adresses[index], 0.99
 
         # res, score = self.gestalts(adresse3, adresses)
-        # if score > 0.9:
+        # if score > 0.8:
         #     return res, score
         # res2, score2 = self.gestalts(adresse2, adresses)
-        # if score2 > 0.9:
+        # if score2 > 0.8:
         #     return res2, score2
         # res3, score3 = self.gestalts(adresse3, adresses_voie)
         # if score + 0.1 > max(score2, score3):
@@ -249,11 +254,12 @@ class AdresseMatcher:
     def load_ps(self, file, dept):
         self.cps_db[0] = []  # TO REMOVE
         self.pss_db = []
-        print(f"Parse {file}")
+        self.log(f"Parse {file}")
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
             self.rownum = 0
             for row in reader:
+                self.i += 1
                 self.rownum += 1
                 cp = int(row[7])
                 if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
@@ -261,7 +267,7 @@ class AdresseMatcher:
                         (dept == 202 and 20200 <= cp < 21000):
                     self.nb += 1
                     if self.nb % 100 == 0:
-                        print(f"Parse {self.nb} PS in {int(time.perf_counter() - time0)}s")
+                        self.log(f"Parse {self.nb} PS")
                     entity = entities.PSEntity()
                     entity.rownum = self.rownum
                     self.ps_repo.row2entity(entity, row)
@@ -283,7 +289,7 @@ class AdresseMatcher:
                             if num == 0 and adresse2 != "":
                                 num, adresse2 = self.split_num(adresse2)
                                 if num != 0:
-                                    print(f"[{self.rownum}] WARNING NUM in adresse2 {adresse2}")
+                                    self.log(f"WARNING NUM in adresse2 {adresse2}")
 
                             # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
                             # if score < 0.75:
@@ -294,19 +300,18 @@ class AdresseMatcher:
                             #         entity.scores[-1] = score
                             #         entity.scores[-2] = 0.5
                             #     else:
-                            #         print(
-                            #             f"[{self.rownum}] Warning commune score {entity.cp} {entity.commune}=>{cp} {commune} @{int(score * 100)}%")
+                            #         self.log(f"Warning commune score {entity.cp} {entity.commune}=>{cp} {commune} @{int(score * 100)}%")
                             matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
                             entity.scores.append(score)
                             if score < 0.5:
                                 self.nbscorelow += 1
-                                # print(f"[{self.rownum}] Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
+                                # self.log(f"Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
                             else:  # TO REMOVE
                                 numero, score = self.match_num(commune, matchadresse, num)
                                 entity.scores.append(score)
                                 if entity.score < 0.8:
                                     self.nbscorelow += 1
-                                    # print(f"[{self.rownum}] Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
+                                    # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
                                 ids = self.communes_db[commune]
                                 found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
                                 if len(found) > 0:
@@ -314,12 +319,11 @@ class AdresseMatcher:
                                     self.pss_db.append(entity)
                                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                                 else:
-                                    print(f"[{self.rownum}] ERROR UNKNOWN {entity.adresse3}")
+                                    self.log(f"ERROR UNKNOWN {entity.adresse3}")
                                     self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
-        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
         print(f"Nb No num: {self.nonum} {(self.nonum / self.nb) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / self.nb) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / self.nb) * 100 : .1f}%")
@@ -328,18 +332,22 @@ class AdresseMatcher:
         print(f"Nb Bad Street: {self.nbbadstreet} {(self.nbbadstreet / self.nb) * 100 : .1f}%")
         print(f"Nb Bad Num: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
         print(f"Nb Error 500: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
+        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
 
     def load_by_depts(self, file, depts=None):
+        self.total = l.ps_repo.test_file(file)
         if depts is None:
             depts = list(range(1, 21)) + list(range(21, 96)) + [201, 202]
+        self.total *= len(depts)
         for dept in depts:
-            print(f"Load dept {dept}")
+            self.log(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db = l.a_repo.load_adresses(dept, time0)
             l.load_ps(file, dept)
-        print(f"Match {self.nb} PS in {int(time.perf_counter() - time0)}s")
+        self.log(f"Match {self.nb} PS")
         file = file.replace(".csv", "-adresses.csv")
+        l.pss_db.sort(key=lambda e: e.rownum)
         self.ps_repo.save_entities(file, l.pss_db)
-        print(f"Saved {self.nb} PS in {int(time.perf_counter() - time0)}s")
+        self.log(f"Saved {self.nb} PS")
 
 
 if __name__ == '__main__':

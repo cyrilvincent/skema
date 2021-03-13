@@ -1,5 +1,6 @@
 # V0.0.1 DEV
 # Nom du projet ?
+# 2 455 000 PS
 # Rapidité => Indexation des adresses  (cp, commune, rue) par pickle (NoSql) réutilisable : 1j (Sql : 5j)
 # Rapidité => Indéxation des PS avec création d'une clé : 0.1j
 # Rapidité => Si une adresse est déjà trouvée pour une clé ne pas la rechercher : 0.1j (17 rows per PS)

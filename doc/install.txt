@@ -4,6 +4,7 @@
 # Ouvrir une console
 # Dans le répertoire de votre choix taper git clone https://github.com/cyrilvincent/skema
 # Renommer skema vers le nom du projet
+# Taper cd le nom du projet
 # Taper python -m pip install -r requirements.txt
 # Dans le projet créer le répertoire data
 # Dans data créer les répertoires adresse et ps
