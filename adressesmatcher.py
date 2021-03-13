@@ -34,6 +34,7 @@ class AdresseMatcher:
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
+        self.adresses_db = {}
 
     def log(self, msg):
         print(f"{int(time.perf_counter() - time0)}s {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
@@ -271,6 +272,11 @@ class AdresseMatcher:
                     entity = entities.PSEntity()
                     entity.rownum = self.rownum
                     self.ps_repo.row2entity(entity, row)
+                    t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
+                    # if t in self.adresses_db:
+                    #     self.update_entity(entity, self.adresses_db[t][0], self.adresses_db[t][1])
+                    #     self.keys_db[entity.id] = (entity.adresseid, entity.score)
+                    #     self.pss_db.append(entity)
                     if entity.id in self.keys_db:
                         self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
                         self.pss_db.append(entity)
@@ -318,6 +324,7 @@ class AdresseMatcher:
                                     self.update_entity(entity, found[0], entity.score)
                                     self.pss_db.append(entity)
                                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
+                                    self.adresses_db[t] = (entity.adresseid, entity.score)
                                 else:
                                     self.log(f"ERROR UNKNOWN {entity.adresse3}")
                                     self.nberror500 += 1
@@ -333,6 +340,7 @@ class AdresseMatcher:
         print(f"Nb Bad Num: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
         print(f"Nb Error 500: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
         print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
+        print(f"Nb Unique Adresse: {len(self.adresses_db)}") #333 adresse3, 406 adresse234, 703 UniquePS
 
     def load_by_depts(self, file, depts=None):
         self.total = l.ps_repo.test_file(file)
