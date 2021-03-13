@@ -5,8 +5,16 @@ import time
 
 
 class PSRepository:
+    """
+    Repository PS
+    """
 
     def save_entities(self, path, pss):
+        """
+        Sauvegarde une liste de PS dans un CSV
+        :param path: le CSV
+        :param pss: la liste de PS
+        """
         print(f"Save {path}")
         with open(path, "w") as f:
             for e in pss:
@@ -15,11 +23,21 @@ class PSRepository:
                 f.write("\n")
 
     def row2entity(self, entity, row):
+        """
+        Convertis une ligne CSV en une entité PS
+        :param entity: PS
+        :param row: ligne CSV
+        """
         for i in range(entities.PSEntity.originalnb):
             entity.v[i] = row[i]
         entity.updateid()
 
     def test_file(self, path):
+        """
+        Teste le fichier
+        :param path: le fichier
+        :return: le nombre de ligne
+        """
         i = 0
         with open(path) as f:
             for _ in f:
@@ -28,8 +46,17 @@ class PSRepository:
 
 
 class AdresseRepository:
+    """
+    Adresse Repository
+    """
 
     def load_adresses(self, dept, time0):
+        """
+        Charge le pickle adresse
+        :param dept: département pickle à charger
+        :param time0: le temps 0
+        :return: Le tuple d'index db, communes, cps voir adresses2pickles
+        """
         s = f"{dept:02d}"
         if dept == 201:
             s = "2A"

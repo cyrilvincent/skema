@@ -1,4 +1,7 @@
 class AdresseEntity:
+    """
+    Entité adresse
+    """
 
     def __init__(self, id):
         self.id = id
@@ -20,6 +23,9 @@ class AdresseEntity:
 
 
 class PSEntity:
+    """
+    Entité PS
+    """
 
     nb = 43
     originalnb = 33
@@ -69,6 +75,9 @@ class PSEntity:
         return s.replace("'", "").replace("-", "").replace("/", "").replace(" ", "").strip()
 
     def updateid(self):
+        """
+        MAJ de l'id
+        """
         self.v[33] = self.id
 
     @property

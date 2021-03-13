@@ -3,6 +3,9 @@ import csv
 import argparse
 
 class SplitPS:
+    """
+    Split PS en fichier par département
+    """
 
     def __init__(self):
         self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
@@ -11,6 +14,11 @@ class SplitPS:
             self.db[d] = []
 
     def dept_from_cp(self, cp):
+        """
+        Retourne le département en fonction du code postal
+        :param cp: le code postal
+        :return: le département
+        """
         dept = int(str(cp)[:2])
         if cp < 10000:
             dept = int(str(cp)[:1])
@@ -21,6 +29,10 @@ class SplitPS:
         return dept
 
     def load(self, path):
+        """
+        Charge PS
+        :param path: PS
+        """
         print(f"Parse {path}")
         with open(path) as f:
             reader = csv.reader(f, delimiter=";")
@@ -31,6 +43,10 @@ class SplitPS:
                     self.db[dept].append(row)
 
     def save(self, path):
+        """
+        Sauvegarde les fichiers PS par département
+        :param path: PS
+        """
         for d in self.db.keys():
             dept = str(d)
             if d < 10:

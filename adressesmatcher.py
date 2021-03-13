@@ -13,6 +13,9 @@ time0 = time.perf_counter()
 
 
 class AdresseMatcher:
+    """
+    Fusionne ps-tarifs et adresses
+    """
 
     def __init__(self):
         self.db = None
@@ -37,15 +40,24 @@ class AdresseMatcher:
         self.adresses_db = {}
 
     def log(self, msg):
+        """
+        Log
+        :param msg:
+        """
         span = int(time.perf_counter() - time0)
         s = f"{span}s"
-        if span >= 600:
-            s = f"{span // 60}m{span % 60}s"
         if span >= 6000:
             s = f"{span // 3600}h{(span % 3600) // 60}m"
+        elif span >= 600:
+            s = f"{span // 60}m{span % 60}s"
         print(f"{s} {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
 
     def split_num(self, s):
+        """
+        Split s en fonction du numero
+        :param s: chaine
+        :return: tuple numéro, reste de la chaine
+        """
         regex = r"(\d+)"
         match = re.match(regex, s)
         if match is None:
@@ -95,9 +107,14 @@ class AdresseMatcher:
             return None
 
     def find_nearest_less_cp(self, cp):
+        """
+        TODO
+        :param cp:
+        :return:
+        """
         min = 99999
         res = 0
-        for k in self.cps_db.keys(): # [k for k in self.cps_db.keys() if cp > k > cp - 1000] Improve perf ?
+        for k in self.cps_db.keys():
             dif = cp - k
             if 0 <= dif < min:
                 min = dif
@@ -105,6 +122,12 @@ class AdresseMatcher:
         return res
 
     def find_nearest_num(self, num, nums):
+        """
+        TODO
+        :param num:
+        :param nums:
+        :return:
+        """
         res = 0
         difmin = 99999
         for n in nums:
@@ -123,6 +146,11 @@ class AdresseMatcher:
         return -1
 
     def normalize_street(self, street):
+        """
+        Normalise la rue
+        :param street: rue
+        :return: rue normalisée
+        """
         street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         street = " " + street
         if " BP" in street:
@@ -133,6 +161,11 @@ class AdresseMatcher:
         return street.strip()
 
     def normalize_commune(self, commune):
+        """
+        Normalise la commune
+        :param commune: commune
+        :return: la commune normalisée
+        """
         if "CEDEX" in commune:
             self.nbcedexbp += 1
             commune = commune.replace("CEDEX", "").replace("1", "").replace("2", "").replace("3", "").replace("4", "")
@@ -143,6 +176,12 @@ class AdresseMatcher:
         return commune.strip()
 
     def match_cp(self, cp, commune):
+        """
+        Match le code postal
+        :param cp: le code postal
+        :param commune: la commune
+        :return: le code postal matché
+        """
         # cp = special.cp_cedex(cp)
         if cp in self.cps_db:
             return cp, 1.0
@@ -163,6 +202,14 @@ class AdresseMatcher:
             # return res, 0.8
 
     def match_commune(self, commune, adresse4, communes, cp):
+        """
+        Match la commune
+        :param commune: la commune
+        :param adresse4: adresse4
+        :param communes: la liste des communes à matcher
+        :param cp: le code postal
+        :return: la commune matchée
+        """
         # commune = special.commune(cp, commune)
         if commune in communes:
             return commune, 1.0
@@ -180,6 +227,14 @@ class AdresseMatcher:
             # return commune, score
 
     def match_street(self, commune, adresse2, adresse3, cp):
+        """
+        Match l'adresse3
+        :param commune: la commune
+        :param adresse2: adresse2
+        :param adresse3: adresse3
+        :param cp: le code postal
+        :return: la rue de la commune matchée
+        """
         # adresse3 = special.street(cp, adresse3)
         ids = self.communes_db[commune]
         entities = [self.db[id] for id in ids]
@@ -212,6 +267,13 @@ class AdresseMatcher:
         return "", 0
 
     def match_num(self, commune, adresse, num):
+        """
+        Match le numéro de rue
+        :param commune: la commune
+        :param adresse: la rue
+        :param num: le numéro
+        :return: le numéro de la rue matché
+        """
         ids = self.communes_db[commune]
         entities = [self.db[id] for id in ids]
         if num == 0:
@@ -238,6 +300,12 @@ class AdresseMatcher:
                 return 0, 1.0
 
     def get_cp_by_commune(self, commune, oldcp):
+        """
+        TODO
+        :param commune:
+        :param oldcp:
+        :return:
+        """
         if commune in self.communes_db:
             ids = self.communes_db[commune]
             dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
@@ -250,6 +318,12 @@ class AdresseMatcher:
         return oldcp, 0
 
     def update_entity(self, entity, adresseid, score):
+        """
+        MAJ PS par rapport à l'adresse
+        :param entity: PS
+        :param adresseid: adresseid
+        :param score: le score de matching
+        """
         entity.adresseid = adresseid
         entity.adressescore = score
         a = self.db[entity.adresseid]
@@ -261,6 +335,11 @@ class AdresseMatcher:
         entity.matchadresse = f"{a.numero} {a.nom_afnor} {a.code_postal} {a.commune}"
 
     def load_ps(self, file, dept):
+        """
+        Fonction principale, charge PS et match un département
+        :param file: le fichier PS
+        :param dept: un département
+        """
         self.cps_db[0] = []  # TO REMOVE
         self.log(f"Parse {file}")
         with open(file) as f:
@@ -350,6 +429,11 @@ class AdresseMatcher:
         print(f"Nb Unique Adresse: {len(self.adresses_db)}") #333 adresse3, 406 adresse234, 703 UniquePS
 
     def load_by_depts(self, file, depts=None):
+        """
+        Prépare le chargement de PS en fonction d'une liste de département
+        :param file: PS
+        :param depts: la liste de département, None = all
+        """
         self.total = l.ps_repo.test_file(file)
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
