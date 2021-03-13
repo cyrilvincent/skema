@@ -37,7 +37,13 @@ class AdresseMatcher:
         self.adresses_db = {}
 
     def log(self, msg):
-        print(f"{int(time.perf_counter() - time0)}s {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
+        span = int(time.perf_counter() - time0)
+        s = f"{span}s"
+        if span >= 600:
+            s = f"{span // 60}m{span % 60}s"
+        if span >= 6000:
+            s = f"{span // 3600}h{(span % 3600) // 60}m"
+        print(f"{s} {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
 
     def split_num(self, s):
         regex = r"(\d+)"
@@ -91,7 +97,7 @@ class AdresseMatcher:
     def find_nearest_less_cp(self, cp):
         min = 99999
         res = 0
-        for k in self.cps_db.keys():
+        for k in self.cps_db.keys(): # [k for k in self.cps_db.keys() if cp > k > cp - 1000] Improve perf ?
             dif = cp - k
             if 0 <= dif < min:
                 min = dif
@@ -117,18 +123,20 @@ class AdresseMatcher:
         return -1
 
     def normalize_street(self, street):
-        street = self.normalize_commune(street)
+        street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         street = " " + street
         if " BP" in street:
             self.nbcedexbp += 1
+            street.replace(" BP", "")
         street = street.replace(" CH ", " CHEMIN ").replace(" AV ", " AVENUE ").replace(" PL ", " PLACE ")
-        street = street.replace(" BD ", "BOULEVARD ").replace(" IMP ", " IMPASSE ")
+        street = street.replace(" BD ", "BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
         return street.strip()
 
     def normalize_commune(self, commune):
         if "CEDEX" in commune:
             self.nbcedexbp += 1
-            commune = commune.replace("CEDEX", "")
+            commune = commune.replace("CEDEX", "").replace("1", "").replace("2", "").replace("3", "").replace("4", "")
+            commune = commune.replace("5", "").replace("6", "").replace("7", "").replace("8", "").replace("9", "")
         commune = commune.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         commune = " " + commune
         commune = commune.replace(" ST ", " SAINT ")
@@ -161,7 +169,7 @@ class AdresseMatcher:
         elif adresse4 != "" and adresse4 in communes:
             return adresse4, 0.9
         else:
-            self.log(f"WARNING BAD COMMUNE: {commune}")
+            self.log(f"WARNING BAD COMMUNE: {cp} {commune}")
             self.nbbadcommune += 1
             return 0, 0.0
             # commune, score = self.gestalts(commune, communes)
@@ -254,7 +262,6 @@ class AdresseMatcher:
 
     def load_ps(self, file, dept):
         self.cps_db[0] = []  # TO REMOVE
-        self.pss_db = []
         self.log(f"Parse {file}")
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
@@ -267,19 +274,19 @@ class AdresseMatcher:
                         (dept == 201 and 20000 <= cp < 20200) or \
                         (dept == 202 and 20200 <= cp < 21000):
                     self.nb += 1
-                    if self.nb % 100 == 0:
-                        self.log(f"Parse {self.nb} PS")
+                    if self.nb % 1000 == 0:
+                        self.log(f"Parse {self.nb} PS in {dept}")
                     entity = entities.PSEntity()
                     entity.rownum = self.rownum
                     self.ps_repo.row2entity(entity, row)
                     t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
-                    # if t in self.adresses_db:
-                    #     self.update_entity(entity, self.adresses_db[t][0], self.adresses_db[t][1])
-                    #     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    #     self.pss_db.append(entity)
-                    if entity.id in self.keys_db:
-                        self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
+                    if t in self.adresses_db:
+                        self.update_entity(entity, self.adresses_db[t][0], self.adresses_db[t][1])
+                        self.keys_db[entity.id] = (entity.adresseid, entity.score)
                         self.pss_db.append(entity)
+                    # if entity.id in self.keys_db:
+                    #     self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
+                    #     self.pss_db.append(entity)
                     else:
                         commune = self.normalize_commune(entity.commune)
                         cp, score = self.match_cp(cp, commune)
@@ -326,7 +333,7 @@ class AdresseMatcher:
                                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                                     self.adresses_db[t] = (entity.adresseid, entity.score)
                                 else:
-                                    self.log(f"ERROR UNKNOWN {entity.adresse3}")
+                                    self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
                                     self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
@@ -345,7 +352,7 @@ class AdresseMatcher:
     def load_by_depts(self, file, depts=None):
         self.total = l.ps_repo.test_file(file)
         if depts is None:
-            depts = list(range(1, 21)) + list(range(21, 96)) + [201, 202]
+            depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.total *= len(depts)
         for dept in depts:
             self.log(f"Load dept {dept}")
@@ -383,9 +390,27 @@ if __name__ == '__main__':
 
     # 01
     # Nb PS: 19766
-    # Nb No num: 3568  18.1%
+    # Nb Matching PS: 12255  62.0%
+    # Nb No num: 3327  16.8%
+    # Nb Cedex BP: 295  1.5%
     # Nb Bad CP: 601  3.0%
-    # Nb Commune not found: 718  3.6% (+3.0%)
+    # Nb Commune not found: 718  3.6%
     # Nb No Street: 13  0.1%
-    # Nb Bad Street: 8518  43.1% (+6.7%)
+    # Nb Bad Street: 6650  33.6%
+    # Nb Bad Num: 6650  33.6%
+    # Nb Error 500: 143  0.7%
+    # Nb Unique PS: 703 (17.4 rows per PS)
+    # Nb Unique Adresse: 406
+
+    # 19 depts
+    # Nb PS: 343600
+    # Nb No num: 32141  9.4%
+    # Nb Cedex BP: 15770  4.6%
+    # Nb Bad CP: 15892  4.6%
+    # Nb Commune not found: 19391  5.6%
+    # Nb No Street: 378  0.1%
+    # Nb Bad Street: 94338  27.5%
+    # Nb Bad Num: 94338  27.5%
+    # Nb Error 500: 9845  2.9%
+    # Nb Unique Adresse: 9559
 

@@ -1,0 +1,21 @@
+# V0.0.1.DEV
+
+# SplitPS
+# Découpe le fichier ps-tarifs*.csv par département
+# Utilisation : python splitps.py data/ps/ps-tarifs-21-03.csv
+# Aide : python splitps.py --help
+
+# MergeCSV
+# Fusionne un répertoire de CSV avec en tête en un seul CSV avec en tête
+# Utilisation python mergecsv.py data/adresse
+# Génère merged.csv
+# Pour filtrer les fichier à fusionner : python mergecsv.py data/adresse -e csv -p adresses-
+# Fusionne uniquement les fichiers adresses-*.csv
+# Pour les fichiers CSV sans en tête utiliser -h : python mergecsv data/ps -e csv -p ps-tarifs-21-03-
+
+# AdressesMatcher
+# Couple le fichier ps-tarifs*.csv et adresses-01.pickle (uniquement 01 pour le moment)
+# Utilisation python adressematcher.py data/ps/ps-tarifs-21-03.csv -d [1]
+# Génère data/ps/ps-tarifs-21-03-adresses.csv uniquement pour les données avec un score > 0.99, pour le moment ignore les autres données
+# -d indique la liste des départements à matcher, uniquement 1 pour le moment
+# Aide : python adressematcher.py --help
