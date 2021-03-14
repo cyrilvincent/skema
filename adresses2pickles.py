@@ -14,7 +14,7 @@
 #         self.nbfile = 0
 #         self.db: Dict[str, entities.AdresseEntity] = {}
 #         self.communes: Dict[str, Set[str]] = {}
-#         self.cps: Dict[str, Set[str]] = {}
+#         self.cps: Dict[int, Set[str]] = {}
 #         self.indexdb = None
 #         self.nb = 0
 #         self.numrow = 0

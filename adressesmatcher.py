@@ -7,6 +7,7 @@ import entities
 import time
 import argparse
 import repositories
+from typing import Dict, Set, List, Tuple, Optional
 
 time0 = time.perf_counter()
 
@@ -17,9 +18,9 @@ class AdresseMatcher:
     """
 
     def __init__(self):
-        self.db = None
-        self.communes_db = None
-        self.cps_db = None
+        self.db: Dict[str, entities.AdresseEntity] = {}
+        self.communes_db: Dict[str, Set[str]] = {}
+        self.cps_db: Dict[int, Set[str]] = {}
         self.nb = 0
         self.nbbadcp = 0
         self.nbnostreet = 0
@@ -38,7 +39,7 @@ class AdresseMatcher:
         self.keys_db = {}
         self.adresses_db = {}
 
-    def log(self, msg):
+    def log(self, msg: str):
         """
         Log
         :param msg:
@@ -51,7 +52,7 @@ class AdresseMatcher:
             s = f"{span // 60}m{span % 60}s"
         print(f"{s} {(self.i / self.total)*100:.1f}% [{self.rownum}] {msg}")
 
-    def split_num(self, s):
+    def split_num(self, s: str) -> Tuple[int, str]:
         """
         Split s en fonction du numero
         :param s: chaine
@@ -105,7 +106,7 @@ class AdresseMatcher:
         else:
             return None
 
-    def find_nearest_less_cp(self, cp):
+    def find_nearest_less_cp(self, cp: int) -> int:
         """
         TODO
         :param cp:
@@ -120,7 +121,7 @@ class AdresseMatcher:
                 res = k
         return res
 
-    def find_nearest_num(self, num, nums):
+    def find_nearest_num(self, num: int, nums: List[int]) -> int:
         """
         TODO
         :param num:
@@ -144,7 +145,7 @@ class AdresseMatcher:
                 return s.find(k)
         return -1
 
-    def normalize_street(self, street):
+    def normalize_street(self, street: str) -> str:
         """
         Normalise la rue
         :param street: rue
@@ -159,7 +160,7 @@ class AdresseMatcher:
         street = street.replace(" BD ", "BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
         return street.strip()
 
-    def normalize_commune(self, commune):
+    def normalize_commune(self, commune: str) -> str:
         """
         Normalise la commune
         :param commune: commune
@@ -174,7 +175,7 @@ class AdresseMatcher:
         commune = commune.replace(" ST ", " SAINT ")
         return commune.strip()
 
-    def match_cp(self, cp, commune):
+    def match_cp(self, cp: int, commune: str) -> Tuple[int, float]:
         """
         Match le code postal
         :param cp: le code postal
@@ -200,7 +201,7 @@ class AdresseMatcher:
             # self.log(f"Warning CP {cp}=>{res} {int(score*100)}%")
             # return res, 0.8
 
-    def match_commune(self, commune, adresse4, communes, cp):
+    def match_commune(self, commune: str, adresse4: str, communes: Set[str], cp: int) -> Tuple[str, float]:
         """
         Match la commune
         :param commune: la commune
@@ -213,7 +214,7 @@ class AdresseMatcher:
         if commune in communes:
             return commune, 1.0
         elif len(communes) == 1:
-            return communes[0], 0.95
+            return list(communes)[0], 0.95
         elif adresse4 != "" and adresse4 in communes:
             return adresse4, 0.9
         else:
@@ -227,7 +228,7 @@ class AdresseMatcher:
             #         return adresse4, score2
             # return commune, score
 
-    def match_street(self, commune, adresse2, adresse3, cp):
+    def match_street(self, commune: str, adresse2: str, adresse3: str, cp: int) -> Tuple[str, float]:
         """
         Match l'adresse3
         :param commune: la commune
@@ -267,7 +268,7 @@ class AdresseMatcher:
         self.nbbadstreet += 1
         return "", 0
 
-    def match_num(self, commune, adresse, num):
+    def match_num(self, commune: str, adresse: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
         """
         Match le numéro de rue
         :param commune: la commune
@@ -302,7 +303,7 @@ class AdresseMatcher:
                 # return entities.AdresseEntity(), 0.0 # Normalement impossible mettre un point d'arrêt
                 return None, 0.0
 
-    def get_cp_by_commune(self, commune, oldcp):
+    def get_cp_by_commune(self, commune: str, oldcp: int) -> Tuple[int, float]:
         """
         TODO
         :param commune:
@@ -320,30 +321,30 @@ class AdresseMatcher:
                     return e.code_postal, 0.9
         return oldcp, 0
 
-    def last_chance2(self, cp, oldcommune, adresse3, num):
+    def last_chance(self, commune: str, adresse3: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
+        if commune in self.communes_db:
+            ids = self.communes_db[commune]
+            for id in ids:
+                e = self.db[id]
+                if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+                    return e, 0.95
+        return None, 0
+
+    def last_chance2(self, cp: int, adresse3: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
         communes = self.cps_db[cp]
         for commune in communes:
             ids = self.communes_db[commune]
             for id in ids:
                 e = self.db[id]
                 if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-                    return e.code_postal, e.commune, e.nom_afnor, e.numero, 0.95
-        return cp, oldcommune, adresse3, num, 0
+                    return e, 0.95
+        return None, 0
 
-    def last_chance(self, oldcp, commune, adresse3, num):
-        if commune in self.communes_db:
-            ids = self.communes_db[commune]
-            for id in ids:
-                e = self.db[id]
-                if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-                    return e.code_postal, e.commune, e.nom_afnor, e.numero, 0.95
-        return oldcp, commune, adresse3, num, 0
-
-    def update_entity(self, entity, aentity, score):
+    def update_entity(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, score: float):
         """
         MAJ PS par rapport à l'adresse
         :param entity: PS
-        :param adresseid: adresseid
+        :param aentity: adresse entity
         :param score: le score de matching
         """
         entity.adresseid = aentity.id
@@ -355,7 +356,7 @@ class AdresseMatcher:
         entity.codeinsee = aentity.code_insee
         entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
 
-    def load_ps(self, file, dept):
+    def load_ps(self, file: str, dept: int):
         """
         Fonction principale, charge PS et match un département
         :param file: le fichier PS
@@ -453,7 +454,7 @@ class AdresseMatcher:
         print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
         print(f"Nb Unique Adresse: {len(self.adresses_db)}") #333 adresse3, 406 adresse234, 703 UniquePS
 
-    def load_by_depts(self, file, depts=None):
+    def load_by_depts(self, file: str, depts=None):
         """
         Prépare le chargement de PS en fonction d'une liste de département
         :param file: PS
@@ -513,15 +514,15 @@ if __name__ == '__main__':
 
     # All
     # Nb PS: 2401126
-    # Nb Matching PS: 1590588  66.2%
-    # Nb No num: 151399  6.3%
-    # Nb Cedex BP: 125745  5.2%
+    # Nb Matching PS: 1597210  66.5%
+    # Nb No num: 152354  6.3%
+    # Nb Cedex BP: 125713  5.2%
     # Nb Bad CP: 118729  4.9%
-    # Nb Commune not found: 166191  6.9%
-    # Nb No Street: 2449  0.1%
-    # Nb Bad Street: 603011  25.1%
-    # Nb Bad Num: 603011  25.1%
-    # Nb Error 500: 41336  1.7%
-    # Nb Unique PS: 103688 (15.3 rows per PS)
-    # Nb Unique Adresse: 60828
+    # Nb Commune not found: 154299  6.4%
+    # Nb No Street: 2450  0.1%
+    # Nb Bad Street: 608100  25.3%
+    # Nb Bad Num: 649617  27.1%
+    # Nb Error 500: 41517  1.7%
+    # Nb Unique PS: 104125 (15.3 rows per PS)
+    # Nb Unique Adresse: 61120
 
