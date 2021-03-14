@@ -276,29 +276,31 @@ class AdresseMatcher:
         :return: le numéro de la rue matché
         """
         ids = self.communes_db[commune]
-        entities = [self.db[id] for id in ids]
+        adresses = [self.db[id] for id in ids]
         if num == 0:
-            nums = [e.numero for e in entities if e.nom_afnor == adresse]
-            if len(nums) > 0:
-                num = nums[0]
-                if num == 0:
-                    return 0, 1.0
+            adresses = [e for e in adresses if e.nom_afnor == adresse]
+            if len(adresses) > 0:
+                if adresses[0].numero == 0:
+                    return adresses[0], 1.0
                 else:
-                    return num, 0.8
+                    return adresses[0], 0.8
             else:
-                return 0, 0.0
+                return None, 0.0
         else:
-            founds = [e.numero for e in entities if e.nom_afnor == adresse and e.numero == num]
+            founds = [e for e in adresses if e.nom_afnor == adresse and e.numero == num]
             if len(founds) > 0:
-                return num, 1.0
+                return founds[0], 1.0
             else:
-                # nums = [e.numero for e in entities if e.nom_afnor == adresse]
+                # nums = [e.numero for e in adresses if e.nom_afnor == adresse]
                 # res = self.find_nearest_num(num, nums)
-                # if res == 0:
-                #     return 0, 0.8
-                # else:
-                #     return res, 0.5
-                return 0, 1.0
+                # founds = [e for e in adresses if e.nom_afnor == adresse and e.numero == num]
+                # if len(founds) > 0:
+                #     if res == 0:
+                #         return 0, 0.8
+                #     else:
+                #         return res, 0.5
+                # return entities.AdresseEntity(), 0.0 # Normalement impossible mettre un point d'arrêt
+                return None, 0.0
 
     def get_cp_by_commune(self, commune, oldcp):
         """
@@ -337,22 +339,21 @@ class AdresseMatcher:
                     return e.code_postal, e.commune, e.nom_afnor, e.numero, 0.95
         return oldcp, commune, adresse3, num, 0
 
-    def update_entity(self, entity, adresseid, score):
+    def update_entity(self, entity, aentity, score):
         """
         MAJ PS par rapport à l'adresse
         :param entity: PS
         :param adresseid: adresseid
         :param score: le score de matching
         """
-        entity.adresseid = adresseid
+        entity.adresseid = aentity.id
         entity.adressescore = score
-        a = self.db[entity.adresseid]
-        entity.lon = a.lon
-        entity.lat = a.lat
-        entity.x = a.x
-        entity.y = a.y
-        entity.codeinsee = a.code_insee
-        entity.matchadresse = f"{a.numero} {a.nom_afnor} {a.code_postal} {a.commune}"
+        entity.lon = aentity.lon
+        entity.lat = aentity.lat
+        entity.x = aentity.x
+        entity.y = aentity.y
+        entity.codeinsee = aentity.code_insee
+        entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
 
     def load_ps(self, file, dept):
         """
@@ -380,7 +381,8 @@ class AdresseMatcher:
                     self.ps_repo.row2entity(entity, row)
                     t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
                     if t in self.adresses_db:
-                        self.update_entity(entity, self.adresses_db[t][0], self.adresses_db[t][1])
+                        aentity = self.db[self.adresses_db[t][0]]
+                        self.update_entity(entity, aentity, self.adresses_db[t][1])
                         self.keys_db[entity.id] = (entity.adresseid, entity.score)
                         self.pss_db.append(entity)
                     # if entity.id in self.keys_db:
@@ -404,7 +406,7 @@ class AdresseMatcher:
                                     self.log(f"WARNING NUM in adresse2 {adresse2}")
 
                             # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
-                            # if score < 0.75:
+                            # if score < 0.8:
                             #     cp2, score = self.get_cp_by_commune(commune, cp)
                             #     if cp2 != cp:
                             #         print(f"[{self.rownum}] Warning Bad CP {cp} {commune}=>{cp2} {commune}")
@@ -419,22 +421,24 @@ class AdresseMatcher:
                                 self.nbscorelow += 1
                                 # self.log(f"Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
                             else:  # TO REMOVE
-                                numero, score = self.match_num(commune, matchadresse, num)
+                                aentity, score = self.match_num(commune, matchadresse, num)
                                 entity.scores.append(score)
                                 if entity.score < 0.8:
                                     self.nbscorelow += 1
                                     # lastchance
                                     # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
-                                ids = self.communes_db[commune]
-                                found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
-                                if len(found) > 0:
-                                    self.update_entity(entity, found[0], entity.score)
+                                #ids = self.communes_db[commune]
+                                #found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
+                                #if len(found) > 0:
+                                if aentity is None:
+                                    aentity = entities.AdresseEntity(0)
+                                    self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
+                                    self.nberror500 += 1
+                                else: # TO REMOVE
+                                    self.update_entity(entity, aentity, entity.score)
                                     self.pss_db.append(entity)
                                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                                     self.adresses_db[t] = (entity.adresseid, entity.score)
-                                else:
-                                    self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
-                                    self.nberror500 += 1
 
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")

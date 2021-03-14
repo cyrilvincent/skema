@@ -20,6 +20,7 @@
 # Département ruraux, pas de numéro => BD lieux dits : 1.5j
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
+# Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
 # Gestion des cas spéciaux => Fichier de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
