@@ -80,6 +80,7 @@ if __name__ == '__main__':
     print("Test PS file")
     print("============")
     print(f"V{config.version}")
+    print(config.copyright)
     file = "data/ps/ps-tarifs-small.csv"
     print(f"Parse {file}")
     repo = PSRepository()

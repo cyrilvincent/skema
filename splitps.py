@@ -2,6 +2,7 @@ import config
 import csv
 import argparse
 
+
 class SplitPS:
     """
     Split PS en fichier par département
@@ -67,6 +68,7 @@ if __name__ == '__main__':
     print("SplitPS")
     print("=======")
     print(f"V{config.version}")
+    print(config.copyright)
     parser = argparse.ArgumentParser(description="Split PS")
     parser.add_argument("path", help="Path")
     args = parser.parse_args()

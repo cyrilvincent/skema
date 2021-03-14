@@ -105,6 +105,7 @@ if __name__ == '__main__':
     print("Adresses 2 Pickles")
     print("==================")
     print(f"V{config.version}")
+    print(config.copyright)
     print()
     time0 = time.perf_counter()
     p = AdresseParser()

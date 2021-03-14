@@ -480,6 +480,7 @@ if __name__ == '__main__':
     print("Adresses Matcher")
     print("================")
     print(f"V{config.version}")
+    print(config.copyright)
     print()
     parser = argparse.ArgumentParser(description="Adresses Matcher")
     parser.add_argument("path", help="Path")

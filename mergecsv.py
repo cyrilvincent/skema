@@ -39,6 +39,7 @@ if __name__ == '__main__':
     print("Merge CSVs")
     print("==========")
     print(f"V{config.version}")
+    print(config.copyright)
     print()
     parser = argparse.ArgumentParser(description="Merge CSVs")
     parser.add_argument("dir", help="Directory")
