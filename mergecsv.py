@@ -3,12 +3,13 @@ import os
 import time
 import argparse
 
+
 class MergeCSV:
     """
     Fusionne des CSV
     """
 
-    def merge(self, path, ext, prefix, noheader):
+    def merge(self, path, ext: str, prefix: str, noheader: bool):
         """
         Fusion
         :param path: le répertoire à fusionner

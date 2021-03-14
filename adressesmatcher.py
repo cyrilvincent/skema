@@ -38,6 +38,7 @@ class AdresseMatcher:
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
         self.adresses_db = {}
+        self.csv = []
 
     def log(self, msg: str):
         """
@@ -356,7 +357,7 @@ class AdresseMatcher:
         entity.codeinsee = aentity.code_insee
         entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
 
-    def load_ps(self, file: str, dept: int):
+    def parse_ps(self, file: str, dept: int):
         """
         Fonction principale, charge PS et match un département
         :param file: le fichier PS
@@ -364,82 +365,80 @@ class AdresseMatcher:
         """
         self.cps_db[0] = []  # TO REMOVE
         self.log(f"Parse {file}")
-        with open(file) as f:
-            reader = csv.reader(f, delimiter=";")
-            self.rownum = 0
-            for row in reader:
-                self.i += 1
-                self.rownum += 1
-                cp = int(row[7])
-                if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
-                        (dept == 201 and 20000 <= cp < 20200) or \
-                        (dept == 202 and 20200 <= cp < 21000):
-                    self.nb += 1
-                    if self.nb % 1000 == 0:
-                        self.log(f"Parse {self.nb} PS in {dept}")
-                    entity = entities.PSEntity()
-                    entity.rownum = self.rownum
-                    self.ps_repo.row2entity(entity, row)
-                    t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
-                    if t in self.adresses_db:
-                        aentity = self.db[self.adresses_db[t][0]]
-                        self.update_entity(entity, aentity, self.adresses_db[t][1])
-                        self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                        self.pss_db.append(entity)
-                    # if entity.id in self.keys_db:
-                    #     self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
-                    #     self.pss_db.append(entity)
-                    else:
-                        commune = self.normalize_commune(entity.commune)
-                        cp, score = self.match_cp(cp, commune)
-                        entity.scores.append(score)
-                        communes = self.cps_db[cp]
-                        adresse4 = self.normalize_street(entity.adresse4)
-                        commune, score = self.match_commune(commune, adresse4, communes, cp)
-                        entity.scores.append(score)
-                        if commune != 0:  # TO REMOVE
-                            adresse3 = self.normalize_street(entity.adresse3)
-                            adresse2 = self.normalize_street(entity.adresse2)
-                            num, adresse3 = self.split_num(adresse3)
-                            if num == 0 and adresse2 != "":
-                                num, adresse2 = self.split_num(adresse2)
-                                if num != 0:
-                                    self.log(f"WARNING NUM in adresse2 {adresse2}")
+        self.rownum = 0
+        for row in self.csv:
+            self.i += 1
+            self.rownum += 1
+            cp = int(row[7])
+            if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
+                    (dept == 201 and 20000 <= cp < 20200) or \
+                    (dept == 202 and 20200 <= cp < 21000):
+                self.nb += 1
+                if self.nb % 1000 == 0:
+                    self.log(f"Parse {self.nb} PS in {dept}")
+                entity = entities.PSEntity()
+                entity.rownum = self.rownum
+                self.ps_repo.row2entity(entity, row)
+                t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
+                if t in self.adresses_db:
+                    aentity = self.db[self.adresses_db[t][0]]
+                    self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
+                    self.pss_db.append(entity)
+                # if entity.id in self.keys_db:
+                #     self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
+                #     self.pss_db.append(entity)
+                else:
+                    commune = self.normalize_commune(entity.commune)
+                    cp, score = self.match_cp(cp, commune)
+                    entity.scores.append(score)
+                    communes = self.cps_db[cp]
+                    adresse4 = self.normalize_street(entity.adresse4)
+                    commune, score = self.match_commune(commune, adresse4, communes, cp)
+                    entity.scores.append(score)
+                    if commune != 0:  # TO REMOVE
+                        adresse3 = self.normalize_street(entity.adresse3)
+                        adresse2 = self.normalize_street(entity.adresse2)
+                        num, adresse3 = self.split_num(adresse3)
+                        if num == 0 and adresse2 != "":
+                            num, adresse2 = self.split_num(adresse2)
+                            if num != 0:
+                                self.log(f"WARNING NUM in adresse2 {adresse2}")
 
-                            # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
-                            # if score < 0.8:
-                            #     cp2, score = self.get_cp_by_commune(commune, cp)
-                            #     if cp2 != cp:
-                            #         print(f"[{self.rownum}] Warning Bad CP {cp} {commune}=>{cp2} {commune}")
-                            #         cp = cp2
-                            #         entity.scores[-1] = score
-                            #         entity.scores[-2] = 0.5
-                            #     else:
-                            #         self.log(f"Warning commune score {entity.cp} {entity.commune}=>{cp} {commune} @{int(score * 100)}%")
-                            matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
+                        # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
+                        # if score < 0.8:
+                        #     cp2, score = self.get_cp_by_commune(commune, cp)
+                        #     if cp2 != cp:
+                        #         print(f"[{self.rownum}] Warning Bad CP {cp} {commune}=>{cp2} {commune}")
+                        #         cp = cp2
+                        #         entity.scores[-1] = score
+                        #         entity.scores[-2] = 0.5
+                        #     else:
+                        #         self.log(f"Warning commune score {entity.cp} {entity.commune}=>{cp} {commune} @{int(score * 100)}%")
+                        matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
+                        entity.scores.append(score)
+                        if score < 0.5:
+                            self.nbscorelow += 1
+                            # self.log(f"Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
+                        else:  # TO REMOVE
+                            aentity, score = self.match_num(commune, matchadresse, num)
                             entity.scores.append(score)
-                            if score < 0.5:
+                            if entity.score < 0.8:
                                 self.nbscorelow += 1
-                                # self.log(f"Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
-                            else:  # TO REMOVE
-                                aentity, score = self.match_num(commune, matchadresse, num)
-                                entity.scores.append(score)
-                                if entity.score < 0.8:
-                                    self.nbscorelow += 1
-                                    # lastchance
-                                    # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
-                                #ids = self.communes_db[commune]
-                                #found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
-                                #if len(found) > 0:
-                                if aentity is None:
-                                    aentity = entities.AdresseEntity(0)
-                                    self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
-                                    self.nberror500 += 1
-                                else: # TO REMOVE
-                                    self.update_entity(entity, aentity, entity.score)
-                                    self.pss_db.append(entity)
-                                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                                    self.adresses_db[t] = (entity.adresseid, entity.score)
+                                # lastchance
+                                # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
+                            #ids = self.communes_db[commune]
+                            #found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
+                            #if len(found) > 0:
+                            if aentity is None:
+                                aentity = entities.AdresseEntity(0)
+                                self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
+                                self.nberror500 += 1
+                            else: # TO REMOVE
+                                self.update_entity(entity, aentity, entity.score)
+                                self.pss_db.append(entity)
+                                self.keys_db[entity.id] = (entity.adresseid, entity.score)
+                                self.adresses_db[t] = (entity.adresseid, entity.score)
 
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
@@ -454,23 +453,25 @@ class AdresseMatcher:
         print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
         print(f"Nb Unique Adresse: {len(self.adresses_db)}") #333 adresse3, 406 adresse234, 703 UniquePS
 
-    def load_by_depts(self, file: str, depts=None):
+    def load_by_depts(self, file: str, depts: Optional[List[int]] = None):
         """
         Prépare le chargement de PS en fonction d'une liste de département
         :param file: PS
         :param depts: la liste de département, None = all
         """
-        self.total = l.ps_repo.test_file(file)
+        self.log(f"Load {file}")
+        self.csv = self.ps_repo.load_ps(file)
+        self.total = len(self.csv)
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.total *= len(depts)
         for dept in depts:
             self.log(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db = l.a_repo.load_adresses(dept, time0)
-            l.load_ps(file, dept)
+            self.parse_ps(file, dept)
         self.log(f"Match {self.nb} PS")
         file = file.replace(".csv", "-adresses.csv")
-        l.pss_db.sort(key=lambda e: e.rownum)
+        self.pss_db.sort(key=lambda e: e.rownum)
         self.ps_repo.save_entities(file, l.pss_db)
         self.log(f"Saved {self.nb} PS")
 

@@ -2,6 +2,8 @@ import entities
 import config
 import cyrilload
 import time
+import csv
+from typing import List
 
 
 class PSRepository:
@@ -9,7 +11,7 @@ class PSRepository:
     Repository PS
     """
 
-    def save_entities(self, path, pss):
+    def save_entities(self, path, pss: List[entities.PSEntity]):
         """
         Sauvegarde une liste de PS dans un CSV
         :param path: le CSV
@@ -22,7 +24,7 @@ class PSRepository:
                     f.write(f"{e.v[i]};")
                 f.write("\n")
 
-    def row2entity(self, entity, row):
+    def row2entity(self, entity: entities.PSEntity, row: str):
         """
         Convertis une ligne CSV en une entité PS
         :param entity: PS
@@ -44,13 +46,18 @@ class PSRepository:
                 i += 1
         return i
 
+    def load_ps(self, file):
+        with open(file) as f:
+            reader = csv.reader(f, delimiter=";")
+            return list(reader)
+
 
 class AdresseRepository:
     """
     Adresse Repository
     """
 
-    def load_adresses(self, dept, time0):
+    def load_adresses(self, dept: int, time0):
         """
         Charge le pickle adresse
         :param dept: département pickle à charger

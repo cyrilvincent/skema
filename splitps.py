@@ -13,7 +13,7 @@ class SplitPS:
         for d in self.depts:
             self.db[d] = []
 
-    def dept_from_cp(self, cp):
+    def dept_from_cp(self, cp: int):
         """
         Retourne le département en fonction du code postal
         :param cp: le code postal
