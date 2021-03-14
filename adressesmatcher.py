@@ -1,7 +1,6 @@
 import unidecode
 import re
 import csv
-import cyrilload
 import difflib
 import config
 import entities
@@ -168,8 +167,8 @@ class AdresseMatcher:
         """
         if "CEDEX" in commune:
             self.nbcedexbp += 1
-            commune = commune.replace("CEDEX", "").replace("1", "").replace("2", "").replace("3", "").replace("4", "")
-            commune = commune.replace("5", "").replace("6", "").replace("7", "").replace("8", "").replace("9", "")
+            index = commune.index("CEDEX")
+            commune = commune[:index]
         commune = commune.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         commune = " " + commune
         commune = commune.replace(" ST ", " SAINT ")
@@ -213,6 +212,8 @@ class AdresseMatcher:
         # commune = special.commune(cp, commune)
         if commune in communes:
             return commune, 1.0
+        elif len(communes) == 1:
+            return communes[0], 0.95
         elif adresse4 != "" and adresse4 in communes:
             return adresse4, 0.9
         else:
@@ -317,6 +318,25 @@ class AdresseMatcher:
                     return e.code_postal, 0.9
         return oldcp, 0
 
+    def last_chance2(self, cp, oldcommune, adresse3, num):
+        communes = self.cps_db[cp]
+        for commune in communes:
+            ids = self.communes_db[commune]
+            for id in ids:
+                e = self.db[id]
+                if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+                    return e.code_postal, e.commune, e.nom_afnor, e.numero, 0.95
+        return cp, oldcommune, adresse3, num, 0
+
+    def last_chance(self, oldcp, commune, adresse3, num):
+        if commune in self.communes_db:
+            ids = self.communes_db[commune]
+            for id in ids:
+                e = self.db[id]
+                if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+                    return e.code_postal, e.commune, e.nom_afnor, e.numero, 0.95
+        return oldcp, commune, adresse3, num, 0
+
     def update_entity(self, entity, adresseid, score):
         """
         MAJ PS par rapport à l'adresse
@@ -403,6 +423,7 @@ class AdresseMatcher:
                                 entity.scores.append(score)
                                 if entity.score < 0.8:
                                     self.nbscorelow += 1
+                                    # lastchance
                                     # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
                                 ids = self.communes_db[commune]
                                 found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
@@ -486,15 +507,17 @@ if __name__ == '__main__':
     # Nb Unique PS: 703 (17.4 rows per PS)
     # Nb Unique Adresse: 406
 
-    # 19 depts
-    # Nb PS: 343600
-    # Nb No num: 32141  9.4%
-    # Nb Cedex BP: 15770  4.6%
-    # Nb Bad CP: 15892  4.6%
-    # Nb Commune not found: 19391  5.6%
-    # Nb No Street: 378  0.1%
-    # Nb Bad Street: 94338  27.5%
-    # Nb Bad Num: 94338  27.5%
-    # Nb Error 500: 9845  2.9%
-    # Nb Unique Adresse: 9559
+    # All
+    # Nb PS: 2401126
+    # Nb Matching PS: 1590588  66.2%
+    # Nb No num: 151399  6.3%
+    # Nb Cedex BP: 125745  5.2%
+    # Nb Bad CP: 118729  4.9%
+    # Nb Commune not found: 166191  6.9%
+    # Nb No Street: 2449  0.1%
+    # Nb Bad Street: 603011  25.1%
+    # Nb Bad Num: 603011  25.1%
+    # Nb Error 500: 41336  1.7%
+    # Nb Unique PS: 103688 (15.3 rows per PS)
+    # Nb Unique Adresse: 60828
 
