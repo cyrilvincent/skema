@@ -170,7 +170,7 @@ class AdresseMatcher:
         else:
             self.nbbadcp += 1
             res = self.find_nearest_less_cp(cp)
-            self.log(f"Warning CP {cp}=>{res}")
+            self.log(f"WARNING CP {cp}=>{res}")
             return res, 0.8
 
     def match_commune(self, commune: str, adresse4: str, communes: Set[str], cp: int) -> Tuple[str, float]:
@@ -356,7 +356,8 @@ class AdresseMatcher:
                     entity.scores[0] = entity.scores[2] = entity.scores[3] = 1.0
         if entity.score < config.adresse_quality:
             self.nbscorelow += 1
-            self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / len(self.adresses_db)) * 100:.1f}%)"
+            nba = len(self.adresses_db) if len(self.adresses_db) != 0 else 1
+            self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / nba) * 100:.1f}%)"
                      f" {entity.adresse3} {entity.cp} {entity.commune}  => {aentity.numero} {aentity.nom_afnor}"
                      f" {aentity.code_postal} {aentity.commune}")
         if aentity is None:
@@ -381,8 +382,6 @@ class AdresseMatcher:
                     (dept == 201 and 20000 <= cp < 20200) or \
                     (dept == 202 and 20200 <= cp < 21000):
                 self.nb += 1
-                if self.nb % 1000 == 0:
-                    self.log(f"Parse {self.nb} PS")
                 entity = entities.PSEntity()
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)

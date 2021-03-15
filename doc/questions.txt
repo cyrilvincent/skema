@@ -1,6 +1,5 @@
 # V0.0.1 DEV
 # 17/03/21
-# Virer temporairement cyriload et adresses2pickles
 # Nom du projet ?
 # 2 455 000 PS comment travailler dessus ? => split par département, Sql ?
 # Rapidité => Indexation des adresses  (cp, commune, rue) par pickle (NoSql) réutilisable : 1j (Sql : 5j)
@@ -20,6 +19,7 @@
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
 # Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
+# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
 # Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
@@ -27,4 +27,4 @@
 # Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
 # Mise en prod, doc : 0.5j
 # Réunions : 0.25-0.5j
-# Accuracy prévisions, normal(38) : 90-95%, dense(75) : 95-99%, campagne(05) sans lieux dits : 75-80%
+# Accuracy prévisions, normal(38) : 90-95%, dense(75) : 95-97%, campagne(05) sans lieux dits : 80-90%
