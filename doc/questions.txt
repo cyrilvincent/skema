@@ -11,7 +11,6 @@
 # Matching Commune => Pattern matching uniquement sur les communes du CP + score fiabilité (très fiable en ville) : 1j
 # Matching Commune => Si mauvais score chercher adresse4 : 0.1j
 # Matching Rue => Pattern matching uniquement sur les adresses de la commune, prendre la + proche + score fiabilité : 0.5j
-# Matching Rue => Si mauvais score ajouter adresse2 (lieux dits?) : 0.1j
 # Matching Num => Si pas de num ou mauvais num chercher le + proche du même côté de la rue en priorité: 0.1j
 # 2A 2B : 0.1j
 # Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.5j
@@ -21,11 +20,11 @@
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
 # Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
-# Gestion des cas spéciaux => Fichier de matching de CP, Commune, Adresse : 1j
+# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
-# 59160 LOMME => 5900 LILLE ca dépend de la rue
+# 59160 LOMME => 59000 LILLE géré pour certaines rue par la bd adresse
 # Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
 # Mise en prod, doc : 0.5j
-# Réunions : 3*0.1j
-# Accuracy prévision, normal(38) : 90-95%, dense(75) : 95-99%, campagne(05) sans lieux dits : 75-80%
+# Réunions : 0.25-0.5j
+# Accuracy prévisions, normal(38) : 90-95%, dense(75) : 95-99%, campagne(05) sans lieux dits : 75-80%
