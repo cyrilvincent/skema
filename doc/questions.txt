@@ -1,6 +1,7 @@
 # V0.0.1 DEV
 # 17/03/21
-# Nom du projet ?
+# Nom du projet ? ICIP
+# Début WP
 # Volume => 2 455 000 PSrow, 2 401 000 PSrow métropolitains+corse, 155000 PSunique (15.4/PSrow), 96000 Adresse unique
 # Volume comment travailler dessus ? => split par département, fonctionnement par indexation, SQL ?
 # Rapidité + RAM => Gestion par département : 0.5j
@@ -16,12 +17,13 @@
 # 75, 69, 13 => Gestion des arrondissements: 0.2j
 # Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.5j
 # Gestion des anciennes adresses => 1 adresse peut avoir 2 valeurs: nom_voie, nom_afnor, (lieux-dits?) : 0.1j
+# Fin WP
+# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
 # Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
 # Département ruraux, pas de numéro => BD lieux dits : 1j
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
 # Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
-# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
 # Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
