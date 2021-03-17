@@ -2,7 +2,7 @@
 # 17/03/21
 # Nom du projet ?
 # Volume => 2 455 000 PSrow, 2 401 000 PSrow métropolitains+corse, 155000 PSunique (15.4/PSrow), 96000 Adresse unique
-# Volume comment travailler dessus ? => split par département, fonctionnement par indéxation, SQL ?
+# Volume comment travailler dessus ? => split par département, fonctionnement par indexation, SQL ?
 # Rapidité + RAM => Gestion par département : 0.5j
 # Rapidité => Travailler par adresse unique et non par row : 0.5j
 # Rapidité => Indexation des adresses  (cp, commune, rue) par pickle (NoSql) réutilisable : 1j
@@ -29,4 +29,4 @@
 # Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
 # Mise en prod, doc : 0.5j
 # Réunions : 0.25-0.5j
-# Accuracy prévisions, normal(38) : 90-95%, dense(75) : +95%, campagne(05) sans lieux dits : 80-90%
+# Accuracy prévisions, normal(38) : +90%, dense(75) : +95%, campagne(05) sans lieux dits : +80%
