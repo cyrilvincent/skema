@@ -1,7 +1,7 @@
 # Colonnes ajoutées par AdressesMatcher
-# 35 PS_id
+# 34 PS_id
 # 35 Rownum: numéro de la ligne dans le fichier ps-tarifs-*.csv
-# 36 Adresseid: colonne id de adresses-*.csv
+# 36 Adresseid: colonne id d'adresses-*.csv
 # 37 Matchadresse: Adresse matchée depuis adresses-*.csv
 # 38 Code INSEE
 # 39 Longitude

@@ -57,7 +57,7 @@ class AdresseRepository:
     Adresse Repository
     """
 
-    def load_adresses(self, dept: int, time0):
+    def load_adresses(self, dept: int):
         """
         Charge le pickle adresse
         :param dept: département pickle à charger
@@ -72,9 +72,10 @@ class AdresseRepository:
         if dept > 970:
             s = str(dept)
         indexdb = cyrilload.load(f"{config.adresse_path}/adresses-{s}.pickle")
-        print(f"Load adresses-{s}.pickle in {int(time.perf_counter() - time0)}s")
-        return indexdb["db"], indexdb["communes"], indexdb["cps"]
+        return indexdb["db"], indexdb["communes"], indexdb["cps"], indexdb["insees"]
 
+    def load_cedex(self):
+        return cyrilload.load(config.cedex_path)
 
 if __name__ == '__main__':
     print("Test PS file")

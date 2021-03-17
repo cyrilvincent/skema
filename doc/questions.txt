@@ -1,4 +1,24 @@
-# V0.0.1 DEV
+# V0.0.2.DEV
+# 01/04/21
+# Tout le WP a été fait
+# Accuracy : 94% (entre 85% et 97%) (/!\ score -3)
+# Accuracy => Optimisation des scores (seuils et pondérations) : 0.1j
+# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
+# Département ruraux, pas de numéro => BD lieux dits : 1j
+# Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
+# Cedex => Certains code insee ont plusieurs CP surtout en campagne : a compléter avec ci dessous
+# Si mauvais score + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
+# Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
+# Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
+# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
+# Exemple de cas spéciaux
+# CP 38034 => 38100, 20184 => 20090, 59430 => 59140
+# 59160 LOMME => 59000 LILLE géré pour certaines rue par la bd adresse
+# Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
+# Mise en prod, doc : 0.5j
+# Réunion : 0.25j
+
+# V0.0.1.DEV
 # 17/03/21
 # Nom du projet ? ICIP
 # Début WP
@@ -17,7 +37,7 @@
 # 75, 69, 13 => Gestion des arrondissements: 0.2j
 # Gestion des anciens noms de communes => 1 commune peut avoir 3 valeurs: nom_commune, nom_ancienne_commune, libelle_acheminement : 0.5j
 # Gestion des anciennes adresses => 1 adresse peut avoir 2 valeurs: nom_voie, nom_afnor, (lieux-dits?) : 0.1j
-# Fin WP
+# Fin WP : 5j
 # Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
 # Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
 # Département ruraux, pas de numéro => BD lieux dits : 1j

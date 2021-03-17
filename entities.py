@@ -22,6 +22,20 @@ class AdresseEntity:
         return f"Adresse ({self.id}) {self.numero} {self.nom_afnor} {self.code_postal} {self.commune}"
 
 
+class CedexEntity:
+    """
+    Entité cedex
+    """
+
+    def __init__(self, cp):
+        self.cp = cp
+        self.commune = ""
+        self.code_insee = ""
+
+    def __repr__(self):
+        return f"Cedex {self.cp} {self.commune} {self.code_insee}"
+
+
 class PSEntity:
     """
     Entité PS
@@ -84,7 +98,7 @@ class PSEntity:
     def score(self):
         if len(self.scores) == 0:
             return 0.0
-        return sum([s for s in self.scores]) / len(self.scores)
+        return sum([s for s in self.scores]) / len(self.scores) - 3
 
     @property
     def rownum(self):
