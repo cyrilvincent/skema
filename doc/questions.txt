@@ -1,3 +1,24 @@
+/!\ TU ES SUR LA BRANCHE DEV
+
+# V0.0.2.DEV
+# 01/04/21
+# 5 jours
+# WP => All OK 94% (entre 85% et 97%) accuracy (/!\ Score -3) en 2h45
+# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
+# Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
+# Département ruraux, pas de numéro => BD lieux dits : 1j
+# Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
+# Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
+# Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
+# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
+# Exemple de cas spéciaux
+# CP 38034 => 38100, 20184 => 20090, 59430 => 59140
+# 59160 LOMME => 59000 LILLE géré pour certaines rue par la bd adresse
+# Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
+# Mise en prod, doc : 0.5j
+# Réunions : 0.25-0.5j
+# Accuracy prévisions, normal(38) : +90%, dense(75) : +95%, campagne(05) sans lieux dits : +80%
+
 # V0.0.1.DEV
 # 17/03/21
 # 2 jours

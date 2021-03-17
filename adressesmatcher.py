@@ -536,6 +536,6 @@ if __name__ == '__main__':
     # Nb Bad commune: 49  0.1%
     # Nb No Street: 214  0.2%
     # Nb Error 500: 0  0.0%
-    # Nb Score low: 2955  3.1% @0.83+lastchance
+    # Nb Score low: 2955  4.1%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 3h0m 100.0% [2455164] Saved 2401126 PS
