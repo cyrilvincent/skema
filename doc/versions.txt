@@ -1,13 +1,13 @@
 # V0.0.2.DEV
 # 01/04/21
-# 4 jours
+# 5 jours
 # AdresseMatcher
 # Matching de ps-tarifs.csv vers adresses-*.pickle
 # Metropole + Corse
 # Match tous les PS vers une adresse par pattern matching Gestalt
 # Calcul du score de fiabilité
 # Correction des CP en cherchant le CP immédiatement en dessous
-# Correction automatique des numéro de rue en charchant le + proche
+# Correction automatique des numéro de rue en cherchant le + proche
 # Création csv résultat de la fusion
 # 93% de précision
 # Adresses2Pickles
