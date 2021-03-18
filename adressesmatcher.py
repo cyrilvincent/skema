@@ -181,7 +181,6 @@ class AdresseMatcher:
                 self.nbbadinsee += 1
                 self.nbbadcp += 1
                 self.log(f"ERROR BAD INSEE {cp} {insee}")  # ERREUR GRAVE
-                x = input("ERROR")
                 return self.find_nearest_less_cp(cp), 0.7
         else:
             self.nbbadcp += 1
@@ -443,7 +442,7 @@ class AdresseMatcher:
     def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
-        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows/PS)")
+        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / self.nb:.1f} rows/PS)")
         print(f"Nb Unique Adresse: {len(self.adresses_db)} ({len(self.adresses_db) / len(self.keys_db):.1f} rows/PS)")
         print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
@@ -506,7 +505,7 @@ if __name__ == '__main__':
     # Nb Bad commune: 0  0.0%
     # Nb No Street: 2  0.1%
     # Nb Error 500: 0  0.0%
-    # Nb Score low: 74  3.4% @0.83, 4.0% @0.85, 4.3% @0.86, 6.8% @0.9, 6.3% @0.88, 2.4% @0.83+lastchance
+    # Nb Score low: 4.3%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 102s 100.0% [2455164] Saved 48927 PS
 
@@ -531,11 +530,12 @@ if __name__ == '__main__':
     # Nb Unique PS: 155870 (15.4 rows/PS)
     # Nb Unique Adresse: 96114 (0.6 rows/PS)
     # Nb No num: 14589  15.2%
-    # Nb Cedex BP: 7214  7.5%
-    # Nb Bad CP: 5677  5.9%
-    # Nb Bad commune: 49  0.1%
+    # Nb Cedex BP: 5386  5.6%
+    # Nb Bad CP: 4370  4.5%
+    # Nb Bad commune: 0  0.0%
     # Nb No Street: 214  0.2%
     # Nb Error 500: 0  0.0%
-    # Nb Score low: 2955  4.1%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 5511  5.7%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 3h0m 100.0% [2455164] Saved 2401126 PS
+    # 3h13m 100.0% [2455164] Saved 2401126 PS

@@ -98,7 +98,7 @@ class PSEntity:
     def score(self):
         if len(self.scores) == 0:
             return 0.0
-        return sum([s for s in self.scores]) / len(self.scores) - 3
+        return sum([s for s in self.scores]) / len(self.scores) - 0.03
 
     @property
     def rownum(self):

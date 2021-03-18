@@ -57,4 +57,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     p = CedexParser()
     p.load(args.path)
-    print(f"Found {p.nb} cedex adresses in {int(time.perf_counter() - time0)}s, created pickle file")
+    print(f"Save {p.nb} cedex adresses in pickle in {int(time.perf_counter() - time0)}s")
