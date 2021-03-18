@@ -129,7 +129,7 @@ class AdresseMatcher:
         :param street: rue
         :return: rue normalisée
         """
-        street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
+        street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ").replace('"', "")
         street = " " + street
         if " BP" in street:
             self.nbcedexbp += 1
