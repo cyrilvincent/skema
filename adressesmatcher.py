@@ -373,7 +373,7 @@ class AdresseMatcher:
             self.nbscorelow += 1
             nba = len(self.adresses_db) if len(self.adresses_db) != 0 else 1
             self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / nba) * 100:.1f}%)"
-                     f" {entity.adresse3} {entity.cp} {entity.commune}  => {aentity.numero} {aentity.nom_afnor}"
+                     f" {entity.adresse3} {entity.cp} {entity.commune} => {aentity.numero} {aentity.nom_afnor}"
                      f" {aentity.code_postal} {aentity.commune}")
         if aentity is None:
             aentity = entities.AdresseEntity(0)
@@ -512,7 +512,7 @@ if __name__ == '__main__':
     # 48
     # Nb PS: 1620
     # Nb Matching PS: 1620  100.0%
-    # Nb Unique PS: 130 (12.5 rows/PS)
+    # Nb Unique PS: 129 (1.0 rows/PS)
     # Nb Unique Adresse: 102 (0.8 rows/PS)
     # Nb No num: 66  64.7%
     # Nb Cedex BP: 0  0.0%
@@ -520,9 +520,10 @@ if __name__ == '__main__':
     # Nb Bad commune: 0  0.0%
     # Nb No Street: 2  2.0%
     # Nb Error 500: 0  0.0%
-    # Nb Score low: 12  11.8%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 14  13.7%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 14s 100.0% [2455164] Saved 1620 PS
+    # 16s 100.0% [2455164] Saved 1620 PS
 
     # All
     # Nb PS: 2401126

@@ -7,9 +7,12 @@ Il y aura conflit sur question.txt
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours
-# WP => All OK 94% (entre 85% et 97%) accuracy (/!\ Score -3) en 2h45
+# WP => All OK 94% (entre 87% et 97%) accuracy (/!\ Score -3) en 3h15
+# Grandes villes => Pb des CEDEX
+# Campagne => Pb des lieux-dits, absence d'adresse ou adresse succinte
 # Département ruraux, pas de numéro => BD lieux dits : 1j
 # Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
+# Pattern matching => Amélioration par le réglage fin des scores (0.3) : 0.5j
 # Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
