@@ -41,7 +41,7 @@ class PSEntity:
     Entité PS
     """
 
-    nb = 43
+    nb = 44
     originalnb = 33
 
     def __init__(self):
@@ -85,8 +85,8 @@ class PSEntity:
 
     @property
     def id(self):
-        s = f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}"
-        s = f"{self.cp}_{self.nom}_{self.prenom}"
+        s = f"{self.cp}{self.nom}{self.prenom}{self.commune}{self.adresse3}".replace(" ", "")  # 155870
+        s = f"{self.cp}{self.nom}{self.prenom}".replace(" ", "")  # 151242 # Dif 4628
         return s.replace("'", "").replace("-", "").replace("/", "").replace(" ", "").strip()
 
     def updateid(self):
@@ -99,7 +99,7 @@ class PSEntity:
     def score(self):
         if len(self.scores) == 0:
             return 0.0
-        return sum([s for s in self.scores]) / len(self.scores) - 0.03
+        return sum([s for s in self.scores]) / len(self.scores)
 
     @property
     def rownum(self):
@@ -172,6 +172,14 @@ class PSEntity:
     @adressescore.setter
     def adressescore(self, value):
         self.v[42] = value
+
+    @property
+    def matchcp(self):
+        return self.v[43]
+
+    @matchcp.setter
+    def matchcp(self, value):
+        self.v[43] = value
 
     def __repr__(self):
         return f"[{self.rownum}] PS: {self.id}"

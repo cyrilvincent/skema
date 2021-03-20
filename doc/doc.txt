@@ -16,7 +16,7 @@
     # La liste doit être au format des listes Python
     # Pour la Corse 2A = 201 et 2B = 202
 # Exemple pour le département 01 python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d [1]
-    # Attention le département ne doit pas commencé par 0, [1] != [01]
+    # Attention le département ne doit pas commencer par 0, [1] != [01]
 # Exemple pour une liste de département python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d [1,38,48]
 # Exemple pour une liste de département consécutifs python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d list(range(10,25))
 # Aide : python adressesmatcher.py --help
