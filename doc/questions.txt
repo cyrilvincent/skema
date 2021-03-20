@@ -32,8 +32,9 @@ Il y aura conflit sur question.txt
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
 # 59160 LOMME => 59000 LILLE géré pour certaines rue par la bd adresse
 # Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
-# Mise en prod, doc : 0.5j
-# Réunions : 0.25-0.5j
+# Il y a des adresses inconnues => PLACE DES COMMERCES 01480 CHALEINS, ROUTE DE PARIS 01000 BOURG EN BRESSE (existe sur maps), ...
+# Mise en prod, doc : 0.25j
+# Réunions : 0.25j
 
 # V0.0.1.DEV
 # 17/03/21

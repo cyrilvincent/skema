@@ -186,6 +186,8 @@ class PSEntity:
 
 
 if __name__ == '__main__':
+    import art
+    print(art.DECORATION_NAMES)
     e = PSEntity()
     print(e)
     # import difflib
