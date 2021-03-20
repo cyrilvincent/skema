@@ -4,6 +4,7 @@ import csv
 import cyrilload
 import entities
 import argparse
+import art
 from typing import Dict
 
 
@@ -46,6 +47,7 @@ class CedexParser:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Cedex 2 Pickle")
     print("==============")
     print(f"V{config.version}")
@@ -57,4 +59,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     p = CedexParser()
     p.load(args.path)
-    print(f"Save {p.nb} cedex adresses in pickle in {int(time.perf_counter() - time0)}s")
+    print(f"Save {p.nb} cedex & insee in pickle in {int(time.perf_counter() - time0)}s")

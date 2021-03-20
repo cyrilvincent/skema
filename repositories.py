@@ -1,7 +1,7 @@
 import entities
 import config
 import cyrilload
-import time
+import art
 import csv
 from typing import List
 
@@ -77,7 +77,9 @@ class AdresseRepository:
     def load_cedex(self):
         return cyrilload.load(config.cedex_path)
 
+
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Test PS file")
     print("============")
     print(f"V{config.version}")

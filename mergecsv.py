@@ -2,7 +2,7 @@ import config
 import os
 import time
 import argparse
-
+import art
 
 class MergeCSV:
     """
@@ -36,6 +36,7 @@ class MergeCSV:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Merge CSVs")
     print("==========")
     print(f"V{config.version}")

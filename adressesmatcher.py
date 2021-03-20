@@ -5,6 +5,7 @@ import entities
 import time
 import argparse
 import repositories
+import art
 from typing import Dict, Set, List, Tuple, Optional, Iterable
 
 time0 = time.perf_counter()
@@ -479,6 +480,7 @@ class AdresseMatcher:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Adresses Matcher")
     print("================")
     print(f"V{config.version}")

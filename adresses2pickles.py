@@ -5,6 +5,7 @@ import csv
 import cyrilload
 import unidecode
 import entities
+import art
 from typing import Dict, Set, Optional
 
 
@@ -114,6 +115,7 @@ class AdresseParser:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Adresses 2 Pickles")
     print("==================")
     print(f"V{config.version}")

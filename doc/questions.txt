@@ -3,7 +3,13 @@ D'abord choisir main puis checkout
 Puis choisir dev et merge into current (c'est l'inverse de ce que je pensais)
 Bien sauvegarder avant
 Il y aura conflit sur question.txt
-
+#  ________      ______       ________      ______
+# /_______/\    /_____/\     /_______/\    /_____/\
+# \__.::._\/    \:::__\/     \__.::._\/    \:::_ \ \
+#    \::\ \      \:\ \  __      \::\ \      \:(_) \ \
+#    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
+#   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
+#   \________\/     \_____\/   \________\/     \_\/
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours
