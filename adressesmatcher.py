@@ -130,7 +130,7 @@ class AdresseMatcher:
         :param street: rue
         :return: rue normalisée
         """
-        street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ").replace('"', "")
+        street = street.upper().replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ").replace('"', "")
         street = " " + street
         if " BP" in street:
             self.nbcedexbp += 1
@@ -150,16 +150,15 @@ class AdresseMatcher:
             self.nbcedexbp += 1
             index = commune.index("CEDEX")
             commune = commune[:index]
-        commune = commune.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
+        commune = commune.upper().replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         commune = " " + commune
         commune = commune.replace(" ST ", " SAINT ").replace(" STE ", " SAINTE ")
         return commune.strip()
 
-    def match_cp(self, cp: int, commune: str) -> Tuple[int, float]:
+    def match_cp(self, cp: int) -> Tuple[int, float]:
         """
         Match le code postal
         :param cp: le code postal
-        :param commune: la commune
         :return: le code postal matché
         """
         # cp = special.cp_cedex(cp)
@@ -170,7 +169,7 @@ class AdresseMatcher:
             return 0, 0.0
         elif 75100 <= cp < 75200:
             self.nbbadcp += 1
-            cp, score = self.match_cp(cp - 100, commune)
+            cp, score = self.match_cp(cp - 100)
             return cp, score * 0.9
         elif cp in self.cedex_db:
             insee = self.cedex_db[cp].code_insee
@@ -408,10 +407,10 @@ class AdresseMatcher:
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
                 else:
-                    commune = self.normalize_commune(entity.commune)
-                    cp, score = self.match_cp(cp, commune)
+                    cp, score = self.match_cp(cp)
                     entity.scores.append(score)
                     communes = self.cps_db[cp]
+                    commune = self.normalize_commune(entity.commune)
                     adresse4 = self.normalize_street(entity.adresse4)
                     commune, score = self.match_commune(commune, adresse4, communes, cp)
                     entity.scores.append(score)
