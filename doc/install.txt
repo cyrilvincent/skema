@@ -6,13 +6,13 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.0.2.DEV
+# Première instalation
 # Installer Python 3.9+ 64 bits depuis Python.org en cochant la case Add Python to Path
 # Installer Git depuis git-scm.com
 # Installer PyCharm Community depuis jetbrains.com
 # Ouvrir une console
 # Dans le répertoire de votre choix taper git clone https://github.com/cyrilvincent/skema
 # Renommer skema vers ICIP
-    # Si le projet est déjà installer il suffit de taper git pull pour mettre à jour le code
 # Taper python -m pip install -r requirements.txt depuis la racine du projet
 # Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
 # Dézipper les adresses dans data/adresse
@@ -21,5 +21,12 @@
 # Pour créer les indexs d'adresse taper python adresses2pickles.py
 # Pour tester le proto taper python adressesmatcher.py data/ps/ps-tarifs-31-03.csv -d [48]
 # Voir doc.txt
+
+# Mise à jour etre 2 versions
+# taper git pull pour mettre à jour le code
+# Si git pull echoue à cause d'une modification du code de votre côté il faut taper les 2 lignes suivantes pour forcer la mise à jour, attention vos mddifications seront perdues
+        # git reset --hard HEAD
+        # git pull
+# Taper python -m pip install -r requirements.txt depuis la racine du projet
 
 

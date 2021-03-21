@@ -186,11 +186,5 @@ class PSEntity:
 
 
 if __name__ == '__main__':
-    import art
-    print(art.DECORATION_NAMES)
     e = PSEntity()
     print(e)
-    # import difflib
-    # sm = difflib.SequenceMatcher(None, "PARIS", "PARIS 16")
-    # print(sm.ratio())
-    # print(sm.quick_ratio())

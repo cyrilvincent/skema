@@ -3,6 +3,7 @@ import csv
 import argparse
 import art
 
+
 class SplitPS:
     """
     Split PS en fichier par département

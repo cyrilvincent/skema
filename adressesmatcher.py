@@ -514,8 +514,8 @@ if __name__ == '__main__':
     # 48
     # Nb PS: 1620
     # Nb Matching PS: 1620  100.0%
-    # Nb Unique PS: 129 (1.0 rows/PS)
-    # Nb Unique Adresse: 102 (0.8 rows/PS)
+    # Nb Unique PS: 129 (0.1 rows/PS)
+    # Nb Unique Adresse: 102 (0.1 rows/PS)
     # Nb No num: 66  64.7%
     # Nb Cedex BP: 0  0.0%
     # Nb Bad CP: 1  1.0%
@@ -525,7 +525,7 @@ if __name__ == '__main__':
     # Nb Bad INSEE: 0
     # Nb Score low: 14  13.7%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 16s 100.0% [2455164] Saved 1620 PS
+    # 14s 100.0% [2455164] Saved 1620 PS
 
     #
     # 0.87

@@ -20,7 +20,7 @@ class PSRepository:
         print(f"Save {path}")
         with open(path, "w") as f:
             for e in pss:
-                for i in range(entities.PSEntity.nb):
+                for i in range(len(e.v)):
                     f.write(f"{e.v[i]};")
                 f.write("\n")
 
@@ -30,7 +30,7 @@ class PSRepository:
         :param entity: PS
         :param row: ligne CSV
         """
-        for i in range(entities.PSEntity.originalnb):
+        for i in range(len(row)):
             entity.v[i] = row[i]
         entity.updateid()
 
@@ -61,7 +61,6 @@ class AdresseRepository:
         """
         Charge le pickle adresse
         :param dept: département pickle à charger
-        :param time0: le temps 0
         :return: Le tuple d'index db, communes, cps voir adresses2pickles
         """
         s = f"{dept:02d}"
