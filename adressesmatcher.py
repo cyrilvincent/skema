@@ -282,7 +282,7 @@ class AdresseMatcher:
                     return founds[0], score
                 return None, 0.0  # Normalement impossible
 
-    
+
     def update_entity(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, score: float):
         """
         MAJ PS par rapport à l'adresse
