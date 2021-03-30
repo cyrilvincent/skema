@@ -1,7 +1,7 @@
 import entities
 import config
 import cyrilload
-import time
+import art
 import csv
 from typing import List
 
@@ -20,7 +20,7 @@ class PSRepository:
         print(f"Save {path}")
         with open(path, "w") as f:
             for e in pss:
-                for i in range(entities.PSEntity.nb):
+                for i in range(len(e.v)):
                     f.write(f"{e.v[i]};")
                 f.write("\n")
 
@@ -30,7 +30,7 @@ class PSRepository:
         :param entity: PS
         :param row: ligne CSV
         """
-        for i in range(entities.PSEntity.originalnb):
+        for i in range(len(row)):
             entity.v[i] = row[i]
         entity.updateid()
 
@@ -57,11 +57,10 @@ class AdresseRepository:
     Adresse Repository
     """
 
-    def load_adresses(self, dept: int, time0):
+    def load_adresses(self, dept: int):
         """
         Charge le pickle adresse
         :param dept: département pickle à charger
-        :param time0: le temps 0
         :return: Le tuple d'index db, communes, cps voir adresses2pickles
         """
         s = f"{dept:02d}"
@@ -72,11 +71,14 @@ class AdresseRepository:
         if dept > 970:
             s = str(dept)
         indexdb = cyrilload.load(f"{config.adresse_path}/adresses-{s}.pickle")
-        print(f"Load adresses-{s}.pickle in {int(time.perf_counter() - time0)}s")
-        return indexdb["db"], indexdb["communes"], indexdb["cps"]
+        return indexdb["db"], indexdb["communes"], indexdb["cps"], indexdb["insees"]
+
+    def load_cedex(self):
+        return cyrilload.load(config.cedex_path)
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Test PS file")
     print("============")
     print(f"V{config.version}")

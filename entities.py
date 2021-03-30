@@ -22,12 +22,26 @@ class AdresseEntity:
         return f"Adresse ({self.id}) {self.numero} {self.nom_afnor} {self.code_postal} {self.commune}"
 
 
+class CedexEntity:
+    """
+    Entité cedex
+    """
+
+    def __init__(self, cp):
+        self.cp = cp
+        self.commune = ""
+        self.code_insee = ""
+
+    def __repr__(self):
+        return f"Cedex {self.cp} {self.commune} {self.code_insee}"
+
+
 class PSEntity:
     """
     Entité PS
     """
 
-    nb = 43
+    nb = 44
     originalnb = 33
 
     def __init__(self):
@@ -71,7 +85,8 @@ class PSEntity:
 
     @property
     def id(self):
-        s = f"{self.cp}_{self.nom}_{self.prenom}_{self.commune}_{self.adresse3}"
+        s = f"{self.cp}{self.nom}{self.prenom}{self.commune}{self.adresse3}".replace(" ", "")  # 155870
+        s = f"{self.cp}{self.nom}{self.prenom}".replace(" ", "")  # 151242 # Dif 4628
         return s.replace("'", "").replace("-", "").replace("/", "").replace(" ", "").strip()
 
     def updateid(self):
@@ -158,6 +173,14 @@ class PSEntity:
     def adressescore(self, value):
         self.v[42] = value
 
+    @property
+    def matchcp(self):
+        return self.v[43]
+
+    @matchcp.setter
+    def matchcp(self, value):
+        self.v[43] = value
+
     def __repr__(self):
         return f"[{self.rownum}] PS: {self.id}"
 
@@ -165,7 +188,3 @@ class PSEntity:
 if __name__ == '__main__':
     e = PSEntity()
     print(e)
-    # import difflib
-    # sm = difflib.SequenceMatcher(None, "PARIS", "PARIS 16")
-    # print(sm.ratio())
-    # print(sm.quick_ratio())

@@ -1,3 +1,43 @@
+/!\ TU ES SUR LA BRANCHE DEV
+D'abord choisir main puis checkout
+Puis choisir dev et merge into current (c'est l'inverse de ce que je pensais)
+Bien sauvegarder avant
+Il y aura conflit sur question.txt
+#  ________      ______       ________      ______
+# /_______/\    /_____/\     /_______/\    /_____/\
+# \__.::._\/    \:::__\/     \__.::._\/    \:::_ \ \
+#    \::\ \      \:\ \  __      \::\ \      \:(_) \ \
+#    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
+#   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
+#   \________\/     \_____\/   \________\/     \_\/
+# V0.0.2.DEV
+# 01/04/21
+# 5 jours
+# WP => All OK, Matching 100%, Accuracy 94% (entre 86% et 97%) accuracy (/!\ @0.87) en 2h55
+# Colonne 44 Matchcp
+# Grandes villes => Pb des CEDEX
+# Campagne => Pb des lieux-dits, absence d'adresse ou adresse succinte
+# Département ruraux, pas de numéro => BD lieux dits : 1j
+# Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
+# Debuggage => adressefinder, splitps
+# Pattern matching => Amélioration par le réglage fin des seuils (83) : 0.5j
+# Si mauvais CP + Mauvaise commune => chercher d'abord la commune puis déduire le CP : 0.5j
+# Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
+# Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
+# Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
+# Volumetrie => Envisager Sql : 5j
+# Cedex => Peut donner 2 insee : 0.2j
+# Key => Nom+Prenom+Adresse* - Nom+Prenom+CP = 4628 (3%) = PS avec adresses différentes ou homonymes
+# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
+# Exemple de cas spéciaux
+# CP 38034 => 38100, 20184 => 20090, 59430 => 59140
+# 59160 LOMME => 59000 LILLE géré pour certaines rue par la bd adresse
+# Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
+# Il y a des adresses inconnues => PLACE DES COMMERCES 01480 CHALEINS, ROUTE DE PARIS 01000 BOURG EN BRESSE (existe sur maps), ...
+# Low score => Google maps (durée à étudier)
+# Mise en prod, doc : 0.25j
+# Réunions : 0.25j
+
 # V0.0.1.DEV
 # 17/03/21
 # 2 jours

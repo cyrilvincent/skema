@@ -1,6 +1,7 @@
 import config
 import csv
 import argparse
+import art
 
 
 class SplitPS:
@@ -65,6 +66,7 @@ class SplitPS:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("SplitPS")
     print("=======")
     print(f"V{config.version}")

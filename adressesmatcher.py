@@ -1,13 +1,12 @@
-import unidecode
 import re
-import csv
 import difflib
 import config
 import entities
 import time
 import argparse
 import repositories
-from typing import Dict, Set, List, Tuple, Optional
+import art
+from typing import Dict, Set, List, Tuple, Optional, Iterable
 
 time0 = time.perf_counter()
 
@@ -24,13 +23,13 @@ class AdresseMatcher:
         self.nb = 0
         self.nbbadcp = 0
         self.nbnostreet = 0
-        self.nbbadstreet = 0
         self.nbscorelow = 0
         self.rownum = 0
         self.nberror500 = 0
         self.nbcedexbp = 0
         self.nonum = 0
         self.nbbadcommune = 0
+        self.nbbadinsee = 0
         self.total = 1
         self.i = 0
         self.pss_db = []
@@ -38,6 +37,8 @@ class AdresseMatcher:
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
         self.adresses_db = {}
+        self.insees_db = {}
+        self.cedex_db = {}
         self.csv = []
 
     def log(self, msg: str):
@@ -68,48 +69,9 @@ class AdresseMatcher:
         index = s.index(match[1])
         return int(num), s[index + len(num):].strip()
 
-    def match_adresse_string(self, adresse): #TO REMOVE
-        s = unidecode.unidecode(adresse.upper()).replace("'", " ").replace("-", " ").replace(".", "")
-        s = s.replace("ST ", "SAINT ").replace("/", " ").strip()
-        if "BP" in s:
-            self.nbbp += 1
-        regex = r"(\d{5})"
-        match = re.findall(regex, s)
-        if len(match) > 0:
-            cp = match[-1]
-            index = s.find(cp)
-            commune = s[index + len(cp):].strip()
-            cp = int(cp)
-            s = s[:index]
-            num = 0
-            keys = ["RUE", "AVENUE", "AV ", "PLACE", "PL ", "CHEMIN", "CH ", "BD ", "BOULEVARD", "IMPASSE", "ZA ",
-                    "ZI ", "ROUTE", "ZAE "]
-            index = self.find_multiple(keys, s)
-            street = s.strip()
-            ss = s if index == -1 else s[:index]
-            if index != -1:
-                street = s[index:].strip()
-            regex = r"(\d+)"
-            match = re.findall(regex, ss)
-            if len(match) > 0:
-                num = match[-1].strip()
-                index = s.find(num) + len(num)
-                street = s[index:].strip()
-                num = int(num)
-            rep = ""
-            if len(street) > 1 and street[1] == " ":
-                rep = street[0]
-                street = street[1:].strip()
-            if street.startswith("BIS") or street.startswith("TER"):
-                rep = street[:3]
-                street = street[3:].strip()
-            return cp, commune, num, street, rep
-        else:
-            return None
-
     def find_nearest_less_cp(self, cp: int) -> int:
         """
-        TODO
+        Retrouve le code postal immédiatement inférieur pour les CEDEX
         :param cp:
         :return:
         """
@@ -124,10 +86,10 @@ class AdresseMatcher:
 
     def find_nearest_num(self, num: int, nums: List[int]) -> int:
         """
-        TODO
-        :param num:
-        :param nums:
-        :return:
+        Trouve le numéro de rue le plus proche de num parmis nums, encourange les mêmes côtés de rue
+        :param num: le numéro à rechercher
+        :param nums: la lsite de numéro dans lesquels chercher
+        :return: le numéro proche trouvé
         """
         res = 0
         difmin = 99999
@@ -140,11 +102,27 @@ class AdresseMatcher:
                 difmin = dif
         return res
 
-    def find_multiple(self, keys, s): # TO REMOVE
-        for k in keys:
-            if k in s:
-                return s.find(k)
-        return -1
+    def gestalts(self, s: str, l: Iterable[str]):
+        """
+        Machine Learning Gestalt
+        Applique Gestalt sur s et tous les éléments de l
+        :param s: la chaine de gauche
+        :param l: la liste des chaine de droite à comparer
+        :return: le meilleur score
+        """
+        if s == "":
+            return "", 0
+        max = -1
+        res = 0
+        for item in l:
+            if item != "":
+                if item.startswith(s) or s.startswith(item):
+                    return item, 0.99
+                sm = difflib.SequenceMatcher(None, s, item)
+                if sm.ratio() > max:
+                    max = sm.ratio()
+                    res = item
+        return res, max
 
     def normalize_street(self, street: str) -> str:
         """
@@ -152,13 +130,14 @@ class AdresseMatcher:
         :param street: rue
         :return: rue normalisée
         """
-        street = street.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
+        street = street.upper().replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ").replace('"', "")
         street = " " + street
         if " BP" in street:
             self.nbcedexbp += 1
             street.replace(" BP", "")
         street = street.replace(" CH ", " CHEMIN ").replace(" AV ", " AVENUE ").replace(" PL ", " PLACE ")
-        street = street.replace(" BD ", "BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
+        street = street.replace(" BD ", " BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
+        street = street.replace(" RT ", " ROUTE ").replace(" GAL ", " GENERAL ")
         return street.strip()
 
     def normalize_commune(self, commune: str) -> str:
@@ -171,16 +150,15 @@ class AdresseMatcher:
             self.nbcedexbp += 1
             index = commune.index("CEDEX")
             commune = commune[:index]
-        commune = commune.replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
+        commune = commune.upper().replace("'", " ").replace("-", " ").replace(".", "").replace("/", " ")
         commune = " " + commune
-        commune = commune.replace(" ST ", " SAINT ")
+        commune = commune.replace(" ST ", " SAINT ").replace(" STE ", " SAINTE ")
         return commune.strip()
 
-    def match_cp(self, cp: int, commune: str) -> Tuple[int, float]:
+    def match_cp(self, cp: int) -> Tuple[int, float]:
         """
         Match le code postal
         :param cp: le code postal
-        :param commune: la commune
         :return: le code postal matché
         """
         # cp = special.cp_cedex(cp)
@@ -191,16 +169,24 @@ class AdresseMatcher:
             return 0, 0.0
         elif 75100 <= cp < 75200:
             self.nbbadcp += 1
-            cp, score = self.match_cp(cp - 100, commune)
+            cp, score = self.match_cp(cp - 100)
             return cp, score * 0.9
+        elif cp in self.cedex_db:
+            insee = self.cedex_db[cp].code_insee
+            if insee in self.insees_db:
+                res = list(self.insees_db[insee])[0]
+                self.log(f"WARNING CEDEX {cp}=>{res}")
+                return res, 0.9
+            else:
+                self.nbbadinsee += 1
+                self.nbbadcp += 1
+                self.log(f"ERROR BAD INSEE {cp} {insee}")  # ERREUR GRAVE
+                return self.find_nearest_less_cp(cp), 0.25
         else:
             self.nbbadcp += 1
-            self.log(f"WARNING BAD CP: {cp}")
-            return 0, 0.0
-            # res = self.find_nearest_less_cp(cp)
-            # score = 0.8  # if "CEDEX" in commune else 0.5
-            # self.log(f"Warning CP {cp}=>{res} {int(score*100)}%")
-            # return res, 0.8
+            res = self.find_nearest_less_cp(cp)
+            self.log(f"WARNING CP {cp}=>{res}")
+            return res, 0.5
 
     def match_commune(self, commune: str, adresse4: str, communes: Set[str], cp: int) -> Tuple[str, float]:
         """
@@ -219,15 +205,14 @@ class AdresseMatcher:
         elif adresse4 != "" and adresse4 in communes:
             return adresse4, 0.9
         else:
-            self.log(f"WARNING BAD COMMUNE: {cp} {commune}")
-            self.nbbadcommune += 1
-            return 0, 0.0
-            # commune, score = self.gestalts(commune, communes)
-            # if score < 0.8 and adresse4 != "":
-            #     adresse4, score2 = self.gestalts(adresse4, communes)
-            #     if score2 > score + 0.1:
-            #         return adresse4, score2
-            # return commune, score
+            res, score = self.gestalts(commune, communes)
+            if score < 0.75 and adresse4 != "":
+                res2, score2 = self.gestalts(adresse4, communes)
+                if score2 > score + 0.1:
+                    self.log(f"WARNING COMMUNE Adresse4 {cp} {commune} {adresse4}=>{res2} @{int(score2*100)}%")
+                    return res2, score2
+            self.log(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
+            return res, score
 
     def match_street(self, commune: str, adresse2: str, adresse3: str, cp: int) -> Tuple[str, float]:
         """
@@ -251,23 +236,19 @@ class AdresseMatcher:
         if adresse3 in adresses_voie:
             index = adresses_voie.index(adresse3)
             return adresses[index], 0.99
-
-        # res, score = self.gestalts(adresse3, adresses)
-        # if score > 0.8:
-        #     return res, score
-        # res2, score2 = self.gestalts(adresse2, adresses)
-        # if score2 > 0.8:
-        #     return res2, score2
-        # res3, score3 = self.gestalts(adresse3, adresses_voie)
-        # if score + 0.1 > max(score2, score3):
-        #     return res, score
-        # if score2 > score3:
-        #     return res2, score2 * 0.8
-        # index = adresses_voie.index(res3)
-        # return adresses[index], score3 * 0.9
-
-        self.nbbadstreet += 1
-        return "", 0
+        res, score = self.gestalts(adresse3, adresses)
+        if score > 0.8:
+            return res, score
+        res2, score2 = self.gestalts(adresse2, adresses)
+        if score2 > 0.8:
+            return res2, score2
+        res3, score3 = self.gestalts(adresse3, adresses_voie)
+        if score + 0.1 > max(score2, score3):
+            return res, score
+        if score2 > score3:
+            return res2, score2 * 0.8
+        index = adresses_voie.index(res3)
+        return adresses[index], score3 * 0.9
 
     def match_num(self, commune: str, adresse: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
         """
@@ -285,7 +266,7 @@ class AdresseMatcher:
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
-                    return adresses[0], 0.8
+                    return adresses[0], 0.9
             else:
                 return None, 0.0
         else:
@@ -293,53 +274,65 @@ class AdresseMatcher:
             if len(founds) > 0:
                 return founds[0], 1.0
             else:
-                # nums = [e.numero for e in adresses if e.nom_afnor == adresse]
-                # res = self.find_nearest_num(num, nums)
-                # founds = [e for e in adresses if e.nom_afnor == adresse and e.numero == num]
-                # if len(founds) > 0:
-                #     if res == 0:
-                #         return 0, 0.8
-                #     else:
-                #         return res, 0.5
-                # return entities.AdresseEntity(), 0.0 # Normalement impossible mettre un point d'arrêt
-                return None, 0.0
+                nums = [e.numero for e in adresses if e.nom_afnor == adresse]
+                res = self.find_nearest_num(num, nums)
+                founds = [e for e in adresses if e.nom_afnor == adresse and e.numero == res]
+                if len(founds) > 0:
+                    score = max(1 - abs(res - num) / 10, 0.5)
+                    return founds[0], score
+                return None, 0.0  # Normalement impossible
 
-    def get_cp_by_commune(self, commune: str, oldcp: int) -> Tuple[int, float]:
-        """
-        TODO
-        :param commune:
-        :param oldcp:
-        :return:
-        """
-        if commune in self.communes_db:
-            ids = self.communes_db[commune]
-            dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
-            for id in ids:
-                e = self.db[id]
-                if e.commune == commune and str(e.code_postal)[:2] == dept:
-                    return e.code_postal, 0.99
-                if (e.commune.startswith(commune) or e.commune.endswith(commune)) and str(e.code_postal)[:2] == dept:
-                    return e.code_postal, 0.9
-        return oldcp, 0
-
-    def last_chance(self, commune: str, adresse3: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
-        if commune in self.communes_db:
-            ids = self.communes_db[commune]
-            for id in ids:
-                e = self.db[id]
-                if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-                    return e, 0.95
-        return None, 0
-
-    def last_chance2(self, cp: int, adresse3: str, num: int) -> Tuple[Optional[entities.AdresseEntity], float]:
-        communes = self.cps_db[cp]
-        for commune in communes:
-            ids = self.communes_db[commune]
-            for id in ids:
-                e = self.db[id]
-                if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-                    return e, 0.95
-        return None, 0
+    # def get_cp_by_commune(self, commune: str, oldcp: int) -> Tuple[int, str, float]:
+    #     """
+    #     Retrouve le code postal par la commune et le code code postal faux
+    #     :param commune: la commune
+    #     :param oldcp: le code postal en échec
+    #     :return: le code postal trouvé, la commune et le score
+    #     """
+    #     if commune in self.communes_db:
+    #         ids = self.communes_db[commune]
+    #         dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
+    #         for id in ids:
+    #             e = self.db[id]
+    #             if e.commune == commune and str(e.code_postal)[:2] == dept:
+    #                 return e.code_postal, e.commune, 0.9
+    #             if e.commune.startswith(commune) and str(e.code_postal)[:2] == dept:
+    #                 return e.code_postal, e.commune, 0.75
+    #     return oldcp, commune, 0
+    #
+    # def last_chance(self, commune: str, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
+    #     """
+    #     Retrouve un code postal par commune, adresse3 et numero
+    #     :param commune: la commune
+    #     :param adresse3: adresse3
+    #     :param num: numéro
+    #     :return: l'entité adresse
+    #     """
+    #     if commune in self.communes_db:
+    #         ids = self.communes_db[commune]
+    #         for id in ids:
+    #             e = self.db[id]
+    #             if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+    #                 return e
+    #     return None
+    #
+    # def very_last_chance(self, cp: int, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
+    #     """
+    #     Retrouve une commune par code postal, adresse3 et numéro
+    #     :param cp: Le code postal
+    #     :param adresse3: adresse3
+    #     :param num: le numéro
+    #     :return: l'entité Adresse
+    #     """
+    #     if cp in self.cps_db:
+    #         communes = self.cps_db[cp]
+    #         for commune in communes:
+    #             ids = self.communes_db[commune]
+    #             for id in ids:
+    #                 e = self.db[id]
+    #                 if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+    #                     return e
+    #     return None
 
     def update_entity(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, score: float):
         """
@@ -356,15 +349,45 @@ class AdresseMatcher:
         entity.y = aentity.y
         entity.codeinsee = aentity.code_insee
         entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
+        entity.matchcp = aentity.code_postal
 
-    def parse_ps(self, file: str, dept: int):
+    def check_low_score(self, entity: entities.PSEntity,
+                        adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
+        # if entity.score < config.adresse_quality:
+        #     res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3),
+        #                                   originalnum)
+        #     if res is not None:
+        #         self.nbbadcp += 1
+        #         aentity = res
+        #         self.log(f"WARNING Bad CP: {entity.cp} {entity.commune}=>{aentity.code_postal} {aentity.commune}")
+        #         entity.scores[0] = 0.5
+        #         entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.99
+        #     else:
+        #         res = self.very_last_chance(int(entity.cp), self.normalize_street(adresse3), originalnum)
+        #         if res is not None:
+        #             self.nbbadcommune += 1
+        #             aentity = res
+        #             self.log(f"WARNING Bad Commune: {entity.cp} {entity.commune}=>{aentity.code_postal}"
+        #                      f" {aentity.commune}")
+        #             entity.scores[1] = 0.5
+        #             entity.scores[0] = entity.scores[2] = entity.scores[3] = 0.98
+        if entity.score < config.adresse_quality:
+            self.nbscorelow += 1
+            nba = len(self.adresses_db) if len(self.adresses_db) != 0 else 1
+            self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / nba) * 100:.1f}%)"
+                     f" {entity.adresse3} {entity.cp} {entity.commune} => {aentity.numero} {aentity.nom_afnor}"
+                     f" {aentity.code_postal} {aentity.commune}")
+        if aentity is None:
+            aentity = entities.AdresseEntity(0)
+            self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
+            self.nberror500 += 1
+        return aentity
+
+    def parse_ps(self, dept: int):
         """
         Fonction principale, charge PS et match un département
-        :param file: le fichier PS
         :param dept: un département
         """
-        self.cps_db[0] = []  # TO REMOVE
-        self.log(f"Parse {file}")
         self.rownum = 0
         for row in self.csv:
             self.i += 1
@@ -374,8 +397,6 @@ class AdresseMatcher:
                     (dept == 201 and 20000 <= cp < 20200) or \
                     (dept == 202 and 20200 <= cp < 21000):
                 self.nb += 1
-                if self.nb % 1000 == 0:
-                    self.log(f"Parse {self.nb} PS in {dept}")
                 entity = entities.PSEntity()
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
@@ -385,73 +406,52 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, self.adresses_db[t][1])
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
-                # if entity.id in self.keys_db:
-                #     self.update_entity(entity, self.keys_db[entity.id][0], self.keys_db[entity.id][1])
-                #     self.pss_db.append(entity)
                 else:
-                    commune = self.normalize_commune(entity.commune)
-                    cp, score = self.match_cp(cp, commune)
+                    cp, score = self.match_cp(cp)
                     entity.scores.append(score)
                     communes = self.cps_db[cp]
+                    commune = self.normalize_commune(entity.commune)
                     adresse4 = self.normalize_street(entity.adresse4)
                     commune, score = self.match_commune(commune, adresse4, communes, cp)
                     entity.scores.append(score)
-                    if commune != 0:  # TO REMOVE
-                        adresse3 = self.normalize_street(entity.adresse3)
-                        adresse2 = self.normalize_street(entity.adresse2)
-                        num, adresse3 = self.split_num(adresse3)
-                        if num == 0 and adresse2 != "":
-                            num, adresse2 = self.split_num(adresse2)
-                            if num != 0:
-                                self.log(f"WARNING NUM in adresse2 {adresse2}")
+                    # if score < 0.8:
+                    #     cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
+                    #     if score2 > score:
+                    #         self.log(f"[{self.rownum}] WARNING Bad CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
+                    #         self.nbbadcp += 1
+                    #         cp = cp2
+                    #         commune = commune2
+                    #         entity.scores[1] = score2
+                    #         entity.scores[0] = 0.5
+                    adresse3 = self.normalize_street(entity.adresse3)
+                    adresse2 = self.normalize_street(entity.adresse2)
+                    num, adresse3 = self.split_num(adresse3)
+                    if num == 0 and adresse2 != "":
+                        num, adresse2 = self.split_num(adresse2)
+                    originalnum = num
+                    matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
+                    entity.scores.append(score)
+                    aentity, score = self.match_num(commune, matchadresse, num)
+                    entity.scores.append(score)
+                    aentity = self.check_low_score(entity, adresse3, originalnum, aentity)
+                    self.update_entity(entity, aentity, entity.score)
+                    self.pss_db.append(entity)
+                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
+                    self.adresses_db[t] = (entity.adresseid, entity.score)
 
-                        # cp, commune, street = special.cp_commune_adresse(cp, commune, street)
-                        # if score < 0.8:
-                        #     cp2, score = self.get_cp_by_commune(commune, cp)
-                        #     if cp2 != cp:
-                        #         print(f"[{self.rownum}] Warning Bad CP {cp} {commune}=>{cp2} {commune}")
-                        #         cp = cp2
-                        #         entity.scores[-1] = score
-                        #         entity.scores[-2] = 0.5
-                        #     else:
-                        #         self.log(f"Warning commune score {entity.cp} {entity.commune}=>{cp} {commune} @{int(score * 100)}%")
-                        matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
-                        entity.scores.append(score)
-                        if score < 0.5:
-                            self.nbscorelow += 1
-                            # self.log(f"Warning street {entity.adresse3}=>{adresse3} @{int(score * 100)}% {entity.cp} {entity.commune} ")
-                        else:  # TO REMOVE
-                            aentity, score = self.match_num(commune, matchadresse, num)
-                            entity.scores.append(score)
-                            if entity.score < 0.8:
-                                self.nbscorelow += 1
-                                # lastchance
-                                # self.log(f"Score: {int(entity.score * 100)}% ({(self.nbscorelow / self.nb) * 100:.1f}%) {entity.num} {entity.commune} {entity.cp} {entity.matchstreet} vs {entity.adresse3}")
-                            #ids = self.communes_db[commune]
-                            #found = [self.db[id].id for id in ids if self.db[id].numero == numero and self.db[id].nom_afnor == matchadresse]
-                            #if len(found) > 0:
-                            if aentity is None:
-                                aentity = entities.AdresseEntity(0)
-                                self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
-                                self.nberror500 += 1
-                            else: # TO REMOVE
-                                self.update_entity(entity, aentity, entity.score)
-                                self.pss_db.append(entity)
-                                self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                                self.adresses_db[t] = (entity.adresseid, entity.score)
-
+    def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
-        print(f"Nb No num: {self.nonum} {(self.nonum / self.nb) * 100 : .1f}%")
-        print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / self.nb) * 100 : .1f}%")
-        print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / self.nb) * 100 : .1f}%")
-        print(f"Nb Commune not found: {self.nbbadcommune} {(self.nbbadcommune / self.nb) * 100 : .1f}%")
-        print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / self.nb) * 100 : .1f}%")
-        print(f"Nb Bad Street: {self.nbbadstreet} {(self.nbbadstreet / self.nb) * 100 : .1f}%")
-        print(f"Nb Bad Num: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
-        print(f"Nb Error 500: {self.nberror500} {(self.nberror500 / self.nb) * 100 : .1f}%")
-        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.pss_db) / len(self.keys_db):.1f} rows per PS)")
-        print(f"Nb Unique Adresse: {len(self.adresses_db)}") #333 adresse3, 406 adresse234, 703 UniquePS
+        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.keys_db) / self.nb:.1f} rows/PS)")
+        print(f"Nb Unique Adresse: {len(self.adresses_db)} ({len(self.adresses_db) / self.nb:.1f} rows/PS)")
+        print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Bad commune: {self.nbbadcommune} {(self.nbbadcommune / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Error Unknown: {self.nberror500} {(self.nberror500 / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Bad INSEE: {self.nbbadinsee}")
+        print(f"Nb Score low: {self.nbscorelow} {(self.nbscorelow / len(self.adresses_db)) * 100 : .1f}%")
 
     def load_by_depts(self, file: str, depts: Optional[List[int]] = None):
         """
@@ -462,21 +462,24 @@ class AdresseMatcher:
         self.log(f"Load {file}")
         self.csv = self.ps_repo.load_ps(file)
         self.total = len(self.csv)
+        # self.log(f"Load {config.cedex_path}")
+        # self.cedex_db = self.a_repo.load_cedex()
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.total *= len(depts)
         for dept in depts:
             self.log(f"Load dept {dept}")
-            self.db, self.communes_db, self.cps_db = l.a_repo.load_adresses(dept, time0)
-            self.parse_ps(file, dept)
-        self.log(f"Match {self.nb} PS")
-        file = file.replace(".csv", "-adresses.csv")
+            self.db, self.communes_db, self.cps_db, self.insees_db = self.a_repo.load_adresses(dept)
+            self.parse_ps(dept)
+        self.display()
         self.pss_db.sort(key=lambda e: e.rownum)
-        self.ps_repo.save_entities(file, l.pss_db)
+        file = file.replace(".csv", "-adresses.csv")
+        self.ps_repo.save_entities(file, self.pss_db)
         self.log(f"Saved {self.nb} PS")
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
     print("Adresses Matcher")
     print("================")
     print(f"V{config.version}")
@@ -486,45 +489,57 @@ if __name__ == '__main__':
     parser.add_argument("path", help="Path")
     parser.add_argument("-d", "--dept", help="Departments list in python format, eg [5,38,06]")
     args = parser.parse_args()
-    l = AdresseMatcher()
+    am = AdresseMatcher()
     if args.dept is None:
-        l.load_by_depts(args.path)
+        am.load_by_depts(args.path)
     else:
-        l.load_by_depts(args.path, eval(args.dept))
+        am.load_by_depts(args.path, eval(args.dept))
 
     # 38
     # Nb PS: 48927
-    # Nb No num: 3491  7.1%
-    # Nb Bad CP: 2181  4.5%
-    # Nb Commune not found: 2649  5.4% (+4.5%)
-    # Nb No Street: 11  0.0%
-    # Nb Bad Street: 15776  32.2% (+9.9%)
+    # Nb Matching PS: 48927  100.0%
+    # Nb Unique PS: 3178 (15.4 rows/PS)
+    # Nb Unique Adresse: 2176 (0.7 rows/PS)
+    # Nb No num: 308  14.2%
+    # Nb Cedex BP: 101  4.6%
+    # Nb Bad CP: 59  2.7%
+    # Nb Bad commune: 0  0.0%
+    # Nb No Street: 2  0.1%
+    # Nb Error 500: 0  0.0%
+    # Nb Score low: 4.3%
+    # Save data/ps/ps-tarifs-21-03-adresses.csv
+    # 102s 100.0% [2455164] Saved 48927 PS
 
-    # 01
-    # Nb PS: 19766
-    # Nb Matching PS: 12255  62.0%
-    # Nb No num: 3327  16.8%
-    # Nb Cedex BP: 295  1.5%
-    # Nb Bad CP: 601  3.0%
-    # Nb Commune not found: 718  3.6%
-    # Nb No Street: 13  0.1%
-    # Nb Bad Street: 6650  33.6%
-    # Nb Bad Num: 6650  33.6%
-    # Nb Error 500: 143  0.7%
-    # Nb Unique PS: 703 (17.4 rows per PS)
-    # Nb Unique Adresse: 406
+    # 48
+    # Nb PS: 1620
+    # Nb Matching PS: 1620  100.0%
+    # Nb Unique PS: 129 (0.1 rows/PS)
+    # Nb Unique Adresse: 102 (0.1 rows/PS)
+    # Nb No num: 66  64.7%
+    # Nb Cedex BP: 0  0.0%
+    # Nb Bad CP: 1  1.0%
+    # Nb Bad commune: 0  0.0%
+    # Nb No Street: 2  2.0%
+    # Nb Error 500: 0  0.0%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 14  13.7%
+    # Save data/ps/ps-tarifs-21-03-adresses.csv
+    # 14s 100.0% [2455164] Saved 1620 PS
 
-    # All
+    #
+    # 0.87
     # Nb PS: 2401126
-    # Nb Matching PS: 1597210  66.5%
-    # Nb No num: 152354  6.3%
-    # Nb Cedex BP: 125713  5.2%
-    # Nb Bad CP: 118729  4.9%
-    # Nb Commune not found: 154299  6.4%
-    # Nb No Street: 2450  0.1%
-    # Nb Bad Street: 608100  25.3%
-    # Nb Bad Num: 649617  27.1%
-    # Nb Error 500: 41517  1.7%
-    # Nb Unique PS: 104125 (15.3 rows per PS)
-    # Nb Unique Adresse: 61120
+    # Nb Matching PS: 2401126  100.0%
+    # Nb Unique PS: 151242 (0.1 rows/PS)
+    # Nb Unique Adresse: 96114 (0.0 rows/PS)
+    # Nb No num: 14589  15.2%
+    # Nb Cedex BP: 5386  5.6%
+    # Nb Bad CP: 4370  4.5%
+    # Nb Bad commune: 0  0.0%
+    # Nb No Street: 214  0.2%
+    # Nb Error 500: 0  0.0%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 5529  5.8%
+    # Save data/ps/ps-tarifs-21-03-adresses.csv
+    # 2h55m 100.0% [2455164] Saved 2401126 PS
 
