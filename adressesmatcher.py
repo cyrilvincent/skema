@@ -449,7 +449,7 @@ class AdresseMatcher:
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad commune: {self.nbbadcommune} {(self.nbbadcommune / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / len(self.adresses_db)) * 100 : .1f}%")
-        print(f"Nb Error 500: {self.nberror500} {(self.nberror500 / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Error Unknown: {self.nberror500} {(self.nberror500 / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad INSEE: {self.nbbadinsee}")
         print(f"Nb Score low: {self.nbscorelow} {(self.nbscorelow / len(self.adresses_db)) * 100 : .1f}%")
 
