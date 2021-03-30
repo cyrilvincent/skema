@@ -30,6 +30,7 @@
 # Corse PORTO => OTA != PORTO VECCHIO, PORTICCIO => GROSSETO PRUGNA, SAGONE => VICO, non géré dans la bd adresse
 # Il y a des adresses inconnues => PLACE DES COMMERCES 01480 CHALEINS, ROUTE DE PARIS 01000 BOURG EN BRESSE (existe sur maps), ...
 # Low score => Google maps (durée à étudier)
+# Low score => Google Tensorflow (3j)
 # Mise en prod, doc : 0.25j
 # Réunions : 0.25j
 

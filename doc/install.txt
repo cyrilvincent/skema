@@ -22,7 +22,7 @@
 # Pour tester le proto taper python adressesmatcher.py data/ps/ps-tarifs-31-03.csv -d [48]
 # Voir doc.txt
 
-# Mise à jour etre 2 versions
+# Mise à jour entre 2 versions
 # taper git pull pour mettre à jour le code
 # Si git pull echoue à cause d'une modification du code de votre côté il faut taper les 2 lignes suivantes pour forcer la mise à jour, attention vos mddifications seront perdues
         # git reset --hard HEAD
