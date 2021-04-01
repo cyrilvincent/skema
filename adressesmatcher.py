@@ -441,8 +441,8 @@ class AdresseMatcher:
     def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
-        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.nb) / self.keys_db:.1f} rows/PS)")
-        print(f"Nb Unique Adresse: {len(self.adresses_db)} ({len(self.nb) / self.adresses_db:.1f} rows/PS)")
+        print(f"Nb Unique PS: {len(self.keys_db)} ({self.nb / len(self.keys_db):.1f} rows/PS)")
+        print(f"Nb Unique Adresse: {len(self.adresses_db)} ({self.nb / len(self.adresses_db):.1f} rows/PS)")
         print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
@@ -513,21 +513,20 @@ if __name__ == '__main__':
     # 48
     # Nb PS: 1620
     # Nb Matching PS: 1620  100.0%
-    # Nb Unique PS: 129 (0.1 rows/PS)
-    # Nb Unique Adresse: 102 (0.1 rows/PS)
+    # Nb Unique PS: 129 (12.6 rows/PS)
+    # Nb Unique Adresse: 102 (15.9 rows/PS)
     # Nb No num: 66  64.7%
     # Nb Cedex BP: 0  0.0%
-    # Nb Bad CP: 1  1.0%
+    # Nb Bad CP: 0  0.0%
     # Nb Bad commune: 0  0.0%
     # Nb No Street: 2  2.0%
-    # Nb Error 500: 0  0.0%
+    # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 14  13.7% => Ld 3 2.9%
+    # Nb Score low: 1  1.0%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 14s 100.0% [2455164] Saved 1620 PS
 
-    #
-    # 0.87
+    # All
     # Nb PS: 2401126
     # Nb Matching PS: 2401126  100.0%
     # Nb Unique PS: 151242 (0.1 rows/PS)
@@ -539,7 +538,7 @@ if __name__ == '__main__':
     # Nb No Street: 214  0.2%
     # Nb Error 500: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 5529  5.8%
+    # Nb Score low: 5529  5.8% => 1.8%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 2h55m 100.0% [2455164] Saved 2401126 PS
 

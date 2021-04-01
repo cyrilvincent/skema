@@ -1,3 +1,5 @@
 unidecode
 art
 jsonpickle
+pandas
+numpy

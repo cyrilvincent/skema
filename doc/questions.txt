@@ -7,7 +7,7 @@
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
 # 4 jours
-# WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95% et 99%) accuracy en 2h45
+# WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95.2% et 99.9%) accuracy en 2h45
 # Key = Nom+Prenom+CP+Profession
 # Cedex => Peut donner 2 insee : 0.2j
 # Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
