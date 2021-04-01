@@ -7,7 +7,14 @@
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
 # 4 jours
-#
+# WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95% et 99%) accuracy en 2h45
+# Key = Nom+Prenom+CP+Profession
+# Cedex => Peut donner 2 insee : 0.2j
+# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
+# Low score => Google maps (durée à étudier)
+# Low score => Google Tensorflow (3j)
+# Réunions : 0.25j
+
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours

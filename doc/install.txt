@@ -20,6 +20,7 @@
 # Télécharger ps-tarifs.csv dans data/ps depuis https://www.data.gouv.fr/fr/datasets/annuaire-sante-de-la-cnam/
 # Renommer le fichier en ps-tarifs-YY-MM.csv où YY = année et MM = mois
 # Pour créer les indexs d'adresse taper python adresses2pickles.py
+# Pour créer l'index des cedex taper python cedex2pickle.py data/cedex/liste-des-cedex.csv
 # Pour tester le proto taper python adressesmatcher.py data/ps/ps-tarifs-31-03.csv -d [48]
 # Voir doc.txt
 

@@ -353,23 +353,23 @@ class AdresseMatcher:
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
-        # if entity.score < config.adresse_quality:
-        #     res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3), originalnum)
-        #     if res is not None:
-        #         self.nbbadcp += 1
-        #         aentity = res
-        #         self.log(f"WARNING Bad CP: {entity.cp} {entity.commune}=>{aentity.code_postal} {aentity.commune}")
-        #         entity.scores[0] = 0.5
-        #         entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.99
-        #     else:
-        #         res = self.very_last_chance(int(entity.cp), self.normalize_street(adresse3), originalnum)
-        #         if res is not None:
-        #             self.nbbadcommune += 1
-        #             aentity = res
-        #             self.log(f"WARNING Bad Commune: {entity.cp} {entity.commune}=>{aentity.code_postal}"
-        #                      f" {aentity.commune}")
-        #             entity.scores[1] = 0.5
-        #             entity.scores[0] = entity.scores[2] = entity.scores[3] = 0.98
+        if entity.score < config.adresse_quality:
+            res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3), originalnum)
+            if res is not None:
+                self.nbbadcp += 1
+                aentity = res
+                self.log(f"WARNING BAD CP (LS): {entity.cp} {entity.commune}=>{aentity.code_postal} {aentity.commune}")
+                entity.scores[0] = 0.5
+                entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.99
+            else:
+                res = self.very_last_chance(int(entity.cp), self.normalize_street(adresse3), originalnum)
+                if res is not None:
+                    self.nbbadcommune += 1
+                    aentity = res
+                    self.log(f"WARNING BAD COMMUNE: {entity.cp} {entity.commune}=>{aentity.code_postal}"
+                             f" {aentity.commune}")
+                    entity.scores[1] = 0.5
+                    entity.scores[0] = entity.scores[2] = entity.scores[3] = 0.98
         if entity.score < config.adresse_quality:
             self.nbscorelow += 1
             nba = len(self.adresses_db) if len(self.adresses_db) != 0 else 1
@@ -441,8 +441,8 @@ class AdresseMatcher:
     def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
-        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.keys_db) / self.nb:.1f} rows/PS)")
-        print(f"Nb Unique Adresse: {len(self.adresses_db)} ({len(self.adresses_db) / self.nb:.1f} rows/PS)")
+        print(f"Nb Unique PS: {len(self.keys_db)} ({len(self.nb) / self.keys_db:.1f} rows/PS)")
+        print(f"Nb Unique Adresse: {len(self.adresses_db)} ({len(self.nb) / self.adresses_db:.1f} rows/PS)")
         print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
@@ -497,17 +497,18 @@ if __name__ == '__main__':
     # 38
     # Nb PS: 48927
     # Nb Matching PS: 48927  100.0%
-    # Nb Unique PS: 3178 (15.4 rows/PS)
-    # Nb Unique Adresse: 2176 (0.7 rows/PS)
+    # Nb Unique PS: 3028 (0.1 rows/PS)
+    # Nb Unique Adresse: 2176 (0.0 rows/PS)
     # Nb No num: 308  14.2%
-    # Nb Cedex BP: 101  4.6%
-    # Nb Bad CP: 59  2.7%
-    # Nb Bad commune: 0  0.0%
+    # Nb Cedex BP: 143  6.6%
+    # Nb Bad CP: 26  1.2%
+    # Nb Bad commune: 6  0.3%
     # Nb No Street: 2  0.1%
-    # Nb Error 500: 0  0.0%
-    # Nb Score low: 4.3% => LD 4.0% => Bad CP 4.0% => Cedex 3.4%
+    # Nb Error Unknown: 0  0.0%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 42  1.9%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 102s 100.0% [2455164] Saved 48927 PS
+    # 103s 100.0% [2455164] Saved 48927 PS
 
     # 48
     # Nb PS: 1620
