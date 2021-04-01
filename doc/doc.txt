@@ -14,6 +14,9 @@
 # Le répertoire peut être changé dans config.py adresse_path
 # Création des fichiers *.pickles dans le même répertoire
 
+# Cedex2Pickles
+# TODO idem install.Txt
+
 # AdressesMatcher
 # Couple le fichier ps-tarifs*.csv et adresses-*.pickle
 # Utilisation python adressesmatcher.py data/ps/ps-tarifs-21-03.csv

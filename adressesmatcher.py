@@ -282,57 +282,57 @@ class AdresseMatcher:
                     return founds[0], score
                 return None, 0.0  # Normalement impossible
 
-    # def get_cp_by_commune(self, commune: str, oldcp: int) -> Tuple[int, str, float]:
-    #     """
-    #     Retrouve le code postal par la commune et le code code postal faux
-    #     :param commune: la commune
-    #     :param oldcp: le code postal en échec
-    #     :return: le code postal trouvé, la commune et le score
-    #     """
-    #     if commune in self.communes_db:
-    #         ids = self.communes_db[commune]
-    #         dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
-    #         for id in ids:
-    #             e = self.db[id]
-    #             if e.commune == commune and str(e.code_postal)[:2] == dept:
-    #                 return e.code_postal, e.commune, 0.9
-    #             if e.commune.startswith(commune) and str(e.code_postal)[:2] == dept:
-    #                 return e.code_postal, e.commune, 0.75
-    #     return oldcp, commune, 0
-    #
-    # def last_chance(self, commune: str, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
-    #     """
-    #     Retrouve un code postal par commune, adresse3 et numero
-    #     :param commune: la commune
-    #     :param adresse3: adresse3
-    #     :param num: numéro
-    #     :return: l'entité adresse
-    #     """
-    #     if commune in self.communes_db:
-    #         ids = self.communes_db[commune]
-    #         for id in ids:
-    #             e = self.db[id]
-    #             if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-    #                 return e
-    #     return None
-    #
-    # def very_last_chance(self, cp: int, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
-    #     """
-    #     Retrouve une commune par code postal, adresse3 et numéro
-    #     :param cp: Le code postal
-    #     :param adresse3: adresse3
-    #     :param num: le numéro
-    #     :return: l'entité Adresse
-    #     """
-    #     if cp in self.cps_db:
-    #         communes = self.cps_db[cp]
-    #         for commune in communes:
-    #             ids = self.communes_db[commune]
-    #             for id in ids:
-    #                 e = self.db[id]
-    #                 if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
-    #                     return e
-    #     return None
+    def get_cp_by_commune(self, commune: str, oldcp: int) -> Tuple[int, str, float]:
+        """
+        Retrouve le code postal par la commune et le code code postal faux
+        :param commune: la commune
+        :param oldcp: le code postal en échec
+        :return: le code postal trouvé, la commune et le score
+        """
+        if commune in self.communes_db:
+            ids = self.communes_db[commune]
+            dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
+            for id in ids:
+                e = self.db[id]
+                if e.commune == commune and str(e.code_postal)[:2] == dept:
+                    return e.code_postal, e.commune, 0.9
+                if e.commune.startswith(commune) and str(e.code_postal)[:2] == dept:
+                    return e.code_postal, e.commune, 0.75
+        return oldcp, commune, 0
+
+    def last_chance(self, commune: str, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
+        """
+        Retrouve un code postal par commune, adresse3 et numero
+        :param commune: la commune
+        :param adresse3: adresse3
+        :param num: numéro
+        :return: l'entité adresse
+        """
+        if commune in self.communes_db:
+            ids = self.communes_db[commune]
+            for id in ids:
+                e = self.db[id]
+                if e.commune == commune and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+                    return e
+        return None
+
+    def very_last_chance(self, cp: int, adresse3: str, num: int) -> Optional[entities.AdresseEntity]:
+        """
+        Retrouve une commune par code postal, adresse3 et numéro
+        :param cp: Le code postal
+        :param adresse3: adresse3
+        :param num: le numéro
+        :return: l'entité Adresse
+        """
+        if cp in self.cps_db:
+            communes = self.cps_db[cp]
+            for commune in communes:
+                ids = self.communes_db[commune]
+                for id in ids:
+                    e = self.db[id]
+                    if e.code_postal == cp and (e.nom_afnor == adresse3 or e.nom_voie == adresse3) and e.numero == num:
+                        return e
+        return None
 
     def update_entity(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, score: float):
         """
@@ -354,8 +354,7 @@ class AdresseMatcher:
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
         # if entity.score < config.adresse_quality:
-        #     res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3),
-        #                                   originalnum)
+        #     res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3), originalnum)
         #     if res is not None:
         #         self.nbbadcp += 1
         #         aentity = res
@@ -414,15 +413,15 @@ class AdresseMatcher:
                     adresse4 = self.normalize_street(entity.adresse4)
                     commune, score = self.match_commune(commune, adresse4, communes, cp)
                     entity.scores.append(score)
-                    # if score < 0.8:
-                    #     cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
-                    #     if score2 > score:
-                    #         self.log(f"[{self.rownum}] WARNING Bad CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
-                    #         self.nbbadcp += 1
-                    #         cp = cp2
-                    #         commune = commune2
-                    #         entity.scores[1] = score2
-                    #         entity.scores[0] = 0.5
+                    if score < 0.8:
+                        cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
+                        if score2 > score:
+                            self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
+                            self.nbbadcp += 1
+                            cp = cp2
+                            commune = commune2
+                            entity.scores[1] = score2
+                            entity.scores[0] = 0.5
                     adresse3 = self.normalize_street(entity.adresse3)
                     adresse2 = self.normalize_street(entity.adresse2)
                     num, adresse3 = self.split_num(adresse3)
@@ -462,8 +461,8 @@ class AdresseMatcher:
         self.log(f"Load {file}")
         self.csv = self.ps_repo.load_ps(file)
         self.total = len(self.csv)
-        # self.log(f"Load {config.cedex_path}")
-        # self.cedex_db = self.a_repo.load_cedex()
+        self.log(f"Load {config.cedex_path}")
+        self.cedex_db = self.a_repo.load_cedex()
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.total *= len(depts)
@@ -506,7 +505,7 @@ if __name__ == '__main__':
     # Nb Bad commune: 0  0.0%
     # Nb No Street: 2  0.1%
     # Nb Error 500: 0  0.0%
-    # Nb Score low: 4.3% => LD 4.0%
+    # Nb Score low: 4.3% => LD 4.0% => Bad CP 4.0% => Cedex 3.4%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 102s 100.0% [2455164] Saved 48927 PS
 
