@@ -22,6 +22,7 @@
 # Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
 # Volumetrie => Envisager Sql : 5j
 # Cedex => Peut donner 2 insee : 0.2j
+# Rajouter dans la key la colonne 11
 # Key => Nom+Prenom+Adresse* - Nom+Prenom+CP = 4628 (3%) = PS avec adresses différentes ou homonymes
 # Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
