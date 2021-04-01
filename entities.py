@@ -84,9 +84,12 @@ class PSEntity:
         return self.v[8]
 
     @property
+    def profession(self):
+        return self.v[10]
+
+    @property
     def id(self):
-        s = f"{self.cp}{self.nom}{self.prenom}{self.commune}{self.adresse3}".replace(" ", "")  # 155870
-        s = f"{self.cp}{self.nom}{self.prenom}".replace(" ", "")  # 151242 # Dif 4628
+        s = f"{self.cp}{self.nom}{self.prenom}{self.profession}".replace(" ", "")
         return s.replace("'", "").replace("-", "").replace("/", "").replace(" ", "").strip()
 
     def updateid(self):

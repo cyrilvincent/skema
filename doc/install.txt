@@ -16,6 +16,7 @@
 # Taper python -m pip install -r requirements.txt depuis la racine du projet
 # Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
 # Dézipper les adresses dans data/adresse
+# Faire de même pour les lieux-dits dans le même répertoire
 # Télécharger ps-tarifs.csv dans data/ps depuis https://www.data.gouv.fr/fr/datasets/annuaire-sante-de-la-cnam/
 # Renommer le fichier en ps-tarifs-YY-MM.csv où YY = année et MM = mois
 # Pour créer les indexs d'adresse taper python adresses2pickles.py

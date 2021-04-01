@@ -7,6 +7,7 @@
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
 # 4 jours
+#
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours
@@ -14,6 +15,7 @@
 # Colonne 44 Matchcp
 # Grandes villes => Pb des CEDEX
 # Campagne => Pb des lieux-dits, absence d'adresse ou adresse succinte
+# Début WP
 # Département ruraux, pas de numéro => BD lieux dits : 1j
 # Cedex => liste-des-cedex.csv Chercher dans la liste le cp pour déduire la commune puis déduire le réel cp : 1j
 # Debuggage => adressefinder, splitps
@@ -22,10 +24,11 @@
 # Si mauvaise adresse ou pas d'adresse => prendre centre du village ? : 0.1j
 # Si mauvais score => chercher d'abord la commune, la rue et le numéro puis déduire le CP : 0.5j
 # Si mauvais score => chercher d'abord le cp, la rue et le numéro puis déduire la commune : 0.5j
-# Volumetrie => Envisager Sql : 5j
-# Cedex => Peut donner 2 insee : 0.2j
 # Rajouter dans la key la colonne 11
 # Key => Nom+Prenom+Adresse* - Nom+Prenom+CP = 4628 (3%) = PS avec adresses différentes ou homonymes
+# Fin WP
+# Volumetrie => Envisager Sql : 5j
+# Cedex => Peut donner 2 insee : 0.2j
 # Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Exemple de cas spéciaux
 # CP 38034 => 38100, 20184 => 20090, 59430 => 59140
