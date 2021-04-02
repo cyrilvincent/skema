@@ -8,9 +8,9 @@
 # V0.1.0.DEV
 # ??/04/21
 # 4 jours
-# WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95.2% et 99.7%) accuracy en 2h45
+# WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95.2% et 99.7%) en 2h52
 # Key = Nom+Prenom+CP+Profession
-# Low score => Google maps (durée à étudier)
+# Accuracy => Google Map: 4j
 # Réunions : 0.25j
 
 # V0.0.2.DEV

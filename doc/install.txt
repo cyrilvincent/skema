@@ -5,7 +5,7 @@
 #    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
-# V0.0.2.DEV
+# V0.1.0.DEV
 # Première instalation
 # Installer Python 3.9+ 64 bits depuis Python.org en cochant la case Add Python to Path
 # Installer Git depuis git-scm.com

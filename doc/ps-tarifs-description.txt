@@ -15,5 +15,5 @@
 # 40 Latitude
 # 41 X
 # 42 Y
-# 43 AdresseScore: Score de matching de l'adresse >=0.99 parfait, >0.90 Sûre, >0.85 Assez sûre, >0.8 OK, <0.8 NOK, <0.75 peu fiable
+# 43 AdresseScore: Score de matching de l'adresse >=0.99 parfait, >0.90 Sûre, >0.85 Assez sûre, >0.83 OK, <0.83 NOK, <0.75 peu fiable
 # 44 Matchcp

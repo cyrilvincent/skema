@@ -114,11 +114,13 @@ class AdresseMatcher:
             return "", 0
         max = -1
         res = 0
+        s = self.denormalize_street(s)
         for item in l:
             if item != "":
                 if item.startswith(s) or s.startswith(item):
                     return item, 0.99
-                sm = difflib.SequenceMatcher(None, s, item)
+                deno = self.denormalize_street(item)
+                sm = difflib.SequenceMatcher(None, s, deno)
                 if sm.ratio() > max:
                     max = sm.ratio()
                     res = item
@@ -139,6 +141,16 @@ class AdresseMatcher:
         street = street.replace(" BD ", " BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
         street = street.replace(" RT ", " ROUTE ").replace(" GAL ", " GENERAL ")
         return street.strip()
+
+    def denormalize_street(self, street: str) -> str:
+        """
+        Normalise la rue
+        :param street: rue
+        :return: rue dénormalisée
+        """
+        street = street.replace("CHEMIN", "CH").replace("AVENUE", "AV").replace("PLACE", "PL")
+        street = street.replace("BOULEVARD", "BD").replace("ROUTE", "RT")
+        return street
 
     def normalize_commune(self, commune: str) -> str:
         """
@@ -175,7 +187,7 @@ class AdresseMatcher:
             insee = self.cedex_db[cp].code_insee
             if insee in self.insees_db:
                 res = list(self.insees_db[insee])[0]
-                self.log(f"WARNING CEDEX {cp}=>{res}")
+                # self.log(f"WARNING CEDEX {cp}=>{res}")
                 return res, 0.9
             else:
                 self.nbbadinsee += 1
@@ -188,11 +200,10 @@ class AdresseMatcher:
             self.log(f"WARNING CP {cp}=>{res}")
             return res, 0.5
 
-    def match_commune(self, commune: str, adresse4: str, communes: Set[str], cp: int) -> Tuple[str, float]:
+    def match_commune(self, commune: str, communes: Set[str], cp: int) -> Tuple[str, float]:
         """
         Match la commune
         :param commune: la commune
-        :param adresse4: adresse4
         :param communes: la liste des communes à matcher
         :param cp: le code postal
         :return: la commune matchée
@@ -202,15 +213,8 @@ class AdresseMatcher:
             return commune, 1.0
         elif len(communes) == 1:
             return list(communes)[0], 0.95
-        elif adresse4 != "" and adresse4 in communes:
-            return adresse4, 0.9
         else:
             res, score = self.gestalts(commune, communes)
-            if score < 0.75 and adresse4 != "":
-                res2, score2 = self.gestalts(adresse4, communes)
-                if score2 > score + 0.1:
-                    self.log(f"WARNING COMMUNE Adresse4 {cp} {commune} {adresse4}=>{res2} @{int(score2*100)}%")
-                    return res2, score2
             self.log(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
             return res, score
 
@@ -410,8 +414,8 @@ class AdresseMatcher:
                     entity.scores.append(score)
                     communes = self.cps_db[cp]
                     commune = self.normalize_commune(entity.commune)
-                    adresse4 = self.normalize_street(entity.adresse4)
-                    commune, score = self.match_commune(commune, adresse4, communes, cp)
+                    # adresse4 = self.normalize_street(entity.adresse4)
+                    commune, score = self.match_commune(commune, communes, cp)
                     entity.scores.append(score)
                     if score < 0.8:
                         cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)

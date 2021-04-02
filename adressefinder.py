@@ -29,7 +29,7 @@ while True:
         print(communes)
         entity.v[8] = input("Commune: ")
         commune = am.normalize_commune(entity.commune)
-        commune, score = am.match_commune(commune, "", communes, cp)
+        commune, score = am.match_commune(commune, communes, cp)
         print(f"=>{commune} @{int(score*100)}%")
         entity.scores.append(score)
         if score < 0.8:
