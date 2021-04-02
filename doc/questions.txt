@@ -6,19 +6,17 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
+# ??/04/21
 # 4 jours
 # WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95.2% et 99.7%) accuracy en 2h45
 # Key = Nom+Prenom+CP+Profession
-# Cedex => Peut donner 2 insee : 0.2j
-# Gestion des cas spéciaux => Fichier CSV de matching de CP, Commune, Adresse : 1j
 # Low score => Google maps (durée à étudier)
-# Low score => Google Tensorflow (3j)
 # Réunions : 0.25j
 
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours
-# WP => All OK, Matching 100%, Accuracy 94% (entre 86% et 97%) accuracy (/!\ @0.87) en 2h55
+# WP => All OK, Matching 100%, Accuracy 94% (entre 86% et 97%) accuracy en 2h55
 # Colonne 44 Matchcp
 # Grandes villes => Pb des CEDEX
 # Campagne => Pb des lieux-dits, absence d'adresse ou adresse succinte

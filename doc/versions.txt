@@ -5,9 +5,28 @@
 #    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
+# V0.1.0.DEV
+# ??/04/21
+# 4 jours
+# AdresseMatcher
+# En cas de mauvais score, recherche du cp par la commune
+# En cas de mauvais score, recherche de la commune par le cp, adresse3 et numéro
+# En cas de mauvais score, recherche du cp par la commune, adresse3 et numéro
+# Gestion des cedex
+# Gestion des lieux-dits
+# Gestion de l'abscence de rue et de numéro
+# Modification de la clé avec ajout de la profession
+# 98.2% de précision
+# Adresses2Pickles
+# Indexation des lieux-dits
+# Indexation des cedex
+# AdresseFinder
+# Ajout des amélioration de AdresseMatcher
+
 # V0.0.2.DEV
 # 01/04/21
 # 5 jours
+# Installable
 # AdresseMatcher
 # Matching de ps-tarifs.csv vers adresses-*.pickle
 # Metropole + Corse
@@ -16,9 +35,13 @@
 # Correction des CP en cherchant le CP immédiatement en dessous
 # Correction automatique des numéro de rue en cherchant le + proche
 # Création csv résultat de la fusion
+# Modification de la clé
+# Ajout de la colonne matchcp
 # 93% de précision
 # Adresses2Pickles
 # Indexation des fichiers adresses par département
+# AdresseFinder
+# Recherche des adresses manuellement avec score intermédiaire
 
 # V0.0.1.DEV
 # 17/03/21
