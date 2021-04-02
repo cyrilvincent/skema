@@ -21,7 +21,9 @@ class PSRepository:
         with open(path, "w") as f:
             for e in pss:
                 for i in range(len(e.v)):
-                    f.write(f"{e.v[i]};")
+                    if i != 0:
+                        f.write(";")
+                    f.write(f"{e.v[i]}")
                 f.write("\n")
 
     def row2entity(self, entity: entities.PSEntity, row: str):

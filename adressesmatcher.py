@@ -529,16 +529,16 @@ if __name__ == '__main__':
     # All
     # Nb PS: 2401126
     # Nb Matching PS: 2401126  100.0%
-    # Nb Unique PS: 151242 (0.1 rows/PS)
-    # Nb Unique Adresse: 96114 (0.0 rows/PS)
+    # Nb Unique PS: 151248 (15.9 rows/PS)
+    # Nb Unique Adresse: 96114 (25.0 rows/PS)
     # Nb No num: 14589  15.2%
-    # Nb Cedex BP: 5386  5.6%
-    # Nb Bad CP: 4370  4.5%
-    # Nb Bad commune: 0  0.0%
+    # Nb Cedex BP: 6305  6.6%
+    # Nb Bad CP: 1226  1.3%
+    # Nb Bad commune: 52  0.1%
     # Nb No Street: 214  0.2%
-    # Nb Error 500: 0  0.0%
-    # Nb Bad INSEE: 0
-    # Nb Score low: 5529  5.8% => 1.8%
+    # Nb Error Unknown: 0  0.0%
+    # Nb Bad INSEE: 21
+    # Nb Score low: 1759  1.8%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 2h55m 100.0% [2455164] Saved 2401126 PS
+    # 2h52m 100.0% [2455164] Saved 2401126 PS
 

@@ -14,6 +14,7 @@ class PSQuery:
         self.path = path
         self.fn = fn
         self.module = module
+        self.nbcolumns = 0
 
     def scan(self):
         """
@@ -28,7 +29,7 @@ class PSQuery:
         dataframe = pandas.concat(self.db, ignore_index=True, sort=False)
         print(dataframe)
         file = f"{self.path}/results/psquery-{self.fn}.csv"
-        dataframe.to_csv(file, header=None, index=False)
+        dataframe.to_csv(file, header=False, index=False, sep=";")
         print(f"Saved {file}")
 
     def load(self, path):
@@ -42,15 +43,21 @@ class PSQuery:
             year = int(match[1])
             month = int(match[2])
             try:
-                dataframe = pandas.read_csv(path, delimiter=";", header=None)
+                dataframe = pandas.read_csv(path, delimiter=";", header=None, encoding="cp1252",
+                                            dtype={14: str, 37: str, 43: int})
+                if self.nbcolumns == 0:
+                    self.nbcolumns = dataframe.shape[1]
                 print(dataframe.shape)
+                if dataframe.shape[1] != self.nbcolumns:
+                    print(f"Bad number of columns {dataframe.shape[1]} != {self.nbcolumns}")
+                    return None
                 s = f"self.module.{self.fn}(dataframe)"
                 res = eval(s)
-                res.assign(year=year)
-                res.assign(month=month)
+                res = res.assign(year=year)
+                res = res.assign(month=month)
                 return res
             except UnicodeDecodeError:
-                print("Not working on original files, use adressesmatcher before")
+                print("Encoding error must be cp1252")
                 return None
 
 
