@@ -66,6 +66,11 @@ class MapsLoader(SeleniumLoader):
         lon = s[:index]
         return float(lon), float(lat)
 
+    def get_lon_lat_from_adresse(self, adresse):
+        self.post(adresse)
+        url = self.get_url()
+        return self.get_lon_lat(url)
+
 
 if __name__ == '__main__':
     with selenium.webdriver.Chrome() as browser:
@@ -81,10 +86,7 @@ if __name__ == '__main__':
         lon, lat = l.get_lon_lat(url)
         print(lon, lat) # 45.098384 5.5782497 vs 45.098642 5.580492
         s = "970 avenue leopold fabre 38250 Lans en Vercors"
-        l.post(s)
-        url = l.get_url()
-        print(url)
-        lon, lat = l.get_lon_lat(url)
+        lon, lat = l.get_lon_lat_from_adresse(s)
         print(lon, lat)
         # p = parsers.MapsParser(l.html)
         # p.soup_pane()

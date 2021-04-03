@@ -5,6 +5,7 @@ import argparse
 import re
 import os
 import importlib
+import repositories
 
 
 class PSQuery:
@@ -15,6 +16,7 @@ class PSQuery:
         self.fn = fn
         self.module = module
         self.nbcolumns = 0
+        self.repo = repositories.PSRepository()
 
     def scan(self):
         """
@@ -29,7 +31,7 @@ class PSQuery:
         dataframe = pandas.concat(self.db, ignore_index=True, sort=False)
         print(dataframe)
         file = f"{self.path}/results/psquery-{self.fn}.csv"
-        dataframe.to_csv(file, header=False, index=False, sep=";")
+        self.repo.save_csv_from_dataframe(dataframe, file)
         print(f"Saved {file}")
 
     def load(self, path):
@@ -43,8 +45,7 @@ class PSQuery:
             year = int(match[1])
             month = int(match[2])
             try:
-                dataframe = pandas.read_csv(path, delimiter=";", header=None, encoding="cp1252",
-                                            dtype={14: str, 37: str, 43: int})
+                dataframe = self.repo.get_dataframe(path)
                 if self.nbcolumns == 0:
                     self.nbcolumns = dataframe.shape[1]
                 print(dataframe.shape)

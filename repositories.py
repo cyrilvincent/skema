@@ -3,6 +3,7 @@ import config
 import cyrilload
 import art
 import csv
+import pandas
 from typing import List
 
 
@@ -52,6 +53,14 @@ class PSRepository:
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
             return list(reader)
+
+    def get_dataframe(self, path):
+        dataframe = pandas.read_csv(path, delimiter=";", header=None, encoding="cp1252",
+                                    dtype={14: str, 37: str, 43: int})
+        return dataframe
+
+    def save_csv_from_dataframe(self, dataframe, path):
+        dataframe.to_csv(path, header=False, index=False, sep=";")
 
 
 class AdresseRepository:

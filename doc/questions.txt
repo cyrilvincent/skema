@@ -10,7 +10,9 @@
 # 4 jours
 # WP => All Ok, Matching 100%, Accuracy 98.2% (entre 95.2% et 99.7%) en 2h52
 # Key = Nom+Prenom+CP+Profession
-# Accuracy => Google Map: 4j
+# Accuracy => Google Geocoding API 5$/1000 adresses (4j) : https://developers.google.com/maps/documentation/geocoding/overview?hl=fr
+# Accuracy => Google Map Scrapping (4j) mais très lent, uniquement pour les scores faibles
+# Pattern Matching => Google Tensorflow USE (3j) mais très lent: https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder
 # Réunions : 0.25j
 
 # V0.0.2.DEV

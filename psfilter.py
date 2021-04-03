@@ -4,6 +4,7 @@ import config
 import argparse
 import re
 import sys
+import repositories
 
 
 def test1(dataframe):
@@ -34,12 +35,13 @@ if __name__ == '__main__':
         sys.exit(1)
     year = int(match[1])
     month = int(match[2])
-    dataframe = pandas.read_csv(args.path, delimiter=";", header=None, encoding="cp1252", dtype={14: str})
+    repo = repositories.PSRepository()
+    dataframe = repo.get_dataframe(args.path)
     s = f"{args.fn}(dataframe)"
     res = eval(s)
     res = res.assign(year=year)
     res = res.assign(month=month)
     print(res)
     file = args.path.replace(".csv", f"-{args.fn}.csv")
-    res.to_csv(file, header=None, index=False, sep=";")
+    repo.save_csv_from_dataframe(res, file)
     print(f"Saved {file}")

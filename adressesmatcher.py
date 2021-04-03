@@ -144,7 +144,7 @@ class AdresseMatcher:
 
     def denormalize_street(self, street: str) -> str:
         """
-        Normalise la rue
+        Denormalise la rue
         :param street: rue
         :return: rue dénormalisée
         """
@@ -414,7 +414,6 @@ class AdresseMatcher:
                     entity.scores.append(score)
                     communes = self.cps_db[cp]
                     commune = self.normalize_commune(entity.commune)
-                    # adresse4 = self.normalize_street(entity.adresse4)
                     commune, score = self.match_commune(commune, communes, cp)
                     entity.scores.append(score)
                     if score < 0.8:
@@ -536,13 +535,13 @@ if __name__ == '__main__':
     # Nb Unique PS: 151248 (15.9 rows/PS)
     # Nb Unique Adresse: 96114 (25.0 rows/PS)
     # Nb No num: 14589  15.2%
-    # Nb Cedex BP: 6305  6.6%
-    # Nb Bad CP: 1226  1.3%
-    # Nb Bad commune: 52  0.1%
+    # Nb Cedex BP: 5556  5.8%
+    # Nb Bad CP: 1263  1.3%
+    # Nb Bad commune: 53  0.1%
     # Nb No Street: 214  0.2%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 21
-    # Nb Score low: 1759  1.8%
+    # Nb Score low: 1775  1.8%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 2h52m 100.0% [2455164] Saved 2401126 PS
 
