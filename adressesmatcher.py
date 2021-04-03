@@ -124,11 +124,8 @@ class AdresseMatcher:
                 if item.startswith(s) or s.startswith(item):
                     return item, 0.99
                 deno = self.denormalize_street(item)
-                # sm = difflib.SequenceMatcher(None, s, deno)
                 ratio = self.gestalt(s, deno)
-                # if sm.ratio() > max:
                 if ratio > max:
-                    # max = sm.ratio()
                     max = ratio
                     res = item
         return res, max
@@ -199,12 +196,12 @@ class AdresseMatcher:
             else:
                 self.nbbadinsee += 1
                 self.nbbadcp += 1
-                self.log(f"ERROR BAD INSEE {cp} {insee}")  # ERREUR GRAVE
+                self.log(f"ERROR BAD INSEE {cp} {insee}")
                 return self.find_nearest_less_cp(cp), 0.25
         else:
             self.nbbadcp += 1
             res = self.find_nearest_less_cp(cp)
-            self.log(f"WARNING CP {cp}=>{res}")
+            self.log(f"ERROR CP DOES NOT EXIST {cp}=>{res}")
             return res, 0.5
 
     def match_commune(self, commune: str, communes: Set[str], cp: int) -> Tuple[str, float]:
@@ -576,15 +573,16 @@ if __name__ == '__main__':
     # Nb PS: 2401126
     # Nb Matching PS: 2401126  100.0%
     # Nb Unique PS: 151248 (15.9 rows/PS)
-    # Nb Unique Adresse: 96114 (25.0 rows/PS)
-    # Nb No num: 14589  15.2%
-    # Nb Cedex BP: 5556  5.8%
-    # Nb Bad CP: 1263  1.3%
-    # Nb Bad commune: 53  0.1%
-    # Nb No Street: 214  0.2%
+    # Nb Unique Adresse: 94784 (25.3 rows/PS)
+    # Nb No num: 14214  15.0%
+    # Nb Cedex BP: 5141  5.4%
+    # Nb Bad CP: 1216  1.3%
+    # Nb Bad commune: 50  0.1%
+    # Nb No Street: 213  0.2%
     # Nb Error Unknown: 0  0.0%
-    # Nb Bad INSEE: 21
-    # Nb Score low: 1775  1.8%
+    # Nb Bad INSEE: 19
+    # Nb Score low: 1752  1.8%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 2h52m 100.0% [2455164] Saved 2401126 PS
+    # Save data/ps/ps_adresses.csv
+    # 2h54m 100.0% [2455164] Saved 2401126 PS
 

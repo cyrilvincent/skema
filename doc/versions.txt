@@ -23,7 +23,9 @@
 # AdresseFinder
 # Ajout des amélioration de AdresseMatcher
 # Repositories
-# test un fichier PS
+# Test un fichier PS
+# StringComparer
+# Comparer 2 phrases par Gestalt
 
 # V0.0.2.DEV
 # 01/04/21

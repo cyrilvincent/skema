@@ -39,6 +39,10 @@
 # Utilisation : python repositories.py data/ps/ps-tarifs.csv
 # Aide : python repositories.py --help
 
+# StringComparer
+# compare deux phrases par Gestalt
+# Utilisation : python stringcomparer.py
+
 # AdressesFinder
 # Retrouve les adresses saisies
 # Debugeur
