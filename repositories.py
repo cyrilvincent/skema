@@ -4,6 +4,7 @@ import cyrilload
 import art
 import csv
 import pandas
+import argparse
 from typing import List
 
 
@@ -87,6 +88,17 @@ class AdresseRepository:
     def load_cedex(self):
         return cyrilload.load(config.cedex_path)
 
+    def save_adresses(self, db):
+        print(f"Save {config.adresse_db_path}")
+        with open(config.adresse_db_path, "w") as f:
+            # f.write("cp;commune;adresse2;adresse3;adresse4;adresseid;score\n")
+            f.write("cp;commune;adresse2;adresse3;adresseid;score\n")
+            for k in db.keys():
+                # f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};{k[4]};")
+                f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
+                v = db[k]
+                f.write(f"{v[0]};{v[1]}\n")
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -94,8 +106,10 @@ if __name__ == '__main__':
     print("============")
     print(f"V{config.version}")
     print(config.copyright)
-    file = "data/ps/ps-tarifs-small.csv"
-    print(f"Parse {file}")
+    parser = argparse.ArgumentParser(description="Test PS file")
+    parser.add_argument("path", help="Path")
+    args = parser.parse_args()
+    print(f"Parse {args.path}")
     repo = PSRepository()
-    nb = repo.test_file(file)
-    print(f"Found {nb} rows")
+    df = repo.get_dataframe(args.path)
+    print(df)

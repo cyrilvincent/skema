@@ -102,6 +102,10 @@ class AdresseMatcher:
                 difmin = dif
         return res
 
+    def gestalt(self, s1, s2):
+        sm = difflib.SequenceMatcher(None, s1, s2)
+        return sm.ratio()
+
     def gestalts(self, s: str, l: Iterable[str]):
         """
         Machine Learning Gestalt
@@ -120,9 +124,12 @@ class AdresseMatcher:
                 if item.startswith(s) or s.startswith(item):
                     return item, 0.99
                 deno = self.denormalize_street(item)
-                sm = difflib.SequenceMatcher(None, s, deno)
-                if sm.ratio() > max:
-                    max = sm.ratio()
+                # sm = difflib.SequenceMatcher(None, s, deno)
+                ratio = self.gestalt(s, deno)
+                # if sm.ratio() > max:
+                if ratio > max:
+                    # max = sm.ratio()
+                    max = ratio
                     res = item
         return res, max
 
@@ -403,7 +410,8 @@ class AdresseMatcher:
                 entity = entities.PSEntity()
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
-                t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
+                # t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
+                t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
                 if t in self.adresses_db:
                     aentity = self.db[self.adresses_db[t][0]]
                     self.update_entity(entity, aentity, self.adresses_db[t][1])
@@ -477,6 +485,7 @@ class AdresseMatcher:
         self.pss_db.sort(key=lambda e: e.rownum)
         file = file.replace(".csv", "-adresses.csv")
         self.ps_repo.save_entities(file, self.pss_db)
+        self.a_repo.save_adresses(self.adresses_db)
         self.log(f"Saved {self.nb} PS")
 
 
@@ -513,6 +522,23 @@ if __name__ == '__main__':
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 103s 100.0% [2455164] Saved 48927 PS
 
+    # 38 adresse3 only
+    # Nb PS: 48927
+    # Nb Matching PS: 48927  100.0%
+    # Nb Unique PS: 3028 (16.2 rows/PS)
+    # Nb Unique Adresse: 1527 (32.0 rows/PS)
+    # Nb No num: 238  15.6%
+    # Nb Cedex BP: 119  7.8%
+    # Nb Bad CP: 27  1.8%
+    # Nb Bad commune: 6  0.4%
+    # Nb No Street: 2  0.1%
+    # Nb Error Unknown: 0  0.0%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 40  2.6%
+    # Save data/ps/ps-tarifs-21-03-adresses.csv
+    # Save data/ps/ps_adresses.csv
+    # 86s 100.0% [2455164] Saved 48927 PS
+
     # 48
     # Nb PS: 1620
     # Nb Matching PS: 1620  100.0%
@@ -528,6 +554,23 @@ if __name__ == '__main__':
     # Nb Score low: 1  1.0%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 14s 100.0% [2455164] Saved 1620 PS
+
+    # 75
+    # Nb PS: 100214
+    # Nb Matching PS: 100214  100.0%
+    # Nb Unique PS: 8921 (11.2 rows/PS)
+    # Nb Unique Adresse: 4845 (20.7 rows/PS)
+    # Nb No num: 0  0.0%
+    # Nb Cedex BP: 31  0.6%
+    # Nb Bad CP: 285  5.9%
+    # Nb Bad commune: 0  0.0%
+    # Nb No Street: 0  0.0%
+    # Nb Error Unknown: 0  0.0%
+    # Nb Bad INSEE: 0
+    # Nb Score low: 13  0.3%
+    # Save data/ps/ps-tarifs-21-03-adresses.csv
+    # Save data/ps/ps_adresses.csv
+    # 18m48s 100.0% [2455164] Saved 100214 PS
 
     # All
     # Nb PS: 2401126

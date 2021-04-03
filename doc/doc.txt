@@ -16,14 +16,14 @@
 
 # Cedex2Pickles
 # Index le fichier liste-des-cedex.csv
-# Utilisation python cedex2pickle.py data/cedex/liste-des-cedex.csv
+# Utilisation : python cedex2pickle.py data/cedex/liste-des-cedex.csv
 # Le répertoire peut être changé dans config.py cedex_path
 # Création du fichier *.pickle dans le même répertoire
 # Aide : python cedex2pickle.py --help
 
 # AdressesMatcher
 # Couple le fichier ps-tarifs*.csv et adresses-*.pickle
-# Utilisation python adressesmatcher.py data/ps/ps-tarifs-21-03.csv
+# Utilisation : python adressesmatcher.py data/ps/ps-tarifs-21-03.csv
 # Génére le fichier data/ps/ps-tarifs-21-03-adresses.csv complété avec les adresses pour tous les départements métropolitains + Corse
 # -d indique la liste des départements à matcher
     # La liste doit être au format des listes Python
@@ -34,10 +34,15 @@
 # Exemple pour une liste de département consécutifs python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d list(range(10,25))
 # Aide : python adressesmatcher.py --help
 
+# Repositories
+# Test un fichier PS
+# Utilisation : python repositories.py data/ps/ps-tarifs.csv
+# Aide : python repositories.py --help
+
 # AdressesFinder
 # Retrouve les adresses saisies
 # Debugeur
-# Utilisation python adressefinder.py
+# Utilisation : python adressefinder.py
 
 # SplitPS
 # Découpe le fichier ps-tarifs*.csv par département
