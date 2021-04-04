@@ -90,6 +90,10 @@ class AdresseParser:
         cyrilload.save(self.indexdb, path.replace(".csv", ""), method="pickle")
 
     def load_lieuxdits(self, path):
+        """
+        Charge le fichier lieux dits
+        :param path: le fichier
+        """
         self.nbfile += 1
         print(f"Load {path}")
         self.numrow = 1
@@ -106,7 +110,7 @@ class AdresseParser:
                 try:
                     e.lon = float(row["lon"])
                     e.lat = float(row["lat"])
-                except:
+                except ValueError:
                     continue
                 self.make_index(e)
         print(f"Found {self.nbfile} files and {len(self.db)} adresses in {int(time.perf_counter() - time0)}s")
@@ -148,4 +152,4 @@ if __name__ == '__main__':
     time0 = time.perf_counter()
     p = AdresseParser()
     p.scan()
-    print(f"Create {p.nbfile // 1} pickles in {int(time.perf_counter() - time0)}s")
+    print(f"Create {p.nbfile // 2} pickles in {int(time.perf_counter() - time0)}s")

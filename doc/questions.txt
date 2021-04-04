@@ -19,6 +19,7 @@
 # Rapidité + Geocoding => Gérer BD adresses matchées : 0.25j
 # Cedex => Peut donner 2 insee : 0.5j (rare et peu utile)
 # Bad Insee => 21 Codes Insee inconnus dans Cedex (27549, ...)
+# Doc => Création de la doc HTML
 # Réunions : 0.25j
 
 # V0.0.2.DEV

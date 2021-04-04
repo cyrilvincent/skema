@@ -362,6 +362,14 @@ class AdresseMatcher:
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
+        """
+        Gère les stratégies de scores bas
+        :param entity: l'entité
+        :param adresse3: adresse3
+        :param originalnum: le numéro originel
+        :param aentity: l'entité adresse matchée avec un mauvais score
+        :return: l'entié adresse matchée après les last chances
+        """
         if entity.score < config.adresse_quality:
             res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3), originalnum)
             if res is not None:
@@ -410,7 +418,6 @@ class AdresseMatcher:
                 entity = entities.PSEntity()
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
-                # t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2, entity.adresse4)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
                 if t in self.adresses_db:
                     aentity = self.db[self.adresses_db[t][0]]

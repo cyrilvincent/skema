@@ -3,3 +3,4 @@ art
 jsonpickle
 pandas
 numpy
+pdoc

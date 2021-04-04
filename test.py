@@ -26,5 +26,3 @@ print(ratio) #62.1%
 ratio = am.gestalt(s1, s3)
 print(ratio) #63.6%
 
-import shutil
-shutil.copy2("toto.txt", "c:\\")
