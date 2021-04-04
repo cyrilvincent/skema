@@ -5,6 +5,7 @@ import art
 import csv
 import pandas
 import argparse
+import shutil
 from typing import List
 
 
@@ -88,16 +89,27 @@ class AdresseRepository:
     def load_cedex(self):
         return cyrilload.load(config.cedex_path)
 
-    def save_adresses(self, db):
+    def save_adresses_db(self, db):
         print(f"Save {config.adresse_db_path}")
         with open(config.adresse_db_path, "w") as f:
-            # f.write("cp;commune;adresse2;adresse3;adresse4;adresseid;score\n")
             f.write("cp;commune;adresse2;adresse3;adresseid;score\n")
             for k in db.keys():
-                # f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};{k[4]};")
                 f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
                 v = db[k]
                 f.write(f"{v[0]};{v[1]}\n")
+
+    def load_adresses_db(self):
+        db = {}
+        try:
+            with open(config.adresse_db_path) as f:
+                reader = csv.DictReader(f, delimiter=";")
+                for row in reader:
+                    k = row["cp"], row["commune"], row["adresse3"], row["adresse2"]
+                    v = row["adresseid"], float(row["score"])
+                    db[k] = v
+        except FileNotFoundError:
+            print(f"{config.adresse_db_path} does not exist")
+        return db
 
 
 if __name__ == '__main__':

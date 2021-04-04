@@ -91,6 +91,9 @@ if __name__ == '__main__':
         s = "970 avenue leopold fabre 38250 Lans en Vercors"
         lon, lat = l.get_lon_lat_from_adresse(s)
         print(lon, lat)
+        s = "CARREFOUR DE L OSPEDALE RUE DU DR JOURDAN 20538 PORTO VECCHIO CEDEX"
+        lon, lat = l.get_lon_lat_from_adresse(s)
+        print(lon, lat)
         # p = parsers.MapsParser(l.html)
         # p.soup_pane()
         # print(p.soup_name())

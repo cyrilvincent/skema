@@ -40,6 +40,7 @@ class AdresseMatcher:
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
+        self.new_adresse = False
 
     def log(self, msg: str):
         """
@@ -364,24 +365,26 @@ class AdresseMatcher:
         if entity.score < config.adresse_quality:
             res = self.last_chance(self.normalize_commune(entity.commune), self.normalize_street(adresse3), originalnum)
             if res is not None:
-                self.nbbadcp += 1
                 aentity = res
-                self.log(f"WARNING BAD CP (LS): {entity.cp} {entity.commune}=>{aentity.code_postal} {aentity.commune}")
-                entity.scores[0] = 0.5
+                if aentity.code_postal != entity.cp:
+                    self.nbbadcp += 1
+                    self.log(f"WARNING CORRECTING CP: {entity.cp} {entity.commune}=>{aentity.code_postal}"
+                             f" {aentity.commune}")
+                entity.scores[0] = 0.5 if aentity.code_postal != entity.cp else 0.9
                 entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.99
             else:
                 res = self.very_last_chance(int(entity.cp), self.normalize_street(adresse3), originalnum)
                 if res is not None:
-                    self.nbbadcommune += 1
                     aentity = res
-                    self.log(f"WARNING BAD COMMUNE: {entity.cp} {entity.commune}=>{aentity.code_postal}"
-                             f" {aentity.commune}")
-                    entity.scores[1] = 0.5
+                    if aentity.commune != entity.commune:
+                        self.nbbadcommune += 1
+                        self.log(f"WARNING CORRECTING COMMUNE: {entity.cp} {entity.commune}=>{aentity.code_postal}"
+                                 f" {aentity.commune}")
+                    entity.scores[1] = 0.5 if aentity.commune != entity.commune else 0.9
                     entity.scores[0] = entity.scores[2] = entity.scores[3] = 0.98
         if entity.score < config.adresse_quality:
             self.nbscorelow += 1
-            nba = len(self.adresses_db) if len(self.adresses_db) != 0 else 1
-            self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / nba) * 100:.1f}%)"
+            self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)"
                      f" {entity.adresse3} {entity.cp} {entity.commune} => {aentity.numero} {aentity.nom_afnor}"
                      f" {aentity.code_postal} {aentity.commune}")
         if aentity is None:
@@ -414,6 +417,8 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, self.adresses_db[t][1])
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
+                    if entity.adressescore < config.adresse_quality:
+                        self.nbscorelow += 1
                 else:
                     cp, score = self.match_cp(cp)
                     entity.scores.append(score)
@@ -423,7 +428,7 @@ class AdresseMatcher:
                     entity.scores.append(score)
                     if score < 0.8:
                         cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
-                        if score2 > score:
+                        if score2 > score and cp2 != entity.cp:
                             self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
                             self.nbbadcp += 1
                             cp = cp2
@@ -445,6 +450,7 @@ class AdresseMatcher:
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.adresses_db[t] = (entity.adresseid, entity.score)
+                    self.new_adresse = True
 
     def display(self):
         print(f"Nb PS: {self.nb}")
@@ -458,19 +464,23 @@ class AdresseMatcher:
         print(f"Nb No Street: {self.nbnostreet} {(self.nbnostreet / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Error Unknown: {self.nberror500} {(self.nberror500 / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad INSEE: {self.nbbadinsee}")
-        print(f"Nb Score low: {self.nbscorelow} {(self.nbscorelow / len(self.adresses_db)) * 100 : .1f}%")
+        print(f"Nb Score low: {self.nbscorelow} {(self.nbscorelow / self.nb) * 100 : .1f}%")
 
-    def load_by_depts(self, file: str, depts: Optional[List[int]] = None):
+    def load_by_depts(self, file: str, depts: Optional[List[int]] = None, cache=False):
         """
         Prépare le chargement de PS en fonction d'une liste de département
         :param file: PS
         :param depts: la liste de département, None = all
+        :param cache: use ps_adresses.csv
         """
         self.log(f"Load {file}")
         self.csv = self.ps_repo.load_ps(file)
         self.total = len(self.csv)
         self.log(f"Load {config.cedex_path}")
         self.cedex_db = self.a_repo.load_cedex()
+        if cache:
+            self.log(f"Load {config.adresse_db_path}")
+            self.adresses_db = self.a_repo.load_adresses_db()
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.total *= len(depts)
@@ -482,7 +492,8 @@ class AdresseMatcher:
         self.pss_db.sort(key=lambda e: e.rownum)
         file = file.replace(".csv", "-adresses.csv")
         self.ps_repo.save_entities(file, self.pss_db)
-        self.a_repo.save_adresses(self.adresses_db)
+        if self.new_adresse and cache:
+            self.a_repo.save_adresses_db(self.adresses_db)
         self.log(f"Saved {self.nb} PS")
 
 
@@ -496,45 +507,30 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Adresses Matcher")
     parser.add_argument("path", help="Path")
     parser.add_argument("-d", "--dept", help="Departments list in python format, eg [5,38,06]")
+    parser.add_argument("-c", "--cache", help="Using ps_adresses.csv", action="store_true")
     args = parser.parse_args()
     am = AdresseMatcher()
     if args.dept is None:
-        am.load_by_depts(args.path)
+        am.load_by_depts(args.path, None, args.cache)
     else:
-        am.load_by_depts(args.path, eval(args.dept))
+        am.load_by_depts(args.path, eval(args.dept), args.cache)
 
     # 38
     # Nb PS: 48927
     # Nb Matching PS: 48927  100.0%
-    # Nb Unique PS: 3028 (0.1 rows/PS)
-    # Nb Unique Adresse: 2176 (0.0 rows/PS)
-    # Nb No num: 308  14.2%
-    # Nb Cedex BP: 143  6.6%
-    # Nb Bad CP: 26  1.2%
-    # Nb Bad commune: 6  0.3%
-    # Nb No Street: 2  0.1%
-    # Nb Error Unknown: 0  0.0%
-    # Nb Bad INSEE: 0
-    # Nb Score low: 42  1.9%
-    # Save data/ps/ps-tarifs-21-03-adresses.csv
-    # 103s 100.0% [2455164] Saved 48927 PS
-
-    # 38 adresse3 only
-    # Nb PS: 48927
-    # Nb Matching PS: 48927  100.0%
     # Nb Unique PS: 3028 (16.2 rows/PS)
-    # Nb Unique Adresse: 1527 (32.0 rows/PS)
-    # Nb No num: 238  15.6%
-    # Nb Cedex BP: 119  7.8%
-    # Nb Bad CP: 27  1.8%
-    # Nb Bad commune: 6  0.4%
-    # Nb No Street: 2  0.1%
+    # Nb Unique Adresse: 7688 (6.4 rows/PS)
+    # Nb No num: 286  3.7%
+    # Nb Cedex BP: 132  1.7%
+    # Nb Bad CP: 28  0.4%
+    # Nb Bad commune: 6  0.1%
+    # Nb No Street: 2  0.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 40  2.6%
+    # Nb Score low: 1779  3.6%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
-    # 86s 100.0% [2455164] Saved 48927 PS
+    # 116s 100.0% [2455164] Saved 48927 PS
 
     # 48
     # Nb PS: 1620
@@ -556,33 +552,32 @@ if __name__ == '__main__':
     # Nb PS: 100214
     # Nb Matching PS: 100214  100.0%
     # Nb Unique PS: 8921 (11.2 rows/PS)
-    # Nb Unique Adresse: 4845 (20.7 rows/PS)
+    # Nb Unique Adresse: 5581 (18.0 rows/PS)
     # Nb No num: 0  0.0%
-    # Nb Cedex BP: 31  0.6%
-    # Nb Bad CP: 285  5.9%
+    # Nb Cedex BP: 68  1.2%
+    # Nb Bad CP: 325  5.8%
     # Nb Bad commune: 0  0.0%
     # Nb No Street: 0  0.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 13  0.3%
+    # Nb Score low: 89  0.1%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
-    # 18m48s 100.0% [2455164] Saved 100214 PS
+    # 20m46s 100.0% [2455164] Saved 100214 PS
 
-    # All
     # Nb PS: 2401126
     # Nb Matching PS: 2401126  100.0%
     # Nb Unique PS: 151248 (15.9 rows/PS)
     # Nb Unique Adresse: 94784 (25.3 rows/PS)
     # Nb No num: 14214  15.0%
-    # Nb Cedex BP: 5141  5.4%
-    # Nb Bad CP: 1216  1.3%
-    # Nb Bad commune: 50  0.1%
+    # Nb Cedex BP: 5127  5.4%
+    # Nb Bad CP: 1204  1.3%
+    # Nb Bad commune: 51  0.1%
     # Nb No Street: 213  0.2%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 19
-    # Nb Score low: 1752  1.8%
+    # Nb Score low: 37583  1.6%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
-    # 2h54m 100.0% [2455164] Saved 2401126 PS
+    # 2h53m 100.0% [2455164] Saved 2401126 PS
 
