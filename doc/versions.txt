@@ -16,7 +16,7 @@
 # Gestion des lieux-dits
 # Gestion de l'abscence de rue et de numéro
 # Modification de la clé avec ajout de la profession
-# 98.2% de précision
+# 98.6% de précision
 # Adresses2Pickles
 # Indexation des lieux-dits
 # Indexation des cedex
@@ -26,6 +26,7 @@
 # Test un fichier PS
 # StringComparer
 # Comparer 2 phrases par Gestalt
+# API Doc : https://htmlpreview.github.io/?https://github.com/cyrilvincent/skema/blob/dev/doc/html/index.html
 
 # V0.0.2.DEV
 # 01/04/21

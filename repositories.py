@@ -5,8 +5,7 @@ import art
 import csv
 import pandas
 import argparse
-import shutil
-from typing import List
+from typing import List, Dict
 
 
 class PSRepository:
@@ -51,17 +50,31 @@ class PSRepository:
                 i += 1
         return i
 
-    def load_ps(self, file):
+    def load_ps(self, file: str):
+        """
+        Load PS file
+        :param file: the path
+        """
         with open(file) as f:
             reader = csv.reader(f, delimiter=";")
             return list(reader)
 
-    def get_dataframe(self, path):
+    def get_dataframe(self, path: str) -> pandas.DataFrame:
+        """
+        Load PS as dataframe
+        :param path: path
+        :return: dataframe
+        """
         dataframe = pandas.read_csv(path, delimiter=";", header=None, encoding="cp1252",
                                     dtype={14: str, 37: str, 43: int})
         return dataframe
 
-    def save_csv_from_dataframe(self, dataframe, path):
+    def save_csv_from_dataframe(self, dataframe: pandas.DataFrame, path: str):
+        """
+        Save dataframe as CSV
+        :param dataframe: dataframe
+        :param path: path
+        """
         dataframe.to_csv(path, header=False, index=False, sep=";")
 
 
@@ -86,10 +99,18 @@ class AdresseRepository:
         indexdb = cyrilload.load(f"{config.adresse_path}/adresses-{s}.pickle")
         return indexdb["db"], indexdb["communes"], indexdb["cps"], indexdb["insees"]
 
-    def load_cedex(self):
+    def load_cedex(self) -> Dict:
+        """
+        Charge Cedex
+        :return: le dictionnaire
+        """
         return cyrilload.load(config.cedex_path)
 
-    def save_adresses_db(self, db):
+    def save_adresses_db(self, db: Dict):
+        """
+        Sauvegarde le dict d'adresse en CSV
+        :param db: le dict
+        """
         print(f"Save {config.adresse_db_path}")
         with open(config.adresse_db_path, "w") as f:
             f.write("cp;commune;adresse2;adresse3;adresseid;score\n")
@@ -98,7 +119,11 @@ class AdresseRepository:
                 v = db[k]
                 f.write(f"{v[0]};{v[1]}\n")
 
-    def load_adresses_db(self):
+    def load_adresses_db(self) -> Dict:
+        """
+        Charge l'adresse db depuis CSV
+        :return: la DB
+        """
         db = {}
         try:
             with open(config.adresse_db_path) as f:

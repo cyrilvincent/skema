@@ -89,7 +89,7 @@ class AdresseParser:
         self.load_lieuxdits(ldpath)
         cyrilload.save(self.indexdb, path.replace(".csv", ""), method="pickle")
 
-    def load_lieuxdits(self, path):
+    def load_lieuxdits(self, path: str):
         """
         Charge le fichier lieux dits
         :param path: le fichier

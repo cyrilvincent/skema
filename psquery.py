@@ -54,8 +54,7 @@ class PSQuery:
                     return None
                 s = f"self.module.{self.fn}(dataframe)"
                 res = eval(s)
-                res = res.assign(year=year)
-                res = res.assign(month=month)
+                res = res.assign(year=year).assign(month=month)
                 return res
             except UnicodeDecodeError:
                 print("Encoding error must be cp1252")

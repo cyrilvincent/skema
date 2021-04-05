@@ -8,7 +8,9 @@
 # V0.1.0.DEV
 # ??/04/21
 # 4 jours
-# WP => All Ok, Matching 100%, Accuracy 98.6% (entre 95.8% et 99.9%) en 2h52
+# WP => All Ok, Matching 100%, Accuracy 98.6%
+# Accuracy => Paris 99.9%, campagne 97-99%, villes moyennes 96-98%, le pire 95.8% à cause des BP, mauvais matching et quelques Cedex (absence, double cp)
+# Accuracy BP & Cedex => Geocoding
 # Key = Nom+Prenom+CP+Profession
 # Mise en place des pondérations => stringcomparer
 # Geocoding => Google Geocoding API 5$/1000 adresses : 4j https://developers.google.com/maps/documentation/geocoding/overview?hl=fr
@@ -16,10 +18,10 @@
 # Geocoding => PositionStack 25000/mois à 0€, très facile mais ne semble pas plus fiable que adressematcher : 2j https://positionstack.com/
 # Geocoding => Google Map Scrapping : 2j mais très lent, mais très fiable car couplé au moteur de recherche Google, uniquement pour les scores faibles (1700 adresses)
 # Pattern Matching => Google Tensorflow USE pattern par mot : 4j mais lent https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder
-# Rapidité + Geocoding => Gérer BD adresses matchées : 0.25j
+# Rapidité + Geocoding => Gérer BD adresses matchées (90K) : 0.25j
 # Cedex => Peut donner 2 insee : 0.5j (rare et peu utile)
 # Bad Insee => 21 Codes Insee inconnus dans Cedex (27549, ...)
-# Doc => Création de la doc HTML
+# Doc => Création de la doc HTML : https://htmlpreview.github.io/?https://github.com/cyrilvincent/skema/blob/dev/doc/html/index.html
 # Réunions : 0.25j
 
 # V0.0.2.DEV

@@ -53,7 +53,7 @@ if __name__ == '__main__':
             print(f"=>{aentity.numero} @{int(score * 100)}%")
             entity.scores.append(score)
             aentity = am.check_low_score(entity, entity.adresse3, num, aentity)
-            print(f"Résultat: {aentity} @{int((sum(entity.scores) / 4) * 100)}%")
+            print(f"Résultat: {aentity} @{int(entity.score * 100)}%")
         except ValueError:
             print("Erreur de saisie, recommencer")
         except KeyError:

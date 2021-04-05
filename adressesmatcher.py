@@ -103,7 +103,13 @@ class AdresseMatcher:
                 difmin = dif
         return res
 
-    def gestalt(self, s1, s2):
+    def gestalt(self, s1: str, s2: str):
+        """
+        Gestalt
+        :param s1: string1
+        :param s2: string2
+        :return: le ratio
+        """
         sm = difflib.SequenceMatcher(None, s1, s2)
         return sm.ratio()
 
@@ -447,12 +453,11 @@ class AdresseMatcher:
                     num, adresse3 = self.split_num(adresse3)
                     if num == 0 and adresse2 != "":
                         num, adresse2 = self.split_num(adresse2)
-                    originalnum = num
                     matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
                     entity.scores.append(score)
                     aentity, score = self.match_num(commune, matchadresse, num)
                     entity.scores.append(score)
-                    aentity = self.check_low_score(entity, adresse3, originalnum, aentity)
+                    aentity = self.check_low_score(entity, adresse3, num, aentity)
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)

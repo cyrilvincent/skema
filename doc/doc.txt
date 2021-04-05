@@ -26,7 +26,7 @@
 # Utilisation : python adressesmatcher.py data/ps/ps-tarifs-21-03.csv
 # Génére le fichier data/ps/ps-tarifs-21-03-adresses.csv complété avec les adresses pour tous les départements métropolitains + Corse
 # -d indique la liste des départements à matcher
-    # La liste doit être au format des listes Python
+    # La liste doit être au format des listes Python sans espace
     # Pour la Corse 2A = 201 et 2B = 202
 # Exemple pour le département 01 python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d [1]
     # Attention le département ne doit pas commencer par 0, [1] != [01]
@@ -61,3 +61,5 @@
 # Fusionne uniquement les fichiers adresses-*.csv
 # Pour les fichiers CSV sans en tête utiliser -h : python mergecsv data/ps -e csv -p ps-tarifs-21-03-
 
+# API
+# https://htmlpreview.github.io/?https://github.com/cyrilvincent/skema/blob/dev/doc/html/index.html

@@ -39,8 +39,7 @@ if __name__ == '__main__':
     dataframe = repo.get_dataframe(args.path)
     s = f"{args.fn}(dataframe)"
     res = eval(s)
-    res = res.assign(year=year)
-    res = res.assign(month=month)
+    res = res.assign(year=year).assign(month=month)
     print(res)
     file = args.path.replace(".csv", f"-{args.fn}.csv")
     repo.save_csv_from_dataframe(res, file)

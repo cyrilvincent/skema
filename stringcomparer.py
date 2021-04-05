@@ -1,6 +1,5 @@
 import art
 import config
-import sys
 import difflib
 from adressesmatcher import AdresseMatcher
 
@@ -15,7 +14,7 @@ if __name__ == '__main__':
     while True:
         s1 = input("Phrase1 (Entrer pour quitter): ")
         if s1 == "":
-            sys.exit(0)
+            quit()
         s1 = am.normalize_street(s1.upper())
         s2 = input("Phrase2: ")
         s2 = am.normalize_street(s2.upper())
