@@ -41,7 +41,7 @@ class PSEntity:
     Entité PS
     """
 
-    nb = 44
+    nb = 45
     originalnb = 33
 
     def __init__(self):
@@ -52,6 +52,7 @@ class PSEntity:
         for i in range(38, 43):
             self.v[i] = 0.0
         self.v[7] = 0
+        self.v[44] = "BAN"
         self.updateid()
         self.rownum = 0
 

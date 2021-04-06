@@ -401,6 +401,12 @@ class AdresseMatcher:
             self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)"
                      f" {entity.adresse3} {entity.cp} {entity.commune} => {aentity.numero} {aentity.nom_afnor}"
                      f" {aentity.code_postal} {aentity.commune}")
+            # import nominatimpoc
+            # lon, lat = nominatimpoc.get_lon_lat_from_adresse(0, entity.adresse3, entity.commune, entity.cp)
+            # if lat != 0:
+            #     print("Nominatim OK")
+            #     self.nbscorelow -= 1
+            #     entity.scores[0] = entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.98
         if aentity is None:
             aentity = entities.AdresseEntity(0)
             self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
@@ -461,7 +467,7 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = (entity.adresseid, entity.score)
+                    self.adresses_db[t] = (entity.adresseid, entity.score, "BAN", entity.lon, entity.lat)
                     self.new_adresse = True
 
     def display(self):
@@ -539,7 +545,7 @@ if __name__ == '__main__':
     # Nb No Street: 2  0.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 1779  3.6%
+    # Nb Score low: 1757  3.6% Nominatim gain de 0.4% soit 11%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
     # 116s 100.0% [2455164] Saved 48927 PS
@@ -556,7 +562,7 @@ if __name__ == '__main__':
     # Nb No Street: 2  2.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 1  1.0%
+    # Nb Score low: 0  0.0%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 14s 100.0% [2455164] Saved 1620 PS
 

@@ -30,7 +30,11 @@ def load():
     db = repo.load_adresses_db()
     for k in db:
         lon, lat = get_lon_lat_from_adresse(0, k[2], k[1], k[0])
-        print(f"{k[2]} {k[0]} {k[1]} @{int(db[k][1]*100)}% => {lon},{lat}")
+        if lat == 0:
+            lon, lat = get_lon_lat_from_adresse(0, k[2], k[1], "")
+        v = db[k]
+        dist = calc_distance(lon, lat, v[3], v[4]) if lat != 0 else "?"
+        print(f"{k[2]} {k[0]} {k[1]} @{int(v[1]*100)}% => {lon},{lat} {dist}m")
 
 
 def calc_distance(lon1, lat1, lon2, lat2):
