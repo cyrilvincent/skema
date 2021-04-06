@@ -2,6 +2,8 @@ import art
 import config
 import adressesmatcher
 import entities
+import nominatimpoc
+import mapquestpoc
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")

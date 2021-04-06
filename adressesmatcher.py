@@ -150,17 +150,17 @@ class AdresseMatcher:
             street.replace(" BP", "")
         street = street.replace(" CH ", " CHEMIN ").replace(" AV ", " AVENUE ").replace(" PL ", " PLACE ")
         street = street.replace(" BD ", " BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
-        street = street.replace(" RT ", " ROUTE ").replace(" GAL ", " GENERAL ")
+        street = street.replace(" RT ", " ROUTE ").replace(" RTE ", " ROUTE ").replace(" GAL ", " GENERAL ")
         return street.strip()
 
     def denormalize_street(self, street: str) -> str:
         """
-        Denormalise la rue
+        Denormalise la rue afin d'abaisser son poids
         :param street: rue
         :return: rue dénormalisée
         """
         street = street.replace("CHEMIN", "CH").replace("AVENUE", "AV").replace("PLACE", "PL")
-        street = street.replace("BOULEVARD", "BD").replace("ROUTE", "RT")
+        street = street.replace("BOULEVARD", "BD").replace("ROUTE", "RT").replace("IMPASSE", "IMP")
         return street
 
     def normalize_commune(self, commune: str) -> str:

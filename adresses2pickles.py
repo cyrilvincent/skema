@@ -46,7 +46,7 @@ class AdresseParser:
         s = s.replace(" CH ", " CHEMIN ").replace(" AV ", " AVENUE ").replace(" PL ", " PLACE ")
         s = s.replace(" BD ", " BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")
         s = s.replace(" ST ", " SAINT ").replace(" STE ", " SAINTE ").replace(" RT ", " ROUTE ")
-        s = s.replace(" GAL ", " GENERAL ")
+        s = s.replace(" GAL ", " GENERAL ").replace(" R ", " RUE ").replace(" RTE ", " ROUTE ")
         return s.strip()
 
     def load(self, path: str):
@@ -69,7 +69,7 @@ class AdresseParser:
                 e = entities.AdresseEntity(row["id"])
                 e.numero = int(row["numero"])
                 e.rep = row["rep"]
-                e.nom_afnor = row["nom_afnor"]
+                e.nom_afnor = self.normalize(row["nom_afnor"])
                 e.nom_voie = self.normalize(row["nom_voie"])
                 if e.nom_voie == e.nom_afnor:
                     e.nom_voie = ""
