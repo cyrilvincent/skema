@@ -431,6 +431,7 @@ class AdresseMatcher:
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
+
                 if t in self.adresses_db:
                     aentity = self.db[self.adresses_db[t][0]]
                     self.update_entity(entity, aentity, self.adresses_db[t][1])
@@ -467,7 +468,7 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = (entity.adresseid, entity.score, "BAN", entity.lon, entity.lat)
+                    self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
                     self.new_adresse = True
 
     def display(self):

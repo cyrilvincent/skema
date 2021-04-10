@@ -113,11 +113,11 @@ class AdresseRepository:
         """
         print(f"Save {config.adresse_db_path}")
         with open(config.adresse_db_path, "w") as f:
-            f.write("cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat\n")
+            f.write("cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n")
             for k in db.keys():
                 f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
                 v = db[k]
-                f.write(f"{v[0]};{v[1]};{v[2]};{v[3]};{v[4]}\n")
+                f.write(f"{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n")
 
     def load_adresses_db(self) -> Dict:
         """
@@ -129,8 +129,12 @@ class AdresseRepository:
             with open(config.adresse_db_path) as f:
                 reader = csv.DictReader(f, delimiter=";")
                 for row in reader:
-                    k = row["cp"], row["commune"], row["adresse3"], row["adresse2"]
-                    v = row["adresseid"], float(row["score"]), row["source"], float(row["lon"]), float(row["lat"])
+                    cp = row["cp"]
+                    if len(cp) == 4:
+                        cp = "0" + cp
+                    k = cp, row["commune"], row["adresse3"], row["adresse2"]
+                    score = float(row["score"])
+                    v = row["adresseid"], score, row["source"], float(row["lon"]), float(row["lat"]), row["matchcp"]
                     db[k] = v
         except FileNotFoundError:
             print(f"{config.adresse_db_path} does not exist")

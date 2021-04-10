@@ -31,6 +31,7 @@ class PSQuery:
         dataframe = pandas.concat(self.db, ignore_index=True, sort=False)
         print(dataframe)
         file = f"{self.path}/results/psquery-{self.fn}.csv"
+        file = file.replace("<", "lt;").replace(">", "gt;").replace(":", "").replace("*", "").replace("|", "OR")
         self.repo.save_csv_from_dataframe(dataframe, file)
         print(f"Saved {file}")
 
@@ -52,7 +53,7 @@ class PSQuery:
                 if dataframe.shape[1] != self.nbcolumns:
                     print(f"Bad number of columns {dataframe.shape[1]} != {self.nbcolumns}")
                     return None
-                s = f"self.module.{self.fn}(dataframe)"
+                s = f"self.module.{self.fn}"
                 res = eval(s)
                 res = res.assign(year=year).assign(month=month)
                 return res
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     print()
     parser = argparse.ArgumentParser(description="PS Query")
     parser.add_argument("path", help="Path")
-    parser.add_argument("fn", help="Function name")
+    parser.add_argument("fn", help="Function call")  # data/ps test2(dataframe,'VINCENT')
     parser.add_argument("-m", "--module", help="psfilter module name")
     args = parser.parse_args()
     module = "psfilter" if args.module is None else args.module
