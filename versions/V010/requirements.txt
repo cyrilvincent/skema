@@ -1,0 +1,6 @@
+unidecode
+art
+jsonpickle
+pandas
+numpy
+pdoc3
