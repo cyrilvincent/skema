@@ -13,7 +13,8 @@
 # Ouvrir une console
 # Dans le répertoire de votre choix taper git clone https://github.com/cyrilvincent/skema
 # Renommer skema vers ICIP
-# Taper python -m pip install -r requirements.txt depuis la racine du projet
+# Mettre à jour pip avec python -m pip install --upgrade pip
+# Installer les modules avec python -m pip install -r requirements.txt depuis la racine du projet
 # Télécharger les adresses par département depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/
 # Dézipper les adresses dans data/adresse
 # Faire de même pour les lieux-dits dans le même répertoire
@@ -21,7 +22,7 @@
 # Renommer le fichier en ps-tarifs-YY-MM.csv où YY = année et MM = mois
 # Pour créer les indexs d'adresse taper python adresses2pickles.py
 # Pour créer l'index des cedex taper python cedex2pickle.py data/cedex/liste-des-cedex.csv
-# Pour tester le proto taper python adressesmatcher.py data/ps/ps-tarifs-31-03.csv -d [48]
+# Pour tester taper python adressesmatcher.py data/ps/ps-tarifs-31-03.csv -d [48]
 # Voir doc.txt
 
 # Mise à jour entre 2 versions

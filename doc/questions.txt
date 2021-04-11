@@ -11,19 +11,17 @@
 # WP => All Ok, Matching 100%, Accuracy 98.7%
 # Accuracy => Paris 99.9%, campagne 97-100%, villes moyennes 96-98%
 # Accuracy => Les causes sont 1/ BP, 2/ Mauvaise adresse, 3/ mauvais matching, 4/ Cedex (absence, double cp)
-# Accuracy BP & Cedex => Geocoding
 # Mise en place des pondérations => stringcomparer
-# Key = Nom+Prenom+CP+Profession
+# Accuracy BP & Cedex => Geocoding
 # Geocoding => Google Geocoding API 5$/1000 adresses : 4j https://developers.google.com/maps/documentation/geocoding/overview?hl=fr
 # Geocoding => MapQuest.com 15000/mois à 0€, pour combien de temps est-ce gratuit?, necessite une adresse complète : 2j https://developer.mapquest.com/documentation/open/geocoding-api/ http://open.mapquestapi.com/geocoding/v1/address?key=SP3uDKFpTXYZaXyU9HnzPu1tIkxTU6xT&location=1571+chemin+des+blancs+38250+lans+en+vercors
 # Geocoding => PositionStack 25000/mois à 0€, très facile mais de qualité moindre : 2j https://positionstack.com/
 # Geocoding => Google Map Scrapping : 3j mais très lent, mais très fiable car couplé au moteur de recherche Google, uniquement pour les scores faibles (2000 adresses)
-# Geocoding => Nominatim : 100% Libre et facile, stable dans le temps, gains possible de 0.5% : 2j https://nominatim.openstreetmap.org/ui/search.html
+# Geocoding => Nominatim : 100% Libre et facile, stable dans le temps, gains possible de 0.5% : 1.5j https://nominatim.openstreetmap.org/ui/search.html
 # Geocoding => Mise en place d'un POC, retrouve 50% des scores lows, 10% d'échec en moyenne, moins bon qu'adressematcher, score par calcul de distance
-# Pattern Matching => Google Tensorflow USE pattern par mot : 4j mais lent, gains faibles https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder
-# Rapidité + Geocoding => Gérer BD adresses matchées (90K) : 0.25j
+# Rapidité + Geocoding => Gérer BD adresses matchées (90K) : 0.5j
 # Cedex => Peut donner 2 insee : 0.5j (rare et peu utile)
-# Bad Insee => 21 Codes Insee inconnus dans Cedex (27549, ...)
+# Bad Insee => 7 Codes Insee inconnus dans Cedex (27549, 76575, 74236, 85224, 85060, 99207, 2A247)
 # Doc => Création de la doc HTML : https://htmlpreview.github.io/?https://github.com/cyrilvincent/skema/blob/dev/doc/html/index.html
 # Réunions : 0.25j
 

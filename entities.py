@@ -36,6 +36,39 @@ class CedexEntity:
         return f"Cedex {self.cp} {self.commune} {self.code_insee}"
 
 
+class AdresseDbEntity:
+
+    def __init__(self, cp, commune, adresse3, adresse2, adresseid, score, source, lon, lat, matchcp):
+        self._cp = 0
+        self.cp = cp
+        self.commune = commune
+        self.adresse3 = adresse3
+        self.adresse2 = adresse2
+        self.adresseid = adresseid
+        self.score = score
+        self.source = source
+        self.lon = lon
+        self.lat = lat
+        self.matchcp = matchcp
+
+    @property
+    def key(self):
+        return self.cp, self.commune, self.adresse3, self.adresse2
+
+    @property
+    def cp(self):
+        return self._cp
+
+    @cp.setter
+    def cp(self, value):
+        self._cp = value
+        if len(value) == 4:
+            self._cp = "0" + self._cp
+
+    def __repr__(self):
+        return f"AdresseDb {self.key}"
+
+
 class PSEntity:
     """
     Entité PS

@@ -36,7 +36,7 @@ class AdresseMatcher:
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
-        self.adresses_db = {}
+        self.adresses_db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity] = {}
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
@@ -278,6 +278,7 @@ class AdresseMatcher:
         if num == 0:
             adresses = [e for e in adresses if e.nom_afnor == adresse]
             if len(adresses) > 0:
+                adresses.sort(key=lambda a: a.numero)
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
@@ -366,6 +367,22 @@ class AdresseMatcher:
         entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
         entity.matchcp = aentity.code_postal
 
+    # def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, values):
+    #     """
+    #     MAJ PS par rapport à l'adresse
+    #     :param entity: PS
+    #     :param aentity: adresse entity
+    #     :param values: adresses_db values
+    #     """
+    #     entity.adresseid = aentity.id
+    #     entity.adressescore = values[1]
+    #     entity.lon = values[2]
+    #     entity.lat = values[3]
+    #     entity.codeinsee = aentity.code_insee
+    #     entity.matchcp = values[4]
+    #     entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
+    #     entity.v[44] = "OSM"
+
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
         """
@@ -431,10 +448,11 @@ class AdresseMatcher:
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
-
                 if t in self.adresses_db:
-                    aentity = self.db[self.adresses_db[t][0]]
-                    self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    # aentity = self.db[self.adresses_db[t][0]]
+                    aentity = self.db[self.adresses_db[t].adresseid]
+                    # self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    self.update_entity(entity, aentity, self.adresses_db[t].score)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
                     if entity.adressescore < config.adresse_quality:
@@ -468,7 +486,10 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
+                    # self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
+                    v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
+                                                 entity.lon, entity.lat, entity.matchcp)
+                    self.adresses_db[v.key] = v
                     self.new_adresse = True
 
     def display(self):
