@@ -114,9 +114,11 @@ class AdresseRepository:
         print(f"Save {config.adresse_db_path}")
         with open(config.adresse_db_path, "w") as f:
             f.write("cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n")
-            for k in db.keys():
+            l = list(db.values())
+            l.sort(key=lambda a: a.score)
+            for v in l:
                 # f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
-                v = db[k]
+                # v = db[k]
                 # f.write(f"{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n")
                 f.write(f"{v.cp};{v.commune};{v.adresse2};{v.adresse3};{v.adresseid};{v.score};{v.source};")
                 f.write(f"{v.lon};{v.lat};{v.matchcp}\n")
