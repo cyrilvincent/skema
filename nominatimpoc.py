@@ -26,13 +26,15 @@ class NominatimRest:
             s = js[0]["display_name"]
             index = s.rindex(",")
             cp = s[index - 5: index].strip()
+            if len(cp) == 4:
+                cp = "0" + cp
         return lon, lat, cp
 
     def load(self):
         self.db = self.repo.load_adresses_db()
         for k in list(self.db.keys()):
             v = self.db[k]
-            if v.source == "BAN" and v.score < 0.91:
+            if v.source == "BAN" and v.score < 0.9:
                 commune = v.commune
                 if " CEDEX" in commune:
                     index = commune.index(" CEDEX")

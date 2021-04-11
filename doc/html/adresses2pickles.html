@@ -74,7 +74,7 @@ class AdresseParser:
         s = s.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
         s = s.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
         s = s.replace(&#34; ST &#34;, &#34; SAINT &#34;).replace(&#34; STE &#34;, &#34; SAINTE &#34;).replace(&#34; RT &#34;, &#34; ROUTE &#34;)
-        s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+        s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;).replace(&#34; R &#34;, &#34; RUE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;)
         return s.strip()
 
     def load(self, path: str):
@@ -97,7 +97,7 @@ class AdresseParser:
                 e = entities.AdresseEntity(row[&#34;id&#34;])
                 e.numero = int(row[&#34;numero&#34;])
                 e.rep = row[&#34;rep&#34;]
-                e.nom_afnor = row[&#34;nom_afnor&#34;]
+                e.nom_afnor = self.normalize(row[&#34;nom_afnor&#34;])
                 e.nom_voie = self.normalize(row[&#34;nom_voie&#34;])
                 if e.nom_voie == e.nom_afnor:
                     e.nom_voie = &#34;&#34;
@@ -117,7 +117,7 @@ class AdresseParser:
         self.load_lieuxdits(ldpath)
         cyrilload.save(self.indexdb, path.replace(&#34;.csv&#34;, &#34;&#34;), method=&#34;pickle&#34;)
 
-    def load_lieuxdits(self, path):
+    def load_lieuxdits(self, path: str):
         &#34;&#34;&#34;
         Charge le fichier lieux dits
         :param path: le fichier
@@ -238,7 +238,7 @@ if __name__ == &#39;__main__&#39;:
         s = s.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
         s = s.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
         s = s.replace(&#34; ST &#34;, &#34; SAINT &#34;).replace(&#34; STE &#34;, &#34; SAINTE &#34;).replace(&#34; RT &#34;, &#34; ROUTE &#34;)
-        s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+        s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;).replace(&#34; R &#34;, &#34; RUE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;)
         return s.strip()
 
     def load(self, path: str):
@@ -261,7 +261,7 @@ if __name__ == &#39;__main__&#39;:
                 e = entities.AdresseEntity(row[&#34;id&#34;])
                 e.numero = int(row[&#34;numero&#34;])
                 e.rep = row[&#34;rep&#34;]
-                e.nom_afnor = row[&#34;nom_afnor&#34;]
+                e.nom_afnor = self.normalize(row[&#34;nom_afnor&#34;])
                 e.nom_voie = self.normalize(row[&#34;nom_voie&#34;])
                 if e.nom_voie == e.nom_afnor:
                     e.nom_voie = &#34;&#34;
@@ -281,7 +281,7 @@ if __name__ == &#39;__main__&#39;:
         self.load_lieuxdits(ldpath)
         cyrilload.save(self.indexdb, path.replace(&#34;.csv&#34;, &#34;&#34;), method=&#34;pickle&#34;)
 
-    def load_lieuxdits(self, path):
+    def load_lieuxdits(self, path: str):
         &#34;&#34;&#34;
         Charge le fichier lieux dits
         :param path: le fichier
@@ -365,7 +365,7 @@ if __name__ == &#39;__main__&#39;:
             e = entities.AdresseEntity(row[&#34;id&#34;])
             e.numero = int(row[&#34;numero&#34;])
             e.rep = row[&#34;rep&#34;]
-            e.nom_afnor = row[&#34;nom_afnor&#34;]
+            e.nom_afnor = self.normalize(row[&#34;nom_afnor&#34;])
             e.nom_voie = self.normalize(row[&#34;nom_voie&#34;])
             if e.nom_voie == e.nom_afnor:
                 e.nom_voie = &#34;&#34;
@@ -387,7 +387,7 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="icip.adresses2pickles.AdresseParser.load_lieuxdits"><code class="name flex">
-<span>def <span class="ident">load_lieuxdits</span></span>(<span>self, path)</span>
+<span>def <span class="ident">load_lieuxdits</span></span>(<span>self, path: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Charge le fichier lieux dits
@@ -396,7 +396,7 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_lieuxdits(self, path):
+<pre><code class="python">def load_lieuxdits(self, path: str):
     &#34;&#34;&#34;
     Charge le fichier lieux dits
     :param path: le fichier
@@ -487,7 +487,7 @@ if __name__ == &#39;__main__&#39;:
     s = s.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
     s = s.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
     s = s.replace(&#34; ST &#34;, &#34; SAINT &#34;).replace(&#34; STE &#34;, &#34; SAINTE &#34;).replace(&#34; RT &#34;, &#34; ROUTE &#34;)
-    s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+    s = s.replace(&#34; GAL &#34;, &#34; GENERAL &#34;).replace(&#34; R &#34;, &#34; RUE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;)
     return s.strip()</code></pre>
 </details>
 </dd>

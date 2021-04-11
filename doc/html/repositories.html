@@ -33,8 +33,7 @@ import art
 import csv
 import pandas
 import argparse
-import shutil
-from typing import List
+from typing import List, Dict, Tuple
 
 
 class PSRepository:
@@ -79,17 +78,31 @@ class PSRepository:
                 i += 1
         return i
 
-    def load_ps(self, file):
+    def load_ps(self, file: str):
+        &#34;&#34;&#34;
+        Load PS file
+        :param file: the path
+        &#34;&#34;&#34;
         with open(file) as f:
             reader = csv.reader(f, delimiter=&#34;;&#34;)
             return list(reader)
 
-    def get_dataframe(self, path):
+    def get_dataframe(self, path: str) -&gt; pandas.DataFrame:
+        &#34;&#34;&#34;
+        Load PS as dataframe
+        :param path: path
+        :return: dataframe
+        &#34;&#34;&#34;
         dataframe = pandas.read_csv(path, delimiter=&#34;;&#34;, header=None, encoding=&#34;cp1252&#34;,
                                     dtype={14: str, 37: str, 43: int})
         return dataframe
 
-    def save_csv_from_dataframe(self, dataframe, path):
+    def save_csv_from_dataframe(self, dataframe: pandas.DataFrame, path: str):
+        &#34;&#34;&#34;
+        Save dataframe as CSV
+        :param dataframe: dataframe
+        :param path: path
+        &#34;&#34;&#34;
         dataframe.to_csv(path, header=False, index=False, sep=&#34;;&#34;)
 
 
@@ -114,27 +127,49 @@ class AdresseRepository:
         indexdb = cyrilload.load(f&#34;{config.adresse_path}/adresses-{s}.pickle&#34;)
         return indexdb[&#34;db&#34;], indexdb[&#34;communes&#34;], indexdb[&#34;cps&#34;], indexdb[&#34;insees&#34;]
 
-    def load_cedex(self):
+    def load_cedex(self) -&gt; Dict:
+        &#34;&#34;&#34;
+        Charge Cedex
+        :return: le dictionnaire
+        &#34;&#34;&#34;
         return cyrilload.load(config.cedex_path)
 
-    def save_adresses_db(self, db):
+    def save_adresses_db(self, db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]):
+        &#34;&#34;&#34;
+        Sauvegarde le dict d&#39;adresse en CSV
+        :param db: le dict
+        &#34;&#34;&#34;
         print(f&#34;Save {config.adresse_db_path}&#34;)
         with open(config.adresse_db_path, &#34;w&#34;) as f:
-            f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score\n&#34;)
-            for k in db.keys():
-                f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
-                v = db[k]
-                f.write(f&#34;{v[0]};{v[1]}\n&#34;)
+            f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n&#34;)
+            l = list(db.values())
+            l.sort(key=lambda a: a.score)
+            for v in l:
+                # f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
+                # v = db[k]
+                # f.write(f&#34;{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n&#34;)
+                f.write(f&#34;{v.cp};{v.commune};{v.adresse2};{v.adresse3};{v.adresseid};{v.score};{v.source};&#34;)
+                f.write(f&#34;{v.lon};{v.lat};{v.matchcp}\n&#34;)
 
-    def load_adresses_db(self):
+    def load_adresses_db(self) -&gt; Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]:
+        &#34;&#34;&#34;
+        Charge l&#39;adresse db depuis CSV
+        :return: la DB
+        &#34;&#34;&#34;
         db = {}
         try:
             with open(config.adresse_db_path) as f:
                 reader = csv.DictReader(f, delimiter=&#34;;&#34;)
                 for row in reader:
-                    k = row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
-                    v = row[&#34;adresseid&#34;], float(row[&#34;score&#34;])
-                    db[k] = v
+                    v = entities.AdresseDbEntity(row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;],
+                                                 row[&#34;adresseid&#34;], float(row[&#34;score&#34;]), row[&#34;source&#34;],
+                                                 float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;])
+                    # cp = row[&#34;cp&#34;]
+                    # k = cp, row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
+                    # score = float(row[&#34;score&#34;])
+                    # v = row[&#34;adresseid&#34;], score, row[&#34;source&#34;], float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;]
+                    # db[k] = v
+                    db[v.key] = v
         except FileNotFoundError:
             print(f&#34;{config.adresse_db_path} does not exist&#34;)
         return db
@@ -194,27 +229,49 @@ if __name__ == &#39;__main__&#39;:
         indexdb = cyrilload.load(f&#34;{config.adresse_path}/adresses-{s}.pickle&#34;)
         return indexdb[&#34;db&#34;], indexdb[&#34;communes&#34;], indexdb[&#34;cps&#34;], indexdb[&#34;insees&#34;]
 
-    def load_cedex(self):
+    def load_cedex(self) -&gt; Dict:
+        &#34;&#34;&#34;
+        Charge Cedex
+        :return: le dictionnaire
+        &#34;&#34;&#34;
         return cyrilload.load(config.cedex_path)
 
-    def save_adresses_db(self, db):
+    def save_adresses_db(self, db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]):
+        &#34;&#34;&#34;
+        Sauvegarde le dict d&#39;adresse en CSV
+        :param db: le dict
+        &#34;&#34;&#34;
         print(f&#34;Save {config.adresse_db_path}&#34;)
         with open(config.adresse_db_path, &#34;w&#34;) as f:
-            f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score\n&#34;)
-            for k in db.keys():
-                f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
-                v = db[k]
-                f.write(f&#34;{v[0]};{v[1]}\n&#34;)
+            f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n&#34;)
+            l = list(db.values())
+            l.sort(key=lambda a: a.score)
+            for v in l:
+                # f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
+                # v = db[k]
+                # f.write(f&#34;{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n&#34;)
+                f.write(f&#34;{v.cp};{v.commune};{v.adresse2};{v.adresse3};{v.adresseid};{v.score};{v.source};&#34;)
+                f.write(f&#34;{v.lon};{v.lat};{v.matchcp}\n&#34;)
 
-    def load_adresses_db(self):
+    def load_adresses_db(self) -&gt; Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]:
+        &#34;&#34;&#34;
+        Charge l&#39;adresse db depuis CSV
+        :return: la DB
+        &#34;&#34;&#34;
         db = {}
         try:
             with open(config.adresse_db_path) as f:
                 reader = csv.DictReader(f, delimiter=&#34;;&#34;)
                 for row in reader:
-                    k = row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
-                    v = row[&#34;adresseid&#34;], float(row[&#34;score&#34;])
-                    db[k] = v
+                    v = entities.AdresseDbEntity(row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;],
+                                                 row[&#34;adresseid&#34;], float(row[&#34;score&#34;]), row[&#34;source&#34;],
+                                                 float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;])
+                    # cp = row[&#34;cp&#34;]
+                    # k = cp, row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
+                    # score = float(row[&#34;score&#34;])
+                    # v = row[&#34;adresseid&#34;], score, row[&#34;source&#34;], float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;]
+                    # db[k] = v
+                    db[v.key] = v
         except FileNotFoundError:
             print(f&#34;{config.adresse_db_path} does not exist&#34;)
         return db</code></pre>
@@ -250,58 +307,83 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="icip.repositories.AdresseRepository.load_adresses_db"><code class="name flex">
-<span>def <span class="ident">load_adresses_db</span></span>(<span>self)</span>
+<span>def <span class="ident">load_adresses_db</span></span>(<span>self) ‑> Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Charge l'adresse db depuis CSV
+:return: la DB</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_adresses_db(self):
+<pre><code class="python">def load_adresses_db(self) -&gt; Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]:
+    &#34;&#34;&#34;
+    Charge l&#39;adresse db depuis CSV
+    :return: la DB
+    &#34;&#34;&#34;
     db = {}
     try:
         with open(config.adresse_db_path) as f:
             reader = csv.DictReader(f, delimiter=&#34;;&#34;)
             for row in reader:
-                k = row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
-                v = row[&#34;adresseid&#34;], float(row[&#34;score&#34;])
-                db[k] = v
+                v = entities.AdresseDbEntity(row[&#34;cp&#34;], row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;],
+                                             row[&#34;adresseid&#34;], float(row[&#34;score&#34;]), row[&#34;source&#34;],
+                                             float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;])
+                # cp = row[&#34;cp&#34;]
+                # k = cp, row[&#34;commune&#34;], row[&#34;adresse3&#34;], row[&#34;adresse2&#34;]
+                # score = float(row[&#34;score&#34;])
+                # v = row[&#34;adresseid&#34;], score, row[&#34;source&#34;], float(row[&#34;lon&#34;]), float(row[&#34;lat&#34;]), row[&#34;matchcp&#34;]
+                # db[k] = v
+                db[v.key] = v
     except FileNotFoundError:
         print(f&#34;{config.adresse_db_path} does not exist&#34;)
     return db</code></pre>
 </details>
 </dd>
 <dt id="icip.repositories.AdresseRepository.load_cedex"><code class="name flex">
-<span>def <span class="ident">load_cedex</span></span>(<span>self)</span>
+<span>def <span class="ident">load_cedex</span></span>(<span>self) ‑> Dict</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Charge Cedex
+:return: le dictionnaire</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_cedex(self):
+<pre><code class="python">def load_cedex(self) -&gt; Dict:
+    &#34;&#34;&#34;
+    Charge Cedex
+    :return: le dictionnaire
+    &#34;&#34;&#34;
     return cyrilload.load(config.cedex_path)</code></pre>
 </details>
 </dd>
 <dt id="icip.repositories.AdresseRepository.save_adresses_db"><code class="name flex">
-<span>def <span class="ident">save_adresses_db</span></span>(<span>self, db)</span>
+<span>def <span class="ident">save_adresses_db</span></span>(<span>self, db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity])</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Sauvegarde le dict d'adresse en CSV
+:param db: le dict</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def save_adresses_db(self, db):
+<pre><code class="python">def save_adresses_db(self, db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]):
+    &#34;&#34;&#34;
+    Sauvegarde le dict d&#39;adresse en CSV
+    :param db: le dict
+    &#34;&#34;&#34;
     print(f&#34;Save {config.adresse_db_path}&#34;)
     with open(config.adresse_db_path, &#34;w&#34;) as f:
-        f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score\n&#34;)
-        for k in db.keys():
-            f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
-            v = db[k]
-            f.write(f&#34;{v[0]};{v[1]}\n&#34;)</code></pre>
+        f.write(&#34;cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n&#34;)
+        l = list(db.values())
+        l.sort(key=lambda a: a.score)
+        for v in l:
+            # f.write(f&#34;{k[0]};{k[1]};{k[3]};{k[2]};&#34;)
+            # v = db[k]
+            # f.write(f&#34;{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n&#34;)
+            f.write(f&#34;{v.cp};{v.commune};{v.adresse2};{v.adresse3};{v.adresseid};{v.score};{v.source};&#34;)
+            f.write(f&#34;{v.lon};{v.lat};{v.matchcp}\n&#34;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -357,46 +439,72 @@ if __name__ == &#39;__main__&#39;:
                 i += 1
         return i
 
-    def load_ps(self, file):
+    def load_ps(self, file: str):
+        &#34;&#34;&#34;
+        Load PS file
+        :param file: the path
+        &#34;&#34;&#34;
         with open(file) as f:
             reader = csv.reader(f, delimiter=&#34;;&#34;)
             return list(reader)
 
-    def get_dataframe(self, path):
+    def get_dataframe(self, path: str) -&gt; pandas.DataFrame:
+        &#34;&#34;&#34;
+        Load PS as dataframe
+        :param path: path
+        :return: dataframe
+        &#34;&#34;&#34;
         dataframe = pandas.read_csv(path, delimiter=&#34;;&#34;, header=None, encoding=&#34;cp1252&#34;,
                                     dtype={14: str, 37: str, 43: int})
         return dataframe
 
-    def save_csv_from_dataframe(self, dataframe, path):
+    def save_csv_from_dataframe(self, dataframe: pandas.DataFrame, path: str):
+        &#34;&#34;&#34;
+        Save dataframe as CSV
+        :param dataframe: dataframe
+        :param path: path
+        &#34;&#34;&#34;
         dataframe.to_csv(path, header=False, index=False, sep=&#34;;&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="icip.repositories.PSRepository.get_dataframe"><code class="name flex">
-<span>def <span class="ident">get_dataframe</span></span>(<span>self, path)</span>
+<span>def <span class="ident">get_dataframe</span></span>(<span>self, path: str) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Load PS as dataframe
+:param path: path
+:return: dataframe</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_dataframe(self, path):
+<pre><code class="python">def get_dataframe(self, path: str) -&gt; pandas.DataFrame:
+    &#34;&#34;&#34;
+    Load PS as dataframe
+    :param path: path
+    :return: dataframe
+    &#34;&#34;&#34;
     dataframe = pandas.read_csv(path, delimiter=&#34;;&#34;, header=None, encoding=&#34;cp1252&#34;,
                                 dtype={14: str, 37: str, 43: int})
     return dataframe</code></pre>
 </details>
 </dd>
 <dt id="icip.repositories.PSRepository.load_ps"><code class="name flex">
-<span>def <span class="ident">load_ps</span></span>(<span>self, file)</span>
+<span>def <span class="ident">load_ps</span></span>(<span>self, file: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Load PS file
+:param file: the path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_ps(self, file):
+<pre><code class="python">def load_ps(self, file: str):
+    &#34;&#34;&#34;
+    Load PS file
+    :param file: the path
+    &#34;&#34;&#34;
     with open(file) as f:
         reader = csv.reader(f, delimiter=&#34;;&#34;)
         return list(reader)</code></pre>
@@ -425,15 +533,22 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="icip.repositories.PSRepository.save_csv_from_dataframe"><code class="name flex">
-<span>def <span class="ident">save_csv_from_dataframe</span></span>(<span>self, dataframe, path)</span>
+<span>def <span class="ident">save_csv_from_dataframe</span></span>(<span>self, dataframe: pandas.core.frame.DataFrame, path: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Save dataframe as CSV
+:param dataframe: dataframe
+:param path: path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def save_csv_from_dataframe(self, dataframe, path):
+<pre><code class="python">def save_csv_from_dataframe(self, dataframe: pandas.DataFrame, path: str):
+    &#34;&#34;&#34;
+    Save dataframe as CSV
+    :param dataframe: dataframe
+    :param path: path
+    &#34;&#34;&#34;
     dataframe.to_csv(path, header=False, index=False, sep=&#34;;&#34;)</code></pre>
 </details>
 </dd>

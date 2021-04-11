@@ -364,24 +364,27 @@ class AdresseMatcher:
         entity.x = aentity.x
         entity.y = aentity.y
         entity.codeinsee = aentity.code_insee
-        entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
+        if aentity.numero != 0:
+            entity.matchadresse = f"{aentity.numero} "
+        entity.matchadresse += f"{aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
         entity.matchcp = aentity.code_postal
 
-    # def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, values):
-    #     """
-    #     MAJ PS par rapport à l'adresse
-    #     :param entity: PS
-    #     :param aentity: adresse entity
-    #     :param values: adresses_db values
-    #     """
-    #     entity.adresseid = aentity.id
-    #     entity.adressescore = values[1]
-    #     entity.lon = values[2]
-    #     entity.lat = values[3]
-    #     entity.codeinsee = aentity.code_insee
-    #     entity.matchcp = values[4]
-    #     entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
-    #     entity.v[44] = "OSM"
+    def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity,
+                                    values: entities.AdresseDbEntity):
+        """
+        MAJ PS par rapport à l'adresse
+        :param entity: PS
+        :param aentity: adresse entity
+        :param values: adresses_db values
+        """
+        entity.adresseid = aentity.id
+        entity.adressescore = values.score
+        entity.lon = values.lon
+        entity.lat = values.lat
+        entity.codeinsee = aentity.code_insee
+        entity.matchcp = values.matchcp
+        entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
+        entity.v[44] = "OSM"
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:

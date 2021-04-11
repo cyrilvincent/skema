@@ -6,7 +6,7 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
-# ??/04/21
+# 15/04/21
 # 4 jours
 # AdresseMatcher
 # En cas de mauvais score, recherche du cp par la commune
@@ -16,7 +16,7 @@
 # Gestion des lieux-dits
 # Gestion de l'abscence de rue et de numéro
 # Modification de la clé avec ajout de la profession
-# 98.6% de précision
+# 98.7% de précision
 # Adresses2Pickles
 # Indexation des lieux-dits
 # Indexation des cedex

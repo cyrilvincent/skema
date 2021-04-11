@@ -1,6 +1,7 @@
 import art
 import config
 import difflib
+import sys
 from adressesmatcher import AdresseMatcher
 
 if __name__ == '__main__':

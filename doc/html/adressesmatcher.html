@@ -64,7 +64,7 @@ class AdresseMatcher:
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
-        self.adresses_db = {}
+        self.adresses_db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity] = {}
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
@@ -131,7 +131,13 @@ class AdresseMatcher:
                 difmin = dif
         return res
 
-    def gestalt(self, s1, s2):
+    def gestalt(self, s1: str, s2: str):
+        &#34;&#34;&#34;
+        Gestalt
+        :param s1: string1
+        :param s2: string2
+        :return: le ratio
+        &#34;&#34;&#34;
         sm = difflib.SequenceMatcher(None, s1, s2)
         return sm.ratio()
 
@@ -172,17 +178,17 @@ class AdresseMatcher:
             street.replace(&#34; BP&#34;, &#34;&#34;)
         street = street.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
         street = street.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
-        street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+        street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
         return street.strip()
 
     def denormalize_street(self, street: str) -&gt; str:
         &#34;&#34;&#34;
-        Denormalise la rue
+        Denormalise la rue afin d&#39;abaisser son poids
         :param street: rue
         :return: rue dénormalisée
         &#34;&#34;&#34;
         street = street.replace(&#34;CHEMIN&#34;, &#34;CH&#34;).replace(&#34;AVENUE&#34;, &#34;AV&#34;).replace(&#34;PLACE&#34;, &#34;PL&#34;)
-        street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;)
+        street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;).replace(&#34;IMPASSE&#34;, &#34;IMP&#34;)
         return street
 
     def normalize_commune(self, commune: str) -&gt; str:
@@ -300,6 +306,7 @@ class AdresseMatcher:
         if num == 0:
             adresses = [e for e in adresses if e.nom_afnor == adresse]
             if len(adresses) &gt; 0:
+                adresses.sort(key=lambda a: (a.numero, a.rep))
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
@@ -385,8 +392,27 @@ class AdresseMatcher:
         entity.x = aentity.x
         entity.y = aentity.y
         entity.codeinsee = aentity.code_insee
-        entity.matchadresse = f&#34;{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
+        if aentity.numero != 0:
+            entity.matchadresse = f&#34;{aentity.numero} &#34;
+        entity.matchadresse += f&#34;{aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
         entity.matchcp = aentity.code_postal
+
+    def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity,
+                                    values: entities.AdresseDbEntity):
+        &#34;&#34;&#34;
+        MAJ PS par rapport à l&#39;adresse
+        :param entity: PS
+        :param aentity: adresse entity
+        :param values: adresses_db values
+        &#34;&#34;&#34;
+        entity.adresseid = aentity.id
+        entity.adressescore = values.score
+        entity.lon = values.lon
+        entity.lat = values.lat
+        entity.codeinsee = aentity.code_insee
+        entity.matchcp = values.matchcp
+        entity.matchadresse = f&#34;{entity.adresse3} {entity.matchcp} {entity.commune}&#34;
+        entity.v[44] = &#34;OSM&#34;
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -&gt; entities.AdresseEntity:
@@ -423,6 +449,12 @@ class AdresseMatcher:
             self.log(f&#34;LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)&#34;
                      f&#34; {entity.adresse3} {entity.cp} {entity.commune} =&gt; {aentity.numero} {aentity.nom_afnor}&#34;
                      f&#34; {aentity.code_postal} {aentity.commune}&#34;)
+            # import nominatimpoc
+            # lon, lat = nominatimpoc.get_lon_lat_from_adresse(0, entity.adresse3, entity.commune, entity.cp)
+            # if lat != 0:
+            #     print(&#34;Nominatim OK&#34;)
+            #     self.nbscorelow -= 1
+            #     entity.scores[0] = entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.98
         if aentity is None:
             aentity = entities.AdresseEntity(0)
             self.log(f&#34;ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}&#34;)
@@ -448,8 +480,10 @@ class AdresseMatcher:
                 self.ps_repo.row2entity(entity, row)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
                 if t in self.adresses_db:
-                    aentity = self.db[self.adresses_db[t][0]]
-                    self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    # aentity = self.db[self.adresses_db[t][0]]
+                    aentity = self.db[self.adresses_db[t].adresseid]
+                    # self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    self.update_entity(entity, aentity, self.adresses_db[t].score)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
                     if entity.adressescore &lt; config.adresse_quality:
@@ -475,16 +509,18 @@ class AdresseMatcher:
                     num, adresse3 = self.split_num(adresse3)
                     if num == 0 and adresse2 != &#34;&#34;:
                         num, adresse2 = self.split_num(adresse2)
-                    originalnum = num
                     matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
                     entity.scores.append(score)
                     aentity, score = self.match_num(commune, matchadresse, num)
                     entity.scores.append(score)
-                    aentity = self.check_low_score(entity, adresse3, originalnum, aentity)
+                    aentity = self.check_low_score(entity, adresse3, num, aentity)
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = (entity.adresseid, entity.score)
+                    # self.adresses_db[t] = entity.adresseid, entity.score, &#34;BAN&#34;, entity.lon, entity.lat, entity.matchcp
+                    v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, &#34;BAN&#34;,
+                                                 entity.lon, entity.lat, entity.matchcp)
+                    self.adresses_db[v.key] = v
                     self.new_adresse = True
 
     def display(self):
@@ -562,7 +598,7 @@ if __name__ == &#39;__main__&#39;:
     # Nb No Street: 2  0.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 1779  3.6%
+    # Nb Score low: 1757  3.6% Nominatim gain de 0.4% soit 11%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
     # 116s 100.0% [2455164] Saved 48927 PS
@@ -579,7 +615,7 @@ if __name__ == &#39;__main__&#39;:
     # Nb No Street: 2  2.0%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 0
-    # Nb Score low: 1  1.0%
+    # Nb Score low: 0  0.0%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # 14s 100.0% [2455164] Saved 1620 PS
 
@@ -660,7 +696,7 @@ if __name__ == &#39;__main__&#39;:
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
-        self.adresses_db = {}
+        self.adresses_db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity] = {}
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
@@ -727,7 +763,13 @@ if __name__ == &#39;__main__&#39;:
                 difmin = dif
         return res
 
-    def gestalt(self, s1, s2):
+    def gestalt(self, s1: str, s2: str):
+        &#34;&#34;&#34;
+        Gestalt
+        :param s1: string1
+        :param s2: string2
+        :return: le ratio
+        &#34;&#34;&#34;
         sm = difflib.SequenceMatcher(None, s1, s2)
         return sm.ratio()
 
@@ -768,17 +810,17 @@ if __name__ == &#39;__main__&#39;:
             street.replace(&#34; BP&#34;, &#34;&#34;)
         street = street.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
         street = street.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
-        street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+        street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
         return street.strip()
 
     def denormalize_street(self, street: str) -&gt; str:
         &#34;&#34;&#34;
-        Denormalise la rue
+        Denormalise la rue afin d&#39;abaisser son poids
         :param street: rue
         :return: rue dénormalisée
         &#34;&#34;&#34;
         street = street.replace(&#34;CHEMIN&#34;, &#34;CH&#34;).replace(&#34;AVENUE&#34;, &#34;AV&#34;).replace(&#34;PLACE&#34;, &#34;PL&#34;)
-        street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;)
+        street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;).replace(&#34;IMPASSE&#34;, &#34;IMP&#34;)
         return street
 
     def normalize_commune(self, commune: str) -&gt; str:
@@ -896,6 +938,7 @@ if __name__ == &#39;__main__&#39;:
         if num == 0:
             adresses = [e for e in adresses if e.nom_afnor == adresse]
             if len(adresses) &gt; 0:
+                adresses.sort(key=lambda a: (a.numero, a.rep))
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
@@ -981,8 +1024,27 @@ if __name__ == &#39;__main__&#39;:
         entity.x = aentity.x
         entity.y = aentity.y
         entity.codeinsee = aentity.code_insee
-        entity.matchadresse = f&#34;{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
+        if aentity.numero != 0:
+            entity.matchadresse = f&#34;{aentity.numero} &#34;
+        entity.matchadresse += f&#34;{aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
         entity.matchcp = aentity.code_postal
+
+    def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity,
+                                    values: entities.AdresseDbEntity):
+        &#34;&#34;&#34;
+        MAJ PS par rapport à l&#39;adresse
+        :param entity: PS
+        :param aentity: adresse entity
+        :param values: adresses_db values
+        &#34;&#34;&#34;
+        entity.adresseid = aentity.id
+        entity.adressescore = values.score
+        entity.lon = values.lon
+        entity.lat = values.lat
+        entity.codeinsee = aentity.code_insee
+        entity.matchcp = values.matchcp
+        entity.matchadresse = f&#34;{entity.adresse3} {entity.matchcp} {entity.commune}&#34;
+        entity.v[44] = &#34;OSM&#34;
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -&gt; entities.AdresseEntity:
@@ -1019,6 +1081,12 @@ if __name__ == &#39;__main__&#39;:
             self.log(f&#34;LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)&#34;
                      f&#34; {entity.adresse3} {entity.cp} {entity.commune} =&gt; {aentity.numero} {aentity.nom_afnor}&#34;
                      f&#34; {aentity.code_postal} {aentity.commune}&#34;)
+            # import nominatimpoc
+            # lon, lat = nominatimpoc.get_lon_lat_from_adresse(0, entity.adresse3, entity.commune, entity.cp)
+            # if lat != 0:
+            #     print(&#34;Nominatim OK&#34;)
+            #     self.nbscorelow -= 1
+            #     entity.scores[0] = entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.98
         if aentity is None:
             aentity = entities.AdresseEntity(0)
             self.log(f&#34;ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}&#34;)
@@ -1044,8 +1112,10 @@ if __name__ == &#39;__main__&#39;:
                 self.ps_repo.row2entity(entity, row)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
                 if t in self.adresses_db:
-                    aentity = self.db[self.adresses_db[t][0]]
-                    self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    # aentity = self.db[self.adresses_db[t][0]]
+                    aentity = self.db[self.adresses_db[t].adresseid]
+                    # self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    self.update_entity(entity, aentity, self.adresses_db[t].score)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
                     if entity.adressescore &lt; config.adresse_quality:
@@ -1071,16 +1141,18 @@ if __name__ == &#39;__main__&#39;:
                     num, adresse3 = self.split_num(adresse3)
                     if num == 0 and adresse2 != &#34;&#34;:
                         num, adresse2 = self.split_num(adresse2)
-                    originalnum = num
                     matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
                     entity.scores.append(score)
                     aentity, score = self.match_num(commune, matchadresse, num)
                     entity.scores.append(score)
-                    aentity = self.check_low_score(entity, adresse3, originalnum, aentity)
+                    aentity = self.check_low_score(entity, adresse3, num, aentity)
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = (entity.adresseid, entity.score)
+                    # self.adresses_db[t] = entity.adresseid, entity.score, &#34;BAN&#34;, entity.lon, entity.lat, entity.matchcp
+                    v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, &#34;BAN&#34;,
+                                                 entity.lon, entity.lat, entity.matchcp)
+                    self.adresses_db[v.key] = v
                     self.new_adresse = True
 
     def display(self):
@@ -1178,6 +1250,12 @@ if __name__ == &#39;__main__&#39;:
         self.log(f&#34;LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)&#34;
                  f&#34; {entity.adresse3} {entity.cp} {entity.commune} =&gt; {aentity.numero} {aentity.nom_afnor}&#34;
                  f&#34; {aentity.code_postal} {aentity.commune}&#34;)
+        # import nominatimpoc
+        # lon, lat = nominatimpoc.get_lon_lat_from_adresse(0, entity.adresse3, entity.commune, entity.cp)
+        # if lat != 0:
+        #     print(&#34;Nominatim OK&#34;)
+        #     self.nbscorelow -= 1
+        #     entity.scores[0] = entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.98
     if aentity is None:
         aentity = entities.AdresseEntity(0)
         self.log(f&#34;ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}&#34;)
@@ -1189,7 +1267,7 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">denormalize_street</span></span>(<span>self, street: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Denormalise la rue
+<div class="desc"><p>Denormalise la rue afin d'abaisser son poids
 :param street: rue
 :return: rue dénormalisée</p></div>
 <details class="source">
@@ -1198,12 +1276,12 @@ if __name__ == &#39;__main__&#39;:
 </summary>
 <pre><code class="python">def denormalize_street(self, street: str) -&gt; str:
     &#34;&#34;&#34;
-    Denormalise la rue
+    Denormalise la rue afin d&#39;abaisser son poids
     :param street: rue
     :return: rue dénormalisée
     &#34;&#34;&#34;
     street = street.replace(&#34;CHEMIN&#34;, &#34;CH&#34;).replace(&#34;AVENUE&#34;, &#34;AV&#34;).replace(&#34;PLACE&#34;, &#34;PL&#34;)
-    street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;)
+    street = street.replace(&#34;BOULEVARD&#34;, &#34;BD&#34;).replace(&#34;ROUTE&#34;, &#34;RT&#34;).replace(&#34;IMPASSE&#34;, &#34;IMP&#34;)
     return street</code></pre>
 </details>
 </dd>
@@ -1290,15 +1368,24 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="icip.adressesmatcher.AdresseMatcher.gestalt"><code class="name flex">
-<span>def <span class="ident">gestalt</span></span>(<span>self, s1, s2)</span>
+<span>def <span class="ident">gestalt</span></span>(<span>self, s1: str, s2: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Gestalt
+:param s1: string1
+:param s2: string2
+:return: le ratio</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def gestalt(self, s1, s2):
+<pre><code class="python">def gestalt(self, s1: str, s2: str):
+    &#34;&#34;&#34;
+    Gestalt
+    :param s1: string1
+    :param s2: string2
+    :return: le ratio
+    &#34;&#34;&#34;
     sm = difflib.SequenceMatcher(None, s1, s2)
     return sm.ratio()</code></pre>
 </details>
@@ -1572,6 +1659,7 @@ Applique Gestalt sur s et tous les éléments de l
     if num == 0:
         adresses = [e for e in adresses if e.nom_afnor == adresse]
         if len(adresses) &gt; 0:
+            adresses.sort(key=lambda a: (a.numero, a.rep))
             if adresses[0].numero == 0:
                 return adresses[0], 1.0
             else:
@@ -1694,7 +1782,7 @@ Applique Gestalt sur s et tous les éléments de l
         street.replace(&#34; BP&#34;, &#34;&#34;)
     street = street.replace(&#34; CH &#34;, &#34; CHEMIN &#34;).replace(&#34; AV &#34;, &#34; AVENUE &#34;).replace(&#34; PL &#34;, &#34; PLACE &#34;)
     street = street.replace(&#34; BD &#34;, &#34; BOULEVARD &#34;).replace(&#34; IMP &#34;, &#34; IMPASSE &#34;).replace(&#34; ST &#34;, &#34; SAINT &#34;)
-    street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
+    street = street.replace(&#34; RT &#34;, &#34; ROUTE &#34;).replace(&#34; RTE &#34;, &#34; ROUTE &#34;).replace(&#34; GAL &#34;, &#34; GENERAL &#34;)
     return street.strip()</code></pre>
 </details>
 </dd>
@@ -1727,8 +1815,10 @@ Applique Gestalt sur s et tous les éléments de l
             self.ps_repo.row2entity(entity, row)
             t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
             if t in self.adresses_db:
-                aentity = self.db[self.adresses_db[t][0]]
-                self.update_entity(entity, aentity, self.adresses_db[t][1])
+                # aentity = self.db[self.adresses_db[t][0]]
+                aentity = self.db[self.adresses_db[t].adresseid]
+                # self.update_entity(entity, aentity, self.adresses_db[t][1])
+                self.update_entity(entity, aentity, self.adresses_db[t].score)
                 self.keys_db[entity.id] = (entity.adresseid, entity.score)
                 self.pss_db.append(entity)
                 if entity.adressescore &lt; config.adresse_quality:
@@ -1754,16 +1844,18 @@ Applique Gestalt sur s et tous les éléments de l
                 num, adresse3 = self.split_num(adresse3)
                 if num == 0 and adresse2 != &#34;&#34;:
                     num, adresse2 = self.split_num(adresse2)
-                originalnum = num
                 matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
                 entity.scores.append(score)
                 aentity, score = self.match_num(commune, matchadresse, num)
                 entity.scores.append(score)
-                aentity = self.check_low_score(entity, adresse3, originalnum, aentity)
+                aentity = self.check_low_score(entity, adresse3, num, aentity)
                 self.update_entity(entity, aentity, entity.score)
                 self.pss_db.append(entity)
                 self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                self.adresses_db[t] = (entity.adresseid, entity.score)
+                # self.adresses_db[t] = entity.adresseid, entity.score, &#34;BAN&#34;, entity.lon, entity.lat, entity.matchcp
+                v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, &#34;BAN&#34;,
+                                             entity.lon, entity.lat, entity.matchcp)
+                self.adresses_db[v.key] = v
                 self.new_adresse = True</code></pre>
 </details>
 </dd>
@@ -1820,8 +1912,40 @@ Applique Gestalt sur s et tous les éléments de l
     entity.x = aentity.x
     entity.y = aentity.y
     entity.codeinsee = aentity.code_insee
-    entity.matchadresse = f&#34;{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
+    if aentity.numero != 0:
+        entity.matchadresse = f&#34;{aentity.numero} &#34;
+    entity.matchadresse += f&#34;{aentity.nom_afnor} {aentity.code_postal} {aentity.commune}&#34;
     entity.matchcp = aentity.code_postal</code></pre>
+</details>
+</dd>
+<dt id="icip.adressesmatcher.AdresseMatcher.update_entity_by_adressesdb"><code class="name flex">
+<span>def <span class="ident">update_entity_by_adressesdb</span></span>(<span>self, entity: entities.PSEntity, aentity: entities.AdresseEntity, values: entities.AdresseDbEntity)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>MAJ PS par rapport à l'adresse
+:param entity: PS
+:param aentity: adresse entity
+:param values: adresses_db values</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity,
+                                values: entities.AdresseDbEntity):
+    &#34;&#34;&#34;
+    MAJ PS par rapport à l&#39;adresse
+    :param entity: PS
+    :param aentity: adresse entity
+    :param values: adresses_db values
+    &#34;&#34;&#34;
+    entity.adresseid = aentity.id
+    entity.adressescore = values.score
+    entity.lon = values.lon
+    entity.lat = values.lat
+    entity.codeinsee = aentity.code_insee
+    entity.matchcp = values.matchcp
+    entity.matchadresse = f&#34;{entity.adresse3} {entity.matchcp} {entity.commune}&#34;
+    entity.v[44] = &#34;OSM&#34;</code></pre>
 </details>
 </dd>
 <dt id="icip.adressesmatcher.AdresseMatcher.very_last_chance"><code class="name flex">
@@ -1897,6 +2021,7 @@ Applique Gestalt sur s et tous les éléments de l
 <li><code><a title="icip.adressesmatcher.AdresseMatcher.parse_ps" href="#icip.adressesmatcher.AdresseMatcher.parse_ps">parse_ps</a></code></li>
 <li><code><a title="icip.adressesmatcher.AdresseMatcher.split_num" href="#icip.adressesmatcher.AdresseMatcher.split_num">split_num</a></code></li>
 <li><code><a title="icip.adressesmatcher.AdresseMatcher.update_entity" href="#icip.adressesmatcher.AdresseMatcher.update_entity">update_entity</a></code></li>
+<li><code><a title="icip.adressesmatcher.AdresseMatcher.update_entity_by_adressesdb" href="#icip.adressesmatcher.AdresseMatcher.update_entity_by_adressesdb">update_entity_by_adressesdb</a></code></li>
 <li><code><a title="icip.adressesmatcher.AdresseMatcher.very_last_chance" href="#icip.adressesmatcher.AdresseMatcher.very_last_chance">very_last_chance</a></code></li>
 </ul>
 </li>
