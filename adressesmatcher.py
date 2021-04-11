@@ -278,7 +278,7 @@ class AdresseMatcher:
         if num == 0:
             adresses = [e for e in adresses if e.nom_afnor == adresse]
             if len(adresses) > 0:
-                adresses.sort(key=lambda a: a.numero)
+                adresses.sort(key=lambda a: (a.numero, a.rep))
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
