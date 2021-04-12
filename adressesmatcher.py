@@ -40,7 +40,7 @@ class AdresseMatcher:
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
-        self.new_adresse = False
+        self.nbnewadresse = 0
 
     def log(self, msg: str):
         """
@@ -493,13 +493,14 @@ class AdresseMatcher:
                     v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
                                                  entity.lon, entity.lat, entity.matchcp)
                     self.adresses_db[v.key] = v
-                    self.new_adresse = True
+                    self.nbnewadresse += 1
 
     def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
         print(f"Nb Unique PS: {len(self.keys_db)} ({self.nb / len(self.keys_db):.1f} rows/PS)")
         print(f"Nb Unique Adresse: {len(self.adresses_db)} ({self.nb / len(self.adresses_db):.1f} rows/PS)")
+        print(f"Nb New Adresse: {self.nbnewadresse}")
         print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
@@ -534,9 +535,16 @@ class AdresseMatcher:
         self.display()
         self.pss_db.sort(key=lambda e: e.rownum)
         file = file.replace(".csv", "-adresses.csv")
-        self.ps_repo.save_entities(file, self.pss_db)
-        if self.new_adresse and cache:
-            self.a_repo.save_adresses_db(self.adresses_db)
+        try:
+            self.ps_repo.save_entities(file, self.pss_db)
+            if self.nbnewadresse > 0 and cache:
+                self.a_repo.save_adresses_db(self.adresses_db)
+        except PermissionError as pe:
+            print(pe)
+            input("Close the file and press Enter")
+            self.ps_repo.save_entities(file, self.pss_db)
+            if self.nbnewadresse > 0 and cache:
+                self.a_repo.save_adresses_db(self.adresses_db)
         self.log(f"Saved {self.nb} PS")
 
 
