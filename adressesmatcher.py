@@ -345,6 +345,15 @@ class AdresseMatcherBase:
                         return e
         return None
 
+    def init_load(self, depts: Optional[List[int]] = None, cache=False):
+        self.total = len(self.csv)
+        self.log(f"Load {config.cedex_path}")
+        self.cedex_db = self.a_repo.load_cedex()
+        if cache:
+            self.log(f"Load {config.adresse_db_path}")
+            self.adresses_db = self.a_repo.load_adresses_db()
+        self.total *= len(depts)
+
 
 class AdresseMatcher(AdresseMatcherBase):
     """
@@ -390,7 +399,7 @@ class AdresseMatcher(AdresseMatcherBase):
         entity.codeinsee = aentity.code_insee
         entity.matchcp = values.matchcp
         entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
-        entity.v[44] = values.source
+        entity.source = values.source
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
@@ -456,49 +465,55 @@ class AdresseMatcher(AdresseMatcherBase):
         cp = int(entity.cp)
         t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
         if t in self.adresses_db:
-            values = self.adresses_db[t]
-            aentity = self.db[values.adresseid]
-            if "OSM" in values.source:
-                self.update_entity_by_adressesdb(entity, aentity, values)
-            else:
-                self.update_entity(entity, aentity, values.score)
-            self.keys_db[entity.id] = (entity.adresseid, entity.score)
-            self.pss_db.append(entity)
-            if entity.adressescore < config.adresse_quality:
-                self.nbscorelow += 1
+            self.manage_adresse_db(entity, t)
         else:
-            cp, score = self.match_cp(cp)
-            entity.scores.append(score)
-            communes = self.cps_db[cp]
-            commune = self.normalize_commune(entity.commune)
-            commune, score = self.match_commune(commune, communes, cp)
-            entity.scores.append(score)
-            if score < 0.8:
-                cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
-                if score2 > score and cp2 != entity.cp:
-                    self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
-                    self.nbbadcp += 1
-                    cp = cp2
-                    commune = commune2
-                    entity.scores[1] = score2
-                    entity.scores[0] = 0.5
-            adresse3 = self.normalize_street(entity.adresse3)
-            adresse2 = self.normalize_street(entity.adresse2)
-            num, adresse3 = self.split_num(adresse3)
-            if num == 0 and adresse2 != "":
-                num, adresse2 = self.split_num(adresse2)
-            matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
-            entity.scores.append(score)
-            aentity, score = self.match_num(commune, matchadresse, num)
-            entity.scores.append(score)
-            aentity = self.check_low_score(entity, adresse3, num, aentity)
-            self.update_entity(entity, aentity, entity.score)
-            self.pss_db.append(entity)
-            self.keys_db[entity.id] = (entity.adresseid, entity.score)
-            v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
-                                         entity.lon, entity.lat, entity.matchcp)
-            self.adresses_db[v.key] = v
-            self.nbnewadresse += 1
+            self.matches(entity, cp, t)
+
+    def manage_adresse_db(self, entity, t):
+        values = self.adresses_db[t]
+        aentity = self.db[values.adresseid]
+        if "OSM" in values.source:
+            self.update_entity_by_adressesdb(entity, aentity, values)
+        else:
+            self.update_entity(entity, aentity, values.score)
+        self.keys_db[entity.id] = (entity.adresseid, entity.score)
+        self.pss_db.append(entity)
+        if entity.adressescore < config.adresse_quality:
+            self.nbscorelow += 1
+
+    def matches(self, entity, cp, t):
+        cp, score = self.match_cp(cp)
+        entity.scores.append(score)
+        communes = self.cps_db[cp]
+        commune = self.normalize_commune(entity.commune)
+        commune, score = self.match_commune(commune, communes, cp)
+        entity.scores.append(score)
+        if score < 0.8:
+            cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
+            if score2 > score and cp2 != entity.cp:
+                self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
+                self.nbbadcp += 1
+                cp = cp2
+                commune = commune2
+                entity.scores[1] = score2
+                entity.scores[0] = 0.5
+        adresse3 = self.normalize_street(entity.adresse3)
+        adresse2 = self.normalize_street(entity.adresse2)
+        num, adresse3 = self.split_num(adresse3)
+        if num == 0 and adresse2 != "":
+            num, adresse2 = self.split_num(adresse2)
+        matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
+        entity.scores.append(score)
+        aentity, score = self.match_num(commune, matchadresse, num)
+        entity.scores.append(score)
+        aentity = self.check_low_score(entity, adresse3, num, aentity)
+        self.update_entity(entity, aentity, entity.score)
+        self.pss_db.append(entity)
+        self.keys_db[entity.id] = (entity.adresseid, entity.score)
+        v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
+                                     entity.lon, entity.lat, entity.matchcp)
+        self.adresses_db[v.key] = v
+        self.nbnewadresse += 1
 
     def display(self):
         print(f"Nb PS: {self.nb}")
@@ -522,17 +537,11 @@ class AdresseMatcher(AdresseMatcherBase):
         :param depts: la liste de département, None = all
         :param cache: use ps_adresses.csv
         """
-        self.log(f"Load {file}")
-        self.csv = self.ps_repo.load_ps(file)
-        self.total = len(self.csv)
-        self.log(f"Load {config.cedex_path}")
-        self.cedex_db = self.a_repo.load_cedex()
-        if cache:
-            self.log(f"Load {config.adresse_db_path}")
-            self.adresses_db = self.a_repo.load_adresses_db()
         if depts is None:
             depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
-        self.total *= len(depts)
+        self.log(f"Load {file}")
+        self.csv = self.ps_repo.load_ps(file)
+        self.init_load(depts, cache)
         for dept in depts:
             self.log(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db, self.insees_db = self.a_repo.load_adresses(dept)

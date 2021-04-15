@@ -218,6 +218,14 @@ class PSEntity:
     def matchcp(self, value):
         self.v[43] = value
 
+    @property
+    def source(self):
+        return self.v[44]
+
+    @source.setter
+    def source(self, value):
+        self.v[44] = value
+
     def __repr__(self):
         return f"[{self.rownum}] PS: {self.id}"
 
