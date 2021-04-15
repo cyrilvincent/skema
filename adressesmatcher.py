@@ -11,20 +11,17 @@ from typing import Dict, Set, List, Tuple, Optional, Iterable
 time0 = time.perf_counter()
 
 
-class AdresseMatcher:
-    """
-    Fusionne ps-tarifs et adresses
-    """
+class AdresseMatcherBase:
 
     def __init__(self):
         self.db: Dict[str, entities.AdresseEntity] = {}
         self.communes_db: Dict[str, Set[str]] = {}
         self.cps_db: Dict[int, Set[str]] = {}
         self.nb = 0
+        self.rownum = 0
         self.nbbadcp = 0
         self.nbnostreet = 0
         self.nbscorelow = 0
-        self.rownum = 0
         self.nberror500 = 0
         self.nbcedexbp = 0
         self.nonum = 0
@@ -32,8 +29,6 @@ class AdresseMatcher:
         self.nbbadinsee = 0
         self.total = 1
         self.i = 0
-        self.pss_db = []
-        self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
         self.adresses_db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity] = {}
@@ -198,7 +193,6 @@ class AdresseMatcher:
             insee = self.cedex_db[cp].code_insee
             if insee in self.insees_db:
                 res = list(self.insees_db[insee])[0]
-                # self.log(f"WARNING CEDEX {cp}=>{res}")
                 return res, 0.9
             else:
                 self.nbbadinsee += 1
@@ -351,6 +345,17 @@ class AdresseMatcher:
                         return e
         return None
 
+
+class AdresseMatcher(AdresseMatcherBase):
+    """
+    Fusionne ps-tarifs et adresses
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.pss_db = []
+        self.ps_repo = repositories.PSRepository()
+
     def update_entity(self, entity: entities.PSEntity, aentity: entities.AdresseEntity, score: float):
         """
         MAJ PS par rapport à l'adresse
@@ -385,7 +390,7 @@ class AdresseMatcher:
         entity.codeinsee = aentity.code_insee
         entity.matchcp = values.matchcp
         entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
-        entity.v[44] = "OSM"
+        entity.v[44] = values.source
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
@@ -422,12 +427,6 @@ class AdresseMatcher:
             self.log(f"LOW SCORE: {int(entity.score * 100)}% ({(self.nbscorelow / (self.nb + 1)) * 100:.1f}%)"
                      f" {entity.adresse3} {entity.cp} {entity.commune} => {aentity.numero} {aentity.nom_afnor}"
                      f" {aentity.code_postal} {aentity.commune}")
-            # import nominatimpoc
-            # lon, lat = nominatimpoc.get_lon_lat_from_adresse(0, entity.adresse3, entity.commune, entity.cp)
-            # if lat != 0:
-            #     print("Nominatim OK")
-            #     self.nbscorelow -= 1
-            #     entity.scores[0] = entity.scores[1] = entity.scores[2] = entity.scores[3] = 0.98
         if aentity is None:
             aentity = entities.AdresseEntity(0)
             self.log(f"ERROR UNKNOWN {entity.adresse3} {entity.cp} {entity.commune}")
@@ -451,50 +450,55 @@ class AdresseMatcher:
                 entity = entities.PSEntity()
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
-                t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
-                if t in self.adresses_db:
-                    # aentity = self.db[self.adresses_db[t][0]]
-                    aentity = self.db[self.adresses_db[t].adresseid]
-                    # self.update_entity(entity, aentity, self.adresses_db[t][1])
-                    self.update_entity(entity, aentity, self.adresses_db[t].score)
-                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.pss_db.append(entity)
-                    if entity.adressescore < config.adresse_quality:
-                        self.nbscorelow += 1
-                else:
-                    cp, score = self.match_cp(cp)
-                    entity.scores.append(score)
-                    communes = self.cps_db[cp]
-                    commune = self.normalize_commune(entity.commune)
-                    commune, score = self.match_commune(commune, communes, cp)
-                    entity.scores.append(score)
-                    if score < 0.8:
-                        cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
-                        if score2 > score and cp2 != entity.cp:
-                            self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
-                            self.nbbadcp += 1
-                            cp = cp2
-                            commune = commune2
-                            entity.scores[1] = score2
-                            entity.scores[0] = 0.5
-                    adresse3 = self.normalize_street(entity.adresse3)
-                    adresse2 = self.normalize_street(entity.adresse2)
-                    num, adresse3 = self.split_num(adresse3)
-                    if num == 0 and adresse2 != "":
-                        num, adresse2 = self.split_num(adresse2)
-                    matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
-                    entity.scores.append(score)
-                    aentity, score = self.match_num(commune, matchadresse, num)
-                    entity.scores.append(score)
-                    aentity = self.check_low_score(entity, adresse3, num, aentity)
-                    self.update_entity(entity, aentity, entity.score)
-                    self.pss_db.append(entity)
-                    self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    # self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
-                    v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
-                                                 entity.lon, entity.lat, entity.matchcp)
-                    self.adresses_db[v.key] = v
-                    self.nbnewadresse += 1
+                self.parse_entity(entity)
+
+    def parse_entity(self, entity):
+        cp = int(entity.cp)
+        t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
+        if t in self.adresses_db:
+            values = self.adresses_db[t]
+            aentity = self.db[values.adresseid]
+            if "OSM" in values.source:
+                self.update_entity_by_adressesdb(entity, aentity, values)
+            else:
+                self.update_entity(entity, aentity, values.score)
+            self.keys_db[entity.id] = (entity.adresseid, entity.score)
+            self.pss_db.append(entity)
+            if entity.adressescore < config.adresse_quality:
+                self.nbscorelow += 1
+        else:
+            cp, score = self.match_cp(cp)
+            entity.scores.append(score)
+            communes = self.cps_db[cp]
+            commune = self.normalize_commune(entity.commune)
+            commune, score = self.match_commune(commune, communes, cp)
+            entity.scores.append(score)
+            if score < 0.8:
+                cp2, commune2, score2 = self.get_cp_by_commune(self.normalize_commune(entity.commune), cp)
+                if score2 > score and cp2 != entity.cp:
+                    self.log(f"WARNING BAD CP {entity.cp} {entity.commune}=>{cp2} {commune2}")
+                    self.nbbadcp += 1
+                    cp = cp2
+                    commune = commune2
+                    entity.scores[1] = score2
+                    entity.scores[0] = 0.5
+            adresse3 = self.normalize_street(entity.adresse3)
+            adresse2 = self.normalize_street(entity.adresse2)
+            num, adresse3 = self.split_num(adresse3)
+            if num == 0 and adresse2 != "":
+                num, adresse2 = self.split_num(adresse2)
+            matchadresse, score = self.match_street(commune, adresse2, adresse3, cp)
+            entity.scores.append(score)
+            aentity, score = self.match_num(commune, matchadresse, num)
+            entity.scores.append(score)
+            aentity = self.check_low_score(entity, adresse3, num, aentity)
+            self.update_entity(entity, aentity, entity.score)
+            self.pss_db.append(entity)
+            self.keys_db[entity.id] = (entity.adresseid, entity.score)
+            v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
+                                         entity.lon, entity.lat, entity.matchcp)
+            self.adresses_db[v.key] = v
+            self.nbnewadresse += 1
 
     def display(self):
         print(f"Nb PS: {self.nb}")
