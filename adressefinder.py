@@ -23,6 +23,7 @@ if __name__ == '__main__':
             if dept != olddept:
                 print(f"Load dept {dept}")
                 am.db, am.communes_db, am.cps_db, am.insees_db = am.a_repo.load_adresses(dept)
+                am.cedex_db = am.a_repo.load_cedex()
             olddept = dept
             entity.v[7] = int(input("Code postal: "))
             cp, score = am.match_cp(entity.cp)
