@@ -25,6 +25,7 @@
 # Couple le fichier ps-tarifs*.csv et adresses-*.pickle
 # Utilisation : python adressesmatcher.py data/ps/ps-tarifs-21-03.csv
 # Génére le fichier data/ps/ps-tarifs-21-03-adresses.csv complété avec les adresses pour tous les départements métropolitains + Corse
+# -c utilise le ficher de cache ps-adresses.csv ainsi que le geocoding
 # -d indique la liste des départements à matcher
     # La liste doit être au format des listes Python sans espace
     # Pour la Corse 2A = 201 et 2B = 202
@@ -33,6 +34,10 @@
 # Exemple pour une liste de département python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d [1,38,48]
 # Exemple pour une liste de département consécutifs python adressesmatcher.py data/ps/ps-tarifs-21-03.csv -d list(range(10,25))
 # Aide : python adressesmatcher.py --help
+
+# OSMRest
+# Met à jour le cache d'adresse avec OpenStreeMap
+# Utilisation : python osmrest.py
 
 # Repositories
 # Test un fichier PS

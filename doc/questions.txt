@@ -5,6 +5,16 @@
 #    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
+#
+# V0.2.0.DEV
+# ??/04/21
+# 4.5 jours
+# WP => All Ok, accuracy 99.9%
+# Mise en place du geocoding OpenStreetMap
+# Mise en place d'un cache d'adresse qui augmente la rapidité et gère le geocoding
+# Psfilter et psquery => Requêtage mono et mutlifichier
+# Création d'un script réutilisable pour les adresses mymatcher
+#
 # V0.1.0.DEV
 # 15/04/21
 # 4 jours

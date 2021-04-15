@@ -2,7 +2,7 @@ import art
 import config
 import adressesmatcher
 import entities
-import nominatimpoc
+import osmrest
 import mapquestpoc
 import selenium
 import gmappoc
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         gmap.load()
         olddept = 0
         am = adressesmatcher.AdresseMatcher()
-        nominatim = nominatimpoc.NominatimRest()
+        nominatim = osmrest.NominatimRest()
         while True:
             entity = entities.PSEntity()
             try:

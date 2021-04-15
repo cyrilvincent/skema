@@ -2,7 +2,7 @@ import art
 import config
 import adressesmatcher
 import entities
-import nominatimpoc
+import osmrest
 import mapquestpoc
 
 if __name__ == '__main__':

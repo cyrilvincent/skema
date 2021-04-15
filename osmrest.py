@@ -4,6 +4,7 @@ import json
 import repositories
 import math
 import config
+import art
 
 
 class NominatimRest:
@@ -107,6 +108,12 @@ class NominatimRest:
 
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
+    print("Adresses Matcher")
+    print("================")
+    print(f"V{config.version}")
+    print(config.copyright)
+    print()
     rest = NominatimRest()
     rest.load()
     rest.save()

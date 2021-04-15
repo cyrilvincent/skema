@@ -2,8 +2,7 @@ import art
 import config
 import adressesmatcher
 import entities
-import nominatimpoc
-import mapquestpoc
+import osmrest
 import selenium
 import gmappoc
 
@@ -22,7 +21,7 @@ if __name__ == '__main__':
         gmap.load()
         olddept = 0
         am = adressesmatcher.AdresseMatcher()
-        nominatim = nominatimpoc.NominatimRest()
+        nominatim = osmrest.NominatimRest()
         while True:
             entity = entities.PSEntity()
             try:
@@ -70,9 +69,6 @@ if __name__ == '__main__':
                 lon, lat, cp = nominatim.get_lon_lat_from_adresse(f"{num} {entity.v[5]}", entity.v[8], entity.v[7])
                 dist = nominatim.calc_distance(aentity.lon, aentity.lat, lon, lat)
                 print(f"Position depuis Nominatim: {lon},{lat} @{dist}m")
-                lon, lat = mapquestpoc.get_lon_lat_from_adresse(f"{num} {entity.v[5]} {entity.v[7]} {entity.v[8]} FRANCE")
-                dist = nominatim.calc_distance(aentity.lon, aentity.lat, lon, lat)
-                print(f"Position depuis Mapquest: {lon},{lat} @{dist}m")
                 lon, lat = gmap.get_lon_lat_from_adresse(f"{num} {entity.v[5]} {entity.v[7]} {entity.v[8]} FRANCE")
                 dist = nominatim.calc_distance(aentity.lon, aentity.lat, lon, lat)
                 print(f"Position depuis GoogleMap: {lon},{lat} @{dist}m")

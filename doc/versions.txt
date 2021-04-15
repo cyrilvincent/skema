@@ -5,6 +5,15 @@
 #    _\::\ \__    \:\ \/_/\     _\::\ \__    \: ___\/
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
+#
+# V0.2.0.DEV
+# ??/04/21
+# 4.5 jours
+# AdresseMatcher gère un cache d'adresse dans ps_adresses.csv
+# CustomMatcher base de MyMatcher pour créer des AdressesMatcher
+# PSFilter et PSQuery effectue des requêtes pandas mono et multifichier
+# OSMRest effectue des requêtes Rest sur les + mauvais score de ps_adresse.csv
+#
 # V0.1.0.DEV
 # 15/04/21
 # 4 jours
