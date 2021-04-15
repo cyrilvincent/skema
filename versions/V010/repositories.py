@@ -5,7 +5,7 @@ import art
 import csv
 import pandas
 import argparse
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 
 class PSRepository:
@@ -106,7 +106,7 @@ class AdresseRepository:
         """
         return cyrilload.load(config.cedex_path)
 
-    def save_adresses_db(self, db: Dict):
+    def save_adresses_db(self, db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]):
         """
         Sauvegarde le dict d'adresse en CSV
         :param db: le dict
@@ -114,12 +114,16 @@ class AdresseRepository:
         print(f"Save {config.adresse_db_path}")
         with open(config.adresse_db_path, "w") as f:
             f.write("cp;commune;adresse2;adresse3;adresseid;score;source;lon;lat;matchcp\n")
-            for k in db.keys():
-                f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
-                v = db[k]
-                f.write(f"{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n")
+            l = list(db.values())
+            l.sort(key=lambda a: a.score)
+            for v in l:
+                # f.write(f"{k[0]};{k[1]};{k[3]};{k[2]};")
+                # v = db[k]
+                # f.write(f"{v[0]};{v[1]};{v[2]};{v[3]};{v[4]};{v[5]}\n")
+                f.write(f"{v.cp};{v.commune};{v.adresse2};{v.adresse3};{v.adresseid};{v.score};{v.source};")
+                f.write(f"{v.lon};{v.lat};{v.matchcp}\n")
 
-    def load_adresses_db(self) -> Dict:
+    def load_adresses_db(self) -> Dict[Tuple[str, str, str, str], entities.AdresseDbEntity]:
         """
         Charge l'adresse db depuis CSV
         :return: la DB
@@ -129,13 +133,15 @@ class AdresseRepository:
             with open(config.adresse_db_path) as f:
                 reader = csv.DictReader(f, delimiter=";")
                 for row in reader:
-                    cp = row["cp"]
-                    if len(cp) == 4:
-                        cp = "0" + cp
-                    k = cp, row["commune"], row["adresse3"], row["adresse2"]
-                    score = float(row["score"])
-                    v = row["adresseid"], score, row["source"], float(row["lon"]), float(row["lat"]), row["matchcp"]
-                    db[k] = v
+                    v = entities.AdresseDbEntity(row["cp"], row["commune"], row["adresse3"], row["adresse2"],
+                                                 row["adresseid"], float(row["score"]), row["source"],
+                                                 float(row["lon"]), float(row["lat"]), row["matchcp"])
+                    # cp = row["cp"]
+                    # k = cp, row["commune"], row["adresse3"], row["adresse2"]
+                    # score = float(row["score"])
+                    # v = row["adresseid"], score, row["source"], float(row["lon"]), float(row["lat"]), row["matchcp"]
+                    # db[k] = v
+                    db[v.key] = v
         except FileNotFoundError:
             print(f"{config.adresse_db_path} does not exist")
         return db

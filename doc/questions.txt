@@ -30,7 +30,7 @@
 # TODO Faire un script réutilisable qui lit un fichier CSV avec entre autres les colonnes street1, street2, cp, commune 0.25j
 # TODO Et enregistrer le résultat du matching dans un CSV résultat 0.25j
 # TODO Transfert de compétence 0.5j
-# TODO Total 4.5j
+# TODO Total 4.5j 3 semaines
 
 # V0.0.2.DEV
 # 01/04/21

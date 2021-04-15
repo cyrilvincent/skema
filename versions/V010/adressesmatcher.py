@@ -36,11 +36,11 @@ class AdresseMatcher:
         self.ps_repo = repositories.PSRepository()
         self.a_repo = repositories.AdresseRepository()
         self.keys_db = {}
-        self.adresses_db = {}
+        self.adresses_db: Dict[Tuple[str, str, str, str], entities.AdresseDbEntity] = {}
         self.insees_db = {}
         self.cedex_db = {}
         self.csv = []
-        self.new_adresse = False
+        self.nbnewadresse = 0
 
     def log(self, msg: str):
         """
@@ -278,6 +278,7 @@ class AdresseMatcher:
         if num == 0:
             adresses = [e for e in adresses if e.nom_afnor == adresse]
             if len(adresses) > 0:
+                adresses.sort(key=lambda a: (a.numero, a.rep))
                 if adresses[0].numero == 0:
                     return adresses[0], 1.0
                 else:
@@ -309,7 +310,8 @@ class AdresseMatcher:
             dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
             for id in ids:
                 e = self.db[id]
-                if e.commune == commune and str(e.code_postal)[:2] == dept:
+                dept2 = str(e.code_postal)[:2] if e.code_postal >= 10000 else "0" + str(e.code_postal)[:1]
+                if e.commune == commune and dept2 == dept:
                     return e.code_postal, e.commune, 0.9
                 if e.commune.startswith(commune) and str(e.code_postal)[:2] == dept:
                     return e.code_postal, e.commune, 0.75
@@ -363,8 +365,27 @@ class AdresseMatcher:
         entity.x = aentity.x
         entity.y = aentity.y
         entity.codeinsee = aentity.code_insee
-        entity.matchadresse = f"{aentity.numero} {aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
+        if aentity.numero != 0:
+            entity.matchadresse = f"{aentity.numero} "
+        entity.matchadresse += f"{aentity.nom_afnor} {aentity.code_postal} {aentity.commune}"
         entity.matchcp = aentity.code_postal
+
+    def update_entity_by_adressesdb(self, entity: entities.PSEntity, aentity: entities.AdresseEntity,
+                                    values: entities.AdresseDbEntity):
+        """
+        MAJ PS par rapport à l'adresse
+        :param entity: PS
+        :param aentity: adresse entity
+        :param values: adresses_db values
+        """
+        entity.adresseid = aentity.id
+        entity.adressescore = values.score
+        entity.lon = values.lon
+        entity.lat = values.lat
+        entity.codeinsee = aentity.code_insee
+        entity.matchcp = values.matchcp
+        entity.matchadresse = f"{entity.adresse3} {entity.matchcp} {entity.commune}"
+        entity.v[44] = "OSM"
 
     def check_low_score(self, entity: entities.PSEntity,
                         adresse3: str, originalnum: int, aentity: entities.AdresseEntity) -> entities.AdresseEntity:
@@ -431,10 +452,11 @@ class AdresseMatcher:
                 entity.rownum = self.rownum
                 self.ps_repo.row2entity(entity, row)
                 t = (entity.cp, entity.commune, entity.adresse3, entity.adresse2)
-
                 if t in self.adresses_db:
-                    aentity = self.db[self.adresses_db[t][0]]
-                    self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    # aentity = self.db[self.adresses_db[t][0]]
+                    aentity = self.db[self.adresses_db[t].adresseid]
+                    # self.update_entity(entity, aentity, self.adresses_db[t][1])
+                    self.update_entity(entity, aentity, self.adresses_db[t].score)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
                     self.pss_db.append(entity)
                     if entity.adressescore < config.adresse_quality:
@@ -468,14 +490,18 @@ class AdresseMatcher:
                     self.update_entity(entity, aentity, entity.score)
                     self.pss_db.append(entity)
                     self.keys_db[entity.id] = (entity.adresseid, entity.score)
-                    self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
-                    self.new_adresse = True
+                    # self.adresses_db[t] = entity.adresseid, entity.score, "BAN", entity.lon, entity.lat, entity.matchcp
+                    v = entities.AdresseDbEntity(t[0], t[1], t[2], t[3], entity.adresseid, entity.score, "BAN",
+                                                 entity.lon, entity.lat, entity.matchcp)
+                    self.adresses_db[v.key] = v
+                    self.nbnewadresse += 1
 
     def display(self):
         print(f"Nb PS: {self.nb}")
         print(f"Nb Matching PS: {len(self.pss_db)} {(len(self.pss_db) / self.nb) * 100 : .1f}%")
         print(f"Nb Unique PS: {len(self.keys_db)} ({self.nb / len(self.keys_db):.1f} rows/PS)")
         print(f"Nb Unique Adresse: {len(self.adresses_db)} ({self.nb / len(self.adresses_db):.1f} rows/PS)")
+        print(f"Nb New Adresse: {self.nbnewadresse}")
         print(f"Nb No num: {self.nonum} {(self.nonum / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Cedex BP: {self.nbcedexbp} {(self.nbcedexbp / len(self.adresses_db)) * 100 : .1f}%")
         print(f"Nb Bad CP: {self.nbbadcp} {(self.nbbadcp / len(self.adresses_db)) * 100 : .1f}%")
@@ -510,9 +536,16 @@ class AdresseMatcher:
         self.display()
         self.pss_db.sort(key=lambda e: e.rownum)
         file = file.replace(".csv", "-adresses.csv")
-        self.ps_repo.save_entities(file, self.pss_db)
-        if self.new_adresse and cache:
-            self.a_repo.save_adresses_db(self.adresses_db)
+        try:
+            self.ps_repo.save_entities(file, self.pss_db)
+            if self.nbnewadresse > 0 and cache:
+                self.a_repo.save_adresses_db(self.adresses_db)
+        except PermissionError as pe:
+            print(pe)
+            input("Close the file and press Enter")
+            self.ps_repo.save_entities(file, self.pss_db)
+            if self.nbnewadresse > 0 and cache:
+                self.a_repo.save_adresses_db(self.adresses_db)
         self.log(f"Saved {self.nb} PS")
 
 
@@ -595,7 +628,7 @@ if __name__ == '__main__':
     # Nb No Street: 213  0.2%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 19
-    # Nb Score low: 37583  1.6%
+    # Nb Score low: 32076  1.3%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
     # 2h53m 100.0% [2455164] Saved 2401126 PS
