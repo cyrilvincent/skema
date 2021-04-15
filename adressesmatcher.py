@@ -310,7 +310,8 @@ class AdresseMatcher:
             dept = str(oldcp)[:2] if oldcp >= 10000 else "0" + str(oldcp)[:1]
             for id in ids:
                 e = self.db[id]
-                if e.commune == commune and str(e.code_postal)[:2] == dept:
+                dept2 = str(e.code_postal)[:2] if e.code_postal >= 10000 else "0" + str(e.code_postal)[:1]
+                if e.commune == commune and dept2 == dept:
                     return e.code_postal, e.commune, 0.9
                 if e.commune.startswith(commune) and str(e.code_postal)[:2] == dept:
                     return e.code_postal, e.commune, 0.75
