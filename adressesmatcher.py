@@ -628,7 +628,7 @@ if __name__ == '__main__':
     # Nb No Street: 213  0.2%
     # Nb Error Unknown: 0  0.0%
     # Nb Bad INSEE: 19
-    # Nb Score low: 37583  1.6%
+    # Nb Score low: 32076  1.3%
     # Save data/ps/ps-tarifs-21-03-adresses.csv
     # Save data/ps/ps_adresses.csv
     # 2h53m 100.0% [2455164] Saved 2401126 PS

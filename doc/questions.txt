@@ -6,7 +6,7 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 # V0.1.0.DEV
-# ??/04/21
+# 15/04/21
 # 4 jours
 # WP => All Ok, Matching 100%, Accuracy 98.7%
 # Accuracy => Paris 99.9%, campagne 97-100%, villes moyennes 96-98%
@@ -23,6 +23,14 @@
 # Doc => Création de la doc HTML : https://htmlpreview.github.io/?https://github.com/cyrilvincent/skema/blob/dev/doc/html/index.html
 # Quelques adresses non métropolitaines pour des dept < 97 => 145 AVENUE MGDAJOU 09750 DZOUMOGNE
 # Réunions : 0.25j
+# Lot 0.2.0
+# TODO Geocoding OSM + BD Adresse (optimisation rapidité) 2j
+# TODO Outil de requêtage multi PS (Pandas) simple à programmer 1j
+# TODO Créer la fonction match_adresse(street1, street2, cp, commune) => AdresseEntity 0.5j
+# TODO Faire un script réutilisable qui lit un fichier CSV avec entre autres les colonnes street1, street2, cp, commune 0.25j
+# TODO Et enregistrer le résultat du matching dans un CSV résultat 0.25j
+# TODO Transfert de compétence 0.5j
+# TODO Total 4.5j
 
 # V0.0.2.DEV
 # 01/04/21
