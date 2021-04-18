@@ -4,6 +4,7 @@ import argparse
 import repositories
 import pandas
 import entities
+import numpy as np
 from typing import List, Tuple
 
 
@@ -34,7 +35,10 @@ class UFCParser:
             e.v[10] = self.get_profession(row["specialité"])
             e.v[12] = self.get_nature(row["Type d'activité"])
             e.v[13], e.v[14] = self.get_convention(row["SECTEUR"])
-            # prochain Moyenne Départementale
+            v = row["Moyenne Départementale"]
+            e.v[18] = int(np.round(v)) if str(v) != "nan" else ""
+            e.v[19] = int(np.round(row["PRIXBas"])) if str(row["PRIXBas"]) != "nan" else ""
+            e.v[20] = int(np.round(row["PRIXHaut"])) if str(row["PRIXHaut"]) != "nan" else ""
             self.entities.append(e)
 
     def save(self):
@@ -52,7 +56,7 @@ class UFCParser:
         l = df.values.tolist()
         if len(l) == 0:
             print(f"ERROR no address for ID2016 {id}")
-            return "", ""
+            return "", "", ""
         l = l[0]
         a1 = str(l[3])
         a2 = str(l[4])
