@@ -5,9 +5,6 @@ import csv
 from adressesmatcher import AdresseMatcherBase
 from typing import List, Optional
 
-time0 = time.perf_counter()
-
-
 class CustomRepository:
 
     def save_entities(self, path, entities):

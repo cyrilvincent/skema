@@ -2,15 +2,15 @@ import config
 import time
 import argparse
 import art
-import entities
-from custommatcher import CustomRepository, CustomMatcherBase
+from custommatcher import CustomMatcherBase
 from typing import List, Optional
 
 time0 = time.perf_counter()
 
 
 class CustomEntity:
-    nb = 45
+    originalnb = 33
+    nb = 45 #+12 with id +11 else
 
     def __init__(self):
         self.scores = []

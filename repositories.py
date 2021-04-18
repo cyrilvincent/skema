@@ -13,16 +13,18 @@ class PSRepository:
     Repository PS
     """
 
-    def save_entities(self, path, pss: List[entities.PSEntity]):
+    def save_entities(self, path, pss: List[entities.PSEntity], nbcolumn=0):
         """
         Sauvegarde une liste de PS dans un CSV
         :param path: le CSV
         :param pss: la liste de PS
+        :param nbcolumn: nombre de colonne
         """
         print(f"Save {path}")
         with open(path, "w") as f:
             for e in pss:
-                for i in range(len(e.v)):
+                nbcolumn = len(e.v) if nbcolumn == 0 else nbcolumn
+                for i in range(nbcolumn):
                     if i != 0:
                         f.write(";")
                     f.write(f"{e.v[i]}")
@@ -145,6 +147,14 @@ class AdresseRepository:
         except FileNotFoundError:
             print(f"{config.adresse_db_path} does not exist")
         return db
+
+
+class UFCRepository:
+
+    def load_ufc(self, path: str) -> Tuple[pandas.DataFrame, pandas.DataFrame]:
+        dataframe = pandas.read_excel(path)
+        adataframe = pandas.read_excel(path, 4)
+        return (dataframe, adataframe)
 
 
 if __name__ == '__main__':

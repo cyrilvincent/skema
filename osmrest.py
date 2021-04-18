@@ -109,8 +109,8 @@ class NominatimRest:
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("Adresses Matcher")
-    print("================")
+    print("OMS Rest")
+    print("========")
     print(f"V{config.version}")
     print(config.copyright)
     print()
