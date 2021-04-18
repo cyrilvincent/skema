@@ -55,7 +55,6 @@ class UFCParser:
                              (self.address_df.CP == cp)]
         l = df.values.tolist()
         if len(l) == 0:
-            print(f"ERROR no address for ID2016 {id}")
             return "", "", ""
         l = l[0]
         a1 = str(l[3])
@@ -72,8 +71,13 @@ class UFCParser:
         return a1, a2, a3
 
     def get_profession(self, s: str) -> int:
+        s = s.strip()
         if s == "Pédiatre":
             return 60
+        if s == "Gynécologue Obstétricien":
+            return 37
+        if s == "Ophtalmologiste":
+            return 56
         print(f"ERROR bad profession {s}")
         return 0
 
@@ -95,31 +99,21 @@ class UFCParser:
         return 0
 
     def get_convention(self, s) -> Tuple[str, str]:
-        s = str(s).strip()
-        if s == "Conventionné secteur 1":
-            return "c1", "N"
-        if s == "Conventionné secteur 1 avec contrat d'accès aux soins":
-            return "c1", "O"
-        if s == "Conventionné secteur 1 avec droit à dépassement permanent et contrat d'accès aux soins":
-            return "c1", "O"
-        if s == "Conventionné secteur 1 avec droit permanent à dépassement":
-            return "c1", "N"
-        if s == "Conventionné secteur 2":
-            return "c2", "N"
-        if s == "Conventionné secteur 2 avec contrat d'accès aux soins":
-            return "c2", "O"
-        if s == "nan":
-            return "nc", "N"
-        print(f"ERROR bad nature {s}")
-        return "", ""
-
-
+        s = str(s).strip().replace("\r\n", "")
+        res1, res2 = "nc", "N"
+        if "secteur 1" in s:
+            res1 = "c1"
+        elif "secteur 2" in s:
+            res1 = "c2"
+        if "soins" in s:
+            res2 = "O"
+        return res1, res2
 
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("UFC 2 Rest")
-    print("==========")
+    print("UFC 2 PS")
+    print("========")
     print(f"V{config.version}")
     print(config.copyright)
     print()
