@@ -7,7 +7,7 @@
 #   \________\/     \_____\/   \________\/     \_\/
 #
 # V0.2.0.DEV
-# ??/04/21
+# 04/05/21
 # 4.5 jours
 # WP => All Ok, accuracy 99.9%
 # Mise en place du geocoding OpenStreetMap
