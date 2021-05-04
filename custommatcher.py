@@ -25,7 +25,7 @@ class CustomRepository:
                 pass
 
     def load(self, file: str):
-        with open(file) as f:
+        with open(file, encoding="utf-8") as f:
             reader = csv.reader(f, delimiter=";")
             return list(reader)
 
