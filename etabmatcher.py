@@ -3,6 +3,7 @@ import time
 import argparse
 import art
 import adresses2pickles
+from custommatcher import CustomMatcherBase
 
 time0 = time.perf_counter()
 
@@ -148,7 +149,6 @@ class MyMatcherBase(CustomMatcherBase):
         self.csv = self.custom_repo.load(file)
         self.init_load(depts, cache)
         for dept in depts:
-            self.log(f"Load dept {dept}")
             self.db, self.communes_db, self.cps_db, self.insees_db = self.a_repo.load_adresses(dept)
             self.parse()
         self.display()
