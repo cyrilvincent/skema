@@ -6,13 +6,18 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 #
+# V1.0.0.DEV
+# OSM = 1req/s soit 86400 requêtes par jour soit 172800 distances soit 415*415
+# Pour 1 semaine => 777*777
+# ArcGIS Pro => API Python, ne sait que calculer les distnces en local, pour les routes c'est en Web!
+
 # V0.2.0.DEV
 # 04/05/21
 # 4.5 jours
 # WP => All Ok, accuracy 99.9%
-# Mise en place du geocoding OpenStreetMap
-# Mise en place d'un cache d'adresse qui augmente la rapidité et gère le geocoding
-# Psfilter et psquery => Requêtage mono et mutlifichier
+# Mise en place du geocoding OpenStreetMap => OSMRest
+# Mise en place d'un cache d'adresse qui augmente la rapidité et gère le geocoding => ps_adresses.csv
+# Psfilter et psquery => Requêtage mono et multifichier
 # Création d'un script réutilisable pour les adresses mymatcher
 #
 # V0.1.0.DEV

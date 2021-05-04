@@ -156,6 +156,12 @@ class UFCRepository:
         adataframe = pandas.read_excel(path, 4)
         return (dataframe, adataframe)
 
+class SSRepository:
+
+    def load_ss(self, path: str) -> pandas.DataFrame:
+        dataframe = pandas.read_excel(path)
+        return dataframe
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")

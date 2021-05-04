@@ -1,5 +1,5 @@
 name = "ICIP"
-version = "0.2.0-DEV"
+version = "1.0.0-DEV"
 copyright = "(c) Skema 2021"
 adresse_path = "data/adresse"
 adresse_quality = 0.83

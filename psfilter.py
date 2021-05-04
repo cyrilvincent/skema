@@ -16,6 +16,10 @@ def test2(dataframe, name):
     res = dataframe[(dataframe[0] == "H") & (dataframe[1] == name)]
     return res
 
+def opthtalmo_secteur1(dataframe):
+    res = dataframe[(dataframe[10] == 56) & (dataframe[13] == "c1")]
+    return res
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")

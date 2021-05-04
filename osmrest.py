@@ -5,6 +5,9 @@ import repositories
 import math
 import config
 import art
+import time
+
+time0 = time.perf_counter()
 
 
 class NominatimRest:
@@ -109,7 +112,7 @@ class NominatimRest:
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("OMS Rest")
+    print("OSM Rest")
     print("========")
     print(f"V{config.version}")
     print(config.copyright)

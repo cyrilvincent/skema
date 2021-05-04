@@ -19,7 +19,10 @@ class CustomRepository:
 
     def row2entity(self, entity, row: str):
         for i in range(len(row)):
-            entity.v[i] = row[i]
+            try:
+                entity.v[i] = row[i]
+            except:
+                pass
 
     def load(self, file: str):
         with open(file) as f:

@@ -21,7 +21,7 @@ class CustomEntity:
 
     @property
     def adresse2(self):
-        return self.v[5]
+        return self.v[4]
 
     @property
     def adresse3(self):
@@ -141,19 +141,14 @@ class MyMatcherBase(CustomMatcherBase):
         for row in self.csv:
             self.i += 1
             self.rownum += 1
-            cp = int(row[7])
-            if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
-                    (dept == 201 and 20000 <= cp < 20200) or \
-                    (dept == 202 and 20200 <= cp < 21000):
-                self.nb += 1
-                entity = CustomEntity()
-                entity.rownum = self.rownum
-                self.custom_repo.row2entity(entity, row)
-                self.parse_entity(entity)
+            self.nb += 1
+            entity = CustomEntity()
+            entity.rownum = self.rownum
+            self.custom_repo.row2entity(entity, row)
+            self.parse_entity(entity)
 
     def load_by_depts(self, file: str, depts: Optional[List[int]] = None, cache=False):
-        if depts is None:
-            depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
+        depts = [1]
         self.log(f"Load {file}")
         self.csv = self.custom_repo.load(file)
         self.init_load(depts, cache)
