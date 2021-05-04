@@ -33,7 +33,7 @@ class CustomEntity:
 
     @property
     def commune(self):
-        return self.v[36]
+        return ap.normalize(self.v[36])
 
     @property
     def score(self):
