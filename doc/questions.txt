@@ -6,6 +6,9 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 #
+
+# SanteSpecialite faire 2012
+# LEs villes sont suffixées par _x000D_
 # V1.0.0.DEV
 # OSM = 1req/s soit 86400 requêtes par jour soit 172800 distances soit 415*415
 # Pour 1 semaine => 777*777

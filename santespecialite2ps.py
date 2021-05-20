@@ -35,11 +35,11 @@ class SanteSpecialiteParser:
         for index, row in self.dataframe.iterrows():
             e = entities.PSEntity()
             e.rownum = index + 1
-            e.v[7] = row["CP"]
-            e.v[8] = row["Ville"]
-            e.v[1], e.v[2] = self.split_nom(row["Nom"])
-            e.v[10] = self.get_profession(row["Specialite"])
-            e.v[13] = self.get_secteur(row["Secteur"])
+            e.v[7] = row["CP"].strip()
+            e.v[8] = row["Ville"].strip()
+            e.v[1], e.v[2] = self.split_nom(row["Nom"].strip())
+            e.v[10] = self.get_profession(row["Specialite"].strip())
+            e.v[13] = self.get_secteur(row["Secteur"].strip())
             e.v[18] = int(np.round(row[15])) if str(row[15]) != "nan" else ""
             e.v[19] = int(np.round(row[13])) if str(row[13]) != "nan" else ""
             e.v[20] = int(np.round(row[14])) if str(row[14]) != "nan" else ""
