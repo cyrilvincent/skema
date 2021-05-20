@@ -53,9 +53,6 @@ class NominatimRest:
                     lon, lat, matchcp = self.get_lon_lat_from_adresse(v.adresse3, "", v.cp)
                     q = 2
                 if lat == 0:
-                    lon, lat, matchcp = self.get_lon_lat_from_adresse("", commune, v.cp[:2])
-                    q = 3
-                if lat == 0:
                     lon, lat, matchcp = self.get_lon_lat_from_adresse("", "", v.cp)
                     q = 4
                 if lat == 0:
@@ -86,7 +83,14 @@ class NominatimRest:
                     if "OSM" in v.source:
                         v.source += str(q)
                     v.score = score
-                    self.db[k] = v
+                    try:
+                        _ = int(v.lon)
+                        _ = int(v.lat)
+                        _ = int(v.matchcp)
+                        self.db[k] = v
+                    except:
+                        pass
+
 
     def save(self):
         try:
