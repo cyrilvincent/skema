@@ -36,7 +36,7 @@ class SanteSpecialiteParser:
             e = entities.PSEntity()
             e.rownum = index + 1
             e.v[7] = row["CP"]
-            e.v[8] = row["Ville"].strip()
+            e.v[8] = row["Ville"].strip().replace("_x000D_", "")
             e.v[1], e.v[2] = self.split_nom(row["Nom"].strip())
             e.v[10] = self.get_profession(row["Specialite"].strip())
             e.v[13] = self.get_secteur(row["Secteur"])
