@@ -4,3 +4,5 @@ jsonpickle
 pandas
 numpy
 pdoc3
+xlrd
+openpyxl

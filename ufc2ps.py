@@ -43,7 +43,7 @@ class UFCParser:
 
     def save(self):
         file = self.path
-        if "/" in self.path:
+        if "/" in self.path or "\\" in self.path:
             index = self.path.rindex("/")
             file = self.path[:index + 1]
             source = self.path[index + 1:]
