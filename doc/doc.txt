@@ -47,7 +47,7 @@
 # SanteSpecialite2PS
 # Transforme un fichier SanteSpecialite < 2016 en PS
 # Utilisation : python santespecialite2ps.py "data\SanteSpecialite\UFC Santé, Pédiatres 2016 v1-3.xlsx"
-# Pour concatener le résultat : copy *.csv ps-tarifs-2013-00.csv
+# Pour concatener le résultat : copy *.csv ps-tarifs-13-00.csv
 
 # Repositories
 # Test un fichier PS

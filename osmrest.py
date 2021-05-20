@@ -89,7 +89,7 @@ class NominatimRest:
                         _ = int(v.matchcp)
                         self.db[k] = v
                     except:
-                        pass
+                        print(f"Warning: no int {v.matchcp}")
 
 
     def save(self):

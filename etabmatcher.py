@@ -7,10 +7,10 @@ from custommatcher import CustomMatcherBase
 
 time0 = time.perf_counter()
 
-
+CPINDEX = 33
 class CustomEntity:
     originalnb = 33
-    nb = 80
+    nb = 81
 
     def __init__(self):
         self.scores = []
@@ -29,7 +29,7 @@ class CustomEntity:
 
     @property
     def cp(self):
-        return self.v[33]
+        return self.v[CPINDEX]
 
     @property
     def commune(self):
@@ -132,25 +132,30 @@ class CustomEntity:
 
 class MyMatcherBase(CustomMatcherBase):
 
-    def parse(self):
+    def parse(self, dept):
         self.rownum = 0
         for row in self.csv:
             self.i += 1
             self.rownum += 1
-            self.nb += 1
-            entity = CustomEntity()
-            entity.rownum = self.rownum
-            self.custom_repo.row2entity(entity, row)
-            self.parse_entity(entity)
+            cp = int(row[CPINDEX])
+            if ((dept * 1000) <= cp < (dept + 1) * 1000 and cp != 201 and cp != 202) or \
+                    (dept == 201 and 20000 <= cp < 20200) or \
+                    (dept == 202 and 20200 <= cp < 21000):
+                self.nb += 1
+                entity = CustomEntity()
+                entity.rownum = self.rownum
+                self.custom_repo.row2entity(entity, row)
+                self.parse_entity(entity)
 
     def load_by_depts(self, file: str, cache=False):
-        depts = [1]
+        depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
         self.log(f"Load {file}")
         self.csv = self.custom_repo.load(file)
         self.init_load(depts, cache)
         for dept in depts:
             self.db, self.communes_db, self.cps_db, self.insees_db = self.a_repo.load_adresses(dept)
-            self.parse()
+            self.log(f"Parse dept {dept}")
+            self.parse(dept)
         self.display()
         self.custom_db.sort(key=lambda e: e.rownum)
         file = file.replace(".csv", "-adresses.csv")
