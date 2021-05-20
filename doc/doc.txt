@@ -42,7 +42,7 @@
 # UFC2PS
 # Transforme un fichier UFC en PS
 # Utilisation : python ufc2ps.py "data\UFC\UFC Santé, Pédiatres 2016 v1-3.xlsx"
-# Pour concatener le résultat : copy *.csv ps-tarifs-2016-00.csv
+# Pour concatener le résultat : copy *.csv ps-tarifs-16-00.csv
 
 # SanteSpecialite2PS
 # Transforme un fichier SanteSpecialite < 2016 en PS
