@@ -28,6 +28,7 @@
 # Mise à jour entre 2 versions
 # taper git pull pour mettre à jour le code
 # Si git pull echoue à cause d'une modification du code de votre côté il faut taper les 2 lignes suivantes pour forcer la mise à jour, attention vos mddifications seront perdues
+        # git add *
         # git reset --hard HEAD
         # git pull
 # Taper python -m pip install -r requirements.txt depuis la racine du projet
