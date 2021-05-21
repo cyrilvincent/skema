@@ -10,6 +10,7 @@ time0 = time.perf_counter()
 CPINDEX = 33
 ADRESSE2INDEX = 0
 ADRESSE3INDEX = 32
+COMMUNEINDEX = 36
 class CustomEntity:
     originalnb = 33
     nb = 81
@@ -35,7 +36,7 @@ class CustomEntity:
 
     @property
     def commune(self):
-        return ap.normalize(self.v[36])
+        return ap.normalize(self.v[COMMUNEINDEX])
 
     @property
     def score(self):

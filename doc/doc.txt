@@ -47,7 +47,24 @@
 # SanteSpecialite2PS12 et 13
 # Transforme un fichier SanteSpecialite < 2016 en PS
 # Utilisation : python santespecialite2ps13.py "data\SanteSpecialite\UFC Santé, Pédiatres 2016 v1-3.xlsx"
-# Pour concatener le résultat : copy *.csv ps-tarifs-13-00.csv
+# Pour concatener le résultat : copy *.csv ps-tarifs-21-03.csv
+
+# PSFilter
+# Permet d'effectuer une requête Pandas sur un fichier ps
+# Utilisation : python psfilter.py data/ps/ps-tarifs-21-03-adresses.csv test1(dataframe)
+
+# PSQuery
+# Permet d'utiliser PSFilter sur tout les fichiers d'un répertoire
+# Utilisation : python psquery.py data/ps test1(dataframe)
+
+# MyMatcher (EtabMatcher)
+# Permet d'effectuer un matching d'adresse vers n'importe quel fichier
+# Mettre à jour les 3 variables uivantes (ligne 10 à 12) avec les numéros de colonnes y afferant (débute à 0)
+# Pour ADRESSE2INDEX si la colonne n'existe pas mettre 0
+# CPINDEX = 33 # Indique la colonne du CP
+# ADRESSE2INDEX = 0 # Indique la colonne du complément d'adresse
+# ADRESSE3INDEX = 32 # Indique la rue
+# COMMUNEINDEX = 36 # Indique la commune
 
 # Repositories
 # Test un fichier PS
