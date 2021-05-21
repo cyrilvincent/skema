@@ -6,6 +6,22 @@
 #   /__\::\__/\    \:\_\ \ \   /__\::\__/\    \ \ \
 #   \________\/     \_____\/   \________\/     \_\/
 #
+#
+# V1.0.1.RC
+# 21/05/21
+# 0 jour
+# SanteSpecialite2PS est splitté en 2 SanteSpecialite2PS12 et SanteSpecialite2PS13
+# Correction du bug OSMRest si le cp est absent
+# Correction du bug sur MyMatcher en multi dept
+#
+# V1.0.0.DEV
+# 20/05/21
+# 1.5 jours
+# SanteSpecialite2PS pour convertir un fichier SanteSpecialite vers PS
+# UFC2PS pour convertir un fichier SanteSpecialite vers PS
+# Bug sur OSMRest: cp = taine
+# Bug sur MyMatcher: un seul dept
+#
 # V0.2.0.DEV
 # 04/05/21
 # 4.5 jours

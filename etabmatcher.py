@@ -8,7 +8,7 @@ from custommatcher import CustomMatcherBase
 time0 = time.perf_counter()
 
 CPINDEX = 33
-ADRESSE2INDEX = 32
+ADRESSE2INDEX = 0
 ADRESSE3INDEX = 32
 class CustomEntity:
     originalnb = 33
@@ -23,7 +23,7 @@ class CustomEntity:
 
     @property
     def adresse2(self):
-        return ap.normalize(self.v[ADRESSE2INDEX])
+        return ap.normalize(self.v[ADRESSE2INDEX]) if ADRESSE2INDEX != 0 else ""
 
     @property
     def adresse3(self):

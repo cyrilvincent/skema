@@ -44,7 +44,7 @@
 # Utilisation : python ufc2ps.py "data\UFC\UFC Santé, Pédiatres 2016 v1-3.xlsx"
 # Pour concatener le résultat : copy *.csv ps-tarifs-16-00.csv
 
-# SanteSpecialite2PS
+# SanteSpecialite2PS12 et 13
 # Transforme un fichier SanteSpecialite < 2016 en PS
 # Utilisation : python santespecialite2ps13.py "data\SanteSpecialite\UFC Santé, Pédiatres 2016 v1-3.xlsx"
 # Pour concatener le résultat : copy *.csv ps-tarifs-13-00.csv
