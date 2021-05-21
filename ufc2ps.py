@@ -49,7 +49,7 @@ class UFCParser:
             source = self.path[index + 1:]
             index = source.rindex(".")
             source = source[:index]
-        file += f"ps-tarifs-00-00-{source}.csv"
+        file += f"ps-tarifs-16-00-{source}.csv"
         self.ps_repo.save_entities(file, self.entities, entities.PSEntity.originalnb)
 
     def get_adresse123_by_nom_prenom_cp(self, nom: str, prenom: str, cp: str) -> Tuple[str, str, str]:

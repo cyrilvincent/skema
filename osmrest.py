@@ -26,13 +26,17 @@ class NominatimRest:
         js = json.loads(s)
         lat = lon = cp = 0
         if len(js) > 0:
-            lat = float(js[0]["lat"])
-            lon = float(js[0]["lon"])
-            s = js[0]["display_name"]
-            index = s.rindex(",")
-            cp = s[index - 5: index].strip()
-            if len(cp) == 4:
-                cp = "0" + cp
+            try:
+                lat = float(js[0]["lat"])
+                lon = float(js[0]["lon"])
+                s = js[0]["display_name"]
+                index = s.rindex(",")
+                cp = s[index - 5: index].strip()
+                _ = int(cp)
+                if len(cp) == 4:
+                    cp = "0" + cp
+            except ValueError:
+                lat = lon = cp = 0
         return lon, lat, cp
 
     def load(self):
@@ -55,6 +59,9 @@ class NominatimRest:
                 if lat == 0:
                     lon, lat, matchcp = self.get_lon_lat_from_adresse("", "", v.cp)
                     q = 4
+                if lat == 0:
+                    lon, lat, matchcp = self.get_lon_lat_from_adresse("", commune, v.cp[:2])
+                    q = 3
                 if lat == 0:
                     print(f"{v.adresse3} {v.cp} {v.commune} @{int(v.score * 100)}% => No match")
                 else:
@@ -83,14 +90,7 @@ class NominatimRest:
                     if "OSM" in v.source:
                         v.source += str(q)
                     v.score = score
-                    try:
-                        _ = int(v.lon)
-                        _ = int(v.lat)
-                        _ = int(v.matchcp)
-                        self.db[k] = v
-                    except:
-                        print(f"Warning: no int {v.matchcp}")
-
+                    self.db[k] = v
 
     def save(self):
         try:
