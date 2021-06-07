@@ -43,7 +43,7 @@ class NominatimRest:
         self.db = self.repo.load_adresses_db()
         for k in list(self.db.keys()):
             v = self.db[k]
-            if v.source == "BAN" and v.score < 0.83:
+            if v.source == "BAN" and v.score < config.adresse_quality:
                 commune = v.commune
                 if " CEDEX" in commune:
                     index = commune.index(" CEDEX")
@@ -76,6 +76,9 @@ class NominatimRest:
                         score = 0.91 + banscore / 100
                     elif q > 0 and dist < 3000:
                         score = config.adresse_quality + 0.04 + banscore / 100
+                    elif (q == 1 or q == 3) and dist > 50000:
+                        v.source = "BAN"
+                        score = banscore
                     elif banscore < config.adresse_quality and q > 0:
                         score = config.adresse_quality + banscore / 100 + 0.03 - q / 100
                     elif q > 2:
@@ -84,13 +87,15 @@ class NominatimRest:
                     elif q > 0:
                         score = banscore
                     print(f"{v.adresse3} {v.cp} {v.commune} @{int(v.score * 100)}% =>"
-                          f" {lon},{lat} {dist}m {v.source}{q} @{int(score * 100)}%")
+                          f" {lon},{lat} {dist}m {matchcp} {v.source}{q} @{int(score * 100)}%")
                     if v.source == "OSM":
                         v.lon, v.lat, v.matchcp = lon, lat, matchcp
                     if "OSM" in v.source:
                         v.source += str(q)
                     v.score = score
-                    self.db[k] = v
+                    if v.matchcp == "taine":
+                        print(f"ERROR taine ???? remove the value")
+                        del self.db[k]
 
     def save(self):
         try:

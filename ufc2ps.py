@@ -35,7 +35,7 @@ class UFCParser:
             e.v[10] = self.get_profession(row["specialité"])
             e.v[12] = self.get_nature(row["Type d'activité"])
             e.v[13], e.v[14] = self.get_convention(row["SECTEUR"])
-            v = row["Moyenne Départementale"]
+            v = row["PRIX"]
             e.v[18] = int(np.round(v)) if str(v) != "nan" else ""
             e.v[19] = int(np.round(row["PRIXBas"])) if str(row["PRIXBas"]) != "nan" else ""
             e.v[20] = int(np.round(row["PRIXHaut"])) if str(row["PRIXHaut"]) != "nan" else ""
