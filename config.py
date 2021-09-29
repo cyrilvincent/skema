@@ -1,8 +1,9 @@
 name = "ICIP"
-version = "1.0.1-RC"
+version = "2.0.0.PREDEV"
 copyright = "(c) Skema 2021"
 adresse_path = "data/adresse"
 adresse_quality = 0.83
 cedex_path = "data/cedex/liste-des-cedex.pickle"
 sleep = 2
 adresse_db_path = "data/ps/ps_adresses.csv"
+connection_string = "postgresql://postgres:sa@localhost/icip"
