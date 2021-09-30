@@ -5,6 +5,7 @@ from sqlalchemy.engine import Engine
 from typing import Optional
 import config
 
+
 Base = declarative_base()
 
 
@@ -27,12 +28,13 @@ class Context:
         self.create_engine(echo, create_all)
         self.create_session()
 
-# ps 1-* ps_row *-1 adresse -? osm -1 dept NB:ps_row contient adresse1234 avant normalisation
-#                              -? ban -1 dept
-#               -? source
+# ps 1-* ps_row -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_row contient adresse1234 avant normalisation
+#                                              -? ban -1 dept
+#                                              -1 dept
+#                                              -? source
+#                              -1 dept
 #               *-* date_source
-# etab *-1 adresse NB:etab contient adresse1234 avant normalisation
-#      -? source
+# etab -1 adresse_raw
 #      *-* date_source
 # Voir dbeaver
 
@@ -115,8 +117,8 @@ class DateSource(Base):
     #           mois annee
 
 
-class Adresse(Base):
-    __tablename__ = "adresse"
+class AdresseNorm(Base):
+    __tablename__ = "adresse_norm"
 
     id = Column(Integer, primary_key=True)
     adresse = Column(String(255), nullable=False) # Contient le num
@@ -136,4 +138,27 @@ class Adresse(Base):
     __table_args__ = (UniqueConstraint('adresse', 'cp', 'commune'),)
 
     def __repr__(self):
-        return f"PSAdresse {self.id} {self.adresse3} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+        return f"AdresseNorm {self.id} {self.adresse} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+
+
+class AdresseRaw(Base):
+    __tablename__ = "adresse_raw"
+
+    id = Column(Integer, primary_key=True)
+    numero = Column(Integer)
+    adresse2 = Column(String(255))
+    adresse3 = Column(String(255), nullable=False)
+    adresse4 = Column(String(255))
+    cp = Column(String(5), nullable=False)
+    commune = Column(String(255), nullable=False)
+    adresse_norm: AdresseNorm = relationship("AdresseNorm")
+    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
+    dept: Dept = relationship("Dept")
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False)
+    __table_args__ = (UniqueConstraint('adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),)
+
+    def __repr__(self):
+        return f"AdresseRaw {self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
+
+    # Index : cp
+    #         commune
