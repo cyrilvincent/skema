@@ -17,8 +17,6 @@ if __name__ == '__main__':
     context = sqlentities.Context()
     context.create()
 
-
-
     depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
 
     for d in depts:

@@ -1,4 +1,5 @@
 from sqlentities import Context, Dept, BAN
+from typing import Set
 import csv
 import config
 import art
@@ -13,6 +14,7 @@ class AdresseParser:
         self.numrow = 0
         self.nbfile = 0
         self.nbadresse = 0
+        self.set = set()
 
     def normalize(self, s: str):
         """
@@ -33,6 +35,12 @@ class AdresseParser:
         s = s.replace(" GAL ", " GENERAL ").replace(" R ", " RUE ").replace(" RTE ", " ROUTE ")
         return s.strip()
 
+    def make_set(self, dept, session):
+        self.set = set()
+        bans = session.query(BAN).filter(BAN.dept_id == dept)
+        for ban in bans:
+            self.set.add(ban.adresse_id)
+
     def test_file(self, path):
         i = 0
         with open(path, encoding="utf8") as f:
@@ -41,10 +49,11 @@ class AdresseParser:
         return i
 
     def load(self, path: str, dept_num: int):
+        print(f"Load {path}")
         context = Context()
         context.create()
+        self.make_set(dept_num, context.session)
         dept = context.session.query(Dept).get(dept_num)
-        print(f"Load {path}")
         self.numrow = 0
         nb = self.test_file(path)
         with open(path, encoding="utf8") as f:
@@ -54,14 +63,15 @@ class AdresseParser:
                 self.nbadresse += 1
                 self.numrow += 1
                 e = BAN()
-                e.adresse_id = row["id"]
-                dbe = context.session.query(BAN).filter(BAN.adresse_id == e.adresse_id).first()
-                if dbe is None:
+                e.adresse_id = row["id"][:50]
+                # dbe = context.session.query(BAN).filter(BAN.adresse_id == e.adresse_id).first()
+                if e.adresse_id not in self.set:
+                # if dbe is None:
                     e.numero = int(row["numero"])
-                    e.rep = row["rep"] if row["rep"] != "" else None
+                    e.rep = row["rep"][:50] if row["rep"] != "" else None
                     e.nom_voie = self.normalize(row["nom_voie"])
                     e.code_postal = int(row["code_postal"])
-                    e.code_insee = int(row["code_insee"])
+                    e.code_insee = row["code_insee"]
                     e.nom_commune = self.normalize(row["nom_commune"])
                     e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
                     if e.nom_ancienne_commune == "":
@@ -79,18 +89,18 @@ class AdresseParser:
                     e.is_lieu_dit = False
                     context.session.add(e)
                     context.session.commit()
+                    self.set.add(e.adresse_id)
                 if self.numrow % 10000 == 0:
                     print(f"Found {self.nbadresse} adresses {(self.numrow/nb)*100:.1f}%")
         print(f"Found {self.nbfile} files and {self.nbadresse} adresses in {int(time.perf_counter() - time0)}s")
 
     def load_lieuxdits(self, path: str, dept_num: int):
+        print(f"Load {path}")
         context = Context()
         context.create()
         self.nbfile += 1
-        print(f"Load {path}")
         dept = context.session.query(Dept).get(dept_num)
         self.numrow = 0
-        nb = self.test_file(path)
         with open(path, encoding="utf8") as f:
             reader = csv.DictReader(f, delimiter=';')
             for row in reader:
@@ -98,11 +108,12 @@ class AdresseParser:
                 self.nbadresse += 1
                 e = BAN()
                 e.adresse_id = row["id"]
-                dbe = context.session.query(BAN).filter(BAN.adresse_id == e.adresse_id).first()
-                if dbe is None:
+                # dbe = context.session.query(BAN).filter(BAN.adresse_id == e.adresse_id).first()
+                # if dbe is None:
+                if e.adresse_id not in self.set:
                     e.nom_voie = self.normalize(row["nom_lieu_dit"])
                     e.code_postal = int(row["code_postal"])
-                    e.code_insee = int(row["code_insee"])
+                    e.code_insee = row["code_insee"]
                     e.nom_commune = self.normalize(row["nom_commune"])
                     e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
                     if e.nom_ancienne_commune == "":
@@ -116,8 +127,7 @@ class AdresseParser:
                     e.is_lieu_dit = True
                     context.session.add(e)
                     context.session.commit()
-                if self.numrow % 10000 == 0:
-                    print(f"Found {self.nbadresse} adresses {(self.numrow / nb) * 100:.1f}%")
+                    self.set.add(e.adresse_id)
         print(f"Found {self.nbfile} files and {self.nbadresse} adresses in {int(time.perf_counter() - time0)}s")
 
     def scan(self):
@@ -141,12 +151,5 @@ if __name__ == '__main__':
     print()
     time0 = time.perf_counter()
     parser = AdresseParser()
-    #parser.load("data/adresse/adresses-05.csv", 5)
+    # parser.load("data/adresse/adresses-60.csv", 60)
     parser.scan()
-
-
-
-
-
-
-
