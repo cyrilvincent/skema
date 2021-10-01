@@ -6,6 +6,7 @@ import math
 import config
 import art
 import time
+import ssl
 
 time0 = time.perf_counter()
 
@@ -21,7 +22,10 @@ class NominatimRest:
         street = urllib.parse.quote(street)
         commune = urllib.parse.quote(commune)
         url = f"{self.uri}street={street}&city={commune}&postalcode={cp}"
+        # print(url)
+        ssl._create_default_https_context = ssl._create_unverified_context
         with urllib.request.urlopen(url) as response:
+
             s = response.read()
         js = json.loads(s)
         lat = lon = cp = 0

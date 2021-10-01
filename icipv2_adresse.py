@@ -1,4 +1,4 @@
-from sqlentities import Context, Dept, BAN
+from sqlentities import Context, Dept, BAN, PS
 from typing import Set
 import csv
 import config
@@ -153,3 +153,4 @@ if __name__ == '__main__':
     parser = AdresseParser()
     # parser.load("data/adresse/adresses-60.csv", 60)
     parser.scan()
+
