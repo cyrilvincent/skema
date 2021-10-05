@@ -28,12 +28,12 @@ class Context:
         self.create_session()
 
 
-# ps 1-* ps_row -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_row contient adresse1234 avant normalisation
-#                                              -? ban -1 dept
-#                                              -1 dept
-#                                              -? source
-#                              -1 dept
-#               *-* date_source
+# ps 1 -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_row contient adresse1234 avant normalisation
+#                                     -? ban -1 dept
+#                                     -1 dept
+#                                     -? source
+#                     -1 dept
+#    1-* ps_row *-* date_source
 # etab -1 adresse_raw
 #      *-* date_source
 # Voir dbeaver
@@ -142,7 +142,7 @@ class AdresseRaw(Base):
     adresse_norm: AdresseNorm = relationship("AdresseNorm")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
     dept: Dept = relationship("Dept")
-    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False)
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False) # Inutile?
     __table_args__ = (UniqueConstraint('adresse1', 'adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),)
 
     def __repr__(self):
@@ -165,16 +165,13 @@ psrow_datesource = Table('ps_row_date_source', Base.metadata,
 
 class DateSource(Base):
     __tablename__ = "date_source"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True) # format 2110
     mois = Column(Integer)
     annee = Column(Integer, nullable=False)
     __table_args__ = (UniqueConstraint('mois', 'annee'),)
 
     def __repr__(self):
         return f"DateSource {self.id} {self.mois} {self.annee}"
-
-    # Indexes : annee
-    #           mois annee
 
 
 class Etablissement(Base):
@@ -185,8 +182,8 @@ class Etablissement(Base):
     adresse = Column(String(255), nullable=False)
     cp = Column(String(5), nullable=False)
     commune = Column(String(255), nullable=False)
-    adresse_raw: AdresseRaw = relationship("AdresseRaw")  # , nullable=False
-    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'))  # , nullable=False
+    adresse_raw: AdresseRaw = relationship("AdresseRaw")
+    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'))  # A passer en nullable=False
     datesources = relationship("DateSource",
                                secondary=etablissement_datesource,
                                backref="etablissements")
@@ -202,8 +199,12 @@ class PS(Base):
     __tablename__ = "ps"
 
     id = Column(Integer, primary_key=True)
+    key = Column(String(255), nullable=False, unique=True) # manque unique en base
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
+    telephone = Column(String(15))
+    adresse_raw: AdresseRaw = relationship("AdresseRaw")
+    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)  # Mettre le nullable=False en base
     # psrows: List = relationship("PSRow") semble facultatif avec le backref
 
 
@@ -212,8 +213,6 @@ class PSRow(Base):
 
     id = Column(Integer, primary_key=True)
     profession = Column(String(255), nullable=False)
-    adresse_raw: AdresseRaw = relationship("AdresseRaw")
-    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     ps: PS = relationship("PS", backref="psrows")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
     datesources = relationship("DateSource",
@@ -223,4 +222,4 @@ class PSRow(Base):
 # backrefs vs backpopulate
 # Le backref est plus simple à coder et génère automatiquement la propriété *s
 # Par exemple ps.psrows est automatiquement généré
-# Par contre pas d'intellissense sur les propriétés générées
+# Par contre pas d'intellisense sur les propriétés générées

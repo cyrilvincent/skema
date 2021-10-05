@@ -1,5 +1,6 @@
 import urllib.request
 import urllib.parse
+import urllib.error
 import json
 import repositories
 import math
@@ -18,16 +19,33 @@ class NominatimRest:
         self.repo = repositories.AdresseRepository()
         self.db = {}
 
+    def get_json_from_url(self, url, nbretry=0):
+        ssl._create_default_https_context = ssl._create_unverified_context
+        try:
+            with urllib.request.urlopen(url) as response:
+                s = response.read()
+                js = json.loads(s)
+                return js
+        except urllib.error.URLError as ex:
+            print(url)
+            print(f"ERROR URLError: {ex}")
+            if nbretry == 5:
+                raise ex
+            else:
+                print(f"RETRY {nbretry + 1}")
+                time.sleep(nbretry * 4 + 1)
+                return self.get_json_from_url(url, nbretry + 1)
+        except json.JSONDecodeError as ex:
+            print(url)
+            print(f"ERROR JSON: {s}")
+            raise ex
+
     def get_lon_lat_from_adresse(self, street, commune, cp):
         street = urllib.parse.quote(street)
         commune = urllib.parse.quote(commune)
         url = f"{self.uri}street={street}&city={commune}&postalcode={cp}"
         # print(url)
-        ssl._create_default_https_context = ssl._create_unverified_context
-        with urllib.request.urlopen(url) as response:
-
-            s = response.read()
-        js = json.loads(s)
+        js = self.get_json_from_url(url)
         lat = lon = cp = 0
         if len(js) > 0:
             try:
