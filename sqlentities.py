@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, Table
+from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, Table, Index
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
 from typing import Optional, List
@@ -57,27 +57,23 @@ class BAN(Base):
     numero = Column(Integer)
     rep = Column(String(50))
     nom_voie = Column(String(255))
-    code_postal = Column(Integer, nullable=False)
-    code_insee = Column(String(5), nullable=False)
-    nom_commune = Column(String(255), nullable=False)
+    code_postal = Column(Integer, nullable=False, index=True)
+    code_insee = Column(String(5), nullable=False, index=True)
+    nom_commune = Column(String(255), nullable=False, index=True)
     nom_ancienne_commune = Column(String(255))
     lon = Column(Float, nullable=False)
     lat = Column(Float, nullable=False)
     libelle_acheminement = Column(String(255))
     nom_afnor = Column(String(255))
     dept: Dept = relationship("Dept")
-    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False)
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     is_lieu_dit = Column(Boolean)
+    __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
+                      Index('BAN_cp_nom_commune_nom_voie', 'nom_commune', 'nom_voie'),
+                      )
 
     def __repr__(self):
-        return f"Adresse {self.id} {self.numero} {self.nom_voie} {self.code_postal} {self.nom_commune}"
-
-    # Indexes : code_postal
-    #           code_insee
-    #           nom_commune
-    #           code_postale nomcommune
-    #           nomcommune nom_voie
-    #           dept_id
+        return f"BAN {self.id} {self.numero} {self.nom_voie} {self.code_postal} {self.nom_commune}"
 
 
 class OSM(Base):
@@ -122,7 +118,7 @@ class AdresseNorm(Base):
     lat = Column(Float)
     score = Column(Float)
     dept: Dept = relationship("Dept")
-    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False)
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):
@@ -137,19 +133,19 @@ class AdresseRaw(Base):
     adresse2 = Column(String(255))
     adresse3 = Column(String(255), nullable=False)
     adresse4 = Column(String(255))
-    cp = Column(String(5), nullable=False)
-    commune = Column(String(255), nullable=False)
+    cp = Column(String(5), nullable=False, index=True)
+    commune = Column(String(255), nullable=False, index=True)
     adresse_norm: AdresseNorm = relationship("AdresseNorm")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
     dept: Dept = relationship("Dept")
-    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False) # Inutile?
-    __table_args__ = (UniqueConstraint('adresse1', 'adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),)
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
+    __table_args__ = (UniqueConstraint('adresse1', 'adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),
+                      Index('adresse_raw_cp_commune_ix', 'cp', 'commune'),
+                      Index('adresse_raw_adresse3_cp_commune_ix', 'adresse3', 'cp', 'commune'),
+                      )
 
     def __repr__(self):
         return f"AdresseRaw {self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
-
-    # Index : cp
-    #         commune
 
 
 etablissement_datesource = Table('etablissement_date_source', Base.metadata,
@@ -165,7 +161,7 @@ psrow_datesource = Table('ps_row_date_source', Base.metadata,
 
 class DateSource(Base):
     __tablename__ = "date_source"
-    id = Column(Integer, primary_key=True) # format 2110
+    id = Column(Integer, primary_key=True)  # format 2110
     mois = Column(Integer)
     annee = Column(Integer, nullable=False)
     __table_args__ = (UniqueConstraint('mois', 'annee'),)
@@ -174,25 +170,37 @@ class DateSource(Base):
         return f"DateSource {self.id} {self.mois} {self.annee}"
 
 
+class EtablissementType(Base):
+    __tablename__ = "etablissement_type"
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False)
+
+    def __repr__(self):
+        return f"EtablissementType {self.id} {self.type}"
+
+
 class Etablissement(Base):
     __tablename__ = "etablissement"
 
     id = Column(Integer, primary_key=True)
     nom = Column(String(255), nullable=False)
-    adresse = Column(String(255), nullable=False)
-    cp = Column(String(5), nullable=False)
-    commune = Column(String(255), nullable=False)
+    numero = Column(String(50), nullable=False)
+    type: EtablissementType = relationship("EtablissementType")
+    type_id = Column(Integer, ForeignKey('etablissement_type.id'), nullable=False)
+    telephone = Column(String(20))
+    mail = Column(String(50))
+    nom2 = Column(String(255), nullable=False)
+    url = Column(String(255))
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
-    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'))  # A passer en nullable=False
+    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     datesources = relationship("DateSource",
                                secondary=etablissement_datesource,
                                backref="etablissements")
+    __table_args__ = (UniqueConstraint('numero'),)
 
     def __repr__(self):
         return f"Etablissement {self.id} {self.nom}"
-
-    # Index : cp
-    #         commune
 
 
 class PS(Base):
@@ -207,6 +215,9 @@ class PS(Base):
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)  # Mettre le nullable=False en base
     # psrows: List = relationship("PSRow") semble facultatif avec le backref
 
+    def __repr__(self):
+        return f"PS {self.id} {self.key} {self.nom} {self.prenom}"
+
 
 class PSRow(Base):
     __tablename__ = "ps_row"
@@ -218,6 +229,9 @@ class PSRow(Base):
     datesources = relationship("DateSource",
                                secondary=psrow_datesource,
                                backref="psrows")
+
+    def __repr__(self):
+        return f"PSRow {self.id} {self.profession}"
 
 # backrefs vs backpopulate
 # Le backref est plus simple à coder et génère automatiquement la propriété *s

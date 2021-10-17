@@ -38,7 +38,12 @@ class NominatimRest:
         except json.JSONDecodeError as ex:
             print(url)
             print(f"ERROR JSON: {s}")
-            raise ex
+            if nbretry == 1:
+                raise ex
+            else:
+                print(f"RETRY {nbretry + 1}")
+                time.sleep(5)
+                return self.get_json_from_url(url, 1)
 
     def get_lon_lat_from_adresse(self, street, commune, cp):
         street = urllib.parse.quote(street)
