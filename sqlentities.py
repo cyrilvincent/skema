@@ -1,8 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, Table, Index
+from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
+    Table, Index
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
-from typing import Optional, List
+from typing import Optional, List, Iterable
 import config
 
 Base = declarative_base()
@@ -10,12 +11,18 @@ Base = declarative_base()
 
 class Context:
 
-    def __init__(self):
+    def __init__(self, connection_string=config.connection_string):
         self.engine: Optional[Engine] = None
         self.session: Optional[Session] = None
+        self.connection_string = connection_string
+
+    @property
+    def db_name(self):
+        index = self.connection_string.rindex("/")
+        return self.connection_string[index + 1:]
 
     def create_engine(self, echo=False, create_all=True):
-        self.engine = create_engine(config.connection_string, echo=echo)
+        self.engine = create_engine(self.connection_string, echo=echo)
         if create_all:
             Base.metadata.create_all(self.engine)
 
@@ -27,8 +34,15 @@ class Context:
         self.create_engine(echo, create_all)
         self.create_session()
 
+    def db_size(self):
+        with self.engine.connect() as conn:
+            sql = f"select pg_database_size('{self.db_name}')"
+            res = conn.execute(sql)
+            row = res.fetchone()
+            return row[0] / 2 ** 20
 
-# ps 1 -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_row contient adresse1234 avant normalisation
+
+# ps 1 -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_raw contient adresse1234 avant normalisation
 #                                     -? ban -1 dept
 #                                     -1 dept
 #                                     -? source
@@ -166,8 +180,13 @@ class DateSource(Base):
     annee = Column(Integer, nullable=False)
     __table_args__ = (UniqueConstraint('mois', 'annee'),)
 
+    def __init__(self, annee, mois):
+        self.annee = annee
+        self.mois = mois
+        self.id = annee * 100 + mois
+
     def __repr__(self):
-        return f"DateSource {self.id} {self.mois} {self.annee}"
+        return f"DateSource {self.id}"
 
 
 class EtablissementType(Base):
@@ -194,9 +213,9 @@ class Etablissement(Base):
     url = Column(String(255))
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
-    datesources = relationship("DateSource",
-                               secondary=etablissement_datesource,
-                               backref="etablissements")
+    date_sources: List[DateSource] = relationship("DateSource",
+                                                  secondary=etablissement_datesource,
+                                                  backref="etablissements")
     __table_args__ = (UniqueConstraint('numero'),)
 
     def __repr__(self):
@@ -207,12 +226,13 @@ class PS(Base):
     __tablename__ = "ps"
 
     id = Column(Integer, primary_key=True)
-    key = Column(String(255), nullable=False, unique=True) # manque unique en base
+    key = Column(String(255), nullable=False, unique=True)  # manque unique en base
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
     telephone = Column(String(15))
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)  # Mettre le nullable=False en base
+
     # psrows: List = relationship("PSRow") semble facultatif avec le backref
 
     def __repr__(self):
@@ -226,9 +246,9 @@ class PSRow(Base):
     profession = Column(String(255), nullable=False)
     ps: PS = relationship("PS", backref="psrows")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
-    datesources = relationship("DateSource",
-                               secondary=psrow_datesource,
-                               backref="psrows")
+    date_sources: List[DateSource] = relationship("DateSource",
+                                                  secondary=psrow_datesource,
+                                                  backref="psrows")
 
     def __repr__(self):
         return f"PSRow {self.id} {self.profession}"

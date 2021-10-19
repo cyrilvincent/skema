@@ -28,7 +28,6 @@ class EnumsCreator:
         context.session.add(et)
         context.session.commit()
 
-
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Sql Enums")
@@ -36,5 +35,8 @@ if __name__ == '__main__':
     print(f"V{config.version}")
     print(config.copyright)
     print()
+    context = Context()
+    context.create()
+    print(f"Database {context.db_name}: {context.db_size():.0f} Mo")
     e = EnumsCreator()
-    e.etablissementType()
+    # e.etablissementType()
