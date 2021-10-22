@@ -30,6 +30,9 @@ class Context:
         Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
         self.session = Session()
 
+    def get_session(self):
+        return sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
+
     def create(self, echo=False, create_all=True):
         self.create_engine(echo, create_all)
         self.create_session()
@@ -60,7 +63,7 @@ class Dept(Base):
     num = Column(CHAR(2), nullable=False, unique=True)
 
     def __repr__(self):
-        return f"Dept {self.id} {self.num}"
+        return f"{self.id}"
 
 
 class BAN(Base):
@@ -87,7 +90,7 @@ class BAN(Base):
                       )
 
     def __repr__(self):
-        return f"BAN {self.id} {self.numero} {self.nom_voie} {self.code_postal} {self.nom_commune}"
+        return f"{self.id} {self.numero} {self.nom_voie} {self.code_postal} {self.nom_commune}"
 
 
 class OSM(Base):
@@ -100,7 +103,7 @@ class OSM(Base):
     score = Column(Float, nullable=False)
 
     def __repr__(self):
-        return f"OSM {self.id} {self.id} {self.display_name} {self.lon} {self.lat}"
+        return f"{self.id} {self.id} {self.display_name} {self.lon} {self.lat}"
 
 
 class Source(Base):
@@ -110,7 +113,7 @@ class Source(Base):
     name = Column(String(10), nullable=False, unique=True)  # BAN OSM Etab Manually
 
     def __repr__(self):
-        return f"Source {self.id} {self.name}"
+        return f"{self.id} {self.name}"
 
 
 class AdresseNorm(Base):
@@ -136,7 +139,7 @@ class AdresseNorm(Base):
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):
-        return f"AdresseNorm {self.id} {self.adresse} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+        return f"{self.id} {self.adresse} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
 
 
 class AdresseRaw(Base):
@@ -145,7 +148,7 @@ class AdresseRaw(Base):
     id = Column(Integer, primary_key=True)
     adresse1 = Column(String(255))
     adresse2 = Column(String(255))
-    adresse3 = Column(String(255), nullable=False)
+    adresse3 = Column(String(255)) # Main
     adresse4 = Column(String(255))
     cp = Column(String(5), nullable=False, index=True)
     commune = Column(String(255), nullable=False, index=True)
@@ -158,8 +161,12 @@ class AdresseRaw(Base):
                       Index('adresse_raw_adresse3_cp_commune_ix', 'adresse3', 'cp', 'commune'),
                       )
 
+    @property
+    def key(self):
+        return self.adresse2, self.adresse3, self.adresse4, self.cp, self.commune
+
     def __repr__(self):
-        return f"AdresseRaw {self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
+        return f"{self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
 
 
 etablissement_datesource = Table('etablissement_date_source', Base.metadata,
@@ -186,7 +193,7 @@ class DateSource(Base):
         self.id = annee * 100 + mois
 
     def __repr__(self):
-        return f"DateSource {self.id}"
+        return f"{self.id}"
 
 
 class EtablissementType(Base):
@@ -196,7 +203,7 @@ class EtablissementType(Base):
     type = Column(String(50), nullable=False)
 
     def __repr__(self):
-        return f"EtablissementType {self.id} {self.type}"
+        return f"{self.id} {self.type}"
 
 
 class Etablissement(Base):
@@ -219,7 +226,7 @@ class Etablissement(Base):
     __table_args__ = (UniqueConstraint('numero'),)
 
     def __repr__(self):
-        return f"Etablissement {self.id} {self.nom}"
+        return f"{self.id} {self.nom}"
 
 
 class PS(Base):
@@ -236,7 +243,7 @@ class PS(Base):
     # psrows: List = relationship("PSRow") semble facultatif avec le backref
 
     def __repr__(self):
-        return f"PS {self.id} {self.key} {self.nom} {self.prenom}"
+        return f"{self.id} {self.key} {self.nom} {self.prenom}"
 
 
 class PSRow(Base):
@@ -251,7 +258,7 @@ class PSRow(Base):
                                                   backref="psrows")
 
     def __repr__(self):
-        return f"PSRow {self.id} {self.profession}"
+        return f"{self.id} {self.profession}"
 
 # backrefs vs backpopulate
 # Le backref est plus simple à coder et génère automatiquement la propriété *s
