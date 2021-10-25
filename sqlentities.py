@@ -82,7 +82,7 @@ class BAN(Base):
     lat = Column(Float, nullable=False)
     libelle_acheminement = Column(String(255))
     nom_afnor = Column(String(255))
-    dept: Dept = relationship("Dept")
+    dept: Dept = relationship("Dept", lazy="joined")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     is_lieu_dit = Column(Boolean)
     __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
@@ -129,12 +129,12 @@ class AdresseNorm(Base):
     osm_id = Column(Integer, ForeignKey('osm.id'))
     ban: BAN = relationship("BAN")
     ban_id = Column(Integer, ForeignKey('ban.id'))
-    source: Source = relationship("Source")
+    source: Source = relationship("Source", lazy="joined")
     source_id = Column(Integer, ForeignKey('source.id'))
     lon = Column(Float)
     lat = Column(Float)
     score = Column(Float)
-    dept: Dept = relationship("Dept")
+    dept: Dept = relationship("Dept", lazy="joined")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
@@ -159,9 +159,9 @@ class AdresseRaw(Base):
     adresse4 = Column(String(255))
     cp = Column(String(5), nullable=False, index=True)
     commune = Column(String(255), nullable=False, index=True)
-    adresse_norm: AdresseNorm = relationship("AdresseNorm")
+    adresse_norm: AdresseNorm = relationship("AdresseNorm", lazy="joined")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
-    dept: Dept = relationship("Dept")
+    dept: Dept = relationship("Dept", lazy="joined")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     __table_args__ = (UniqueConstraint('adresse1', 'adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),
                       Index('adresse_raw_cp_commune_ix', 'cp', 'commune'),
@@ -222,15 +222,15 @@ class Etablissement(Base):
     id = Column(Integer, primary_key=True)
     nom = Column(String(255), nullable=False)
     numero = Column(String(50), nullable=False)
-    type: EtablissementType = relationship("EtablissementType")
+    type: EtablissementType = relationship("EtablissementType", lazy="joined")
     type_id = Column(Integer, ForeignKey('etablissement_type.id'), nullable=False)
     telephone = Column(String(20))
     mail = Column(String(50))
     nom2 = Column(String(255), nullable=False)
     url = Column(String(255))
-    adresse_raw: AdresseRaw = relationship("AdresseRaw")
+    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
-    date_sources: List[DateSource] = relationship("DateSource",
+    date_sources: List[DateSource] = relationship("DateSource", lazy="joined",
                                                   secondary=etablissement_datesource,
                                                   backref="etablissements")
     __table_args__ = (UniqueConstraint('numero'),)
@@ -251,10 +251,8 @@ class PS(Base):
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
     telephone = Column(String(15))
-    adresse_raw: AdresseRaw = relationship("AdresseRaw")
+    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)  # Mettre le nullable=False en base
-
-    # psrows: List = relationship("PSRow") semble facultatif avec le backref
 
     def __repr__(self):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
@@ -267,7 +265,7 @@ class PSRow(Base):
     profession = Column(String(255), nullable=False)
     ps: PS = relationship("PS", backref="psrows")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
-    date_sources: List[DateSource] = relationship("DateSource",
+    date_sources: List[DateSource] = relationship("DateSource", lazy="joined",
                                                   secondary=psrow_datesource,
                                                   backref="psrows")
 

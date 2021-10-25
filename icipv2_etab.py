@@ -34,7 +34,7 @@ class BaseParser(metaclass=ABCMeta):
         l = self.context.session.query(Source).all()
         for s in l:
             self.sources[s.id] = s
-        l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
+        l = self.context.session.query(AdresseRaw).all()
         for a in l:
             self.adresse_raws[a.key] = a
         l = self.context.session.query(AdresseNorm).all()
@@ -131,8 +131,7 @@ class EtabParser(BaseParser):
     def load_cache(self):
         print("Making cache")
         super().load_cache()
-        l = self.context.session.query(Etablissement).options(joinedload(Etablissement.date_sources)) \
-            .options(joinedload(Etablissement.adresse_raw)).all()
+        l = self.context.session.query(Etablissement).all()
         for e in l:
             self.entities[e.id] = e
         self.etablissement_types = self.context.session.query(EtablissementType).all()
