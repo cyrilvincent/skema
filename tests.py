@@ -80,13 +80,13 @@ class ICIPTests(TestCase):
         ep.load_cache()
         e = ep.mapper(row)
         a = ep.adresse_raw_mapper(row)
-        ep.create_upate_adresse(e, a)
+        ep.create_update_adresse(e, a)
         self.assertIsNone(e.adresse_raw.id)
         self.assertEqual("1571 chemin des blancs", e.adresse_raw.adresse3)
         s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;Rue du Collège;01600;01;AIN;REYRIEUX;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         row = s.split(";")
         a = ep.adresse_raw_mapper(row)
-        ep.create_upate_adresse(e, a)
+        ep.create_update_adresse(e, a)
         self.assertIsNotNone(e.adresse_raw.id)
         self.assertEqual("REYRIEUX", e.adresse_raw.commune)
 
@@ -101,7 +101,7 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(1, ep.nb_new_etab)
+        self.assertEqual(1, ep.nb_new_entity)
         self.assertEqual(1, ep.nb_new_adresse)
 
     def test_parse_row_new_etab_known_adresse(self):
@@ -114,8 +114,15 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(1, ep.nb_new_etab)
+        self.assertEqual(1, ep.nb_new_entity)
         self.assertEqual(0, ep.nb_new_adresse)
+
+    def test_etab_load(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "data/etab_00-00.csv"
+        ep.load(path)
 
     def test_parse_row_known_etab_known_adresse(self):
         context = Context()
@@ -127,7 +134,7 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(0, ep.nb_new_etab)
+        self.assertEqual(0, ep.nb_new_entity)
         self.assertEqual(0, ep.nb_new_adresse)
 
     def test_parse_row_known_etab_new_adresse(self):
@@ -140,7 +147,7 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(0, ep.nb_new_etab)
+        self.assertEqual(0, ep.nb_new_entity)
         self.assertEqual(1, ep.nb_new_adresse)
 
     def test_parse_row_known_etab_other_adresse(self):
@@ -153,7 +160,7 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(0, ep.nb_new_etab)
+        self.assertEqual(0, ep.nb_new_entity)
         self.assertEqual(0, ep.nb_new_adresse)
 
     def test_parse_row_update_etab(self):
@@ -166,9 +173,9 @@ class ICIPTests(TestCase):
         row = s.split(";")
         ep.load_cache()
         ep.parse_row(row)
-        self.assertEqual(0, ep.nb_new_etab)
+        self.assertEqual(0, ep.nb_new_entity)
         self.assertEqual(0, ep.nb_new_adresse)
-        self.assertEqual(1, ep.nb_update_etab)
+        self.assertEqual(1, ep.nb_update_entity)
 
     def test_parse_multi_date(self):
         context = Context()
@@ -181,9 +188,14 @@ class ICIPTests(TestCase):
         ep.load_cache()
         ep.parse_row(row)
 
-    def test_etab_load(self):
-        context = Context()
-        context.create(echo=True)
-        ep = EtabParser(context)
-        path = "data/etab_00-00.csv"
-        ep.load(path)
+    def test_split_num(self):
+        ep = EtabParser(None)
+        num, s = ep.split_num("1571 ch des blancs")
+        self.assertEqual(1571, num)
+        self.assertEqual("ch des blancs", s)
+
+    def test_replace_all(self):
+        ep = EtabParser(None)
+        s = ep.replace_all("CYRIL VINCENT", {"CY": "MA", "RIL": "TIS"})
+        self.assertEqual("MATIS VINCENT", s)
+

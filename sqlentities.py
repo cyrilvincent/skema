@@ -121,7 +121,7 @@ class AdresseNorm(Base):
 
     id = Column(Integer, primary_key=True)
     numero = Column(Integer)
-    rue1 = Column(String(255), nullable=False)
+    rue1 = Column(String(255)) # enlever le not null
     rue2 = Column(String(255))
     cp = Column(String(5), nullable=False)
     commune = Column(String(255), nullable=False)

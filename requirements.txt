@@ -6,3 +6,4 @@ numpy
 pdoc3
 xlrd
 openpyxl
+sqlalchemy
