@@ -139,7 +139,14 @@ class AdresseNorm(Base):
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):
-        return f"{self.id} {self.adresse} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+        return f"{self.id} {self.rue1} {self.rue2} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+
+    @property
+    def key(self):
+        return self.numero, self.rue1, self.rue2, self.cp, self.commune
+
+    def equals(self, other):
+        return self.key == other.key
 
 
 class AdresseRaw(Base):
@@ -167,6 +174,9 @@ class AdresseRaw(Base):
 
     def __repr__(self):
         return f"{self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
+
+    def equals(self, other):
+        return self.key == other.key and self.adresse1 == other.adresse1
 
 
 etablissement_datesource = Table('etablissement_date_source', Base.metadata,
@@ -227,6 +237,10 @@ class Etablissement(Base):
 
     def __repr__(self):
         return f"{self.id} {self.nom}"
+
+    def equals(self, other):
+        return self.nom == other.nom and self.numero == other.numero and self.telephone == other.telephone \
+               and self.mail == other.mail and self.url == other.url
 
 
 class PS(Base):
