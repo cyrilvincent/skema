@@ -82,7 +82,7 @@ class BAN(Base):
     lat = Column(Float, nullable=False)
     libelle_acheminement = Column(String(255))
     nom_afnor = Column(String(255))
-    dept: Dept = relationship("Dept", lazy="joined")
+    dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     is_lieu_dit = Column(Boolean)
     __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
@@ -272,7 +272,15 @@ class PSRow(Base):
     def __repr__(self):
         return f"{self.id} {self.profession}"
 
-# backrefs vs backpopulate
-# Le backref est plus simple à coder et génère automatiquement la propriété *s
-# Par exemple ps.psrows est automatiquement généré
-# Par contre pas d'intellisense sur les propriétés générées
+
+class Cedex(Base):
+    __tablename__ = "cedex"
+
+    id = Column(Integer, primary_key=True)
+    cedex = Column(CHAR(5), nullable=False, index=True)
+    libelle = Column(String(255), nullable=False)
+    insee = Column(CHAR(5), nullable=False)
+    cp = Column(CHAR(5))
+
+    def __repr__(self):
+        return f"{self.id} {self.cedex} => {self.cp}"
