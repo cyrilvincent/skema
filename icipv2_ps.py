@@ -2,8 +2,8 @@ from typing import Dict, Optional, List, Tuple
 
 import sqlalchemy.orm.identity
 from sqlalchemy.orm import joinedload, subqueryload, selectinload
-from sqlentities import Context, DateSource, Cabinet, PS, AdresseRaw, Dept, AdresseNorm, Source
-from icipv2_etab import BaseParser
+from sqlentities import Context, DateSource, Cabinet, PS, AdresseRaw, Dept, AdresseNorm, PSCabinetDateSource
+from icipv2_etab import BaseParser, time0
 import argparse
 import csv
 import time
@@ -19,16 +19,21 @@ class PSParser(BaseParser):
         self.nb_tarif = 0
         self.nb_cabinet = 0
         self.cabinets: Dict[str, Cabinet] = {}
+        # self.pscabinetdatesources: Dict[Tuple[int, int, int], PSCabinetDateSource] = {}
 
     def load_cache(self):
-        print("Making cache")
         super().load_cache()
-        l: List[PS] = self.context.session.query(PS).options(joinedload(PS.cabinets)).all()
+        l: List[PS] = self.context.session.query(PS) \
+            .options(joinedload(PS.ps_cabinet_date_sources).joinedload(PSCabinetDateSource.cabinet)).all()
         for e in l:
             self.entities[e.key] = e
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
+        # l: List[PSCabinetDateSource] = self.context.session.query(PSCabinetDateSource)\
+        #     .filter(PSCabinetDateSource.date_source.id == self.date_source.id)
+        # for p in l:
+        #     self.pscabinetdatesources[p.key] = p
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -38,7 +43,7 @@ class PSParser(BaseParser):
             ps.prenom = row[2]
             ps.key = f"{ps.nom}_{ps.prenom}_{row[7]}".replace(" ", "_")[:255]
         except Exception as ex:
-            print(f"ERROR row {self.row_nb} {ps}\n{ex}")
+            print(f"ERROR PS row {self.row_num} {ps}\n{ex}")
             quit(1)
         return ps
 
@@ -49,36 +54,113 @@ class PSParser(BaseParser):
             c.telephone = self.get_nullable(row[9])
             c.key = f"{c.nom}_{row[7]}_{row[5]}".replace(" ", "_")[:255]
         except Exception as ex:
-            print(f"ERROR row {self.row_nb} {c}\n{ex}")
+            print(f"ERROR cabinet row {self.row_num} {c}\n{ex}")
             quit(1)
         return c
 
-    def create_update_cabinet(self, e: PS, row):
+    def create_update_cabinet(self, e: PS, row) -> Cabinet:
         c = self.cabinet_mapper(row)
         if c.key in self.cabinets:
             c = self.cabinets[c.key]
         else:
             self.nb_cabinet += 1
             self.cabinets[c.key] = c
-        keys = [cabinet.key for cabinet in e.cabinets]
-        if c.key not in keys:
-            e.cabinets.append(c)
+        keys = [pcds.key for pcds in e.ps_cabinet_date_sources]
+        if (e.id, c.id, self.date_source.id) not in keys:
+            pcds = PSCabinetDateSource()
+            pcds.date_source = self.date_source
+            pcds.cabinet = c
+            e.ps_cabinet_date_sources.append(pcds)
+        return c
 
-    def adresse_row_mapper(self, c: Cabinet, row):
-        pass
-        # Garder adresse3 et 4 dans l'ordre c'est la normalisation qui changera l'ordre si necessaire
+    def adresse_raw_mapper(self, row):
+        a = AdresseRaw()
+        try:
+            a.adresse2 = self.get_nullable(row[4])
+            a.adresse3 = self.get_nullable(row[5])
+            a.adresse4 = self.get_nullable(row[6])
+            a.cp = row[7]
+            a.commune = row[8]
+            a.dept = self.depts[a.cp[:2]]
+        except Exception as ex:
+            print(f"ERROR raw row {self.row_num} {a}\n{ex}")
+            quit(1)
+        return a
+
+    def create_update_adresse_raw(self, c: Cabinet, row):
+        a = self.adresse_raw_mapper(row)
+        if a.key in self.adresse_raws:
+            a = self.adresse_raws[a.key]
+        else:
+            self.nb_new_adresse += 1
+            self.adresse_raws[a.key] = a
+        c.adresse_raw = a
+
+    def choose_best_rue(self, a: AdresseRaw) -> int:
+        l = ["CHEMIN", "AVENUE", "PLACE", "BOULEVARD", "IMPASSE", "ROUTE"]
+        if a.adresse3 is not None:
+            num, rue = self.split_num(a.adresse3)
+            if num is not None:
+                return 3
+            rue = self.normalize_street(rue)
+            for w in l:
+                if w in rue:
+                    return 3
+        if a.adresse2 is not None:
+            num, rue = self.split_num(a.adresse2)
+            if num is not None:
+                return 2
+            rue = self.normalize_street(rue)
+            for w in l:
+                if w in rue:
+                    return 2
+        return 3
+
+    def normalize(self, a: AdresseRaw) -> AdresseNorm:
+        n = AdresseNorm()
+        n.cp = a.cp
+        n.commune = self.normalize_commune(a.commune)
+        n.dept = a.dept
+        best = self.choose_best_rue(a)
+        if best == 3 and a.adresse3 is not None:
+            n.numero, n.rue1 = self.split_num(a.adresse3)
+            n.rue1 = self.normalize_street(n.rue1)
+            n.rue2 = self.normalize_street(a.adresse2) if a.adresse2 is not None else None
+        elif best == 2 and a.adresse2 is not None:
+            n.numero, n.rue1 = self.split_num(a.adresse2)
+            n.rue1 = self.normalize_street(n.rue1)
+            n.rue2 = self.normalize_street(a.adresse3) if a.adresse3 is not None else None
+        return n
+
+    def create_update_norm(self, a: AdresseRaw):
+        n = self.normalize(a)
+        if n.key in self.adresse_norms:
+            n = self.adresse_norms[n.key]
+        else:
+            self.adresse_norms[n.key] = n
+            self.context.session.add(n)
+            self.nb_new_norm += 1
+        if a.adresse_norm is None:
+            a.adresse_norm = n
+        else:
+            same = a.adresse_norm.equals(n)
+            if not same:
+                a.adresse_norm = n
 
     def parse_row(self, row):
-        self.row_nb += 1
-        e = self.mapper(row)
-        if e.key in self.entities:
-            e = self.entities[e.key]
-        else:
-            self.entities[e.key] = e
-            self.nb_new_entity += 1
-            self.context.session.add(e)
-        self.create_update_cabinet(e, row)  # TODO Remettre le null et passer tout en joinedLoad
-        self.context.session.commit()
+        dept = row[7][:2]
+        if dept in self.depts:
+            e = self.mapper(row)
+            if e.key in self.entities:
+                e = self.entities[e.key]
+            else:
+                self.entities[e.key] = e
+                self.nb_new_entity += 1
+                self.context.session.add(e)
+            c = self.create_update_cabinet(e, row)
+            self.create_update_adresse_raw(c, row)
+            self.create_update_norm(c.adresse_raw)
+            self.context.session.commit()
 
 
 if __name__ == '__main__':
@@ -92,13 +174,12 @@ if __name__ == '__main__':
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     args = parser.parse_args()
-    time0 = time.perf_counter()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mo")
     ep = PSParser(context)
-    ep.load(args.path)
+    ep.load(args.path, encoding=None)
     print(f"New PS: {ep.nb_new_entity}")
     print(f"New cabinet: {ep.nb_cabinet}")
     print(f"New tarif: {ep.nb_tarif}")
@@ -107,6 +188,9 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {ep.row_nb} rows in {time.perf_counter() - time0:.0f} s")
+    print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
+    # data/ps/ps-tarifs-21-03.csv
+    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
+    # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv

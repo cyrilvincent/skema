@@ -5,7 +5,7 @@ import repositories
 import pandas
 import entities
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 class UFCParser:
@@ -14,8 +14,8 @@ class UFCParser:
         self.repo = repositories.UFCRepository()
         self.ps_repo = repositories.PSRepository()
         self.path = path
-        self.dataframe: pandas.DataFrame | None = None
-        self.address_df: pandas.DataFrame | None = None
+        self.dataframe: Optional[pandas.DataFrame] = None
+        self.address_df: Optional[pandas.DataFrame] = None
         self.entities: List[entities.PSEntity] = []
 
     def load(self):

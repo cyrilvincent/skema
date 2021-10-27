@@ -9,12 +9,15 @@ import art
 import config
 import re
 
+time0 = time.perf_counter()
+
 
 class BaseParser(metaclass=ABCMeta):
 
     def __init__(self, context):
         self.context = context
-        self.row_nb = 0
+        self.row_num = 0
+        self.nb_row = 0
         self.entities = {}
         self.nb_new_adresse = 0
         self.nb_new_entity = 0
@@ -34,12 +37,18 @@ class BaseParser(metaclass=ABCMeta):
         l = self.context.session.query(Source).all()
         for s in l:
             self.sources[s.id] = s
-        l = self.context.session.query(AdresseRaw).all()
+        l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
         for a in l:
             self.adresse_raws[a.key] = a
         l = self.context.session.query(AdresseNorm).all()
         for a in l:
             self.adresse_norms[a.key] = a
+
+    def test_file(self, path, encoding="utf8"):
+        with open(path, encoding=encoding) as f:
+            for _ in f:
+                self.nb_row += 1
+        print(f"Found {self.nb_row} rows")
 
     def parse_date(self, path):
         try:
@@ -62,19 +71,12 @@ class BaseParser(metaclass=ABCMeta):
     def get_nullable(self, v):
         return None if v == "" else v
 
-    # def pseudo_equal(self, obj1: object, obj2) -> bool:
-    #     for a in obj1.__dict__:
-    #         if type(obj1.__getattribute__(a)) in [str, float, None] and a not in ['id'] and not a.startswith('_'):
-    #             if obj1.__getattribute__(a) != obj2.__getattribute__(a):
-    #                 return False
-    #     return True
-
     def pseudo_clone(self, from_obj: object, to_obj):
         for a in from_obj.__dict__:
             if type(from_obj.__getattribute__(a)) in [str, float, None] and a not in ['id'] and not a.startswith('_'):
                 to_obj.__setattr__(a, from_obj.__getattribute__(a))
 
-    def split_num(self, s: str) -> Tuple[int, str]:
+    def split_num(self, s: str) -> Tuple[Optional[int], str]:
         regex = r"(\d+)"
         match = re.match(regex, s)
         if match is None:
@@ -110,10 +112,15 @@ class BaseParser(metaclass=ABCMeta):
         print(f"Loading {path}")
         self.check_date(path)
         self.load_cache()
+        self.test_file(path, encoding)
         with open(path, encoding=encoding) as f:
             reader = csv.reader(f, delimiter=delimiter)
             for row in reader:
+                self.row_num += 1
                 self.parse_row(row)
+                if self.row_num % 10000 == 0:
+                    print(f"Found {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
+                          f"in {int(time.perf_counter() - time0)}s")
 
     @abstractmethod
     def parse_row(self, row): ...
@@ -129,9 +136,10 @@ class EtabParser(BaseParser):
         self.etablissement_types = List[EtablissementType]
 
     def load_cache(self):
-        print("Making cache")
         super().load_cache()
-        l = self.context.session.query(Etablissement).all()
+        l = self.context.session.query(Etablissement).options(joinedload(Etablissement.type))\
+            .options(joinedload(Etablissement.adresse_raw).joinedload(AdresseRaw.adresse_norm))\
+            .options(joinedload(Etablissement.date_sources)).all()
         for e in l:
             self.entities[e.id] = e
         self.etablissement_types = self.context.session.query(EtablissementType).all()
@@ -149,7 +157,7 @@ class EtabParser(BaseParser):
             e.nom2 = row[39]
             e.url = self.get_nullable(row[40])
         except Exception as ex:
-            print(f"ERROR row {self.row_nb} {e}\n{ex}")
+            print(f"ERROR row {self.row_num} {e}\n{ex}")
             quit(1)
         return e
 
@@ -161,7 +169,7 @@ class EtabParser(BaseParser):
             a.dept = self.depts[row[34]]
             a.commune = row[36]
         except Exception as ex:
-            print(f"ERROR row {self.row_nb} {a}\n{ex}")
+            print(f"ERROR row {self.row_num} {a}\n{ex}")
             quit(1)
         return a
 
@@ -171,7 +179,7 @@ class EtabParser(BaseParser):
             lon = row[42]
             return lat, lon
         except Exception as ex:
-            print(f"ERROR row {self.row_nb} bad lat lon\n{ex}")
+            print(f"ERROR row {self.row_num} bad lat lon\n{ex}")
             quit(1)
 
     def create_update_adresse(self, e: Etablissement, a: AdresseRaw):
@@ -203,7 +211,7 @@ class EtabParser(BaseParser):
         if a.adresse_norm is None:
             a.adresse_norm = n
         else:
-            same = a.adresse_norm.equals(n) # self.pseudo_equal(a.adresse_norm, n)
+            same = a.adresse_norm.equals(n)
             if not same:
                 a.adresse_norm = n
 
@@ -216,10 +224,9 @@ class EtabParser(BaseParser):
             n.score = 1
 
     def parse_row(self, row):
-        self.row_nb += 1
         e = self.mapper(row)
         if e.id in self.entities:
-            same = e.equals(self.entities[e.id])  # self.pseudo_equal(e, self.entities[e.id])
+            same = e.equals(self.entities[e.id])
             if not same:
                 self.pseudo_clone(e, self.entities[e.id])
                 self.nb_update_entity += 1
@@ -227,7 +234,7 @@ class EtabParser(BaseParser):
             if self.date_source not in e.date_sources:
                 e.date_sources.append(self.date_source)
             a = self.adresse_raw_mapper(row)
-            same = a.equals(e.adresse_raw)  # self.pseudo_equal(a, e.adresse_raw)
+            same = a.equals(e.adresse_raw)
             if not same:
                 self.create_update_adresse(e, a)
         else:
@@ -253,7 +260,6 @@ if __name__ == '__main__':
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     args = parser.parse_args()
-    time0 = time.perf_counter()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
@@ -267,6 +273,6 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {ep.row_nb} rows in {time.perf_counter() - time0:.0f} s")
+    print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/etab_00-00.csv -e

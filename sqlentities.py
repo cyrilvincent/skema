@@ -130,12 +130,12 @@ class AdresseNorm(Base):
     osm_id = Column(Integer, ForeignKey('osm.id'))
     ban: BAN = relationship("BAN")
     ban_id = Column(Integer, ForeignKey('ban.id'))
-    source: Source = relationship("Source", lazy="joined")
+    source: Source = relationship("Source")
     source_id = Column(Integer, ForeignKey('source.id'))
     lon = Column(Float)
     lat = Column(Float)
     score = Column(Float)
-    dept: Dept = relationship("Dept", lazy="joined")
+    dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
@@ -154,17 +154,16 @@ class AdresseRaw(Base):
     __tablename__ = "adresse_raw"
 
     id = Column(Integer, primary_key=True)
-    adresse1 = Column(String(255))
     adresse2 = Column(String(255))
     adresse3 = Column(String(255))  # Main
     adresse4 = Column(String(255))
     cp = Column(String(5), nullable=False, index=True)
     commune = Column(String(255), nullable=False, index=True)
-    adresse_norm: AdresseNorm = relationship("AdresseNorm", lazy="joined")
+    adresse_norm: AdresseNorm = relationship("AdresseNorm")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
-    dept: Dept = relationship("Dept", lazy="joined")
+    dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
-    __table_args__ = (UniqueConstraint('adresse1', 'adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),
+    __table_args__ = (UniqueConstraint('adresse2', 'adresse3', 'adresse4', 'cp', 'commune'),
                       Index('adresse_raw_cp_commune_ix', 'cp', 'commune'),
                       Index('adresse_raw_adresse3_cp_commune_ix', 'adresse3', 'cp', 'commune'),
                       )
@@ -177,7 +176,7 @@ class AdresseRaw(Base):
         return f"{self.id} {self.adresse2} {self.adresse3} {self.adresse4} {self.cp} {self.commune}"
 
     def equals(self, other):
-        return self.key == other.key and self.adresse1 == other.adresse1
+        return self.key == other.key
 
 
 etablissement_datesource = Table('etablissement_date_source', Base.metadata,
@@ -189,11 +188,6 @@ tarif_datesource = Table('tarif_date_source', Base.metadata,
                          Column('tarif_id', ForeignKey('tarif.id'), primary_key=True),
                          Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
                          )
-
-ps_cabinet = Table('ps_cabinet', Base.metadata,
-                   Column('ps_id', ForeignKey('ps.id'), primary_key=True),
-                   Column('cabinet_id', ForeignKey('cabinet.id'), primary_key=True)
-                   )
 
 
 class DateSource(Base):
@@ -228,15 +222,15 @@ class Etablissement(Base):
     id = Column(Integer, primary_key=True)
     nom = Column(String(255), nullable=False)
     numero = Column(String(50), nullable=False)
-    type: EtablissementType = relationship("EtablissementType", lazy="joined")
+    type: EtablissementType = relationship("EtablissementType")
     type_id = Column(Integer, ForeignKey('etablissement_type.id'), nullable=False)
     telephone = Column(String(20))
     mail = Column(String(50))
     nom2 = Column(String(255), nullable=False)
     url = Column(String(255))
-    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
+    adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
-    date_sources: List[DateSource] = relationship("DateSource", lazy="joined",
+    date_sources: List[DateSource] = relationship("DateSource",
                                                   secondary=etablissement_datesource, backref="etablissements")
     __table_args__ = (UniqueConstraint('numero'),)
 
@@ -255,7 +249,7 @@ class Cabinet(Base):
     nom = Column(String(255), nullable=False)
     key = Column(String(255), nullable=False, index=True)
     telephone = Column(String(15))
-    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
+    adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
 
     def __repr__(self):
@@ -270,12 +264,30 @@ class PS(Base):
     key = Column(String(255), nullable=False, unique=True, index=True)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
-    cabinets: List[Cabinet] = relationship("Cabinet", secondary=ps_cabinet)
 
+    # ps_cabinet_date_sources by backref
     # tarifs by backref
 
     def __repr__(self):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
+
+
+class PSCabinetDateSource(Base):
+    __tablename__ = "ps_cabinet_date_source"
+    id = Column(Integer, primary_key=True)
+    ps: PS = relationship("PS", backref="ps_cabinet_date_sources")
+    ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
+    cabinet: Cabinet = relationship("Cabinet")
+    cabinet_id = Column(Integer, ForeignKey('cabinet.id'), nullable=False)
+    date_source: DateSource = relationship("DateSource")
+    date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False)
+
+    @property
+    def key(self):
+        return self.ps_id, self.cabinet_id, self.date_source_id
+
+    def __repr__(self):
+        return f"{self.id} {self.ps_id} {self.cabinet_id} {self.date_source_id}"
 
 
 class Convention(Base):
@@ -317,7 +329,7 @@ class TarifStats(Base):
     moy = Column(Float, nullable=False)
     min = Column(Float)
     max = Column(Float)
-    dept: Dept = relationship("Dept", lazy="joined")
+    dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), index=True)
     profession: Profession = relationship("Profession", backref="tarif_statss")
     profession_id = Column(Integer, ForeignKey('profession.id'))
