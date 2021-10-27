@@ -15,7 +15,7 @@ class BaseParser(metaclass=ABCMeta):
     def __init__(self, context):
         self.context = context
         self.row_nb = 0
-        self.entities: Dict[int, DateSource] = {}
+        self.entities = {}
         self.nb_new_adresse = 0
         self.nb_new_entity = 0
         self.nb_update_entity = 0
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     time0 = time.perf_counter()
     context = Context()
-    context.create(echo=args.echo)
+    context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mo")
     ep = EtabParser(context)

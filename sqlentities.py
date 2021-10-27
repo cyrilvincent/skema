@@ -26,16 +26,16 @@ class Context:
         if create_all:
             Base.metadata.create_all(self.engine)
 
-    def create_session(self):
-        Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
+    def create_session(self, expire_on_commit=True):
+        Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False, expire_on_commit=expire_on_commit)
         self.session = Session()
 
     def get_session(self):
         return sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
 
-    def create(self, echo=False, create_all=True):
+    def create(self, echo=False, create_all=True, expire_on_commit=True):
         self.create_engine(echo, create_all)
-        self.create_session()
+        self.create_session(expire_on_commit)
 
     def db_size(self):
         with self.engine.connect() as conn:
@@ -45,15 +45,16 @@ class Context:
             return row[0] / 2 ** 20
 
 
-# ps 1 -1 adresse_raw -1 adresse_norm -? osm -1 dept NB:adresse_raw contient adresse1234 avant normalisation
-#                                     -? ban -1 dept
-#                                     -1 dept
-#                                     -? source
-#                     -1 dept
-#    1-* ps_row *-* date_source
+# ps *-* cabinet -1 adresse_raw -1 adresse_norm -? osm -1 dept
+#                                               -? ban -1 dept
+#                                               -1 dept
+#                                               -? source
+#                                -1 dept
+#    1-* tarif *-* date_source (ou -1 date_source si ca change tous les mois)
+#              -1 profession -* tarif_stats(moy, min, max) *-* date_source (ou -1 si ca change tous les mois)
+#                                                          -? dept (si None = France)
 # etab -1 adresse_raw
 #      *-* date_source
-# Voir dbeaver
 
 
 class Dept(Base):
@@ -121,7 +122,7 @@ class AdresseNorm(Base):
 
     id = Column(Integer, primary_key=True)
     numero = Column(Integer)
-    rue1 = Column(String(255)) # enlever le not null
+    rue1 = Column(String(255))  # enlever le not null
     rue2 = Column(String(255))
     cp = Column(String(5), nullable=False)
     commune = Column(String(255), nullable=False)
@@ -155,7 +156,7 @@ class AdresseRaw(Base):
     id = Column(Integer, primary_key=True)
     adresse1 = Column(String(255))
     adresse2 = Column(String(255))
-    adresse3 = Column(String(255)) # Main
+    adresse3 = Column(String(255))  # Main
     adresse4 = Column(String(255))
     cp = Column(String(5), nullable=False, index=True)
     commune = Column(String(255), nullable=False, index=True)
@@ -184,15 +185,20 @@ etablissement_datesource = Table('etablissement_date_source', Base.metadata,
                                  Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
                                  )
 
-psrow_datesource = Table('ps_row_date_source', Base.metadata,
-                         Column('ps_row_id', ForeignKey('ps_row.id'), primary_key=True),
+tarif_datesource = Table('tarif_date_source', Base.metadata,
+                         Column('tarif_id', ForeignKey('tarif.id'), primary_key=True),
                          Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
                          )
+
+ps_cabinet = Table('ps_cabinet', Base.metadata,
+                   Column('ps_id', ForeignKey('ps.id'), primary_key=True),
+                   Column('cabinet_id', ForeignKey('cabinet.id'), primary_key=True)
+                   )
 
 
 class DateSource(Base):
     __tablename__ = "date_source"
-    id = Column(Integer, primary_key=True)  # format 2110
+    id = Column(Integer, primary_key=True)
     mois = Column(Integer)
     annee = Column(Integer, nullable=False)
     __table_args__ = (UniqueConstraint('mois', 'annee'),)
@@ -231,8 +237,7 @@ class Etablissement(Base):
     adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     date_sources: List[DateSource] = relationship("DateSource", lazy="joined",
-                                                  secondary=etablissement_datesource,
-                                                  backref="etablissements")
+                                                  secondary=etablissement_datesource, backref="etablissements")
     __table_args__ = (UniqueConstraint('numero'),)
 
     def __repr__(self):
@@ -243,31 +248,105 @@ class Etablissement(Base):
                and self.mail == other.mail and self.url == other.url
 
 
+class Cabinet(Base):
+    __tablename__ = "cabinet"
+
+    id = Column(Integer, primary_key=True)
+    nom = Column(String(255), nullable=False)
+    key = Column(String(255), nullable=False, index=True)
+    telephone = Column(String(15))
+    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
+    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.key}"
+
+
 class PS(Base):
     __tablename__ = "ps"
 
     id = Column(Integer, primary_key=True)
-    key = Column(String(255), nullable=False, unique=True)  # manque unique en base
+    genre = Column(CHAR(1), nullable=False)
+    key = Column(String(255), nullable=False, unique=True, index=True)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
-    telephone = Column(String(15))
-    adresse_raw: AdresseRaw = relationship("AdresseRaw", lazy="joined")
-    adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)  # Mettre le nullable=False en base
+    cabinets: List[Cabinet] = relationship("Cabinet", secondary=ps_cabinet)
+
+    # tarifs by backref
 
     def __repr__(self):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
 
 
-class PSRow(Base):
-    __tablename__ = "ps_row"
+class Convention(Base):
+    __tablename__ = "convention"
 
     id = Column(Integer, primary_key=True)
-    profession = Column(String(255), nullable=False)
-    ps: PS = relationship("PS", backref="psrows")
+    code = Column(CHAR(2), nullable=False)
+    libelle = Column(String(100), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
+
+
+class Nature(Base):
+    __tablename__ = "nature"
+
+    id = Column(Integer, primary_key=True)
+    libelle = Column(String(50), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
+
+
+class Profession(Base):
+    __tablename__ = "profession"
+
+    id = Column(Integer, primary_key=True)
+    libelle = Column(String(50), nullable=False)
+    annexe = Column(Boolean, nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
+
+
+class TarifStats(Base):
+    __tablename__ = "tarif_stats"
+
+    id = Column(Integer, primary_key=True)
+    moy = Column(Float, nullable=False)
+    min = Column(Float)
+    max = Column(Float)
+    dept: Dept = relationship("Dept", lazy="joined")
+    dept_id = Column(Integer, ForeignKey('dept.id'), index=True)
+    profession: Profession = relationship("Profession", backref="tarif_statss")
+    profession_id = Column(Integer, ForeignKey('profession.id'))
+
+    # TODO *-* ou *-1 DateSource
+
+    def __repr__(self):
+        return f"{self.id} {self.moyenne}"
+
+
+class Tarif(Base):
+    __tablename__ = "tarif"
+
+    id = Column(Integer, primary_key=True)
+    profession: Profession = relationship("Profession")
+    profession_id = Column(Integer, ForeignKey('profession.id'))
+    nature: Nature = relationship("Nature")
+    nature_id = Column(Integer, ForeignKey('nature.id'), nullable=False)
+    convention: Convention = relationship("Convention")
+    convention_id = Column(Integer, ForeignKey("convention.id"), nullable=False)
+    option_contrat = Column(Boolean)
+    vitale = Column(Boolean)
+    code = Column(String(50), nullable=False)
+    famille = Column(String(50))
+    ps: PS = relationship("PS", backref="tarifs")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
-    date_sources: List[DateSource] = relationship("DateSource", lazy="joined",
-                                                  secondary=psrow_datesource,
-                                                  backref="psrows")
+    date_sources: List[DateSource] = relationship("DateSource",
+                                                  secondary=tarif_datesource,
+                                                  backref="tarifs")
 
     def __repr__(self):
         return f"{self.id} {self.profession}"

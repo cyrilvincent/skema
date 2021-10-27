@@ -81,7 +81,7 @@ if __name__ == '__main__':
     print("============")
     print(f"V{config.version}")
     print(config.copyright)
-    file = "data/ps/ps-tarifs-small.csv"
+    file = "data/ps/ps-tarifs-small-00-00.csv"
     print(f"Parse {file}")
     repo = PSRepository()
     nb = repo.test_file(file)
