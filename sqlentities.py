@@ -3,7 +3,7 @@ from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, Fore
     Table, Index
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
-from typing import Optional, List, Iterable
+from typing import Optional, List
 import config
 
 Base = declarative_base()
@@ -30,8 +30,9 @@ class Context:
         Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False, expire_on_commit=expire_on_commit)
         self.session = Session()
 
-    def get_session(self):
-        return sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
+    def get_session(self, expire_on_commit=True):
+        Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False, expire_on_commit=expire_on_commit)
+        return Session()
 
     def create(self, echo=False, create_all=True, expire_on_commit=True):
         self.create_engine(echo, create_all)
@@ -44,15 +45,15 @@ class Context:
             row = res.fetchone()
             return row[0] / 2 ** 20
 
-
-# ps *-* cabinet -1 adresse_raw -1 adresse_norm -? osm -1 dept
-#                                               -? ban -1 dept
-#                                               -1 dept
-#                                               -? source
-#                                -1 dept
-#    1-* tarif *-* date_source (ou -1 date_source si ca change tous les mois)
-#              -1 profession -* tarif_stats(moy, min, max) *-* date_source (ou -1 si ca change tous les mois)
-#                                                          -? dept (si None = France)
+# ps -* ps_cabinet_date_source -1 cabinet -1 adresse_raw -1 adresse_norm -? osm -1 dept
+#                                                                        -? ban -1 dept
+#                                                                        -1 dept
+#                                                                        -? source
+#                                                        -1 dept
+#                              -1 date_source
+#    1-* tarif *-* date_source
+#              -1 profession -* tarif_stats *-* date_source
+#                                           -? dept (si None = France)
 # etab -1 adresse_raw
 #      *-* date_source
 
@@ -62,6 +63,8 @@ class Dept(Base):
 
     id = Column(Integer, primary_key=True, )
     num = Column(CHAR(2), nullable=False, unique=True)
+
+    # backref: bans
 
     def __repr__(self):
         return f"{self.id}"
@@ -74,7 +77,7 @@ class BAN(Base):
     adresse_id = Column(String(50), unique=True)
     numero = Column(Integer)
     rep = Column(String(50))
-    nom_voie = Column(String(255))
+    nom_voie = Column(String(255), nullable=False)
     code_postal = Column(Integer, nullable=False, index=True)
     code_insee = Column(String(5), nullable=False, index=True)
     nom_commune = Column(String(255), nullable=False, index=True)
@@ -83,7 +86,7 @@ class BAN(Base):
     lat = Column(Float, nullable=False)
     libelle_acheminement = Column(String(255))
     nom_afnor = Column(String(255))
-    dept: Dept = relationship("Dept")
+    dept: Dept = relationship("Dept", backref="bans")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     is_lieu_dit = Column(Boolean)
     __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
@@ -111,7 +114,7 @@ class Source(Base):
     __tablename__ = "source"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(10), nullable=False, unique=True)  # BAN OSM Etab Manually
+    name = Column(String(10), nullable=False, unique=True)  # BAN OSM BAN+OSM Etab Manually
 
     def __repr__(self):
         return f"{self.id} {self.name}"
@@ -124,12 +127,14 @@ class AdresseNorm(Base):
     numero = Column(Integer)
     rue1 = Column(String(255))  # enlever le not null
     rue2 = Column(String(255))
-    cp = Column(String(5), nullable=False)
+    cp = Column(Integer, nullable=False)
     commune = Column(String(255), nullable=False)
     osm: OSM = relationship("OSM")
     osm_id = Column(Integer, ForeignKey('osm.id'))
+    osm_score = Column(Float)
     ban: BAN = relationship("BAN")
     ban_id = Column(Integer, ForeignKey('ban.id'))
+    ban_score = Column(Float)
     source: Source = relationship("Source")
     source_id = Column(Integer, ForeignKey('source.id'))
     lon = Column(Float)
@@ -157,7 +162,7 @@ class AdresseRaw(Base):
     adresse2 = Column(String(255))
     adresse3 = Column(String(255))  # Main
     adresse4 = Column(String(255))
-    cp = Column(String(5), nullable=False, index=True)
+    cp = Column(Integer, nullable=False, index=True)
     commune = Column(String(255), nullable=False, index=True)
     adresse_norm: AdresseNorm = relationship("AdresseNorm")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
@@ -334,7 +339,7 @@ class TarifStats(Base):
     profession: Profession = relationship("Profession", backref="tarif_statss")
     profession_id = Column(Integer, ForeignKey('profession.id'))
 
-    # TODO *-* ou *-1 DateSource
+    # TODO *-* DateSource
 
     def __repr__(self):
         return f"{self.id} {self.moyenne}"
@@ -368,10 +373,10 @@ class Cedex(Base):
     __tablename__ = "cedex"
 
     id = Column(Integer, primary_key=True)
-    cedex = Column(CHAR(5), nullable=False, index=True)
+    cedex = Column(Integer, nullable=False, index=True)
     libelle = Column(String(255), nullable=False)
     insee = Column(CHAR(5), nullable=False)
-    cp = Column(CHAR(5))
+    cp = Column(Integer)
 
     def __repr__(self):
         return f"{self.id} {self.cedex} => {self.cp}"

@@ -28,6 +28,8 @@ class AdresseParser:
             s = "LE "+s[:-4]
         elif s.endswith("(LA)"):
             s = "LA "+s[:-4]
+        elif s.endswith("(L)"):
+            s = "L "+s[:-3]
         s = " " + s
         s = s.replace(" CH ", " CHEMIN ").replace(" AV ", " AVENUE ").replace(" PL ", " PLACE ")
         s = s.replace(" BD ", " BOULEVARD ").replace(" IMP ", " IMPASSE ").replace(" ST ", " SAINT ")

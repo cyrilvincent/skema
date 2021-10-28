@@ -19,7 +19,7 @@ class PSParser(BaseParser):
         self.nb_tarif = 0
         self.nb_cabinet = 0
         self.cabinets: Dict[str, Cabinet] = {}
-        # self.pscabinetdatesources: Dict[Tuple[int, int, int], PSCabinetDateSource] = {}
+        self.depts_int: Dict[int, Dept] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -30,10 +30,9 @@ class PSParser(BaseParser):
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
-        # l: List[PSCabinetDateSource] = self.context.session.query(PSCabinetDateSource)\
-        #     .filter(PSCabinetDateSource.date_source.id == self.date_source.id)
-        # for p in l:
-        #     self.pscabinetdatesources[p.key] = p
+        l = self.context.session.query(Dept).all()
+        for d in l:
+            self.depts_int[d.id] = d
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -73,15 +72,24 @@ class PSParser(BaseParser):
             e.ps_cabinet_date_sources.append(pcds)
         return c
 
+    def get_dept_from_cp(self, cp):
+        cp = str(cp)
+        if len(cp) == 4:
+            cp = "0" + cp
+        dept = cp[:2]
+        if dept == "20":
+            dept = cp[:3]
+        return int(dept)
+
     def adresse_raw_mapper(self, row):
         a = AdresseRaw()
         try:
             a.adresse2 = self.get_nullable(row[4])
             a.adresse3 = self.get_nullable(row[5])
             a.adresse4 = self.get_nullable(row[6])
-            a.cp = row[7]
+            a.cp = int(row[7])
             a.commune = row[8]
-            a.dept = self.depts[a.cp[:2]]
+            a.dept = self.depts_int[self.get_dept_from_cp(a.cp)]
         except Exception as ex:
             print(f"ERROR raw row {self.row_num} {a}\n{ex}")
             quit(1)
@@ -148,8 +156,8 @@ class PSParser(BaseParser):
                 a.adresse_norm = n
 
     def parse_row(self, row):
-        dept = row[7][:2]
-        if dept in self.depts:
+        dept = self.get_dept_from_cp(row[7])
+        if dept in self.depts_int:
             e = self.mapper(row)
             if e.key in self.entities:
                 e = self.entities[e.key]
@@ -178,17 +186,17 @@ if __name__ == '__main__':
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mo")
-    ep = PSParser(context)
-    ep.load(args.path, encoding=None)
-    print(f"New PS: {ep.nb_new_entity}")
-    print(f"New cabinet: {ep.nb_cabinet}")
-    print(f"New tarif: {ep.nb_tarif}")
-    print(f"New adresse: {ep.nb_new_adresse}")
-    print(f"New adresse normalized: {ep.nb_new_norm}")
+    psp = PSParser(context)
+    psp.load(args.path, encoding=None)
+    print(f"New PS: {psp.nb_new_entity}")
+    print(f"New cabinet: {psp.nb_cabinet}")
+    print(f"New tarif: {psp.nb_tarif}")
+    print(f"New adresse: {psp.nb_new_adresse}")
+    print(f"New adresse normalized: {psp.nb_new_norm}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
+    print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv

@@ -1,5 +1,7 @@
 from unittest import TestCase
 from icipv2_etab import EtabParser
+from icipv2_ps import PSParser
+from icipv2_BAN_matcher import BANMatcher
 from sqlentities import *
 
 
@@ -263,3 +265,53 @@ class ICIPTests(TestCase):
         ep.load_cache()
         ep.parse_row(row)
         self.assertEqual(0, ep.nb_new_norm)
+
+    def test_get_dept_by_cp(self):
+        pp = PSParser(None)
+        d = pp.get_dept_from_cp(38250)
+        self.assertEqual(38, d)
+        d = pp.get_dept_from_cp(1000)
+        self.assertEqual(1, d)
+        d = pp.get_dept_from_cp(20100)
+        self.assertEqual(201, d)
+
+    def test_ban_matcher_make_cache(self):
+        m = BANMatcher([])
+        m.make_cache0()
+        m.make_cache1(5)
+
+    def test_ban_matcher_nearest_less_cp(self):
+        m = BANMatcher([])
+        m.make_cache0()
+        m.make_cache1(38)
+        cp = m.find_nearest_less_cp(38259)
+        self.assertEqual(38250, cp)
+
+    def test_ban_matcher_cp(self):
+        m = BANMatcher([])
+        m.make_cache0()
+        m.make_cache1(38)
+        cp, score = m.match_cp(38250)
+        self.assertEqual(38250, cp)
+        self.assertEqual(1, score)
+        cp, score = m.match_cp(38058)
+        self.assertEqual(38400, cp)
+        self.assertEqual(0.95, score)
+        cp, score = m.match_cp(38259)
+        self.assertEqual(38250, cp)
+        self.assertEqual(0.5, score)
+
+    def test_gestlat(self):
+        m = BANMatcher([])
+        score = m.gestalt("LANS EN VERCORS", "LANS VERCROS")
+        self.assertAlmostEqual(0.81, score, delta=0.01)
+        score = m.gestalt("LANS EN VERCORS", "LANS")
+        self.assertAlmostEqual(0.42, score, delta=0.01)
+
+    def test_gestlats(self):
+        m = BANMatcher([])
+        res, _ = m.gestalts("LANS", ["LANS EN VERCORS", "VILLARD DE LANS"])
+        self.assertEqual("LANS EN VERCORS", res)
+        res, _ = m.gestalts("LANS VERCROS", ["LANS EN VERCORS", "VILLARD DE LANS"])
+        self.assertEqual("LANS EN VERCORS", res)
+

@@ -17,7 +17,7 @@ class CedexParser:
     def mapper(self, row) -> Cedex:
         c = Cedex()
         try:
-            c.cedex = row["cedex"]
+            c.cedex = int(row["cedex"])
             c.libelle = row["libelle"]
             c.insee = row["insee"]
             ban = self.context.session.query(BAN).filter(BAN.code_insee == c.insee).first()

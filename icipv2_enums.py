@@ -1,9 +1,35 @@
-from sqlentities import Context, EtablissementType, Convention, Nature
+from sqlentities import Context, EtablissementType, Convention, Nature, Source
 import config
 import art
 
 
 class EnumsCreator:
+
+    def source(self):
+        print("Source")
+        context = Context()
+        context.create()
+        s = Source()
+        s.id = 1
+        s.name = "OSM"
+        context.session.add(s)
+        s = Source()
+        s.id = 2
+        s.name = "BAN"
+        context.session.add(s)
+        s = Source()
+        s.id = 3
+        s.name = "Etab"
+        context.session.add(s)
+        s = Source()
+        s.id = 4
+        s.name = "BAN+OSM"
+        context.session.add(s)
+        s = Source()
+        s.id = 5
+        s.name = "Manually"
+        context.session.add(s)
+        context.session.commit()
 
     def etablissementType(self):
         print("EtablissementType")
@@ -100,6 +126,7 @@ if __name__ == '__main__':
     context.create()
     print(f"Database {context.db_name}: {context.db_size():.0f} Mo")
     e = EnumsCreator()
+    e.source()
     # e.etablissementType()
     e.nature()
     e.convention()
