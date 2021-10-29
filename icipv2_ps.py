@@ -19,7 +19,6 @@ class PSParser(BaseParser):
         self.nb_tarif = 0
         self.nb_cabinet = 0
         self.cabinets: Dict[str, Cabinet] = {}
-        self.depts_int: Dict[int, Dept] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -30,9 +29,6 @@ class PSParser(BaseParser):
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
-        l = self.context.session.query(Dept).all()
-        for d in l:
-            self.depts_int[d.id] = d
 
     def mapper(self, row) -> PS:
         ps = PS()

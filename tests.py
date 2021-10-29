@@ -314,4 +314,36 @@ class ICIPTests(TestCase):
         self.assertEqual("LANS EN VERCORS", res)
         res, _ = m.gestalts("LANS VERCROS", ["LANS EN VERCORS", "VILLARD DE LANS"])
         self.assertEqual("LANS EN VERCORS", res)
+        res, score = m.gestalts("SAINT LARENT", ["SAINT LAURENT DU PONT"])
+        self.assertEqual("SAINT LAURENT DU PONT", res)
 
+    def test_get_cp_by_commune(self):
+        m = BANMatcher([38])
+        m.make_cache1(38)
+        cp, _, _ = m.get_cp_by_commune("LANS EN VERCORS")
+        self.assertEqual(38250, cp)
+
+    def test_match_rue(self):
+        m = BANMatcher([38])
+        m.make_cache1(38)
+        rue, score = m.match_rue("LANS EN VERCORS", "CHEMIN DES BLANCS", None, 38250)
+        self.assertEqual("CHEMIN DES BLANCS", rue)
+        self.assertEqual(1, score)
+        rue, _ = m.match_rue("LANS EN VERCORS", "CH DES BLANCS", None, 38250)
+        self.assertEqual("CHEMIN DES BLANCS", rue)
+        rue, _ = m.match_rue("LANS EN VERCORS", "BLANC", "CHEMIN DES BLANCS", 38250)
+        self.assertEqual("CHEMIN DES BLANCS", rue)
+        rue, _ = m.match_rue("LANS EN VERCORS", "BLANC", "CH DES BLANCS", 38250)
+        self.assertEqual("CHEMIN DES BLANCS", rue)
+
+    def test_match_num(self):
+        m = BANMatcher([38])
+        m.make_cache1(38)
+        ban, score = m.match_numero(38250, "LANS EN VERCORS", "CHEMIN DES BLANCS", 1571)
+        self.assertEqual(1571, ban.numero)
+        ban, score = m.match_numero(38250, "LANS EN VERCORS", "CHEMIN DES BLANCS", 1573)
+        self.assertEqual(1571, ban.numero)
+        ban, score = m.match_numero(38250, "LANS EN VERCORS", "CHEMIN DES BLANCS", None)
+        self.assertEqual(17, ban.numero)
+        ban, score = m.match_numero(38250, "LANS EN VERCORS", "CHEMIN DES BLANCS", 5000)
+        self.assertEqual(1600, ban.numero)

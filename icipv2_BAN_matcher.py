@@ -6,13 +6,14 @@ import time
 import art
 import config
 import difflib
+import numpy as np
 
 time0 = time.perf_counter()
 
 
 class BANMatcher:
 
-    def __init__(self, depts: List[Dept], force=False, ban_echo=False, sa_echo=False):
+    def __init__(self, depts: List[int], force=False, ban_echo=False, sa_echo=False):
         self.context = Context()
         self.context.create_engine(echo=sa_echo)
         self.session = self.context.get_session(False)
@@ -22,12 +23,11 @@ class BANMatcher:
         self.row_num = 0
         self.total_nb_norm = 0
         self.dept = 0
-        self.csv = []
         self.cedexs: Dict[int, int] = {}
         self.cps: Dict[int, Set[str]] = {}
-        self.cp_communes: [Tuple[int, str], Set[str]] = {}
-        self.cp_commune_rues: [Tuple[int, str, str], List[BAN]] = {}
-        self.norm: Optional[AdresseNorm] = None
+        self.cp_communes: Dict[Tuple[int, str], Set[str]] = {}
+        self.cp_commune_rues: Dict[Tuple[int, str, str], List[BAN]] = {}
+        self.communes: Dict[str, Set[int]] = {}
         self.scores = []
         self.total_scores = []  # Tous les scores pour moyenne
         print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
@@ -53,6 +53,7 @@ class BANMatcher:
         self.cps = {}
         self.cp_communes = {}
         self.cp_commune_rues = {}
+        self.communes = {}
         for ban in self.dept.bans:
             if ban.code_postal not in self.cps:
                 self.cps[ban.code_postal] = set()
@@ -66,6 +67,10 @@ class BANMatcher:
             self.make_cache23(ban.code_postal, ban.nom_ancienne_commune, ban.nom_voie, ban)
             self.make_cache23(ban.code_postal, ban.nom_ancienne_commune, ban.libelle_acheminement, ban)
             self.make_cache23(ban.code_postal, ban.nom_ancienne_commune, ban.nom_afnor, ban)
+            if ban.nom_commune not in self.communes:
+                self.communes[ban.nom_commune] = set()
+            if ban.code_postal not in self.communes[ban.nom_commune]:
+                self.communes[ban.nom_commune].add(ban.code_postal)
 
     def make_cache23(self, cp, commune, rue, ban):
         if commune is not None and rue is not None:
@@ -87,7 +92,8 @@ class BANMatcher:
         if self.force:
             self.total_nb_norm = norm
         else:
-            self.total_nb_norm = self.session.query(AdresseNorm).filter(AdresseNorm.ban_id is not None).count()
+            self.total_nb_norm = self.session.query(AdresseNorm)\
+                .filter(AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None)).count()
         print(f"Found {self.total_nb_norm} adresses to match")
 
     def find_nearest_less_cp(self, cp: int) -> int:
@@ -117,9 +123,10 @@ class BANMatcher:
                 print(f"ERROR CP DOES NOT EXIST {cp}=>{res}")
             return res, 0.5
 
-    def denormalize_street(self, street: str) -> str:
+    def denormalize(self, street: str) -> str:
         street = street.replace("CHEMIN", "CH").replace("AVENUE", "AV").replace("PLACE", "PL")
         street = street.replace("BOULEVARD", "BD").replace("ROUTE", "RT").replace("IMPASSE", "IMP")
+        street = street.replace("SAINT", "ST")
         return street
 
     def gestalt(self, s1: str, s2: str):
@@ -131,14 +138,14 @@ class BANMatcher:
             return None, 0
         max = -1
         res = None
-        s = self.denormalize_street(s)
+        s = self.denormalize(s)
         for item in l:
             if item != "":
                 if s == item:
                     return item, 1
                 elif item.startswith(s) or s.startswith(item):
                     return item, 0.99
-                deno = self.denormalize_street(item)
+                deno = self.denormalize(item)
                 ratio = self.gestalt(s, deno)
                 if ratio > max:
                     max = ratio
@@ -158,6 +165,61 @@ class BANMatcher:
                 print(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
             return res, score
 
+    def get_cp_by_commune(self, commune: str) -> Tuple[int, str, float]:
+        if commune in self.communes:
+            l = list(self.communes[commune])
+            return l[0], commune, 1 / len(l)
+        return 0, commune, 0
+
+    def match_rue(self, commune: str, rue1: Optional[str], rue2: Optional[str], cp: int) -> Tuple[str, float]:
+        if rue1 is None:
+            rue1 = "MAIRIE EGLISE"
+        if (cp, commune, rue1) in self.cp_commune_rues:
+            return rue1, 1
+        if rue2 is not None and (cp, commune, rue2) in self.cp_commune_rues:
+            return rue2, 0.95
+        rues = self.cp_communes[(cp, commune)]
+        res, score = self.gestalts(rue1, rues)
+        if score > 0.8:
+            return res, score
+        if rue2 is not None:
+            res2, score2 = self.gestalts(rue2, rues)
+            if score2 > score:
+                res, score = res2, score2
+        if self.echo and score < 0.7:
+            print(f"WARNING RUE {cp} {commune} {rue1}=>{res} @{int(score * 100)}%")
+        return res, score
+
+    def match_numero(self, cp: int,commune: str, rue: str, num: Optional[int]) -> Tuple[BAN, float]:
+        l = self.cp_commune_rues[(cp, commune, rue)]
+        if num is None:
+            for ban in l:
+                if ban.numero is None:
+                    return ban, 1
+            return l[0], 0.9
+        min = 99999
+        res = l[0]
+        for ban in l:
+            if ban.numero == num:
+                return ban, 1
+            if ban.numero is None:
+                diff = num
+            else:
+                diff = abs(ban.numero - num)
+            if diff % 2 == 1:
+                diff *= 3
+            if diff < min:
+                res = ban
+                min = diff
+        if res.numero is None:
+            score = 0.6
+        else:
+            score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
+        return res, score
+
+
+
+
     def match_norm(self, row: AdresseNorm):
         cp, score = self.match_cp(row.cp)
         self.scores = [score]
@@ -165,17 +227,27 @@ class BANMatcher:
         commune, score = self.match_commune(row.commune, communes, cp)
         self.scores.append(score)
         if self.score < 0.75:
-            pass
-            # get_cp_by_commune
+            cp2, _, score2 = self.get_cp_by_commune(row.commune)
+            if score2 > self.score:
+                print(f"WARNING BAD CP {cp} {commune}=>{cp2}")
+                cp = cp2
+                commune = row.commune
+                self.scores = [score2 / 2, 1]
+        rue, score = self.match_rue(commune, row.rue1, row.rue2, cp)
+        self.scores.append(score)
+        ban, score = self.match_numero(cp, commune, rue, row.numero)
+        self.scores.append(score)
+        print(self.scores, self.score, row, ban)
 
     def match_dept(self, d: int):
         self.make_cache1(d)
         rows = self.session.query(AdresseNorm).filter(AdresseNorm.dept_id == d)
         if not self.force:
-            rows = rows.filter(AdresseNorm.ban_id.is_(None))
+            rows = rows.filter(AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None))
         for row in rows:
             self.row_num += 1
             self.match_norm(row)
+            self.total_scores.append(self.score)
             if self.row_num % 100 == 0:
                 print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
@@ -204,6 +276,14 @@ if __name__ == '__main__':
     depts = None if args.dept is None else eval(args.dept)
     bm = BANMatcher(depts, args.force, args.log, args.echo)
     bm.match()
+    mean = np.mean(np.array(bm.total_scores))
+    std = np.std(np.array(bm.total_scores))
+    print(f"Score average {mean * 100:.1f}%")
+    print(f"Score median {np.median(np.array(bm.total_scores)) * 100:.1f}%")
+    print(f"Score min {np.min(np.array(bm.total_scores)) * 100:.1f}%")
+    print(f"Score std {std * 100:.1f}%")
+    print(f"Score average-std {(mean - std) * 100:.1f}%")
+    print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
     print(f"Parse {bm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
     # -e -l -d [5]

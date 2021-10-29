@@ -145,7 +145,7 @@ class AdresseNorm(Base):
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):
-        return f"{self.id} {self.rue1} {self.rue2} {self.cp} {self.commune} {self.source} {self.lon} {self.lat}"
+        return f"{self.id} {self.numero} {self.rue1} {self.rue2} {self.cp} {self.commune}"
 
     @property
     def key(self):

@@ -25,6 +25,7 @@ class BaseParser(metaclass=ABCMeta):
         self.nb_new_norm = 0
         self.date_source: Optional[DateSource] = None
         self.depts: Dict[str, Dept] = {}
+        self.depts_int: Dict[int, Dept] = {}
         self.sources: Dict[int, Source] = {}
         self.adresse_raws: [Dict[Tuple[str, str, str, str, str]], AdresseRaw] = {}
         self.adresse_norms: [Dict[Tuple[int, str, str, str, str]], AdresseNorm] = {}
@@ -34,6 +35,7 @@ class BaseParser(metaclass=ABCMeta):
         l = self.context.session.query(Dept).all()
         for d in l:
             self.depts[d.num] = d
+            self.depts_int[d.id] = d
         l = self.context.session.query(Source).all()
         for s in l:
             self.sources[s.id] = s
