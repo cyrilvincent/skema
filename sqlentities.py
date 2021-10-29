@@ -106,6 +106,8 @@ class OSM(Base):
     display_name = Column(String(255), nullable=False)
     score = Column(Float, nullable=False)
 
+    # backref bans
+
     def __repr__(self):
         return f"{self.id} {self.id} {self.display_name} {self.lon} {self.lat}"
 
@@ -129,7 +131,7 @@ class AdresseNorm(Base):
     rue2 = Column(String(255))
     cp = Column(Integer, nullable=False)
     commune = Column(String(255), nullable=False)
-    osm: OSM = relationship("OSM")
+    osm: OSM = relationship("OSM", backref="bans")
     osm_id = Column(Integer, ForeignKey('osm.id'))
     osm_score = Column(Float)
     ban: BAN = relationship("BAN")

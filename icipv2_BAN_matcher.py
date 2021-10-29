@@ -28,8 +28,12 @@ class BANMatcher:
         self.cp_communes: Dict[Tuple[int, str], Set[str]] = {}
         self.cp_commune_rues: Dict[Tuple[int, str, str], List[BAN]] = {}
         self.communes: Dict[str, Set[int]] = {}
+        self.commune_rue_numeros: Dict[Tuple[str, str, Optional[int]], BAN] = {}
+        self.cp_rue_numeros: Dict[Tuple[int, str, Optional[int]], BAN] = {}
+        self.commune_rues: Dict[Tuple[str, str], BAN] = {}
         self.scores = []
-        self.total_scores = []  # Tous les scores pour moyenne
+        self.total_scores = []
+        self.filter_no_force = AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None)
         print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
         if self.depts is None:
             self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
@@ -54,6 +58,10 @@ class BANMatcher:
         self.cp_communes = {}
         self.cp_commune_rues = {}
         self.communes = {}
+        self.commune_rue_numeros = {}
+        self.cp_rue_numeros = {}
+        self.commune_rues = {}
+        self.scores = []
         for ban in self.dept.bans:
             if ban.code_postal not in self.cps:
                 self.cps[ban.code_postal] = set()
@@ -71,6 +79,9 @@ class BANMatcher:
                 self.communes[ban.nom_commune] = set()
             if ban.code_postal not in self.communes[ban.nom_commune]:
                 self.communes[ban.nom_commune].add(ban.code_postal)
+            self.commune_rue_numeros[ban.nom_commune, ban.nom_voie, ban.numero] = ban
+            self.cp_rue_numeros[ban.code_postal, ban.nom_voie, ban.numero] = ban
+            self.commune_rues[ban.nom_commune, ban.nom_voie] = ban
 
     def make_cache23(self, cp, commune, rue, ban):
         if commune is not None and rue is not None:
@@ -92,9 +103,11 @@ class BANMatcher:
         if self.force:
             self.total_nb_norm = norm
         else:
-            self.total_nb_norm = self.session.query(AdresseNorm)\
-                .filter(AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None)).count()
+            self.total_nb_norm = self.session.query(AdresseNorm).filter(self.filter_no_force).count()
         print(f"Found {self.total_nb_norm} adresses to match")
+        if self.total_nb_norm == 0:
+            print("Everything is up to date")
+            quit(0)
 
     def find_nearest_less_cp(self, cp: int) -> int:
         min = 99999
@@ -119,8 +132,8 @@ class BANMatcher:
             return cp, score * 0.95
         else:
             res = self.find_nearest_less_cp(cp)
-            if self.echo:
-                print(f"ERROR CP DOES NOT EXIST {cp}=>{res}")
+            # if self.echo:
+            #     print(f"ERROR CP DOES NOT EXIST {cp}=>{res}")
             return res, 0.5
 
     def denormalize(self, street: str) -> str:
@@ -161,8 +174,8 @@ class BANMatcher:
             return list(communes)[0], 0.95
         else:
             res, score = self.gestalts(commune, communes)
-            if self.echo and score < 0.8:
-                print(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
+            # if self.echo and score < 0.8:
+            #     print(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
             return res, score
 
     def get_cp_by_commune(self, commune: str) -> Tuple[int, str, float]:
@@ -186,11 +199,11 @@ class BANMatcher:
             res2, score2 = self.gestalts(rue2, rues)
             if score2 > score:
                 res, score = res2, score2
-        if self.echo and score < 0.7:
-            print(f"WARNING RUE {cp} {commune} {rue1}=>{res} @{int(score * 100)}%")
+        # if self.echo and score < 0.7:
+        #     print(f"WARNING RUE {cp} {commune} {rue1}=>{res} @{int(score * 100)}%")
         return res, score
 
-    def match_numero(self, cp: int,commune: str, rue: str, num: Optional[int]) -> Tuple[BAN, float]:
+    def match_numero(self, cp: int, commune: str, rue: str, num: Optional[int]) -> Tuple[BAN, float]:
         l = self.cp_commune_rues[(cp, commune, rue)]
         if num is None:
             for ban in l:
@@ -217,8 +230,40 @@ class BANMatcher:
             score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
         return res, score
 
-
-
+    def check_low_quality(self, row: AdresseNorm, ban: BAN) -> BAN:
+        ban_id = ban.id
+        old_score = self.score
+        if self.scores[0] < 1:
+            if (row.commune, row.rue1, row.numero) in self.commune_rue_numeros:
+                ban = self.commune_rue_numeros[(row.commune, row.rue1, row.numero)]
+                if ban_id == ban.id:
+                    self.scores = [0.9, 1, 1, 1]
+                else:
+                    self.scores = [0.5, 1, 1, 1]
+                    # if self.echo:
+                    #     print(f"WARNING LQ1 {row.cp} {row.commune} => {ban.code_postal} {ban.nom_commune}")
+                return ban
+        if self.scores[1] < 1:
+            if (row.cp, row.rue1, row.numero) in self.cp_rue_numeros:
+                ban = self.cp_rue_numeros[(row.cp, row.rue1, row.numero)]
+                if ban_id == ban.id:
+                    self.scores = [1, 0.9, 1, 1]
+                else:
+                    self.scores = [1, 0.5, 1, 1]
+                    # if self.echo:
+                    #     print(f"WARNING LQ2 {row.cp} {row.commune} => {ban.code_postal} {ban.nom_commune}")
+                return ban
+            if self.score < 0.67:
+                if (row.commune, row.rue1) in self.commune_rues:
+                    ban = self.commune_rues[(row.commune, row.rue1)]
+                    if ban_id == ban.id:
+                        self.scores = [0.6, 1, 1, 0.4]
+                    else:
+                        self.scores = [0.5, 1, 1, 0.2]
+                        # if self.echo:
+                        #     print(f"WARNING LQ3 {row.rue1} {row.cp} {row.commune} => {ban.nom_voie} {ban.code_postal} {ban.nom_commune}")
+                    return ban
+        return ban
 
     def match_norm(self, row: AdresseNorm):
         cp, score = self.match_cp(row.cp)
@@ -229,7 +274,7 @@ class BANMatcher:
         if self.score < 0.75:
             cp2, _, score2 = self.get_cp_by_commune(row.commune)
             if score2 > self.score:
-                print(f"WARNING BAD CP {cp} {commune}=>{cp2}")
+                # print(f"WARNING BAD CP {cp} {commune}=>{cp2}")
                 cp = cp2
                 commune = row.commune
                 self.scores = [score2 / 2, 1]
@@ -237,18 +282,25 @@ class BANMatcher:
         self.scores.append(score)
         ban, score = self.match_numero(cp, commune, rue, row.numero)
         self.scores.append(score)
-        print(self.scores, self.score, row, ban)
+        if self.score < config.ban_mean - 2 * config.ban_std:
+            ban = self.check_low_quality(row, ban)
+        if self.echo and self.score < config.ban_mean - 3 * config.ban_std:
+            print(f"WARNING {row.numero} {row.rue1} {row.cp} {row.commune}  =>"
+                  f" {ban.numero} {ban.nom_voie} {ban.code_postal} {ban.nom_commune} @{self.score * 100:.1f}%")
+        row.ban_score = self.score
+        row.ban = ban
+        self.session.commit()
 
     def match_dept(self, d: int):
         self.make_cache1(d)
         rows = self.session.query(AdresseNorm).filter(AdresseNorm.dept_id == d)
         if not self.force:
-            rows = rows.filter(AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None))
+            rows = rows.filter(self.filter_no_force)
         for row in rows:
             self.row_num += 1
             self.match_norm(row)
             self.total_scores.append(self.score)
-            if self.row_num % 100 == 0:
+            if self.row_num % 100 == 0 and not self.echo:
                 print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
 

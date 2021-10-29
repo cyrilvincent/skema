@@ -7,3 +7,6 @@ cedex_path = "data/cedex/liste-des-cedex.pickle"
 sleep = 2
 adresse_db_path = "data/ps/ps_adresses.csv"
 connection_string = "postgresql://postgres:sa@localhost/icip"
+ban_mean = 0.975
+ban_std = 0.054
+osm_nb_std = 3
