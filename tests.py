@@ -2,6 +2,8 @@ from unittest import TestCase
 from icipv2_etab import EtabParser
 from icipv2_ps import PSParser
 from icipv2_BAN_matcher import BANMatcher
+from icipv2_OSM_matcher import OSMMatcher
+from icipv2_score import ScoreMatcher
 from sqlentities import *
 
 
@@ -347,3 +349,41 @@ class ICIPTests(TestCase):
         self.assertEqual(17, ban.numero)
         ban, score = m.match_numero(38250, "LANS EN VERCORS", "CHEMIN DES BLANCS", 5000)
         self.assertEqual(1600, ban.numero)
+
+    def test_get_json_from_url(self):
+        om = OSMMatcher(ban_echo=True)
+        url = "https://nominatim.openstreetmap.org/search.php?format=jsonv2&country=France&city=lans+en+vercors"
+        json = om.get_json_from_url(url)
+        self.assertAlmostEqual(45, float(json[0]["lat"]), delta=1)
+        print(json)
+
+    def test_get_lon_lat_from_adresse(self):
+        om = OSMMatcher(ban_echo=True)
+        osm = om.get_osm_from_adresse(1571, "chemin des blancs", "lans en vercors", 38250)
+        self.assertAlmostEqual(45, osm.lat, delta=1)
+        osm = om.get_osm_from_adresse(None, None, "lans en vercors", 38250)
+        self.assertAlmostEqual(45, osm.lat, delta=1)
+        osm = om.get_osm_from_adresse(None, None, None, 38250)
+        self.assertAlmostEqual(45, osm.lat, delta=1)
+        osm = om.get_osm_from_adresse(None, None, "lans en vercors", None)
+        self.assertAlmostEqual(45, osm.lat, delta=1)
+        osm = om.get_osm_from_adresse(None, None, "xxx", None)
+        self.assertIsNone(osm)
+        osm = om.get_osm_from_adresse(None, "chemin des blancs", None, 38250)
+        self.assertAlmostEqual(45, osm.lat, delta=1)
+        osm = om.get_osm_from_adresse(None, "xxx", None, 38250)
+        self.assertIsNone(osm)
+        osm = om.get_osm_from_adresse(None, "maison de sante", "lans en vercors", 38250)
+        print(osm)
+
+    def test_osm_purge(self):
+        om = OSMMatcher(ban_echo=True)
+        om.purge()
+
+    def test_calc_distance(self):
+        om = OSMMatcher(ban_echo=True)
+        osm1 = om.get_osm_from_adresse(1571, "chemin des blancs", "lans en vercors", 38250)
+        osm2 = om.get_osm_from_adresse(970, "avenue leopold fabre", "lans en vercors", 75008)
+        sm = ScoreMatcher(ban_echo=True)
+        d = sm.calc_distance(osm1.lon, osm1.lat, osm2.lon, osm2.lat)
+        self.assertEqual(3314, d)

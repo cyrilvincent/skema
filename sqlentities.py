@@ -103,13 +103,12 @@ class OSM(Base):
     id = Column(Integer, primary_key=True)
     lon = Column(Float, nullable=False)
     lat = Column(Float, nullable=False)
-    display_name = Column(String(255), nullable=False)
-    score = Column(Float, nullable=False)
+    adresse = Column(String(255), nullable=False)
 
     # backref bans
 
     def __repr__(self):
-        return f"{self.id} {self.id} {self.display_name} {self.lon} {self.lat}"
+        return f"{self.id} {self.adresse}"
 
 
 class Source(Base):

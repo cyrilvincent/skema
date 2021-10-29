@@ -33,7 +33,7 @@ class BANMatcher:
         self.commune_rues: Dict[Tuple[str, str], BAN] = {}
         self.scores = []
         self.total_scores = []
-        self.filter_no_force = AdresseNorm.ban_id.is_(None) & AdresseNorm.score.is_(None)
+        self.filter_no_force = AdresseNorm.ban_score.is_(None) & AdresseNorm.score.is_(None)
         print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
         if self.depts is None:
             self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]

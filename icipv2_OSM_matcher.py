@@ -5,8 +5,13 @@ import argparse
 import time
 import art
 import config
-import difflib
 import numpy as np
+import ssl
+import urllib.request
+import urllib.parse
+import urllib.error
+import json
+import re
 
 time0 = time.perf_counter()
 
@@ -19,13 +24,15 @@ class OSMMatcher:
         self.session = self.context.get_session(False)
         self.force = force
         self.echo = ban_echo
+        self.uri = "https://nominatim.openstreetmap.org/search.php?format=jsonv2&country=France"
         self.row_num = 0
         self.total_nb_norm = 0
-        self.score = 0.0
         self.total_scores = []
-        self.filter_force = (AdresseNorm.ban_score < 0.9) | AdresseNorm.source_id.is_(None) \
-                            | ((AdresseNorm.source_id != 3) & (AdresseNorm.source_id != 5))
-        self.filter_no_force = AdresseNorm.osm_id.is_(None) & AdresseNorm.score.is_(None)
+        self.filter_force = (AdresseNorm.ban_score < config.ban_mean - config.osm_nb_std * config.ban_std) & \
+                            (AdresseNorm.source_id.is_(None) |
+                             ((AdresseNorm.source_id != 3) & (AdresseNorm.source_id != 5)))
+        self.filter_no_force = AdresseNorm.osm_score.is_(None) & AdresseNorm.score.is_(None)
+        ssl._create_default_https_context = ssl._create_unverified_context
         print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
 
     def stats(self):
@@ -43,6 +50,58 @@ class OSMMatcher:
             print("Everything is up to date")
             quit(0)
 
+    def get_json_from_url(self, url, nbretry=0):
+        if self.echo:
+            print(url)
+        try:
+            with urllib.request.urlopen(url) as response:
+                s = response.read()
+                js = json.loads(s)
+                return js
+        except urllib.error.URLError as ex:
+            print(url)
+            print(f"ERROR URLError: {ex}")
+            if nbretry == 5:
+                raise ex
+            else:
+                print(f"RETRY {nbretry + 1}")
+                time.sleep(nbretry * 4 + 1)
+                return self.get_json_from_url(url, nbretry + 1)
+        except json.JSONDecodeError as ex:
+            print(url)
+            print(f"ERROR JSON: {s}")
+            if nbretry == 1:
+                raise ex
+            else:
+                print(f"RETRY {nbretry + 1}")
+                time.sleep(5)
+                return self.get_json_from_url(url, 1)
+
+    def get_osm_from_adresse(self, numero: Optional[int], rue: Optional[str], commune: Optional[str], cp: Optional[int]) -> Optional[OSM]:
+        url = self.uri
+        osm = OSM()
+        if rue is not None:
+            if numero is None:
+                url += f"&street={urllib.parse.quote(rue)}"
+            else:
+                url += f"&street={numero}%20{urllib.parse.quote(rue)}"
+        if commune is not None:
+            if commune.endswith("CEDE"):
+                commune = commune[:-5]
+            url += f"&city={urllib.parse.quote(commune)}"
+        if cp is not None:
+            url += f"&postalcode={cp}"
+        js = self.get_json_from_url(url)
+        if len(js) > 0:
+            try:
+                osm.lat = float(js[0]["lat"])
+                osm.lon = float(js[0]["lon"])
+                osm.adresse = js[0]["display_name"][:255]
+            except ValueError:
+                return None
+            return osm
+        return None
+
     def purge(self):
         print("Purge")
         osms = self.session.query(OSM).filter(~OSM.bans.any())
@@ -50,18 +109,71 @@ class OSMMatcher:
             self.session.delete(osm)
         self.session.commit()
 
-    def match_norm(self, row: AdresseNorm):
-        pass
+    def has_num(self, s: str) -> bool:
+        regex = r"(\d+)"
+        match = re.match(regex, s)
+        return match is not None
+
+    def match_norm(self, row: AdresseNorm) -> Tuple[Optional[OSM], float]:
+        osm = self.get_osm_from_adresse(row.numero, row.rue1, row.commune, row.cp)
+        if osm is not None:
+            if self.has_num(osm.adresse):
+                return osm, 1
+            if osm.adresse.count(",") >= 7:
+                return osm, 0.93
+            return osm, 0.73
+        if row.rue2 is not None:
+            osm = self.get_osm_from_adresse(None, row.rue2, row.commune, row.cp)
+            if osm is not None:
+                if self.has_num(osm.adresse):
+                    return osm, 1
+                if osm.adresse.count(",") >= 7:
+                    return osm, 0.97
+                return osm, 0.77
+        if row.numero is not None:
+            osm = self.get_osm_from_adresse(None, row.rue1, None, row.cp)
+            if osm is not None:
+                if osm.adresse.count(",") >= 7:
+                    return osm, 0.92
+                return osm, 0.72
+        osm = self.get_osm_from_adresse(None, None, row.commune, row.cp)
+        if osm is not None:
+            if osm.adresse.count(",") >= 6:
+                return osm, 0.7
+            return osm, 0.5
+        osm = self.get_osm_from_adresse(row.numero, row.rue1, row.commune, None)
+        if osm is not None:
+            if self.has_num(osm.adresse):
+                return osm, 0.87
+            if osm.adresse.count(",") >= 7:
+                return osm, 0.82
+            return osm, 0.67
+        osm = self.get_osm_from_adresse(None, None, row.commune, None)
+        if osm is not None:
+            return osm, 0.5
+        return None, 0
 
     def match(self):
         self.stats()
-        rows = self.session.query(AdresseNorm).filter(self.filter_force)
+        rows = self.session.query(AdresseNorm)\
+            .filter(self.filter_force).order_by(AdresseNorm.ban_score)
         if not self.force:
             rows = rows.filter(self.filter_no_force)
         for row in rows:
             self.row_num += 1
-            self.match_norm(row)
-            self.total_scores.append(self.score)
+            osm, score = self.match_norm(row)
+            self.total_scores.append(score)
+            if osm is None:
+                print(f"{row.rue1} {row.cp} {row.commune} => No match")
+            else:
+                ban_score = 0 if row.ban_score is None else row.ban_score
+                print(f"{row.numero} {row.rue1} {row.cp} {row.commune} @{ban_score * 100:.0f}% "
+                      f"=> {osm.adresse[:70]} @{score * 100:.0f}%")
+            row.osm_score = score
+            if osm is not None:
+                row.osm = osm
+            self.session.commit()
+        self.purge()
 
 
 if __name__ == '__main__':
