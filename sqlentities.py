@@ -116,7 +116,7 @@ class Source(Base):
     __tablename__ = "source"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(10), nullable=False, unique=True)  # BAN OSM BAN+OSM Etab Manually
+    name = Column(String(10), nullable=False, unique=True)
 
     def __repr__(self):
         return f"{self.id} {self.name}"
@@ -228,7 +228,7 @@ class Etablissement(Base):
 
     id = Column(Integer, primary_key=True)
     nom = Column(String(255), nullable=False)
-    numero = Column(String(50), nullable=False)
+    numero = Column(String(50), nullable=False, unique=True)
     type: EtablissementType = relationship("EtablissementType")
     type_id = Column(Integer, ForeignKey('etablissement_type.id'), nullable=False)
     telephone = Column(String(20))
@@ -239,7 +239,6 @@ class Etablissement(Base):
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     date_sources: List[DateSource] = relationship("DateSource",
                                                   secondary=etablissement_datesource, backref="etablissements")
-    __table_args__ = (UniqueConstraint('numero'),)
 
     def __repr__(self):
         return f"{self.id} {self.nom}"
@@ -254,7 +253,7 @@ class Cabinet(Base):
 
     id = Column(Integer, primary_key=True)
     nom = Column(String(255), nullable=False)
-    key = Column(String(255), nullable=False, index=True)
+    key = Column(String(255), nullable=False, index=True, unique=True)
     telephone = Column(String(15))
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
@@ -288,6 +287,8 @@ class PSCabinetDateSource(Base):
     cabinet_id = Column(Integer, ForeignKey('cabinet.id'), nullable=False)
     date_source: DateSource = relationship("DateSource")
     date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False)
+
+    __table_args__ = (UniqueConstraint('ps_id', 'cabinet_id', 'date_source_id'),)
 
     @property
     def key(self):
@@ -343,6 +344,8 @@ class TarifStats(Base):
 
     # TODO *-* DateSource
 
+    # __table_args__ = (UniqueConstraint('profession_id', 'dept_id', "date_source_id"),)
+
     def __repr__(self):
         return f"{self.id} {self.moyenne}"
 
@@ -379,6 +382,8 @@ class Cedex(Base):
     libelle = Column(String(255), nullable=False)
     insee = Column(CHAR(5), nullable=False)
     cp = Column(Integer)
+
+    __table_args__ = (UniqueConstraint('cedex', 'insee'),)
 
     def __repr__(self):
         return f"{self.id} {self.cedex} => {self.cp}"

@@ -374,6 +374,8 @@ class ICIPTests(TestCase):
         self.assertAlmostEqual(45, osm.lat, delta=1)
         osm = om.get_osm_from_adresse(None, "xxx", None, 38250)
         self.assertIsNone(osm)
+        osm = om.get_osm_from_adresse(None, None, "paris", None)
+        self.assertIsNone(osm.cp)
         osm = om.get_osm_from_adresse(None, "maison de sante", "lans en vercors", 38250)
         print(osm)
 

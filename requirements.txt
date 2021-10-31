@@ -7,4 +7,3 @@ pdoc3
 xlrd
 openpyxl
 sqlalchemy
-numpy

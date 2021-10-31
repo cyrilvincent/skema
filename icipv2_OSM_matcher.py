@@ -32,7 +32,6 @@ class OSMMatcher:
                              ((AdresseNorm.source_id != 3) & (AdresseNorm.source_id != 5)))
         self.filter_no_force = AdresseNorm.osm_score.is_(None) & AdresseNorm.score.is_(None)
         ssl._create_default_https_context = ssl._create_unverified_context
-        print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
 
     def stats(self):
         ban = self.session.query(BAN).count()
@@ -89,11 +88,9 @@ class OSMMatcher:
                 osm.lon = float(js[0]["lon"])
                 osm.adresse = js[0]["display_name"][:255]
                 index = osm.adresse.rindex(",")
-                cp = osm.adresse[index - 5: index].strip()
-                try:
+                cp: str = osm.adresse[index - 5: index].strip()
+                if cp.isdigit():
                     osm.cp = int(cp)
-                except:
-                    pass
             except ValueError:
                 return None
             return osm
@@ -152,8 +149,7 @@ class OSMMatcher:
 
     def match(self):
         self.stats()
-        rows = self.session.query(AdresseNorm)\
-            .filter(self.filter_force).order_by(AdresseNorm.ban_score)
+        rows = self.session.query(AdresseNorm).filter(self.filter_force).order_by(AdresseNorm.ban_score)
         if not self.force:
             rows = rows.filter(self.filter_no_force)
         for row in rows:
@@ -186,6 +182,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--log", help="Log (OSM echo)", action="store_true")
     args = parser.parse_args()
     om = OSMMatcher(args.force, args.log, args.echo)
+    print(f"Database {om.context.db_name}: {om.context.db_size():.0f} Mo")
     om.match()
     mean = np.mean(np.array(om.total_scores))
     std = np.std(np.array(om.total_scores))

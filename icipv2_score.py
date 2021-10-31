@@ -25,7 +25,6 @@ class ScoreMatcher:
         self.total_scores = []
         self.filter_no_force = AdresseNorm.score.is_(None)
         self.sources: Dict[int, Source] = {}
-        print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
 
     def load_cache(self):
         print("Make cache")
@@ -138,17 +137,18 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--force", help="Force matching", action="store_true")
     parser.add_argument("-l", "--log", help="Log (debug echo)", action="store_true")
     args = parser.parse_args()
-    om = ScoreMatcher(args.force, args.log, args.echo)
-    om.match()
-    mean = np.mean(np.array(om.total_scores))
-    std = np.std(np.array(om.total_scores))
+    sm = ScoreMatcher(args.force, args.log, args.echo)
+    print(f"Database {sm.context.db_name}: {sm.context.db_size():.0f} Mo")
+    sm.match()
+    mean = np.mean(np.array(sm.total_scores))
+    std = np.std(np.array(sm.total_scores))
     print(f"Score average {mean * 100:.1f}%")
-    print(f"Score median {np.median(np.array(om.total_scores)) * 100:.1f}%")
-    print(f"Score min {np.min(np.array(om.total_scores)) * 100:.1f}%")
+    print(f"Score median {np.median(np.array(sm.total_scores)) * 100:.1f}%")
+    print(f"Score min {np.min(np.array(sm.total_scores)) * 100:.1f}%")
     print(f"Score std {std * 100:.1f}%")
     print(f"Score average-std {(mean - std) * 100:.1f}%")
     print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
-    print(f"Parse {om.row_num} adresses in {time.perf_counter() - time0:.0f} s")
+    print(f"Parse {sm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
     # -e -l -d [5]
     # select percentile_cont(0.5)WITHIN GROUP (ORDER BY score) as median, stddev(score) as std, avg(score)
     # from adresse_norm where score is not NULL limit 100

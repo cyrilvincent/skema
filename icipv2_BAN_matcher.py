@@ -34,7 +34,6 @@ class BANMatcher:
         self.scores = []
         self.total_scores = []
         self.filter_no_force = AdresseNorm.ban_score.is_(None) & AdresseNorm.score.is_(None)
-        print(f"Database {self.context.db_name}: {self.context.db_size():.0f} Mo")
         if self.depts is None:
             self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
 
@@ -187,6 +186,7 @@ class BANMatcher:
     def match_rue(self, commune: str, rue1: Optional[str], rue2: Optional[str], cp: int) -> Tuple[str, float]:
         if rue1 is None:
             rue1 = "MAIRIE EGLISE"
+        # rue1 ??= "MAIRIE EGLISE"
         if (cp, commune, rue1) in self.cp_commune_rues:
             return rue1, 1
         if rue2 is not None and (cp, commune, rue2) in self.cp_commune_rues:
@@ -324,6 +324,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     depts = None if args.dept is None else eval(args.dept)
     bm = BANMatcher(depts, args.force, args.log, args.echo)
+    print(f"Database {bm.context.db_name}: {bm.context.db_size():.0f} Mo")
     bm.match()
     mean = np.mean(np.array(bm.total_scores))
     std = np.std(np.array(bm.total_scores))
