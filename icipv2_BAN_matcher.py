@@ -1,6 +1,6 @@
 from typing import Dict, Optional, List, Tuple, Set, Iterable
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cedex, BAN, EtablissementType, AdresseRaw, Dept, AdresseNorm, Source
+from sqlentities import Context, Cedex, BAN, Dept, AdresseNorm
 import argparse
 import time
 import art
@@ -111,8 +111,10 @@ class BANMatcher:
 
     def find_nearest_less_cp(self, cp: int) -> int:
         min = 99999
-        res = 0
+        res = None
         for k in self.cps:
+            if res is None:
+                res = k
             dif = cp - k
             if 0 <= dif < min:
                 min = dif
@@ -127,13 +129,13 @@ class BANMatcher:
         elif 75100 <= cp < 75200:
             cp, score = self.match_cp(cp - 100)
             return cp, score * 0.9
+        elif cp == 75000:
+            return 75001, 0.1
         elif cp in self.cedexs:
             cp, score = self.match_cp(self.cedexs[cp])
             return cp, score * 0.95
         else:
             res = self.find_nearest_less_cp(cp)
-            # if self.echo:
-            #     print(f"ERROR CP DOES NOT EXIST {cp}=>{res}")
             return res, 0.5
 
     def denormalize(self, street: str) -> str:
@@ -167,15 +169,13 @@ class BANMatcher:
                     max = 0.5
         return res, max
 
-    def match_commune(self, commune: str, communes: Set[str], cp: int) -> Tuple[str, float]:
+    def match_commune(self, commune: str, communes: Set[str]) -> Tuple[str, float]:
         if commune in communes:
             return commune, 1
         elif len(communes) == 1:
             return list(communes)[0], 0.95
         else:
             res, score = self.gestalts(commune, communes)
-            # if self.echo and score < 0.8:
-            #     print(f"WARNING COMMUNE {cp} {commune}=>{res} @{int(score*100)}%")
             return res, score
 
     def get_cp_by_commune(self, commune: str) -> Tuple[int, str, float]:
@@ -232,7 +232,6 @@ class BANMatcher:
 
     def check_low_quality(self, row: AdresseNorm, ban: BAN) -> BAN:
         ban_id = ban.id
-        old_score = self.score
         if self.scores[0] < 1:
             if (row.commune, row.rue1, row.numero) in self.commune_rue_numeros:
                 ban = self.commune_rue_numeros[(row.commune, row.rue1, row.numero)]
@@ -240,8 +239,6 @@ class BANMatcher:
                     self.scores = [0.9, 1, 1, 1]
                 else:
                     self.scores = [0.5, 1, 1, 1]
-                    # if self.echo:
-                    #     print(f"WARNING LQ1 {row.cp} {row.commune} => {ban.code_postal} {ban.nom_commune}")
                 return ban
         if self.scores[1] < 1:
             if (row.cp, row.rue1, row.numero) in self.cp_rue_numeros:
@@ -250,8 +247,6 @@ class BANMatcher:
                     self.scores = [1, 0.9, 1, 1]
                 else:
                     self.scores = [1, 0.5, 1, 1]
-                    # if self.echo:
-                    #     print(f"WARNING LQ2 {row.cp} {row.commune} => {ban.code_postal} {ban.nom_commune}")
                 return ban
             if self.score < 0.67:
                 if (row.commune, row.rue1) in self.commune_rues:
@@ -260,36 +255,38 @@ class BANMatcher:
                         self.scores = [0.6, 1, 1, 0.4]
                     else:
                         self.scores = [0.5, 1, 1, 0.2]
-                        # if self.echo:
-                        #     print(f"WARNING LQ3 {row.rue1} {row.cp} {row.commune} => {ban.nom_voie} {ban.code_postal} {ban.nom_commune}")
                     return ban
         return ban
 
-    def match_norm(self, row: AdresseNorm):
+    def match_norm(self, row: AdresseNorm, commit=True):
         cp, score = self.match_cp(row.cp)
-        self.scores = [score]
-        communes = self.cps[cp]
-        commune, score = self.match_commune(row.commune, communes, cp)
-        self.scores.append(score)
-        if self.score < 0.75:
-            cp2, _, score2 = self.get_cp_by_commune(row.commune)
-            if score2 > self.score:
-                # print(f"WARNING BAD CP {cp} {commune}=>{cp2}")
-                cp = cp2
-                commune = row.commune
-                self.scores = [score2 / 2, 1]
-        rue, score = self.match_rue(commune, row.rue1, row.rue2, cp)
-        self.scores.append(score)
-        ban, score = self.match_numero(cp, commune, rue, row.numero)
-        self.scores.append(score)
-        if self.score < config.ban_mean - 2 * config.ban_std:
-            ban = self.check_low_quality(row, ban)
-        if self.echo and self.score < config.ban_mean - 3 * config.ban_std:
-            print(f"WARNING {row.numero} {row.rue1} {row.cp} {row.commune}  =>"
-                  f" {ban.numero} {ban.nom_voie} {ban.code_postal} {ban.nom_commune} @{self.score * 100:.1f}%")
-        row.ban_score = self.score
-        row.ban = ban
-        self.session.commit()
+        if cp == 0:
+            print(f"ERROR: BAD CP {cp}, cannot match")
+        else:
+            self.scores = [score]
+            communes = self.cps[cp]
+            commune, score = self.match_commune(row.commune, communes)
+            self.scores.append(score)
+            if self.score < 0.75:
+                cp2, _, score2 = self.get_cp_by_commune(row.commune)
+                if score2 > self.score:
+                    # print(f"WARNING BAD CP {cp} {commune}=>{cp2}")
+                    cp = cp2
+                    commune = row.commune
+                    self.scores = [score2 / 2, 1]
+            rue, score = self.match_rue(commune, row.rue1, row.rue2, cp)
+            self.scores.append(score)
+            ban, score = self.match_numero(cp, commune, rue, row.numero)
+            self.scores.append(score)
+            if self.score < config.ban_mean - 2 * config.ban_std:
+                ban = self.check_low_quality(row, ban)
+            if self.echo and self.score < config.ban_mean - 3 * config.ban_std:
+                print(f"WARNING {row.numero} {row.rue1} {row.cp} {row.commune}  =>"
+                      f" {ban.numero} {ban.nom_voie} {ban.code_postal} {ban.nom_commune} @{self.score * 100:.1f}%")
+            row.ban_score = self.score
+            row.ban = ban
+            if commit:
+                self.session.commit()
 
     def match_dept(self, d: int):
         self.make_cache1(d)

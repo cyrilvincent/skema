@@ -1,6 +1,5 @@
-from typing import Dict, Optional, List, Tuple, Set, Iterable
-from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cedex, BAN, OSM, AdresseRaw, Dept, AdresseNorm, Source
+from typing import Optional, Tuple
+from sqlentities import Context, BAN, OSM, AdresseNorm
 import argparse
 import time
 import art
@@ -58,26 +57,18 @@ class OSMMatcher:
                 s = response.read()
                 js = json.loads(s)
                 return js
-        except urllib.error.URLError as ex:
+        except Exception as ex:
             print(url)
             print(f"ERROR URLError: {ex}")
             if nbretry == 5:
                 raise ex
             else:
                 print(f"RETRY {nbretry + 1}")
-                time.sleep(nbretry * 4 + 1)
+                time.sleep(nbretry * 30 + 1)
                 return self.get_json_from_url(url, nbretry + 1)
-        except json.JSONDecodeError as ex:
-            print(url)
-            print(f"ERROR JSON: {s}")
-            if nbretry == 1:
-                raise ex
-            else:
-                print(f"RETRY {nbretry + 1}")
-                time.sleep(5)
-                return self.get_json_from_url(url, 1)
 
-    def get_osm_from_adresse(self, numero: Optional[int], rue: Optional[str], commune: Optional[str], cp: Optional[int]) -> Optional[OSM]:
+    def get_osm_from_adresse(self, numero: Optional[int], rue: Optional[str],
+                             commune: Optional[str], cp: Optional[int]) -> Optional[OSM]:
         url = self.uri
         osm = OSM()
         if rue is not None:
@@ -97,6 +88,12 @@ class OSMMatcher:
                 osm.lat = float(js[0]["lat"])
                 osm.lon = float(js[0]["lon"])
                 osm.adresse = js[0]["display_name"][:255]
+                index = osm.adresse.rindex(",")
+                cp = osm.adresse[index - 5: index].strip()
+                try:
+                    osm.cp = int(cp)
+                except:
+                    pass
             except ValueError:
                 return None
             return osm
@@ -120,8 +117,8 @@ class OSMMatcher:
             if self.has_num(osm.adresse):
                 return osm, 1
             if osm.adresse.count(",") >= 7:
-                return osm, 0.93
-            return osm, 0.73
+                return osm, 0.85
+            return osm, 0.65
         if row.rue2 is not None:
             osm = self.get_osm_from_adresse(None, row.rue2, row.commune, row.cp)
             if osm is not None:
@@ -134,8 +131,8 @@ class OSMMatcher:
             osm = self.get_osm_from_adresse(None, row.rue1, None, row.cp)
             if osm is not None:
                 if osm.adresse.count(",") >= 7:
-                    return osm, 0.92
-                return osm, 0.72
+                    return osm, 0.84
+                return osm, 0.64
         osm = self.get_osm_from_adresse(None, None, row.commune, row.cp)
         if osm is not None:
             if osm.adresse.count(",") >= 6:
@@ -144,10 +141,10 @@ class OSMMatcher:
         osm = self.get_osm_from_adresse(row.numero, row.rue1, row.commune, None)
         if osm is not None:
             if self.has_num(osm.adresse):
-                return osm, 0.87
+                return osm, 0.8
             if osm.adresse.count(",") >= 7:
-                return osm, 0.82
-            return osm, 0.67
+                return osm, 0.7
+            return osm, 0.5
         osm = self.get_osm_from_adresse(None, None, row.commune, None)
         if osm is not None:
             return osm, 0.5
@@ -168,7 +165,7 @@ class OSMMatcher:
             else:
                 ban_score = 0 if row.ban_score is None else row.ban_score
                 print(f"{row.numero} {row.rue1} {row.cp} {row.commune} @{ban_score * 100:.0f}% "
-                      f"=> {osm.adresse[:70]} @{score * 100:.0f}%")
+                      f"=> {osm.adresse[:70]} {osm.cp} @{score * 100:.0f}%")
             row.osm_score = score
             if osm is not None:
                 row.osm = osm

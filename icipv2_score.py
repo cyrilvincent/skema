@@ -1,16 +1,13 @@
-from typing import Dict, Optional, List, Tuple, Set, Iterable
+from typing import Dict, List
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cedex, BAN, OSM, AdresseRaw, Dept, AdresseNorm, Source
+from sqlentities import Context, BAN, AdresseNorm, Source
 import argparse
 import time
 import art
 import config
 import numpy as np
 import math
-import urllib.request
-import urllib.parse
-import urllib.error
-import json
+
 
 time0 = time.perf_counter()
 
@@ -67,20 +64,26 @@ class ScoreMatcher:
     def match_row(self, row: AdresseNorm):
         self.row_num += 1
         if (row.source is None or (row.source_id != 3 and row.source_id != 5)) and row.ban is not None:
-            if row.osm is None and row.ban_score >= config.ban_mean - config.osm_nb_std * config.ban_std:
+            if (row.osm is None and row.ban_score >= config.ban_mean - config.osm_nb_std * config.ban_std)\
+                    or row.osm_score == 0:
                 row.source = self.sources[2]
                 row.lon, row.lat = row.ban.lon, row.ban.lat
                 row.score = row.ban_score
             elif row.osm is not None:
                 d = self.calc_distance(row.ban.lon, row.ban.lat, row.osm.lon, row.osm.lat)
                 if self.echo:
-                    print(f"{d}m {row.rue1} {row.cp} {row.commune} <=> {row.ban.nom_voie} {row.ban.code_postal} {row.ban.nom_commune} "
+                    print(f"{d}m {row.rue1} {row.cp} {row.commune} <=> "
+                          f"{row.ban.nom_voie} {row.ban.code_postal} {row.ban.nom_commune} "
                           f"@{row.ban_score * 100:.0f}% <=> {row.osm.adresse[:50]} @{row.osm_score * 100:.0f}%")
+                if d < 50:
+                    row.source = self.sources[4]
+                    row.lon, row.lat = row.ban.lon, row.ban.lat
+                    row.score = 1
                 if d < 100:
                     row.source = self.sources[4]
                     row.lon, row.lat = row.ban.lon, row.ban.lat
                     row.score = min(1, max(row.ban_score, row.osm_score) + 0.1)
-                elif d < 1000:
+                elif d < 500:
                     row.source = self.sources[4]
                     if row.ban_score > row.osm_score:
                         row.lon, row.lat = row.ban.lon, row.ban.lat
@@ -88,6 +91,10 @@ class ScoreMatcher:
                     else:
                         row.lon, row.lat = row.osm.lon, row.osm.lat
                         row.score = row.osm_score
+                elif d > 100000 and row.osm_score < 0.9:
+                    row.source = self.sources[2]
+                    row.lon, row.lat = row.ban.lon, row.ban.lat
+                    row.score = row.ban_score
                 else:
                     if row.ban_score > row.osm_score:
                         row.source = self.sources[2]
@@ -97,6 +104,10 @@ class ScoreMatcher:
                         row.source = self.sources[1]
                         row.lon, row.lat = row.osm.lon, row.osm.lat
                         row.score = row.osm_score
+                    if d > 5000 and row.score < config.ban_mean - config.osm_nb_std * config.ban_std:
+                        row.score -= 0.1
+                    elif d > 10000 and row.score < config.ban_mean - 3 * config.ban_std:
+                        row.score /= 2
             if row.score is not None:
                 self.total_scores.append(row.score)
                 self.session.commit()
@@ -125,7 +136,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="BAN Matcher")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     parser.add_argument("-f", "--force", help="Force matching", action="store_true")
-    parser.add_argument("-l", "--log", help="Log (OSM echo)", action="store_true")
+    parser.add_argument("-l", "--log", help="Log (debug echo)", action="store_true")
     args = parser.parse_args()
     om = ScoreMatcher(args.force, args.log, args.echo)
     om.match()
@@ -138,5 +149,6 @@ if __name__ == '__main__':
     print(f"Score average-std {(mean - std) * 100:.1f}%")
     print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
     print(f"Parse {om.row_num} adresses in {time.perf_counter() - time0:.0f} s")
-
     # -e -l -d [5]
+    # select percentile_cont(0.5)WITHIN GROUP (ORDER BY score) as median, stddev(score) as std, avg(score)
+    # from adresse_norm where score is not NULL limit 100

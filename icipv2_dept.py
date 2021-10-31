@@ -1,8 +1,4 @@
-import sqlalchemy.ext.declarative
-import sqlalchemy.orm
-import sqlalchemy
 import sqlentities
-import csv
 import config
 import art
 
@@ -32,7 +28,3 @@ if __name__ == '__main__':
         print(f"Creating {dept}")
         context.session.add(dept)
         context.session.commit()
-
-
-
-

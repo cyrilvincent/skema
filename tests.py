@@ -361,6 +361,7 @@ class ICIPTests(TestCase):
         om = OSMMatcher(ban_echo=True)
         osm = om.get_osm_from_adresse(1571, "chemin des blancs", "lans en vercors", 38250)
         self.assertAlmostEqual(45, osm.lat, delta=1)
+        self.assertEqual(38250, osm.cp)
         osm = om.get_osm_from_adresse(None, None, "lans en vercors", 38250)
         self.assertAlmostEqual(45, osm.lat, delta=1)
         osm = om.get_osm_from_adresse(None, None, None, 38250)

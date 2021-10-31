@@ -1,15 +1,12 @@
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List
 
-import sqlalchemy.orm.identity
-from sqlalchemy.orm import joinedload, subqueryload, selectinload
-from sqlentities import Context, DateSource, Cabinet, PS, AdresseRaw, Dept, AdresseNorm, PSCabinetDateSource
+from sqlalchemy.orm import joinedload
+from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource
 from icipv2_etab import BaseParser, time0
 import argparse
-import csv
 import time
 import art
 import config
-import re
 
 
 class PSParser(BaseParser):

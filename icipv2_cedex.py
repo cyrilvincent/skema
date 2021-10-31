@@ -1,5 +1,4 @@
-from typing import Dict, Optional, List, Tuple
-from sqlentities import Context, Cedex, BAN, EtablissementType, AdresseRaw, Dept, AdresseNorm, Source
+from sqlentities import Context, Cedex, BAN
 import argparse
 import csv
 import time

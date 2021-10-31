@@ -1,0 +1,10 @@
+unidecode
+art
+jsonpickle
+pandas
+numpy
+pdoc3
+xlrd
+openpyxl
+sqlalchemy
+numpy

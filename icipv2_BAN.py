@@ -1,5 +1,4 @@
-from sqlentities import Context, Dept, BAN, PS
-from typing import Set
+from sqlentities import Context, Dept, BAN
 import csv
 import config
 import art
@@ -53,7 +52,7 @@ class AdresseParser:
     def load(self, path: str, dept_num: int):
         print(f"Load {path}")
         context = Context()
-        context.create()
+        context.create()    # Remplacer par get_session
         self.make_set(dept_num, context.session)
         dept = context.session.query(Dept).get(dept_num)
         self.numrow = 0
@@ -66,9 +65,7 @@ class AdresseParser:
                 self.numrow += 1
                 e = BAN()
                 e.adresse_id = row["id"][:50]
-                # dbe = context.session.query(BAN).filter(BAN.adresse_id == e.adresse_id).first()
                 if e.adresse_id not in self.set:
-                # if dbe is None:
                     e.numero = int(row["numero"])
                     e.rep = row["rep"][:50] if row["rep"] != "" else None
                     e.nom_voie = self.normalize(row["nom_voie"])
@@ -155,4 +152,3 @@ if __name__ == '__main__':
     parser = AdresseParser()
     # parser.load("data/adresse/adresses-60.csv", 60)
     parser.scan()
-
