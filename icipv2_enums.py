@@ -1,4 +1,4 @@
-from sqlentities import Context, EtablissementType, Convention, Nature, Source
+from sqlentities import Context, EtablissementType, Convention, Nature, Source, FamilleActe, Profession, ModeExercice
 import config
 import art
 
@@ -111,7 +111,39 @@ class EnumsCreator:
         n.id = 8
         n.libelle = "T. plein hosp./mal. aut. med."
         context.session.add(n)
+        context.session.commit()
 
+    def famille_acte(self):
+        print("FamilleActe")
+        context = Context()
+        context.create()
+        for i in range(1, 221):
+            f = FamilleActe()
+            f.id = i
+            f.libelle = "TODO"
+            context.session.add(f)
+        context.session.commit()
+
+    def profession(self):
+        print("Profession")
+        context = Context()
+        context.create()
+        for i in range(1, 75):
+            p = Profession()
+            p.id = i
+            p.libelle = "TODO"
+            context.session.add(p)
+        context.session.commit()
+
+    def mode_exercice(self):
+        print("ModeExercice")
+        context = Context()
+        context.create()
+        for i in range(1, 9):
+            m = ModeExercice()
+            m.id = i
+            m.libelle = "TODO"
+            context.session.add(m)
         context.session.commit()
 
 
@@ -126,7 +158,10 @@ if __name__ == '__main__':
     context.create()
     print(f"Database {context.db_name}: {context.db_size():.0f} Mo")
     e = EnumsCreator()
-    e.source()
+    # e.source()
     # e.etablissementType()
-    e.nature()
-    e.convention()
+    # e.nature()
+    # e.convention()
+    e.famille_acte()
+    e.profession()
+    e.mode_exercice()

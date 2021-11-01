@@ -45,6 +45,7 @@ class Context:
             row = res.fetchone()
             return row[0] / 2 ** 20
 
+
 # ps -* ps_cabinet_date_source -1 cabinet -1 adresse_raw -1 adresse_norm -? osm -1 dept
 #                                                                        -? ban -1 dept
 #                                                                        -1 dept
@@ -54,6 +55,8 @@ class Context:
 #    1-* tarif *-* date_source
 #              -1 profession -* tarif_stats *-* date_source
 #                                           -? dept (si None = France)
+#              -? mode_exercice
+#              -? famille_acte
 # etab -1 adresse_raw
 #      *-* date_source
 
@@ -67,7 +70,7 @@ class Dept(Base):
     # backref: bans
 
     def __repr__(self):
-        return f"{self.id}"
+        return f"D{self.id}"
 
 
 class BAN(Base):
@@ -196,6 +199,11 @@ tarif_datesource = Table('tarif_date_source', Base.metadata,
                          Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
                          )
 
+tarif_stats_datesource = Table('tarif_stats_date_source', Base.metadata,
+                               Column('tarif_stats_id', ForeignKey('tarif_stats.id'), primary_key=True),
+                               Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
+                               )
+
 
 class DateSource(Base):
     __tablename__ = "date_source"
@@ -210,7 +218,7 @@ class DateSource(Base):
         self.id = annee * 100 + mois
 
     def __repr__(self):
-        return f"{self.id}"
+        return f"D{self.id}"
 
 
 class EtablissementType(Base):
@@ -324,7 +332,16 @@ class Profession(Base):
 
     id = Column(Integer, primary_key=True)
     libelle = Column(String(50), nullable=False)
-    annexe = Column(Boolean, nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
+
+
+class ModeExercice(Base):
+    __tablename__ = "mode_exercice"
+
+    id = Column(Integer, primary_key=True)
+    libelle = Column(String(50), nullable=False)
 
     def __repr__(self):
         return f"{self.id} {self.libelle}"
@@ -341,13 +358,21 @@ class TarifStats(Base):
     dept_id = Column(Integer, ForeignKey('dept.id'), index=True)
     profession: Profession = relationship("Profession", backref="tarif_statss")
     profession_id = Column(Integer, ForeignKey('profession.id'))
-
-    # TODO *-* DateSource
-
-    # __table_args__ = (UniqueConstraint('profession_id', 'dept_id', "date_source_id"),)
+    date_sources: List[DateSource] = relationship("DateSource",
+                                                  secondary=tarif_stats_datesource)
 
     def __repr__(self):
         return f"{self.id} {self.moyenne}"
+
+
+class FamilleActe(Base):
+    __tablename__ = "famille_acte"
+
+    id = Column(Integer, primary_key=True)
+    libelle = Column(String, nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
 
 
 class Tarif(Base):
@@ -355,7 +380,9 @@ class Tarif(Base):
 
     id = Column(Integer, primary_key=True)
     profession: Profession = relationship("Profession")
-    profession_id = Column(Integer, ForeignKey('profession.id'))
+    profession_id = Column(Integer, ForeignKey('profession.id'), nullable=False)
+    mode_exercice: ModeExercice = relationship("ModeExercice")
+    mode_exercice_id = Column(Integer, ForeignKey('mode_exercice.id'))
     nature: Nature = relationship("Nature")
     nature_id = Column(Integer, ForeignKey('nature.id'), nullable=False)
     convention: Convention = relationship("Convention")
@@ -366,6 +393,8 @@ class Tarif(Base):
     famille = Column(String(50))
     ps: PS = relationship("PS", backref="tarifs")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
+    famille_acte: FamilleActe = relationship("FamilleActe")
+    famille_acte_id = Column(Integer, ForeignKey('famille_acte.id'))
     date_sources: List[DateSource] = relationship("DateSource",
                                                   secondary=tarif_datesource,
                                                   backref="tarifs")

@@ -112,39 +112,39 @@ class OSMMatcher:
         osm = self.get_osm_from_adresse(row.numero, row.rue1, row.commune, row.cp)
         if osm is not None:
             if self.has_num(osm.adresse):
-                return osm, 1
+                return osm, 1  # 1260
             if osm.adresse.count(",") >= 7:
-                return osm, 0.85
-            return osm, 0.65
+                return osm, 0.85  # 2000
+            return osm, 0.65  # 350
         if row.rue2 is not None:
             osm = self.get_osm_from_adresse(None, row.rue2, row.commune, row.cp)
             if osm is not None:
                 if self.has_num(osm.adresse):
                     return osm, 1
                 if osm.adresse.count(",") >= 7:
-                    return osm, 0.97
-                return osm, 0.77
+                    return osm, 0.97  # 490
+                return osm, 0.77  # 20
         if row.numero is not None:
             osm = self.get_osm_from_adresse(None, row.rue1, None, row.cp)
             if osm is not None:
                 if osm.adresse.count(",") >= 7:
-                    return osm, 0.84
-                return osm, 0.64
+                    return osm, 0.84  # 330
+                return osm, 0.64  # 14
         osm = self.get_osm_from_adresse(None, None, row.commune, row.cp)
         if osm is not None:
             if osm.adresse.count(",") >= 6:
-                return osm, 0.7
+                return osm, 0.7  # 1500
             return osm, 0.5
         osm = self.get_osm_from_adresse(row.numero, row.rue1, row.commune, None)
         if osm is not None:
             if self.has_num(osm.adresse):
-                return osm, 0.8
+                return osm, 0.8  # 30
             if osm.adresse.count(",") >= 7:
-                return osm, 0.7
+                return osm, 0.6
             return osm, 0.5
-        osm = self.get_osm_from_adresse(None, None, row.commune, None)
-        if osm is not None:
-            return osm, 0.5
+        # osm = self.get_osm_from_adresse(None, None, row.commune, None)
+        # if osm is not None:
+        #     return osm, 0.5
         return None, 0
 
     def match(self):

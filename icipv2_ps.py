@@ -100,7 +100,7 @@ class PSParser(BaseParser):
     def choose_best_rue(self, a: AdresseRaw) -> int:
         if a.adresse2 is None:
             return 3
-        l = ["CHEMIN", "AVENUE", "PLACE", "BOULEVARD", "IMPASSE", "ROUTE"]
+        l = ["CHEMIN", "AVENUE", "PLACE", "BOULEVARD", "IMPASSE", "ROUTE", "RUE"]
         if a.adresse3 is not None:
             num, rue = self.split_num(a.adresse3)
             if num is not None:
