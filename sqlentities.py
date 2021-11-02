@@ -53,7 +53,7 @@ class Context:
 #                                                        -1 dept
 #                              -1 date_source
 #    1-* tarif *-* date_source
-#              -1 profession -* tarif_stats *-* date_source
+#              -1 profession -* tarif_stats -1 date_source
 #                                           -? dept (si None = France)
 #              -? mode_exercice
 #              -? famille_acte
@@ -93,7 +93,7 @@ class BAN(Base):
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     is_lieu_dit = Column(Boolean)
     __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
-                      Index('BAN_cp_nom_commune_nom_voie', 'nom_commune', 'nom_voie'),
+                      Index('BAN_cp_nom_commune_nom_voie_ix', 'nom_commune', 'nom_voie'),
                       )
 
     def __repr__(self):
@@ -198,11 +198,6 @@ tarif_datesource = Table('tarif_date_source', Base.metadata,
                          Column('tarif_id', ForeignKey('tarif.id'), primary_key=True),
                          Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
                          )
-
-tarif_stats_datesource = Table('tarif_stats_date_source', Base.metadata,
-                               Column('tarif_stats_id', ForeignKey('tarif_stats.id'), primary_key=True),
-                               Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
-                               )
 
 
 class DateSource(Base):
@@ -357,9 +352,15 @@ class TarifStats(Base):
     dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), index=True)
     profession: Profession = relationship("Profession", backref="tarif_statss")
-    profession_id = Column(Integer, ForeignKey('profession.id'))
-    date_sources: List[DateSource] = relationship("DateSource",
-                                                  secondary=tarif_stats_datesource)
+    profession_id = Column(Integer, ForeignKey('profession.id'), index=True)
+    date_source: DateSource = relationship("DateSource")
+    date_source_id = Column(Integer, ForeignKey('date_source.id'), index=True)
+
+    __table_args__ = (UniqueConstraint('profession_id', 'date_source_id', 'dept_id'),)
+
+    @property
+    def key(self):
+        return self.profession_id, self.date_source_id, self.dept_id
 
     def __repr__(self):
         return f"{self.id} {self.moyenne}"
