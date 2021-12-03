@@ -53,8 +53,7 @@ class Context:
 #                                                        -1 dept
 #                              -1 date_source
 #    1-* tarif *-* date_source
-#              -1 profession -* tarif_stats -1 date_source
-#                                           -? dept (si None = France)
+#              -1 profession
 #              -? mode_exercice
 #              -? famille_acte
 # etab -1 adresse_raw
@@ -91,7 +90,7 @@ class BAN(Base):
     nom_afnor = Column(String(255))
     dept: Dept = relationship("Dept", backref="bans")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
-    is_lieu_dit = Column(Boolean)
+    is_lieu_dit = Column(Boolean, nullable=False)
     __table_args__ = (Index('BAN_cp_nom_commune_ix', 'code_postal', 'nom_commune'),
                       Index('BAN_cp_nom_commune_nom_voie_ix', 'nom_commune', 'nom_voie'),
                       )
@@ -130,7 +129,7 @@ class AdresseNorm(Base):
 
     id = Column(Integer, primary_key=True)
     numero = Column(Integer)
-    rue1 = Column(String(255))  # enlever le not null
+    rue1 = Column(String(255))
     rue2 = Column(String(255))
     cp = Column(Integer, nullable=False)
     commune = Column(String(255), nullable=False)
@@ -305,11 +304,11 @@ class Convention(Base):
     __tablename__ = "convention"
 
     id = Column(Integer, primary_key=True)
-    code = Column(CHAR(2), nullable=False)
+    code = Column(CHAR(2), nullable=False, unique=True)
     libelle = Column(String(100), nullable=False)
 
     def __repr__(self):
-        return f"{self.id} {self.libelle}"
+        return f"{self.id} {self.code}"
 
 
 class Nature(Base):
@@ -342,30 +341,6 @@ class ModeExercice(Base):
         return f"{self.id} {self.libelle}"
 
 
-class TarifStats(Base):
-    __tablename__ = "tarif_stats"
-
-    id = Column(Integer, primary_key=True)
-    moy = Column(Float, nullable=False)
-    min = Column(Float)
-    max = Column(Float)
-    dept: Dept = relationship("Dept")
-    dept_id = Column(Integer, ForeignKey('dept.id'), index=True)
-    profession: Profession = relationship("Profession", backref="tarif_statss")
-    profession_id = Column(Integer, ForeignKey('profession.id'), index=True)
-    date_source: DateSource = relationship("DateSource")
-    date_source_id = Column(Integer, ForeignKey('date_source.id'), index=True)
-
-    __table_args__ = (UniqueConstraint('profession_id', 'date_source_id', 'dept_id'),)
-
-    @property
-    def key(self):
-        return self.profession_id, self.date_source_id, self.dept_id
-
-    def __repr__(self):
-        return f"{self.id} {self.moyenne}"
-
-
 class FamilleActe(Base):
     __tablename__ = "famille_acte"
 
@@ -388,8 +363,8 @@ class Tarif(Base):
     nature_id = Column(Integer, ForeignKey('nature.id'), nullable=False)
     convention: Convention = relationship("Convention")
     convention_id = Column(Integer, ForeignKey("convention.id"), nullable=False)
-    option_contrat = Column(Boolean)
-    vitale = Column(Boolean)
+    option_contrat = Column(Boolean)  # nullable=False ?
+    vitale = Column(Boolean)  # nullable=False ?
     code = Column(String(50), nullable=False)
     famille = Column(String(50))
     ps: PS = relationship("PS", backref="tarifs")
@@ -399,9 +374,35 @@ class Tarif(Base):
     date_sources: List[DateSource] = relationship("DateSource",
                                                   secondary=tarif_datesource,
                                                   backref="tarifs")
+    montant = Column(Integer, nullable=False)
+    borne_inf = Column(Integer)
+    borne_sup = Column(Integer)
+    montant_2 = Column(Integer)
+    borne_inf_2 = Column(Integer)
+    borne_sup_2 = Column(Integer)
+    montant_imagerie = Column(Integer)
+    borne_inf_imagerie = Column(Integer)
+    borne_sup_imagerie = Column(Integer)
+    montant_anesthesie = Column(Integer)
+    borne_inf_anesthesie = Column(Integer)
+    borne_sup_anesthesie = Column(Integer)
+    montant_cec = Column(Integer)
+    borne_inf_cec = Column(Integer)
+    borne_sup_cec = Column(Integer)
+
+    @property
+    def key(self):
+        return (self.profession_id, self.mode_exercice_id, self.nature_id, self.convention_id, self.option_contrat,
+                self.vitale, self.code, self.famille, self.ps_id, self.famille_acte_id, self.montant, self.borne_inf,
+                self.borne_sup, self.montant_2, self.borne_inf_2, self.borne_sup_2, self.montant_imagerie,
+                self.borne_inf_imagerie, self.borne_sup_imagerie, self.montant_anesthesie, self.borne_inf_anesthesie,
+                self.borne_sup_anesthesie, self.montant_cec, self.borne_inf_cec, self.borne_sup_cec)
+
+    def equals(self, other):
+        return self.key == other.key
 
     def __repr__(self):
-        return f"{self.id} {self.profession}"
+        return f"{self.id} {self.profession} {self.montant}"
 
 
 class Cedex(Base):

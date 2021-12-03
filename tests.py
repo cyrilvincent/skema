@@ -1,9 +1,9 @@
 from unittest import TestCase
-from icipv2_etab import EtabParser
-from icipv2_ps import PSParser
-from icipv2_BAN_matcher import BANMatcher
-from icipv2_OSM_matcher import OSMMatcher
-from icipv2_score import ScoreMatcher
+from etab_parser import EtabParser
+from ps_parser import PSParser
+from BAN_matcher import BANMatcher
+from OSM_matcher import OSMMatcher
+from score_matcher import ScoreMatcher
 from sqlentities import *
 
 

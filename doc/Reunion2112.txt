@@ -1,0 +1,20 @@
+Envoyer le code STATA
+Ps_LibreAcces : 3 fichiers
+    Personne_activite = principal
+    Diplome = diplomelibelle + code
+    SavoirFaire = savoirfairelibelle + code
+Livrer ps_libreacces
+
+PS
+    mode d’exercice particulier c'est en + de 11
+    montants généralement constaté + bornes = lié au médecin
+
+Etab
+    Les vieux fichiers n'ont pas de geolocalisation et pas les mêmes colonnes
+
+3ème:
+    Tout tes fichiers PS et Etab et identifiants (sans les adressematcher)
+    SantéSpecialité et UFC => format PS
+    Le tout dans un zip
+
+

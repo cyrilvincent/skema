@@ -1,10 +1,10 @@
 import art
 import config
 from sqlentities import AdresseRaw
-from icipv2_ps import PSParser
-from icipv2_BAN_matcher import BANMatcher
-from icipv2_OSM_matcher import OSMMatcher
-from icipv2_score import ScoreMatcher
+from ps_parser import PSParser
+from BAN_matcher import BANMatcher
+from OSM_matcher import OSMMatcher
+from score_matcher import ScoreMatcher
 from threading import Thread
 import time
 

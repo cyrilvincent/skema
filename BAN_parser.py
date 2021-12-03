@@ -16,11 +16,6 @@ class AdresseParser:
         self.set = set()
 
     def normalize(self, s: str):
-        """
-        Normalise la commune
-        :param s: la commune
-        :return:
-        """
         s = unidecode.unidecode(s.upper()).replace("'", " ").replace("-", " ").replace("/", " ").replace(".", "")
         s = s.replace("ARRONDISSEMENT", "")
         if s.endswith("(LE)"):
