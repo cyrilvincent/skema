@@ -17,4 +17,11 @@ Etab
     SantéSpecialité et UFC => format PS
     Le tout dans un zip
 
+UFC
+    Il y a trois bases pour 2016 mais qui contiennent aussi les infos de 2012 et au moins il y a les adresses (ce qui n’était pas le cas pour les bases 2012).
+    Dans ces fichiers 2016, il y a la base principale avec prix 2016 (il faut garder « prix fréquent », « prix bas », « prix haut ») et prix 2012 (un seul)
+    Il y a un autre onglet avec adresses des particiens et un dernier onglet avec sortants (qui sont les médecins qui ont arrêté entre 2012 et 2016)
+    Il faudrait donc prendre l’ensemble de ces infos et créer deux fichiers PS, un pour 2012 et un pour 2016.
+
+
 

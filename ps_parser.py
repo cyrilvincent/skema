@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource
+from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, Tarif, DateSource, \
+    Profession, ModeExercice, Nature, Convention, FamilleActe
 from etab_parser import BaseParser, time0
 import argparse
 import time
@@ -13,7 +14,6 @@ class PSParser(BaseParser):
 
     def __init__(self, context):
         super().__init__(context)
-        self.nb_tarif = 0
         self.nb_cabinet = 0
         self.cabinets: Dict[str, Cabinet] = {}
 
@@ -47,7 +47,7 @@ class PSParser(BaseParser):
             c.key = f"{c.nom}_{row[7]}_{row[5]}".replace(" ", "_")[:255]
         except Exception as ex:
             print(f"ERROR cabinet row {self.row_num} {c}\n{ex}")
-            quit(1)
+            quit(2)
         return c
 
     def create_update_cabinet(self, e: PS, row) -> Cabinet:
@@ -65,16 +65,7 @@ class PSParser(BaseParser):
             e.ps_cabinet_date_sources.append(pcds)
         return c
 
-    def get_dept_from_cp(self, cp):
-        cp = str(cp)
-        if len(cp) == 4:
-            cp = "0" + cp
-        dept = cp[:2]
-        if dept == "20":
-            dept = cp[:3]
-        return int(dept)
-
-    def adresse_raw_mapper(self, row):
+    def adresse_raw_mapper(self, row) -> AdresseRaw:
         a = AdresseRaw()
         try:
             a.adresse2 = self.get_nullable(row[4])
@@ -85,7 +76,7 @@ class PSParser(BaseParser):
             a.dept = self.depts_int[self.get_dept_from_cp(a.cp)]
         except Exception as ex:
             print(f"ERROR raw row {self.row_num} {a}\n{ex}")
-            quit(1)
+            quit(4)
         return a
 
     def create_update_adresse_raw(self, c: Cabinet, row):
@@ -185,7 +176,6 @@ if __name__ == '__main__':
     psp.load(args.path, encoding=None)
     print(f"New PS: {psp.nb_new_entity}")
     print(f"New cabinet: {psp.nb_cabinet}")
-    print(f"New tarif: {psp.nb_tarif}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")
     new_db_size = context.db_size()

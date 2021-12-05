@@ -53,11 +53,13 @@ class Context:
 #                                                        -1 dept
 #                              -1 date_source
 #    1-* tarif *-* date_source
-#              -1 profession
+#              -? profession
 #              -? mode_exercice
 #              -? famille_acte
+#              -1 cabinet
 # etab -1 adresse_raw
 #      *-* date_source
+# personne_activite *-* pa_adresse
 
 
 class Dept(Base):
@@ -196,6 +198,11 @@ etablissement_datesource = Table('etablissement_date_source', Base.metadata,
 tarif_datesource = Table('tarif_date_source', Base.metadata,
                          Column('tarif_id', ForeignKey('tarif.id'), primary_key=True),
                          Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
+                         )
+
+personne_activite_pa_adresse = Table('personne_activite_pa_adresse', Base.metadata,
+                         Column('personne_activite_id', ForeignKey('personne_activite.id'), primary_key=True),
+                         Column('pa_adresse_id', ForeignKey('pa_adresse.id'), primary_key=True)
                          )
 
 
@@ -356,7 +363,7 @@ class Tarif(Base):
 
     id = Column(Integer, primary_key=True)
     profession: Profession = relationship("Profession")
-    profession_id = Column(Integer, ForeignKey('profession.id'), nullable=False)
+    profession_id = Column(Integer, ForeignKey('profession.id'))
     mode_exercice: ModeExercice = relationship("ModeExercice")
     mode_exercice_id = Column(Integer, ForeignKey('mode_exercice.id'))
     nature: Nature = relationship("Nature")
@@ -366,40 +373,40 @@ class Tarif(Base):
     option_contrat = Column(Boolean)  # nullable=False ?
     vitale = Column(Boolean)  # nullable=False ?
     code = Column(String(50), nullable=False)
-    famille = Column(String(50))
     ps: PS = relationship("PS", backref="tarifs")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
+    cabinet: Cabinet = relationship("Cabinet")
+    cabinet_id = Column(Integer, ForeignKey('cabinet.id'), nullable=False)
     famille_acte: FamilleActe = relationship("FamilleActe")
     famille_acte_id = Column(Integer, ForeignKey('famille_acte.id'))
-    date_sources: List[DateSource] = relationship("DateSource",
-                                                  secondary=tarif_datesource,
-                                                  backref="tarifs")
-    montant = Column(Integer, nullable=False)
-    borne_inf = Column(Integer)
-    borne_sup = Column(Integer)
-    montant_2 = Column(Integer)
-    borne_inf_2 = Column(Integer)
-    borne_sup_2 = Column(Integer)
-    montant_imagerie = Column(Integer)
-    borne_inf_imagerie = Column(Integer)
-    borne_sup_imagerie = Column(Integer)
-    montant_anesthesie = Column(Integer)
-    borne_inf_anesthesie = Column(Integer)
-    borne_sup_anesthesie = Column(Integer)
-    montant_cec = Column(Integer)
-    borne_inf_cec = Column(Integer)
-    borne_sup_cec = Column(Integer)
+    date_sources = relationship("DateSource", secondary=tarif_datesource, backref="tarifs")
+    montant = Column(Float, nullable=False)
+    borne_inf = Column(Float)
+    borne_sup = Column(Float)
+    montant_2 = Column(Float)
+    borne_inf_2 = Column(Float)
+    borne_sup_2 = Column(Float)
+    montant_imagerie = Column(Float)
+    borne_inf_imagerie = Column(Float)
+    borne_sup_imagerie = Column(Float)
+    montant_anesthesie = Column(Float)
+    borne_inf_anesthesie = Column(Float)
+    borne_sup_anesthesie = Column(Float)
+    montant_cec = Column(Float)
+    borne_inf_cec = Column(Float)
+    borne_sup_cec = Column(Float)
 
     @property
     def key(self):
-        return (self.profession_id, self.mode_exercice_id, self.nature_id, self.convention_id, self.option_contrat,
-                self.vitale, self.code, self.famille, self.ps_id, self.famille_acte_id, self.montant, self.borne_inf,
-                self.borne_sup, self.montant_2, self.borne_inf_2, self.borne_sup_2, self.montant_imagerie,
-                self.borne_inf_imagerie, self.borne_sup_imagerie, self.montant_anesthesie, self.borne_inf_anesthesie,
-                self.borne_sup_anesthesie, self.montant_cec, self.borne_inf_cec, self.borne_sup_cec)
-
-    def equals(self, other):
-        return self.key == other.key
+        return (None if self.ps is None else self.ps.id,
+                None if self.profession is None else self.profession.id,
+                None if self.mode_exercice is None else self.mode_exercice.id,
+                self.nature.id, self.convention.id, self.option_contrat, self.vitale, self.code,
+                None if self.famille_acte is None else self.famille_acte.id, self.montant,
+                self.borne_inf, self.borne_sup, self.montant_2, self.borne_inf_2, self.borne_sup_2,
+                self.montant_imagerie, self.borne_inf_imagerie, self.borne_sup_imagerie, self.montant_anesthesie,
+                self.borne_inf_anesthesie, self.borne_sup_anesthesie, self.montant_cec, self.borne_inf_cec,
+                self.borne_sup_cec)
 
     def __repr__(self):
         return f"{self.id} {self.profession} {self.montant}"
@@ -418,3 +425,44 @@ class Cedex(Base):
 
     def __repr__(self):
         return f"{self.id} {self.cedex} => {self.cp}"
+
+
+class PersonneActivite(Base):
+    __tablename__ = "personne_activite"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False, unique=True)
+    nom = Column(String(255), nullable=False)
+    prenom = Column(String(255))
+
+    # backref pa_adresses
+
+    def __repr__(self):
+        return f"{self.id} {self.nom} {self.prenom}"
+
+
+class PAAdresse(Base):
+    __tablename__ = "pa_adresse"
+
+    id = Column(Integer, primary_key=True)
+    numero = Column(Integer)
+    rue = Column(String(255))
+    cp = Column(Integer, nullable=False)
+    commune = Column(String(255), nullable=False)
+    dept: Dept = relationship("Dept")
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
+    personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
+                                                              secondary=personne_activite_pa_adresse,
+                                                              backref="pa_adresses")
+
+    __table_args__ = (UniqueConstraint('numero', 'rue', 'cp', 'commune'),)
+
+    @property
+    def key(self):
+        return self.numero, self.rue, self.cp, self.commune
+
+    def __repr__(self):
+        return f"{self.id} {self.numero} {self.rue} {self.cp} {self.commune}"
+
+
+

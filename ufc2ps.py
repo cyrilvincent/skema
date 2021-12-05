@@ -31,6 +31,7 @@ class UFCParser:
             e.v[8] = row["VILLE"]
             e.v[1] = row["NOM"]
             e.v[2] = row["PRENOM"]
+            # A changer avec id2016 et id2012
             e.v[3], e.v[4], e.v[5] = self.get_adresse123_by_nom_prenom_cp(row["NOM"], row["PRENOM"], row["CP"])
             e.v[10] = self.get_profession(row["specialité"])
             e.v[12] = self.get_nature(row["Type d'activité"])

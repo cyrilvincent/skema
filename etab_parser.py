@@ -1,5 +1,7 @@
 from typing import Dict, Optional, List, Tuple
 from sqlalchemy.orm import joinedload
+import unidecode
+
 from sqlentities import Context, DateSource, Etablissement, EtablissementType, AdresseRaw, Dept, AdresseNorm, Source
 from abc import ABCMeta, abstractmethod
 import argparse
@@ -60,6 +62,15 @@ class BaseParser(metaclass=ABCMeta):
         except IndexError:
             print("ERROR: file must have date like this: file_YY-MM.csv")
 
+    def get_dept_from_cp(self, cp):
+        cp = str(cp)
+        if len(cp) == 4:
+            cp = "0" + cp
+        dept = cp[:2]
+        if dept == "20":
+            dept = cp[:3]
+        return int(dept)
+
     def check_date(self, path):
         self.parse_date(path)
         db_date = self.context.session.query(DateSource).get(self.date_source.id)
@@ -72,6 +83,9 @@ class BaseParser(metaclass=ABCMeta):
 
     def get_nullable(self, v):
         return None if v == "" else v
+
+    def get_nullable_int(self, v):
+        return None if v == "" else int(v)
 
     def pseudo_clone(self, from_obj: object, to_obj):
         for a in from_obj.__dict__:
@@ -110,13 +124,21 @@ class BaseParser(metaclass=ABCMeta):
         commune = self.replace_all(commune, dico)
         return commune.strip()
 
-    def load(self, path, delimiter=';', encoding="utf8"):
+    def normalize_string(self, s: str) -> str:
+        s = s.strip().upper()
+        s = unidecode.unidecode(s).replace("'", " ").replace("-", " ").replace("/", " ").replace(".", "")
+        return s
+
+    def load(self, path, delimiter=';', encoding="utf8", header=False):
         print(f"Loading {path}")
         self.check_date(path)
         self.load_cache()
         self.test_file(path, encoding)
         with open(path, encoding=encoding) as f:
-            reader = csv.reader(f, delimiter=delimiter)
+            if header:
+                reader = csv.DictReader(f, delimiter=delimiter)
+            else:
+                reader = csv.reader(f, delimiter=delimiter)
             for row in reader:
                 self.row_num += 1
                 self.parse_row(row)

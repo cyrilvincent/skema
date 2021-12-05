@@ -5,7 +5,7 @@ import repositories
 import pandas
 import entities
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 class SanteSpecialiteParser:
@@ -14,7 +14,7 @@ class SanteSpecialiteParser:
         self.repo = repositories.SSRepository()
         self.ps_repo = repositories.PSRepository()
         self.path = path
-        self.dataframe: pandas.DataFrame | None = None
+        self.dataframe: Optional[pandas.DataFrame] = None
         self.entities: List[entities.PSEntity] = []
 
     def load(self):

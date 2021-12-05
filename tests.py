@@ -1,9 +1,14 @@
 from unittest import TestCase
+
+from sqlalchemy.orm import joinedload
+
 from etab_parser import EtabParser
 from ps_parser import PSParser
 from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
+from ps_tarif_parser import PSTarifParser
 from score_matcher import ScoreMatcher
+from personne_activite_parser import PersonneActiviteParser
 from sqlentities import *
 
 
@@ -390,3 +395,86 @@ class ICIPTests(TestCase):
         sm = ScoreMatcher(ban_echo=True)
         d = sm.calc_distance(osm1.lon, osm1.lat, osm2.lon, osm2.lat)
         self.assertEqual(3314, d)
+
+    def test_tarif_by_year(self):
+        context = Context()
+        context.create(echo=True)
+        l: List[Tarif] = context.session.query(Tarif).options(joinedload(Tarif.date_sources))\
+            .filter(Tarif.date_sources.any(DateSource.annee >= 2020))
+        print(l)
+
+    def test_tarif_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PSParser(context)
+        p.date_source = DateSource(21, 12)
+        p.load_cache()
+        s = "H;JITTEN;PHILIPPE;CABINET MEDICAL ET OSTEOPATHIE;;5 ESPA CHARLES DE GAULLE;LA GRENETTE;01100;OYONNAX;0474776681;45;1;3;c1;N;O;G__;1;10;20;30;;;;;;;;;;;;"
+        row = s.split(";")
+        t = p.tarif_mapper(row)
+        self.assertEqual(45, t.profession.id)
+        self.assertEqual(1, t.mode_exercice.id)
+        self.assertEqual(3, t.nature.id)
+        self.assertEqual("C1", t.convention.code)
+        self.assertFalse(t.option_contrat)
+        self.assertTrue(t.vitale)
+        self.assertEqual("G__", t.code)
+        self.assertEqual(1, t.famille_acte.id)
+        self.assertEqual(10, t.montant)
+        self.assertEqual(20, t.borne_inf)
+        self.assertEqual(30, t.borne_sup)
+
+    def test_personne_activite_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PersonneActiviteParser(context)
+        s = "Type d'identifiant PP|Identifiant PP|Identification nationale PP|Code civilité d'exercice|Libellé civilité d'exercice|Code civilité|Libellé civilité|Nom d'exercice|Prénom d'exercice|Code profession|Libellé profession|Code catégorie professionnelle|Libellé catégorie professionnelle|Code type savoir-faire|Libellé type savoir-faire|Code savoir-faire|Libellé savoir-faire|Code mode exercice|Libellé mode exercice|Numéro SIRET site|Numéro SIREN site|Numéro FINESS site|Numéro FINESS établissement juridique|Identifiant technique de la structure|Raison sociale site|Enseigne commerciale site|Complément destinataire (coord. structure)|Complément point géographique (coord. structure)|Numéro Voie (coord. structure)|Indice répétition voie (coord. structure)|Code type de voie (coord. structure)|Libellé type de voie (coord. structure)|Libellé Voie (coord. structure)|Mention distribution (coord. structure)|Bureau cedex (coord. structure)|Code postal (coord. structure)|Code commune (coord. structure)|Libellé commune (coord. structure)|Code pays (coord. structure)|Libellé pays (coord. structure)|Téléphone (coord. structure)|Téléphone 2 (coord. structure)|Télécopie (coord. structure)|Adresse e-mail (coord. structure)|Code Département (structure)|Libellé Département (structure)|Ancien identifiant de la structure|Autorité d'enregistrement|Code secteur d'activité|Libellé secteur d'activité|Code section tableau pharmaciens|Libellé section tableau pharmaciens|"
+        headers = s.split("|")
+        s = "0|012600631|0012600631|||M|Monsieur|PETITGUYOT|ALEXANDRE|26|Audioprothésiste|C|Civil|||||S|Salarié|49940088500020||||C49940088500020|DOUBS OPTIC||DOUBS OPTIC||9||RTE|Route|DE BESANCON||25300 DOUBS|25300|||||||||||349940088500020|ARS/Variable/Variable|SA42|Appareillage médical|||"
+        row = s.split("|")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        pa = p.mapper(dico)
+        self.assertEqual("0012600631", pa.inpp)
+        self.assertEqual("PETITGUYOT", pa.nom)
+        self.assertEqual("ALEXANDRE", pa.prenom)
+
+    def test_datesource_back(self):
+        p = PSTarifParser(None)
+        p.date_source = DateSource(21, 12)
+        res = p.datesource_back()
+        self.assertEqual(2109, res)
+        p.date_source = DateSource(22, 1)
+        res = p.datesource_back()
+        self.assertEqual(2110, res)
+        p.date_source = DateSource(22, 0)
+        res = p.datesource_back()
+        self.assertEqual(0, res)
+
+    def test_pa_adresse_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PersonneActiviteParser(context)
+        p.load_cache()
+        s = "Type d'identifiant PP|Identifiant PP|Identification nationale PP|Code civilité d'exercice|Libellé civilité d'exercice|Code civilité|Libellé civilité|Nom d'exercice|Prénom d'exercice|Code profession|Libellé profession|Code catégorie professionnelle|Libellé catégorie professionnelle|Code type savoir-faire|Libellé type savoir-faire|Code savoir-faire|Libellé savoir-faire|Code mode exercice|Libellé mode exercice|Numéro SIRET site|Numéro SIREN site|Numéro FINESS site|Numéro FINESS établissement juridique|Identifiant technique de la structure|Raison sociale site|Enseigne commerciale site|Complément destinataire (coord. structure)|Complément point géographique (coord. structure)|Numéro Voie (coord. structure)|Indice répétition voie (coord. structure)|Code type de voie (coord. structure)|Libellé type de voie (coord. structure)|Libellé Voie (coord. structure)|Mention distribution (coord. structure)|Bureau cedex (coord. structure)|Code postal (coord. structure)|Code commune (coord. structure)|Libellé commune (coord. structure)|Code pays (coord. structure)|Libellé pays (coord. structure)|Téléphone (coord. structure)|Téléphone 2 (coord. structure)|Télécopie (coord. structure)|Adresse e-mail (coord. structure)|Code Département (structure)|Libellé Département (structure)|Ancien identifiant de la structure|Autorité d'enregistrement|Code secteur d'activité|Libellé secteur d'activité|Code section tableau pharmaciens|Libellé section tableau pharmaciens|"
+        headers = s.split("|")
+        s = "0|012600631|0012600631|||M|Monsieur|PETITGUYOT|ALEXANDRE|26|Audioprothésiste|C|Civil|||||S|Salarié|49940088500020||||C49940088500020|DOUBS OPTIC||DOUBS OPTIC||9||RTE|Route|DE BESANCON||25300 DOUBS|25300|||||||||||349940088500020|ARS/Variable/Variable|SA42|Appareillage médical|||"
+        row = s.split("|")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        a = p.pa_adresse_mapper(dico)
+        self.assertEqual(9, a.numero)
+        self.assertEqual("ROUTE DE BESANCON", a.rue)
+        self.assertEqual("25300", a.cp)
+        self.assertEqual("DOUBS", a.commune)
+        self.assertEqual(25, a.dept.id)
+        dico["Libellé commune (coord. structure)"] = "lans"
+        a = p.pa_adresse_mapper(dico)
+        self.assertEqual("LANS", a.commune)
+        dico["Libellé commune (coord. structure)"] = ""
+        dico["Bureau cedex (coord. structure)"] = ""
+        a = p.pa_adresse_mapper(dico)
+        self.assertIsNone(a)
+
