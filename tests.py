@@ -467,7 +467,7 @@ class ICIPTests(TestCase):
         a = p.pa_adresse_mapper(dico)
         self.assertEqual(9, a.numero)
         self.assertEqual("ROUTE DE BESANCON", a.rue)
-        self.assertEqual("25300", a.cp)
+        self.assertEqual(25300, a.cp)
         self.assertEqual("DOUBS", a.commune)
         self.assertEqual(25, a.dept.id)
         dico["Libellé commune (coord. structure)"] = "lans"
@@ -477,4 +477,59 @@ class ICIPTests(TestCase):
         dico["Bureau cedex (coord. structure)"] = ""
         a = p.pa_adresse_mapper(dico)
         self.assertIsNone(a)
+        dico = {"Type d'identifiant PP": '0', 'Identifiant PP': '759124159', 'Identification nationale PP': '0759124159', "Code civilité d'exercice": '', "Libellé civilité d'exercice": '', 'Code civilité': 'MME', 'Libellé civilité': 'Madame', "Nom d'exercice": 'DE RUIJTER', "Prénom d'exercice": 'ISABELLE', 'Code profession': '91', 'Libellé profession': 'Orthophoniste', 'Code catégorie professionnelle': 'C', 'Libellé catégorie professionnelle': 'Civil', 'Code type savoir-faire': '', 'Libellé type savoir-faire': '', 'Code savoir-faire': '', 'Libellé savoir-faire': '', 'Code mode exercice': 'L', 'Libellé mode exercice': 'Libéral', 'Numéro SIRET site': '', 'Numéro SIREN site': '', 'Numéro FINESS site': '', 'Numéro FINESS établissement juridique': '', 'Identifiant technique de la structure': 'C75912415900', 'Raison sociale site': 'CABINET MME DE RUIJTER', 'Enseigne commerciale site': '', 'Complément destinataire (coord. structure)': 'CABINET MME DE RUIJTER', 'Complément point géographique (coord. structure)': '', 'Numéro Voie (coord. structure)': 'P', 'Indice répétition voie (coord. structure)': '', 'Code type de voie (coord. structure)': 'PL', 'Libellé type de voie (coord. structure)': 'Place', 'Libellé Voie (coord. structure)': 'VIOLET', 'Mention distribution (coord. structure)': 'CDS ANSELME PAYEN EPHPAD', 'Bureau cedex (coord. structure)': '75015 PARIS', 'Code postal (coord. structure)': '75015', 'Code commune (coord. structure)': '', 'Libellé commune (coord. structure)': '', 'Code pays (coord. structure)': '', 'Libellé pays (coord. structure)': '', 'Téléphone (coord. structure)': '0148237096', 'Téléphone 2 (coord. structure)': '', 'Télécopie (coord. structure)': '', 'Adresse e-mail (coord. structure)': '', 'Code Département (structure)': '', 'Libellé Département (structure)': '', 'Ancien identifiant de la structure': '075912415900', "Autorité d'enregistrement": 'ARS/CPAM/CPAM', "Code secteur d'activité": 'SA07', "Libellé secteur d'activité": 'Cabinet individuel', 'Code section tableau pharmaciens': '', 'Libellé section tableau pharmaciens': '', '': ''}
+        a = p.pa_adresse_mapper(dico)
+        dico = {"Type d'identifiant PP": '8', 'Identifiant PP': '10001045367', 'Identification nationale PP': '810001045367', "Code civilité d'exercice": 'DR', "Libellé civilité d'exercice": 'Docteur', 'Code civilité': 'M', 'Libellé civilité': 'Monsieur', "Nom d'exercice": 'GUIGNARD', "Prénom d'exercice": 'ERIC', 'Code profession': '10', 'Libellé profession': 'Médecin', 'Code catégorie professionnelle': 'C', 'Libellé catégorie professionnelle': 'Civil', 'Code type savoir-faire': 'S', 'Libellé type savoir-faire': 'Spécialité ordinale', 'Code savoir-faire': 'SM49', 'Libellé savoir-faire': 'Santé publique et médecine sociale', 'Code mode exercice': 'S', 'Libellé mode exercice': 'Salarié', 'Numéro SIRET site': '85131528300016', 'Numéro SIREN site': '', 'Numéro FINESS site': '', 'Numéro FINESS établissement juridique': '', 'Identifiant technique de la structure': 'R10100000328372', 'Raison sociale site': 'AIMMUNE THERAPEUTICS UK LIMITED', 'Enseigne commerciale site': 'AIMMUNE THERAPEUTICS', 'Complément destinataire (coord. structure)': 'AIMMUNE THERAPEUTICS UK LIMITED', 'Complément point géographique (coord. structure)': '', 'Numéro Voie (coord. structure)': '', 'Indice répétition voie (coord. structure)': '', 'Code type de voie (coord. structure)': '', 'Libellé type de voie (coord. structure)': '', 'Libellé Voie (coord. structure)': 'CARRICK HOUSE LYPIATT ROAD', 'Mention distribution (coord. structure)': '', 'Bureau cedex (coord. structure)': 'GL 5O 2QJ CHELTENHAM', 'Code postal (coord. structure)': 'GL', 'Code commune (coord. structure)': '', 'Libellé commune (coord. structure)': '', 'Code pays (coord. structure)': '99132', 'Libellé pays (coord. structure)': 'Royaume-uni', 'Téléphone (coord. structure)': '', 'Téléphone 2 (coord. structure)': '', 'Télécopie (coord. structure)': '', 'Adresse e-mail (coord. structure)': '', 'Code Département (structure)': '', 'Libellé Département (structure)': '', 'Ancien identifiant de la structure': '385131528300016', "Autorité d'enregistrement": 'CNOM/CNOM/CNOM', "Code secteur d'activité": 'SA32', "Libellé secteur d'activité": 'Fab. Exploit. Import. Méd. DM', 'Code section tableau pharmaciens': '', 'Libellé section tableau pharmaciens': '', '': ''}
+        a = p.pa_adresse_mapper(dico)
+
+    def test_cache_inpp(self):
+        context = Context()
+        context.create(echo=True)
+        dico3 = {}
+        pa_adresses = context.session.query(PAAdresse).options(joinedload(PAAdresse.personne_activites)).all()
+        for a in pa_adresses:
+            for pa in a.personne_activites:
+                key3 = pa.nom, pa.prenom, int(a.cp / 1000)  # à remplacer par get_dept
+                key6 = pa.nom, pa.prenom, a.numero, a.rue, a.cp, a.commune
+                if key3 not in dico3:
+                    dico3[key3] = {key6: pa.inpp}
+                else:
+                    dico3[key3][key6] = pa.inpp
+            context.session.expunge(a)
+            # Sauvegarder les paires qui fonctionnent dans 1 dico pour eviter de le refaire à chaque ligne
+            # Il y a le cas où dico3 à 2 élément qui donnent le même inpp
+            # Il faut donc tester len(set(dico3[key3].values())) = 1 = DARBOULI JEROME 10
+            # cas le + complexe avec inpp différents MOREAU ROSELINE 10 & ('LEFEBVRE', 'SOPHIE', 62)
+        max = 0
+        max_key = None
+        for k in dico3:
+            l = len(set(dico3[k].values()))
+            if l > max:
+                max = l
+                max_key = k
+        print(len(dico3))
+        print(max)
+        print(max_key)
+        print(dico3[max_key])
+
+
+    def test_cache_inpp2(self):
+        context = Context()
+        context.create(echo=True)
+        p = PSParser(context)
+        p.load_cache_inpp()
+        max = 0
+        max_key = None
+        for k in p.inpps:
+            l = len(set(p.inpps[k].values()))
+            if l > max:
+                max = l
+                max_key = k
+        print(len(p.inpps))
+        self.assertEqual(8, max)
+        self.assertEqual(('LEFEBVRE', 'SOPHIE', 62), max_key)
+        self.assertEqual({(141, 'RUE DE QUIERY', 62490, 'VITRY EN ARTOIS'): '810104335319', (1601, 'BOULEVARD DES JUSTES', 62107, 'CALAIS'): '0629400748', (55, 'RUE DE ROSEMONT', 62130, 'SAINT POL SUR TERNOISE'): '810005814339', (28, 'PLACE DU GENERAL LECLERC', 62130, 'SAINT POL SUR TERNOISE'): '810100224947', (None, 'RUE DE BLENDECQUES', 62570, 'HELFAUT'): '810104257190', (39, 'RUE LESAGE', 62940, 'HAILLICOURT'): '810100124576', (1, 'RUE PRINCIPALE', 62120, 'CAMPAGNE LÈS WARDRECQUES'): '810005810808', (55, 'IMPASSE DU STADE', 62145, 'ESTRÉE BLANCHE'): '810005814339', (30, 'AVENUE DU PRESIDENT WILSON', 62100, 'CALAIS'): '810100356202', (2, 'RUE DES BRUYERES', 62120, 'RACQUINGHEM'): '810005810808'}, p.inpps[max_key])
+        print(p.inpps[('MARTIN', 'ISABELLE', 75)])
+        # ('MARTIN', 'ISABELLE') 36 dans la france
+
 

@@ -53,6 +53,7 @@ class PSTarifParser(PSParser):
         for f in l:
             self.famille_actes[f.id] = f
         ds_back = self.datesource_back()
+        print("Making cache level 2, long and need a lot of RAM")
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources))\
             .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id))) # TODO non testé

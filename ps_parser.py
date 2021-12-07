@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple, Optional
 
 from sqlalchemy.orm import joinedload
 from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, Tarif, DateSource, \
-    Profession, ModeExercice, Nature, Convention, FamilleActe
+    Profession, ModeExercice, Nature, Convention, FamilleActe, PAAdresse
 from etab_parser import BaseParser, time0
 import argparse
 import time
@@ -15,7 +15,10 @@ class PSParser(BaseParser):
     def __init__(self, context):
         super().__init__(context)
         self.nb_cabinet = 0
+        self.nb_inpps = 0
+        self.nb_ps_to_match = 0
         self.cabinets: Dict[str, Cabinet] = {}
+        self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[str, str, int, str, int, str], str]] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -26,6 +29,21 @@ class PSParser(BaseParser):
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
+        self.load_cache_inpp()
+
+    def load_cache_inpp(self):
+        print("Make cache level 2")
+        session = self.context.get_session()
+        pa_adresses = session.query(PAAdresse).options(joinedload(PAAdresse.personne_activites)).all()
+        for a in pa_adresses:
+            for pa in a.personne_activites:
+                key1 = pa.nom, pa.prenom, self.get_dept_from_cp(a.cp)
+                key2 = a.numero, a.rue, a.cp, a.commune
+                if key1 not in self.inpps:
+                    self.inpps[key1] = {key2: pa.inpp}
+                else:
+                    self.inpps[key1][key2] = pa.inpp
+            session.expunge(a)
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -124,9 +142,26 @@ class PSParser(BaseParser):
             n.numero, n.rue1 = self.split_num(a.adresse2)
             n.rue1 = self.normalize_street(n.rue1)
             n.rue2 = self.normalize_street(a.adresse3) if a.adresse3 is not None else None
+        if n.rue1 is not None and len(n.rue1) > 2 and n.rue1[1] == " ": # TODO modif pour enlever une lettre seule en début d'adresse à refaire tourner
+            n.rue1 = n.rue1[2:]
         return n
 
-    def create_update_norm(self, a: AdresseRaw):
+    def match_inpp(self, ps: PS, adresse: AdresseNorm) -> Optional[str]:
+        self.nb_ps_to_match += 1
+        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(adresse.cp)
+        if key1 not in self.inpps:
+            return None
+        dico = self.inpps[key1]
+        l = list(set(dico.values()))
+        if len(l) == 1:
+            self.nb_inpps += 1
+            return l[0]
+        if len(l) == 0:
+            print(f"Error in match_inpp set cannot be empty for {key1}")
+        # TODO
+        return None
+
+    def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:
         n = self.normalize(a)
         if n.key in self.adresse_norms:
             n = self.adresse_norms[n.key]
@@ -140,6 +175,7 @@ class PSParser(BaseParser):
             same = a.adresse_norm.equals(n)
             if not same:
                 a.adresse_norm = n
+        return n
 
     def parse_row(self, row):
         dept = self.get_dept_from_cp(row[7])
@@ -153,8 +189,9 @@ class PSParser(BaseParser):
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
             self.create_update_adresse_raw(c, row)
-            self.create_update_norm(c.adresse_raw)
-            self.context.session.commit()
+            n = self.create_update_norm(c.adresse_raw)
+            self.match_inpp(e, n)
+            # self.context.session.commit()
 
 
 if __name__ == '__main__':
@@ -178,6 +215,7 @@ if __name__ == '__main__':
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")
+    print(f"Match INPP: {psp.nb_inpps} / {psp.nb_ps_to_match}: {(psp.nb_inpps / psp.nb_ps_to_match) * 100:.0f}%")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
