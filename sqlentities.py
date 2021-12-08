@@ -275,7 +275,7 @@ class PS(Base):
     __tablename__ = "ps"
 
     id = Column(Integer, primary_key=True)
-    genre = Column(CHAR(1), nullable=False)
+    genre = Column(CHAR(1))
     key = Column(String(255), nullable=False, unique=True)
     has_inpp = Column(Boolean, nullable=False)
     nom = Column(String(255), nullable=False)

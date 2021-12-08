@@ -50,7 +50,7 @@ class PSParser(BaseParser):
     def mapper(self, row) -> PS:
         ps = PS()
         try:
-            ps.genre = row[0]
+            ps.genre = self.get_nullable(row[0])
             ps.nom = row[1]
             ps.prenom = row[2]
             ps.key = f"{ps.nom}_{ps.prenom}_{row[7]}".replace(" ", "_")[:255]
@@ -248,7 +248,10 @@ class PSParser(BaseParser):
                 e.key = inpp
                 e.has_inpp = True
             if e.key in self.entities:
+                genre = e.genre
                 e = self.entities[e.key]
+                if e.genre is None and genre is not None:
+                    e.genre = genre
             else:
                 self.entities[e.key] = e
                 self.nb_new_entity += 1
