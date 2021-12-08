@@ -151,10 +151,12 @@ class AdresseRepository:
 
 class UFCRepository:
 
-    def load_ufc(self, path: str) -> Tuple[pandas.DataFrame, pandas.DataFrame]:
+    def load_ufc(self, path: str) -> Tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]:
         dataframe = pandas.read_excel(path)
         adataframe = pandas.read_excel(path, 4)
-        return (dataframe, adataframe)
+        sdataframe = pandas.read_excel(path, 5)
+        return dataframe, adataframe, sdataframe
+
 
 class SSRepository:
 

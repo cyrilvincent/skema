@@ -55,7 +55,6 @@ class PSTarifParser(PSParser):
         self.load_cache_inpp()
         self.load_cache_tarif()
 
-
     def load_cache_tarif(self):
         print("Making cache level 3, long and need a lot of RAM")
         ds_back = self.datesource_back()

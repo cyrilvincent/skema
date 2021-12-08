@@ -16,14 +16,24 @@ class UFCParser:
         self.path = path
         self.dataframe: Optional[pandas.DataFrame] = None
         self.address_df: Optional[pandas.DataFrame] = None
+        self.sortant_df: Optional[pandas.DataFrame] = None
         self.entities: List[entities.PSEntity] = []
 
     def load(self):
         print(f"Load {self.path}")
-        self.dataframe, self.address_df = self.repo.load_ufc(self.path)
+        self.dataframe, self.address_df, self.sortant_df = self.repo.load_ufc(self.path)
+
+    def split_nom(self, s: str) -> Tuple[str, str]:
+        nom = s
+        prenom = ""
+        if " " in s:
+            index = s.rindex(" ")
+            nom = s[:index]
+            prenom = s[index + 1:]
+        return nom, prenom
 
     def parse(self):
-        print("Parse")
+        print("Parsing")
         for index, row in self.dataframe.iterrows():
             e = entities.PSEntity()
             e.rownum = index + 1
@@ -31,32 +41,42 @@ class UFCParser:
             e.v[8] = row["VILLE"]
             e.v[1] = row["NOM"]
             e.v[2] = row["PRENOM"]
-            # A changer avec id2016 et id2012
-            e.v[3], e.v[4], e.v[5] = self.get_adresse123_by_nom_prenom_cp(row["NOM"], row["PRENOM"], row["CP"])
+            e.v[3], e.v[4], e.v[5] = self.get_adresse123_by_id2012(row["ID2012"])
             e.v[10] = self.get_profession(row["specialité"])
             e.v[12] = self.get_nature(row["Type d'activité"])
             e.v[13], e.v[14] = self.get_convention(row["SECTEUR"])
+            v = row["PRIX2012"]
+            e.v[18] = int(np.round(v)) if str(v) != "nan" else ""
+            self.entities.append(e)
+        self.parse_sortants()
+
+    def parse_sortants(self):
+        print("Parsing sortants")
+        for index, row in self.sortant_df.iterrows():
+            e = entities.PSEntity()
+            e.rownum = index + 1
+            e.v[7] = row["CP"]
+            e.v[8] = row["Ville"]
+            e.v[1], e.v[2] = self.split_nom(row["Nom"])
+            e.v[3], e.v[4], e.v[5] = self.get_adresse123_by_id2012(row["id2012"])
+            e.v[10] = self.get_profession(row["Specialite"])
+            e.v[13], e.v[14] = self.get_convention_sortant(row["Secteur"])
             v = row["PRIX"]
             e.v[18] = int(np.round(v)) if str(v) != "nan" else ""
-            e.v[19] = int(np.round(row["PRIXBas"])) if str(row["PRIXBas"]) != "nan" else ""
-            e.v[20] = int(np.round(row["PRIXHaut"])) if str(row["PRIXHaut"]) != "nan" else ""
             self.entities.append(e)
 
     def save(self):
-        file = self.path
-        if "\\" in self.path:
-            index = self.path.rindex("\\")
-            file = self.path[:index + 1]
-            source = self.path[index + 1:]
-            index = source.rindex(".")
-            source = source[:index]
-        file += f"ps-tarifs-16-00-{source}.csv"
+        self.path = "./" + self.path
+        index = self.path.rindex("/")
+        file = self.path[:index + 1]
+        source = self.path[index + 1:]
+        index = source.rindex(".")
+        source = source[:index]
+        file += f"ps-tarifs-{source}-12-00.csv"
         self.ps_repo.save_entities(file, self.entities, entities.PSEntity.originalnb)
 
-    def get_adresse123_by_nom_prenom_cp(self, nom: str, prenom: str, cp: str) -> Tuple[str, str, str]:
-        df = self.address_df[(self.address_df.NOM == nom) &
-                             (self.address_df.PRENOM == prenom) &
-                             (self.address_df.CP == cp)]
+    def get_adresse123_by_id2012(self, id: str) -> Tuple[str, str, str]:
+        df = self.address_df[self.address_df.ID2016 == id]
         l = df.values.tolist()
         if len(l) == 0:
             return "", "", ""
@@ -80,10 +100,36 @@ class UFCParser:
             return 60
         if s == "Gynécologue Obstétricien":
             return 37
+        if s == "Gynécologue obstétricien":
+            return 37
+        if s == "Gynécologue médical et obstétricien":
+            return 37
+        if s == "Gynécologue médical":
+            return 37
         if s == "Ophtalmologiste":
             return 56
         print(f"ERROR bad profession {s}")
         return 0
+
+    def get_convention(self, s) -> Tuple[str, str]:
+        s = str(s).strip().replace("\r\n", "")
+        res1, res2 = "nc", "N"
+        if "secteur 1" in s:
+            res1 = "c1"
+        elif "secteur 2" in s:
+            res1 = "c2"
+        if "soins" in s:
+            res2 = "O"
+        return res1, res2
+
+    def get_convention_sortant(self, s) -> Tuple[str, str]:
+        s = str(s).strip().replace("\r\n", "")
+        res1, res2 = "nc", ""
+        if "1" in s:
+            res1 = "c1"
+        elif "2" in s:
+            res1 = "c2"
+        return res1, res2
 
     def get_nature(self, s: str) -> int:
         s = str(s).strip()
@@ -102,22 +148,11 @@ class UFCParser:
         print(f"ERROR bad nature {s}")
         return 0
 
-    def get_convention(self, s) -> Tuple[str, str]:
-        s = str(s).strip().replace("\r\n", "")
-        res1, res2 = "nc", "N"
-        if "secteur 1" in s:
-            res1 = "c1"
-        elif "secteur 2" in s:
-            res1 = "c2"
-        if "soins" in s:
-            res2 = "O"
-        return res1, res2
-
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("UFC 2 PS")
-    print("========")
+    print("UFC 2 PS 2012")
+    print("=============")
     print(f"V{config.version}")
     print(config.copyright)
     print()
@@ -128,3 +163,7 @@ if __name__ == '__main__':
     p.load()
     p.parse()
     p.save()
+
+    # "data/UFC/UFC Santé_ Gynécologues 2016 v1-3.xlsx"
+    # "data/UFC/UFC Santé, Pédiatres 2016 v1-3.xlsx"
+    # "data/UFC/UFC Santé_ Ophtalmologistes 2016 v1-3.xlsx"
