@@ -107,14 +107,19 @@ class BaseParser(metaclass=ABCMeta):
         return s
 
     def normalize_street(self, street: str) -> str:
+        street = unidecode.unidecode(street)
         street = " " + street.upper()
         dico = {"'": " ", "-": " ", ".": "", "/": " ", '"': "",
-                " BP": "", " CH ": " CHEMIN ", " AV ": " AVENUE ", "PL ": " PLACE ", " BD ": " BOULEVARD ",
-                " IMP ": " IMPASSE ", " ST ": " SAINT ", " RT ": " ROUTE ", " RTE ": " ROUTE ", " GAL ": " GENERAL "}
-        street = self.replace_all(street, dico)
+                " BP": "", " CH ": " CHEMIN ", " AV ": " AVENUE ", " PL ": " PLACE ", " BD ": " BOULEVARD ",
+                " IMP ": " IMPASSE ", " ST ": " SAINT ", " RT ": " ROUTE ", " RTE ": " ROUTE ", " GAL ": " GENERAL ",
+                " BIS ": "", " TER ": "", " BAT ": ""}
+        street = self.replace_all(street, dico).strip()
+        if len(street) > 2 and street[1] == " ":
+            street = street[2:]
         return street.strip()
 
     def normalize_commune(self, commune: str) -> str:
+        commune = unidecode.unidecode(commune)
         commune = " " + commune.upper()
         if "CEDEX" in commune:
             index = commune.index("CEDEX")
@@ -132,8 +137,8 @@ class BaseParser(metaclass=ABCMeta):
     def load(self, path, delimiter=';', encoding="utf8", header=False):
         print(f"Loading {path}")
         self.check_date(path)
-        self.load_cache()
         self.test_file(path, encoding)
+        self.load_cache()
         with open(path, encoding=encoding) as f:
             if header:
                 reader = csv.DictReader(f, delimiter=delimiter)
@@ -142,8 +147,8 @@ class BaseParser(metaclass=ABCMeta):
             for row in reader:
                 self.row_num += 1
                 self.parse_row(row)
-                if self.row_num % 10000 == 0:
-                    print(f"Found {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
+                if self.row_num % 10000 == 0 or self.row_num == 10 or self.row_num == 100 or self.row_num == 1000:
+                    print(f"Parse {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
                           f"in {int(time.perf_counter() - time0)}s")
 
     @abstractmethod

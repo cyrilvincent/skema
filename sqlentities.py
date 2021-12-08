@@ -466,4 +466,41 @@ class PAAdresse(Base):
         return f"{self.id} {self.numero} {self.rue} {self.cp} {self.commune}"
 
 
+class Diplome(Base):
+    __tablename__ = "diplome"
+
+    id = Column(Integer, primary_key=True)
+    code_type_diplome = Column(String(10), nullable=False)
+    libelle_type_diplome = Column(String(255), nullable=False)
+    code_diplome = Column(String(10), nullable=False, unique=True)
+    libelle_diplome = Column(String(255), nullable=False)
+    is_savoir_faire = Column(Boolean, nullable=False)
+
+    @property
+    def key(self):
+        return self.code_diplome
+
+    def __repr__(self):
+        return f"{self.id} {self.code_diplome}"
+
+
+class INPPDiplome(Base):
+    __tablename__ = "inpp_diplome"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    diplome_id = Column(Integer, ForeignKey('diplome.id'), nullable=False)
+    diplome: Diplome = relationship("Diplome")
+
+    __table_args__ = (UniqueConstraint('inpp', 'diplome_id'),)
+
+    @property
+    def key(self):
+        return self.inpp, self.diplome.key
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.diplome_id}"
+
+
+
 

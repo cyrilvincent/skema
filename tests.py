@@ -532,4 +532,18 @@ class ICIPTests(TestCase):
         print(p.inpps[('MARTIN', 'ISABELLE', 75)])
         # ('MARTIN', 'ISABELLE') 36 dans la france
 
+    def test_convert_key_to_adresse_string(self):
+        p = PSParser(None)
+        key = (1571, "CHEMIN DES BLANCS", 38250, "LANS")
+        s = p.convert_key_to_rue_string(key)
+        self.assertEqual(s, "1571 CHEMIN DES BLANCS 38250 LANS")
+        key = (None, "CHEMIN DES BLANCS", 38250, "LANS")
+        s = p.convert_key_to_rue_string(key)
+        self.assertEqual(s, "CHEMIN DES BLANCS 38250 LANS")
+        key = (None, None, 38250, "LANS")
+        s = p.convert_key_to_rue_string(key)
+        self.assertEqual(s, "38250 LANS")
+
+
+
 

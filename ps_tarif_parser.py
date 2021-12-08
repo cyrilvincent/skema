@@ -52,11 +52,17 @@ class PSTarifParser(PSParser):
         l: List[FamilleActe] = self.context.session.query(FamilleActe).all()
         for f in l:
             self.famille_actes[f.id] = f
+        self.load_cache_inpp()
+        self.load_cache_tarif()
+
+
+    def load_cache_tarif(self):
+        print("Making cache level 3, long and need a lot of RAM")
         ds_back = self.datesource_back()
-        print("Making cache level 2, long and need a lot of RAM")
         l: List[Tarif] = self.context.session.query(Tarif) \
-            .options(joinedload(Tarif.date_sources))\
-            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id))) # TODO non testé
+            .options(joinedload(Tarif.date_sources)) \
+            .filter(Tarif.date_sources.any(
+            (DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))  # TODO non testé
         for t in l:
             self.tarifs[t.key] = t
 
@@ -149,6 +155,11 @@ class PSTarifParser(PSParser):
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
             e = self.mapper(row)
+            a = self.create_update_adresse_raw(row)
+            n = self.create_update_norm(a)
+            inpp = self.match_inpp(e, n)
+            if inpp is not None:
+                e.key = inpp
             e = self.entities[e.key]
             c = self.cabinet_mapper(row)
             c = self.cabinets[c.key]

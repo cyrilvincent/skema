@@ -1,3 +1,4 @@
+import difflib
 from typing import Dict, List, Tuple, Optional
 
 from sqlalchemy.orm import joinedload
@@ -18,7 +19,8 @@ class PSParser(BaseParser):
         self.nb_inpps = 0
         self.nb_ps_to_match = 0
         self.cabinets: Dict[str, Cabinet] = {}
-        self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[str, str, int, str, int, str], str]] = {}
+        self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], str]] = {}
+        self.inpps_temp: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -32,7 +34,7 @@ class PSParser(BaseParser):
         self.load_cache_inpp()
 
     def load_cache_inpp(self):
-        print("Make cache level 2")
+        print("Making cache level 2")
         session = self.context.get_session()
         pa_adresses = session.query(PAAdresse).options(joinedload(PAAdresse.personne_activites)).all()
         for a in pa_adresses:
@@ -52,6 +54,7 @@ class PSParser(BaseParser):
             ps.nom = row[1]
             ps.prenom = row[2]
             ps.key = f"{ps.nom}_{ps.prenom}_{row[7]}".replace(" ", "_")[:255]
+            ps.has_inpp = False
         except Exception as ex:
             print(f"ERROR PS row {self.row_num} {ps}\n{ex}")
             quit(1)
@@ -97,14 +100,15 @@ class PSParser(BaseParser):
             quit(4)
         return a
 
-    def create_update_adresse_raw(self, c: Cabinet, row):
+    def create_update_adresse_raw(self, row) -> AdresseRaw:
         a = self.adresse_raw_mapper(row)
         if a.key in self.adresse_raws:
             a = self.adresse_raws[a.key]
         else:
             self.nb_new_adresse += 1
             self.adresse_raws[a.key] = a
-        c.adresse_raw = a
+        # c.adresse_raw = a
+        return a
 
     def choose_best_rue(self, a: AdresseRaw) -> int:
         if a.adresse2 is None:
@@ -142,24 +146,79 @@ class PSParser(BaseParser):
             n.numero, n.rue1 = self.split_num(a.adresse2)
             n.rue1 = self.normalize_street(n.rue1)
             n.rue2 = self.normalize_street(a.adresse3) if a.adresse3 is not None else None
-        if n.rue1 is not None and len(n.rue1) > 2 and n.rue1[1] == " ": # TODO modif pour enlever une lettre seule en début d'adresse à refaire tourner
-            n.rue1 = n.rue1[2:]
         return n
 
-    def match_inpp(self, ps: PS, adresse: AdresseNorm) -> Optional[str]:
+    def convert_key_to_rue_string(self, key: Tuple[Optional[int], Optional[str], int, str]) -> str:
+        s = f"{key[2]} {key[3]}"
+        if key[1] is not None:
+            s = f"{key[1]} {s}"
+        if key[0] is not None:
+            s = f"{key[0]} {s}"
+        return s
+
+    def gestalt(self, s1: str, s2: str):
+        sm = difflib.SequenceMatcher(None, s1, s2)
+        return sm.ratio()
+
+    def match_inpp_gestalt(self, key: Tuple[int, str, int, str],
+                           dico: Dict[Tuple[int, str, int, str], str]) -> Optional[str]:
+        s = self.convert_key_to_rue_string(key)
+        max = 0
+        inpp = None
+        for k in dico.keys():
+            s2 = self.convert_key_to_rue_string(k)
+            score = self.gestalt(s, s2)
+            if score > max:
+                max = score
+                inpp = dico[k]
+        if max > config.inpp_quality:
+            return inpp
+        if len(set(dico.values())) == 1 and max > (config.inpp_quality * 0.9):
+            return inpp
+        return None
+
+    def match_rue(self, rue1: Optional[str], rue2: Optional[str]):
+        if rue1 is None or rue2 is None:
+            return True
+        if rue1 == rue2:
+            return True
+        if rue1 is not None and rue2 is not None:
+            if rue1.startswith(rue2) or rue2.startswith(rue1):
+                return True
+        return False
+
+    def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+        key3 = ps.nom, ps.prenom, a.numero, a.rue1, a.cp, a.commune
+        if key3 in self.inpps_temp:
+            return self.inpps_temp[key3]
         self.nb_ps_to_match += 1
-        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(adresse.cp)
+        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
         if key1 not in self.inpps:
+            self.inpps_temp[key3] = None
             return None
         dico = self.inpps[key1]
-        l = list(set(dico.values()))
+        # if len(dico.keys()) == 1:
+        #     print(key3, dico)
+        # if key3 == ('POURCHET', 'MARIE', 3, 'RUE GRANDE RUE', 1600, 'TREVOUX'):
+        #     print("Debug")
+        key2 = a.numero, a.rue1, a.cp, a.commune
+        if key2 in dico:
+            self.nb_inpps += 1
+            self.inpps_temp[key3] = dico[key2]
+            return dico[key2]
+        l = [dico[k] for k in dico.keys() if (k[2] == a.cp or k[3] == a.commune) and self.match_rue(k[1], a.rue1)]
+        l = list(set(l))
         if len(l) == 1:
             self.nb_inpps += 1
+            self.inpps_temp[key3] = l[0]
             return l[0]
-        if len(l) == 0:
-            print(f"Error in match_inpp set cannot be empty for {key1}")
-        # TODO
-        return None
+        inpp = self.match_inpp_gestalt(key2, dico)
+        if inpp is not None:
+            self.nb_inpps += 1
+        # else:
+        #     print("No match", (self.nb_inpps / self.nb_ps_to_match) * 100, key3)
+        self.inpps_temp[key3] = inpp
+        return inpp
 
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:
         n = self.normalize(a)
@@ -167,7 +226,7 @@ class PSParser(BaseParser):
             n = self.adresse_norms[n.key]
         else:
             self.adresse_norms[n.key] = n
-            self.context.session.add(n)
+            # self.context.session.add(n) # TODO inutile et dangereux pour ps_tarif_parser, à vérifier pour ps_parser
             self.nb_new_norm += 1
         if a.adresse_norm is None:
             a.adresse_norm = n
@@ -181,6 +240,12 @@ class PSParser(BaseParser):
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
             e = self.mapper(row)
+            a = self.create_update_adresse_raw(row)
+            n = self.create_update_norm(a)
+            inpp = self.match_inpp(e, n)
+            if inpp is not None:
+                e.key = inpp
+                e.has_inpp = True
             if e.key in self.entities:
                 e = self.entities[e.key]
             else:
@@ -188,10 +253,11 @@ class PSParser(BaseParser):
                 self.nb_new_entity += 1
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
-            self.create_update_adresse_raw(c, row)
-            n = self.create_update_norm(c.adresse_raw)
-            self.match_inpp(e, n)
-            # self.context.session.commit()
+            # a = self.create_update_adresse_raw(row)
+            c.adresse_raw = a
+            # n = self.create_update_norm(c.adresse_raw)
+            # self.match_inpp(e, n)
+            self.context.session.commit()
 
 
 if __name__ == '__main__':
@@ -215,13 +281,13 @@ if __name__ == '__main__':
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")
-    print(f"Match INPP: {psp.nb_inpps} / {psp.nb_ps_to_match}: {(psp.nb_inpps / psp.nb_ps_to_match) * 100:.0f}%")
+    print(f"Matching INPP: {psp.nb_inpps}/{psp.nb_ps_to_match}: {(psp.nb_inpps / psp.nb_ps_to_match) * 100:.0f}%")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
-    # data/ps/ps-tarifs-21-03.csv
+    # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
