@@ -17,6 +17,7 @@ time0 = time.perf_counter()
 class BaseParser(metaclass=ABCMeta):
 
     def __init__(self, context):
+        self.path = None
         self.context = context
         self.row_num = 0
         self.nb_row = 0
@@ -136,6 +137,7 @@ class BaseParser(metaclass=ABCMeta):
 
     def load(self, path, delimiter=';', encoding="utf8", header=False):
         print(f"Loading {path}")
+        self.path = path
         self.check_date(path)
         self.test_file(path, encoding)
         self.load_cache()

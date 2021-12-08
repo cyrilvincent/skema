@@ -125,4 +125,6 @@ if __name__ == '__main__':
     p.parse()
     p.save()
 
-    # data/UFC/UFC Santé_ Gynécologues 2016 v1-3
+    # "data/UFC/UFC Santé_ Gynécologues 2016 v1-3.xlsx"
+    # "data/UFC/UFC Santé, Pédiatres 2016 v1-3.xlsx"
+    # "data/UFC/UFC Santé_ Ophtalmologistes 2016 v1-3.xlsx"

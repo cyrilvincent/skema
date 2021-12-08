@@ -178,6 +178,8 @@ class PSParser(BaseParser):
         return None
 
     def match_rue(self, rue1: Optional[str], rue2: Optional[str]):
+        if self.date_source.id == 1206 or self.date_source.id == 1306:  # SanteSpecialite
+            return False
         if rue1 is None or rue2 is None:
             return True
         if rue1 == rue2:
@@ -226,7 +228,6 @@ class PSParser(BaseParser):
             n = self.adresse_norms[n.key]
         else:
             self.adresse_norms[n.key] = n
-            # self.context.session.add(n) # TODO inutile et dangereux pour ps_tarif_parser, à vérifier pour ps_parser
             self.nb_new_norm += 1
         if a.adresse_norm is None:
             a.adresse_norm = n
