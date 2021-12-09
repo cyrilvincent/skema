@@ -1,7 +1,7 @@
 from typing import Dict, Optional, List, Tuple
 from sqlalchemy.orm import joinedload
 import unidecode
-
+import pyproj
 from sqlentities import Context, DateSource, Etablissement, EtablissementType, AdresseRaw, Dept, AdresseNorm, Source
 from abc import ABCMeta, abstractmethod
 import argparse
@@ -43,6 +43,7 @@ class BaseParser(metaclass=ABCMeta):
         for s in l:
             self.sources[s.id] = s
         l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
+        # Erreur courant, quand le key ne matche pas c'est que le cp est en str
         for a in l:
             self.adresse_raws[a.key] = a
         l = self.context.session.query(AdresseNorm).all()
@@ -135,6 +136,11 @@ class BaseParser(metaclass=ABCMeta):
         s = unidecode.unidecode(s).replace("'", " ").replace("-", " ").replace("/", " ").replace(".", "")
         return s
 
+    def convert_lambert93_lon_lat(self, x: float, y: float) -> Tuple[float, float]:
+        transformer = pyproj.Transformer.from_crs(2154, 4326, always_xy=True)
+        lon, lat = transformer.transform(x, y)
+        return lon, lat
+
     def load(self, path, delimiter=';', encoding="utf8", header=False):
         print(f"Loading {path}")
         self.path = path
@@ -206,6 +212,7 @@ class EtabParser(BaseParser):
         return a
 
     def lat_lon_mapper(self, row) -> Tuple[float, float]:
+        # TODO faire un if pour tester la présence des colonnes
         try:
             lat = row[41]
             lon = row[42]
@@ -249,18 +256,21 @@ class EtabParser(BaseParser):
 
     def create_update_lat_lon(self, row, n: AdresseNorm):
         lat, lon = self.lat_lon_mapper(row)
-        if n.source_id != 3:
+        # TODO if 55 > lat > 40 and 10 > lon > -5 et != None
+        # TODO A bien tester avec une norm sans GPS ou une norm avec une autre source
+        if n.source_id != 3:  # TODO /!\ nullable
             n.lat = lat
             n.lon = lon
             n.source = self.sources[3]
             n.score = 1
 
     def parse_row(self, row):
-        e = self.mapper(row)
-        if e.id in self.entities:
+        # TODO changer le parse_date
+        e = self.mapper(row) # TODO ajouter les n colonnes /!\ finess non numerique
+        if e.id in self.entities: # TODO changer la logique de ce if copier les autres
             same = e.equals(self.entities[e.id])
             if not same:
-                self.pseudo_clone(e, self.entities[e.id])
+                self.pseudo_clone(e, self.entities[e.id]) # TODO à garder c'est très différents des autres
                 self.nb_update_entity += 1
             e = self.entities[e.id]
             if self.date_source not in e.date_sources:

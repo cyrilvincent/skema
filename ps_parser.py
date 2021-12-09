@@ -251,6 +251,7 @@ class PSParser(BaseParser):
                 genre = e.genre
                 e = self.entities[e.key]
                 if e.genre is None and genre is not None:
+                    self.nb_update_entity += 1
                     e.genre = genre
             else:
                 self.entities[e.key] = e

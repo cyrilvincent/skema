@@ -3,6 +3,7 @@ from unittest import TestCase
 from sqlalchemy.orm import joinedload
 
 from etab_parser import EtabParser
+from etalab_parser import EtalabParser
 from ps_parser import PSParser
 from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
@@ -37,35 +38,29 @@ class ICIPTests(TestCase):
         ep = EtabParser(context)
         ep.load_cache()
 
-    def test_etab_mapper(self):
-        context = Context()
-        context.create(echo=True)
-        ep = EtabParser(context)
-        s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1570 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
-        row = s.split(";")
-        ep.load_cache()
-        e = ep.mapper(row)
-        self.assertEqual(123456789, e.id)
-        self.assertEqual("Cyril Vincent", e.nom)
-        self.assertEqual("Privé non lucratif", e.type.type)
-        self.assertEqual("0622538762", e.telephone)
-        self.assertEqual("contact@cyrilvincent.com", e.mail)
-        self.assertEqual("Cyril Vincent Conseil", e.nom2)
-        self.assertEqual("www.cyrilvincent.com", e.url)
-
-    def test_pseudo_equal(self):
-        ep = EtabParser(None)
-        e1 = Etablissement(id=1, nom="Cyril Vincent", telephone="0622538762")
-        e2 = Etablissement(nom="Cyril Vincent", telephone="0622538762")
-        self.assertTrue(ep.pseudo_equal(e1, e2))
+    # def test_etab_mapper(self):
+    #     context = Context()
+    #     context.create(echo=True)
+    #     ep = EtabParser(context)
+    #     s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1570 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+    #     row = s.split(";")
+    #     ep.load_cache()
+    #     e = ep.mapper(row)
+    #     self.assertEqual(123456789, e.id)
+    #     self.assertEqual("Cyril Vincent", e.nom)
+    #     self.assertEqual("Privé non lucratif", e.type.type)
+    #     self.assertEqual("0622538762", e.telephone)
+    #     self.assertEqual("contact@cyrilvincent.com", e.mail)
+    #     self.assertEqual("Cyril Vincent Conseil", e.nom2)
+    #     self.assertEqual("www.cyrilvincent.com", e.url)
 
     def test_pseudo_clone(self):
         ep = EtabParser(None)
-        e1 = Etablissement(id=1, nom="Cyril Vincent", telephone="0622538762")
+        e1 = Etablissement(id=1, rs="Cyril Vincent", telephone="0622538762")
         e2 = Etablissement(id=2)
         ep.pseudo_clone(e1, e2)
         self.assertEqual(2, e2.id)
-        self.assertEqual("Cyril Vincent", e2.nom)
+        self.assertEqual("Cyril Vincent", e2.rs)
         self.assertEqual("0622538762", e2.telephone)
 
     def test_adresseraw_mapper(self):
@@ -543,6 +538,41 @@ class ICIPTests(TestCase):
         key = (None, None, 38250, "LANS")
         s = p.convert_key_to_rue_string(key)
         self.assertEqual(s, "38250 LANS")
+
+    def test_convert_lambert92_gps(self):
+        p = EtabParser(None)
+        x1, y1 = 882408.3, 6543019.6
+        lon, lat = p.convert_lambert93_lon_lat(x1, y1)
+        self.assertAlmostEqual(5.355651287573366, lon, delta=1e-5)
+        self.assertAlmostEqual(45.96240165432614, lat, delta=1e-5)
+        x1, y1 = 870215.7, 6571590.5
+        lon, lat = p.convert_lambert93_lon_lat(x1, y1)
+        print(lon, lat)
+
+    def test_etalab_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = EtalabParser(context)
+        h = "nofinesset;nofinessej;rs;rslongue;complrs;compldistrib;numvoie;typvoie;voie;compvoie;lieuditbp;region;libregion;departement;libdepartement;cog;codepostal;libelle_routage;ligneacheminement;telephone;telecopie;categetab;libcategetab;liblongcategetab;categretab;libcategretab;siret;codeape;libcodeape;mft;libmft;liblongmft;sph;libsph;numen;coordx;coordy;sourcegeocod;dategeocod;dateautor;dateouvert;datemaj"
+        headers = h.split(";")
+        s = "010000024;010780054;CH DE FLEYRIAT;CENTRE HOSPITALIER DE BOURG-EN-BRESSE FLEYRIAT;;;900;RTE;DE PARIS;;;84;AUVERGNE-RHONE-ALPES;01;AIN;01451;01440;VIRIAT;01440 VIRIAT;04 74 45 46 47;04 74 45 41 14;355;C.H.;Centre Hospitalier (C.H.);1102;Centres Hospitaliers;26010004500012;8610Z;Activit�s hospitali�res;03;ARS / DG EPS;ARS �tablissements Publics de sant� dotation globale;1;Etab.public de sant�;;870215.7;6571590.5;1,ATLASANTE,100,IGN,BD_ADRESSE,V2.2,LAMBERT_93;2021-01-04;1979-02-13;1979-02-13;2020-02-04"
+        row = s.split(";")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        t = p.mapper(dico)
+        self.assertEqual("010000024", t.nofinesset)
+        self.assertEqual("010780054", t.nofinessej)
+        self.assertEqual("CH DE FLEYRIAT", t.rs)
+        self.assertEqual("CENTRE HOSPITALIER DE BOURG-EN-BRESSE FLEYRIAT", t.rslongue)
+        self.assertEqual("03", t.mft)
+        self.assertEqual(1, t.sph)
+        self.assertEqual(355, t.categetab)
+        self.assertEqual(1102, t.categretab)
+        self.assertEqual("04 74 45 46 47", t.telephone)
+        self.assertEqual("04 74 45 41 14", t.telecopie)
+        self.assertEqual("26010004500012", t.siret)
+        self.assertEqual("8610Z", t.codeape)
 
 
 

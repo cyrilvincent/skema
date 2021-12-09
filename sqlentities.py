@@ -219,7 +219,7 @@ class DateSource(Base):
         self.id = annee * 100 + mois
 
     def __repr__(self):
-        return f"D{self.id}"
+        return f"{self.id}"
 
 
 class EtablissementType(Base):
@@ -236,25 +236,35 @@ class Etablissement(Base):
     __tablename__ = "etablissement"
 
     id = Column(Integer, primary_key=True)
-    nom = Column(String(255), nullable=False)
-    numero = Column(String(50), nullable=False, unique=True)
-    type: EtablissementType = relationship("EtablissementType")
-    type_id = Column(Integer, ForeignKey('etablissement_type.id'), nullable=False)
+    nofinesset = Column(String(10), nullable=False, unique=True)
+    nofinessej = Column(String(10), nullable=False)
+    rs = Column(String(50), nullable=False)
+    rslongue = Column(String(255), nullable=False)
+    complrs = Column(String(255))
+    mft: Column(String(10))
+    categetab: Column(Integer)
+    categretab: Column(Integer)
+    sph = Column(Integer)
     telephone = Column(String(20))
-    mail = Column(String(50))
-    nom2 = Column(String(255), nullable=False)
-    url = Column(String(255))
+    telecopie = Column(String(20))
+    siret = Column(String(15))
+    dateautor= Column(String(50))
+    dateouvert = Column(String(50))
+    datemaj = Column(String(50))
+    codeape = Column(String(50)) # Pas dans tous
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     date_sources: List[DateSource] = relationship("DateSource",
                                                   secondary=etablissement_datesource, backref="etablissements")
 
     def __repr__(self):
-        return f"{self.id} {self.nom}"
+        return f"{self.id} {self.rs}"
 
     def equals(self, other):
-        return self.nom == other.nom and self.numero == other.numero and self.telephone == other.telephone \
-               and self.mail == other.mail and self.url == other.url
+        return self.nofinesset == other.nofinesset and self.nofinessej == other.nofinessej\
+               and self.rs == other.rs and self.rslongue == other.rslongue\
+               and self.telephone == other.telephone and self.datemaj == other.datemaj\
+               and self.codeape == other.codeape
 
 
 class Cabinet(Base):
