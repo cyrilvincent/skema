@@ -56,17 +56,16 @@ class PSTarifParser(PSParser):
         self.load_cache_tarif()
 
     def load_cache_tarif(self):
-        print("Making cache level 3, long and need a lot of RAM")
+        print("Making cache level 3, need a lot of RAM")
         ds_back = self.datesource_back()
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
-            .filter(Tarif.date_sources.any(
-            (DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))  # TODO non testé
+            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))  # TODO non testé
         for t in l:
             self.tarifs[t.key] = t
 
     def datesource_back(self) -> int:
-        if self.date_source.mois == 0:
+        if self.date_source.year < 20:
             year = month = 0
         else:
             year, month = self.date_source.annee, self.date_source.mois - config.tarif_datesource_back

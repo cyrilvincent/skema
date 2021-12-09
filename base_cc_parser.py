@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlentities import Context
 
 
-class BaseCC:
+class BaseCCParser:
 
     def __init__(self):
         pass
@@ -36,11 +36,11 @@ class BaseCC:
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("BASE_CC")
-    print("=======")
+    print("BASE_CC Parser")
+    print("==============")
     print(f"V{config.version}")
     print(config.copyright)
     print()
-    p = BaseCC()
+    p = BaseCCParser()
     p.load()
 

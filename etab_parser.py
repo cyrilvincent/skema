@@ -149,7 +149,8 @@ class BaseParser(metaclass=ABCMeta):
             for row in reader:
                 self.row_num += 1
                 self.parse_row(row)
-                if self.row_num % 10000 == 0 or self.row_num == 10 or self.row_num == 100 or self.row_num == 1000:
+                if self.row_num % 10000 == 0 or self.row_num == 10 or self.row_num == 100 \
+                        or self.row_num == 1000 or self.row_num == self.nb_row:
                     print(f"Parse {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
                           f"in {int(time.perf_counter() - time0)}s")
 

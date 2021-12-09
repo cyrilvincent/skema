@@ -71,7 +71,7 @@ class Dept(Base):
     # backref: bans
 
     def __repr__(self):
-        return f"D{self.id}"
+        return f"{self.id}"
 
 
 class BAN(Base):
