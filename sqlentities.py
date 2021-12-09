@@ -201,9 +201,10 @@ tarif_datesource = Table('tarif_date_source', Base.metadata,
                          )
 
 personne_activite_pa_adresse = Table('personne_activite_pa_adresse', Base.metadata,
-                         Column('personne_activite_id', ForeignKey('personne_activite.id'), primary_key=True),
-                         Column('pa_adresse_id', ForeignKey('pa_adresse.id'), primary_key=True)
-                         )
+                                     Column('personne_activite_id', ForeignKey('personne_activite.id'),
+                                            primary_key=True),
+                                     Column('pa_adresse_id', ForeignKey('pa_adresse.id'), primary_key=True)
+                                     )
 
 
 class DateSource(Base):
@@ -248,10 +249,10 @@ class Etablissement(Base):
     telephone = Column(String(20))
     telecopie = Column(String(20))
     siret = Column(String(15))
-    dateautor= Column(String(50))
+    dateautor = Column(String(50))
     dateouvert = Column(String(50))
     datemaj = Column(String(50))
-    codeape = Column(String(50)) # Pas dans tous
+    codeape = Column(String(50))  # Pas dans tous
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     date_sources: List[DateSource] = relationship("DateSource",
@@ -261,9 +262,9 @@ class Etablissement(Base):
         return f"{self.id} {self.rs}"
 
     def equals(self, other):
-        return self.nofinesset == other.nofinesset and self.nofinessej == other.nofinessej\
-               and self.rs == other.rs and self.rslongue == other.rslongue\
-               and self.telephone == other.telephone and self.datemaj == other.datemaj\
+        return self.nofinesset == other.nofinesset and self.nofinessej == other.nofinessej \
+               and self.rs == other.rs and self.rslongue == other.rslongue \
+               and self.telephone == other.telephone and self.datemaj == other.datemaj \
                and self.codeape == other.codeape
 
 
@@ -510,7 +511,3 @@ class INPPDiplome(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.diplome_id}"
-
-
-
-

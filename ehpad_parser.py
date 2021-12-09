@@ -1,10 +1,8 @@
 import argparse
-
 import art
 import config
 import pandas
 from sqlalchemy import create_engine
-
 from sqlentities import Context, DateSource
 
 
@@ -14,10 +12,11 @@ class EhpadParser:
         self.date_source = None
 
     def parse_date(self, path):
+        # noinspection PyBroadException
         try:
             yy = int(path[-12:-10])
             self.date_source = DateSource(annee=yy, mois=0)
-        except Exception:
+        except:
             print("ERROR: file must have date like this: *-YYYY-brute.csv")
 
     def check_date(self, path):
@@ -55,4 +54,3 @@ if __name__ == '__main__':
     p.load(args.path)
 
     # data/ehpad/cnsa-export-prix-ehpad-2018-brute.csv
-

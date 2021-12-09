@@ -3,9 +3,9 @@ from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
 
 from ps_parser import PSParser
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, Tarif, DateSource, \
+from sqlentities import Context, Cabinet, PS, PSCabinetDateSource, Tarif, DateSource, \
     Profession, ModeExercice, Nature, Convention, FamilleActe, Dept
-from etab_parser import BaseParser, time0
+from etab_parser import time0
 import argparse
 import time
 import art

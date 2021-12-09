@@ -480,37 +480,6 @@ class ICIPTests(TestCase):
     def test_cache_inpp(self):
         context = Context()
         context.create(echo=True)
-        dico3 = {}
-        pa_adresses = context.session.query(PAAdresse).options(joinedload(PAAdresse.personne_activites)).all()
-        for a in pa_adresses:
-            for pa in a.personne_activites:
-                key3 = pa.nom, pa.prenom, int(a.cp / 1000)  # à remplacer par get_dept
-                key6 = pa.nom, pa.prenom, a.numero, a.rue, a.cp, a.commune
-                if key3 not in dico3:
-                    dico3[key3] = {key6: pa.inpp}
-                else:
-                    dico3[key3][key6] = pa.inpp
-            context.session.expunge(a)
-            # Sauvegarder les paires qui fonctionnent dans 1 dico pour eviter de le refaire à chaque ligne
-            # Il y a le cas où dico3 à 2 élément qui donnent le même inpp
-            # Il faut donc tester len(set(dico3[key3].values())) = 1 = DARBOULI JEROME 10
-            # cas le + complexe avec inpp différents MOREAU ROSELINE 10 & ('LEFEBVRE', 'SOPHIE', 62)
-        max = 0
-        max_key = None
-        for k in dico3:
-            l = len(set(dico3[k].values()))
-            if l > max:
-                max = l
-                max_key = k
-        print(len(dico3))
-        print(max)
-        print(max_key)
-        print(dico3[max_key])
-
-
-    def test_cache_inpp2(self):
-        context = Context()
-        context.create(echo=True)
         p = PSParser(context)
         p.load_cache_inpp()
         max = 0

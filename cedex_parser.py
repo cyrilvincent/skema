@@ -61,9 +61,6 @@ if __name__ == '__main__':
     ep = CedexParser(context)
     ep.load(args.path)
     print(f"Nb Cedex: {ep.nb_cedex}")
-    new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {ep.row_nb} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/cedex/liste-des-cedex.csv -e

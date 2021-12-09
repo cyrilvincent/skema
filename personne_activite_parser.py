@@ -1,8 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, Tarif, DateSource, \
-    Profession, ModeExercice, Nature, Convention, FamilleActe, PersonneActivite, PAAdresse, Dept
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept
 from etab_parser import BaseParser, time0
 import argparse
 import time

@@ -1,17 +1,11 @@
-from typing import Dict, Optional, List, Tuple
+from typing import Optional, List, Tuple
 from sqlalchemy.orm import joinedload
-import unidecode
-import pyproj
-
 from etab_parser import BaseParser
-from sqlentities import Context, DateSource, Etablissement, EtablissementType, AdresseRaw, Dept, AdresseNorm, Source
-from abc import ABCMeta, abstractmethod
+from sqlentities import Context, DateSource, Etablissement, EtablissementType, AdresseRaw, AdresseNorm
 import argparse
-import csv
 import time
 import art
 import config
-import re
 
 time0 = time.perf_counter()
 

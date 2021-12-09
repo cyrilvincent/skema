@@ -3,13 +3,8 @@ import config
 import pandas
 from sqlalchemy import create_engine
 
-from sqlentities import Context
-
 
 class BaseCCParser:
-
-    def __init__(self):
-        pass
 
     def load(self):
         file17 = "data/insee_villes/base_cc_17.xls"
@@ -43,4 +38,3 @@ if __name__ == '__main__':
     print()
     p = BaseCCParser()
     p.load()
-

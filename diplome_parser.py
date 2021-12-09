@@ -1,9 +1,7 @@
-import difflib
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List
 
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, Tarif, DateSource, \
-    Profession, ModeExercice, Nature, Convention, FamilleActe, PAAdresse, Diplome, INPPDiplome
+from sqlentities import Context, Diplome, INPPDiplome
 from etab_parser import BaseParser, time0
 import argparse
 import time
@@ -109,4 +107,3 @@ if __name__ == '__main__':
 
     # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202112020908.txt
     # data/ps_libreacces/PS_LibreAcces_SavoirFaire_202112020908.txt -s
-

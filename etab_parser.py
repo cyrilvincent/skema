@@ -212,7 +212,6 @@ class EtabParser(BaseParser):
         return a
 
     def lat_lon_mapper(self, row) -> Tuple[float, float]:
-        # TODO faire un if pour tester la présence des colonnes
         try:
             lat = row[41]
             lon = row[42]
@@ -256,21 +255,18 @@ class EtabParser(BaseParser):
 
     def create_update_lat_lon(self, row, n: AdresseNorm):
         lat, lon = self.lat_lon_mapper(row)
-        # TODO if 55 > lat > 40 and 10 > lon > -5 et != None
-        # TODO A bien tester avec une norm sans GPS ou une norm avec une autre source
-        if n.source_id != 3:  # TODO /!\ nullable
+        if n.source is not None and n.source_id != 3:
             n.lat = lat
             n.lon = lon
             n.source = self.sources[3]
             n.score = 1
 
     def parse_row(self, row):
-        # TODO changer le parse_date
-        e = self.mapper(row) # TODO ajouter les n colonnes /!\ finess non numerique
-        if e.id in self.entities: # TODO changer la logique de ce if copier les autres
+        e = self.mapper(row)
+        if e.id in self.entities:
             same = e.equals(self.entities[e.id])
             if not same:
-                self.pseudo_clone(e, self.entities[e.id]) # TODO à garder c'est très différents des autres
+                self.pseudo_clone(e, self.entities[e.id])
                 self.nb_update_entity += 1
             e = self.entities[e.id]
             if self.date_source not in e.date_sources:

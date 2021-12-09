@@ -145,5 +145,4 @@ if __name__ == '__main__':
     print()
     time0 = time.perf_counter()
     parser = AdresseParser()
-    # parser.load("data/adresse/adresses-60.csv", 60)
     parser.scan()
