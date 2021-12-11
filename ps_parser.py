@@ -246,11 +246,11 @@ class PSParser(BaseParser):
                 e.key = inpp
                 e.has_inpp = True
             if e.key in self.entities:
-                genre = e.genre
-                e = self.entities[e.key]
-                if e.genre is None and genre is not None:
+                same = e.equals(self.entities[e.key])
+                if not same:
+                    self.entities[e.key].genre = e.genre
                     self.nb_update_entity += 1
-                    e.genre = genre
+                e = self.entities[e.key]
             else:
                 self.entities[e.key] = e
                 self.nb_new_entity += 1
@@ -281,6 +281,7 @@ if __name__ == '__main__':
     psp = PSParser(context)
     psp.load(args.path, encoding=None)
     print(f"New PS: {psp.nb_new_entity}")
+    print(f"Update PS: {psp.nb_update_entity}")
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")

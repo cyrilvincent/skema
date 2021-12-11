@@ -298,6 +298,9 @@ class PS(Base):
     def __repr__(self):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
 
+    def equals(self, other):
+        return self.genre == other.genre
+
 
 class PSCabinetDateSource(Base):
     __tablename__ = "ps_cabinet_date_source"

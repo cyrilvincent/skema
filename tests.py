@@ -62,6 +62,14 @@ class ICIPTests(TestCase):
         self.assertEqual(2, e2.id)
         self.assertEqual("Cyril Vincent", e2.rs)
         self.assertEqual("0622538762", e2.telephone)
+        e2.codeape = "xyz"
+        e1.codeape = None
+        self.assertIsNone(e1.codeape)
+        ep.pseudo_clone(e1, e2)
+        self.assertIsNone(e2.codeape)
+        e1.codeape = "abc"
+        ep.pseudo_clone(e1, e2)
+        self.assertEqual("abc", e2.codeape)
 
     def test_adresseraw_mapper(self):
         context = Context()

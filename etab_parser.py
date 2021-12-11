@@ -43,7 +43,7 @@ class BaseParser(metaclass=ABCMeta):
         for s in l:
             self.sources[s.id] = s
         l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
-        # Erreur courant, quand le key ne matche pas c'est que le cp est en str
+        # Erreur courante, quand le key ne matche pas c'est que le cp est en str
         for a in l:
             self.adresse_raws[a.key] = a
         l = self.context.session.query(AdresseNorm).all()
@@ -91,7 +91,7 @@ class BaseParser(metaclass=ABCMeta):
 
     def pseudo_clone(self, from_obj: object, to_obj):
         for a in from_obj.__dict__:
-            if type(from_obj.__getattribute__(a)) in [str, float, None] and a not in ['id'] and not a.startswith('_'):
+            if type(from_obj.__getattribute__(a)) in [str, float, type(None)] and a not in ['id'] and not a.startswith('_'):
                 to_obj.__setattr__(a, from_obj.__getattribute__(a))
 
     def split_num(self, s: str) -> Tuple[Optional[int], str]:

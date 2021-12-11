@@ -51,6 +51,7 @@ class EtalabParser(BaseParser):
             e.dateautor = self.get_nullable(row["dateautor"])
             e.dateouvert = self.get_nullable(row["dateouvert"])
             e.datemaj = self.get_nullable(row["datemaj"])
+            e.codeape = None
             if "codeape" in row:
                 e.codeape = self.get_nullable(row["codeape"])
         except Exception as ex:
@@ -89,9 +90,11 @@ class EtalabParser(BaseParser):
 
     def lon_lat_mapper(self, row) -> Tuple[Optional[float], Optional[float]]:
         try:
-            if "coordx" in row:
-                x = float(row["coordx"])
-                y = float(row["coordy"])
+            if "coordx" in row and row["coordx"] != "" and row["coordy"] != "":
+                x = float(row["coordx"].replace(",", ""))
+                y = float(row["coordy"].replace(",", ""))
+                if x == 0 or y == 0:
+                    return None, None
                 lon, lat = self.convert_lambert93_lon_lat(x, y)
                 return lon, lat
             return None, None
@@ -139,25 +142,29 @@ class EtalabParser(BaseParser):
                 a.adresse_norm = n
 
     def create_update_lon_lat(self, row, n: AdresseNorm):
-        lon, lat = self.lon_lat_mapper(row)
-        if lon is not None and lat is not None and (n.source_id is None or n.source_id != 3):
-            n.lat = lat
-            n.lon = lon
-            n.source = self.sources[3]
-            n.score = 1 if (55 > lat > 40 and 10 > lon > -5) else 0.5
-            self.nb_new_lon_lat += 1
+        if n.source_id is None or n.source_id != 3:
+            lon, lat = self.lon_lat_mapper(row)
+            if lon is not None and lat is not None:
+                if 55 > lat > 40 and 10 > lon > -10:
+                    n.lat = lat
+                    n.lon = lon
+                    n.source = self.sources[3]
+                    n.score = 1
+                    self.nb_new_lon_lat += 1
 
     def parse_row(self, row):
         dept = self.get_dept_from_cp(row["codepostal"])
         if dept in self.depts_int:
             e = self.mapper(row)
             if e.nofinesset in self.entities:
-                olde = e
-                e = self.entities[e.nofinesset]
-                same = olde.equals(e)
+                same = e.equals(self.entities[e.nofinesset])
                 if not same:
-                    self.pseudo_clone(olde, e)
+                    # Si on veut dupliquer les lignes en cas de modif
+                    # self.entities[e.nofinesset] = e
+                    # self.context.session.add(e)
+                    self.pseudo_clone(e, self.entities[e.nofinesset])
                     self.nb_update_entity += 1
+                e = self.entities[e.nofinesset]
             else:
                 self.entities[e.nofinesset] = e
                 self.nb_new_entity += 1
@@ -165,6 +172,8 @@ class EtalabParser(BaseParser):
             self.create_update_adresse_raw(e, row)
             self.create_update_norm(e.adresse_raw)
             self.create_update_lon_lat(row, e.adresse_raw.adresse_norm)
+            if self.date_source.id not in [ds.id for ds in e.date_sources]:
+                e.date_sources.append(self.date_source)
             self.context.session.commit()
 
 
