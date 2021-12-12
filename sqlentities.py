@@ -192,12 +192,12 @@ class AdresseRaw(Base):
 
 etablissement_datesource = Table('etablissement_date_source', Base.metadata,
                                  Column('etablissement_id', ForeignKey('etablissement.id'), primary_key=True),
-                                 Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
+                                 Column('date_source_id', ForeignKey('date_source.id'), primary_key=True, index=True)
                                  )
 
 tarif_datesource = Table('tarif_date_source', Base.metadata,
                          Column('tarif_id', ForeignKey('tarif.id'), primary_key=True),
-                         Column('date_source_id', ForeignKey('date_source.id'), primary_key=True)
+                         Column('date_source_id', ForeignKey('date_source.id'), primary_key=True, index=True)
                          )
 
 personne_activite_pa_adresse = Table('personne_activite_pa_adresse', Base.metadata,
@@ -310,7 +310,7 @@ class PSCabinetDateSource(Base):
     cabinet: Cabinet = relationship("Cabinet")
     cabinet_id = Column(Integer, ForeignKey('cabinet.id'), nullable=False)
     date_source: DateSource = relationship("DateSource")
-    date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False)
+    date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False, index=True)
 
     __table_args__ = (UniqueConstraint('ps_id', 'cabinet_id', 'date_source_id'),)
 
@@ -385,8 +385,8 @@ class Tarif(Base):
     nature_id = Column(Integer, ForeignKey('nature.id'), nullable=False)
     convention: Convention = relationship("Convention")
     convention_id = Column(Integer, ForeignKey("convention.id"), nullable=False)
-    option_contrat = Column(Boolean)  # nullable=False ?
-    vitale = Column(Boolean)  # nullable=False ?
+    option_contrat = Column(Boolean)
+    vitale = Column(Boolean)
     code = Column(String(50), nullable=False)
     ps: PS = relationship("PS", backref="tarifs")
     ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
@@ -395,7 +395,7 @@ class Tarif(Base):
     famille_acte: FamilleActe = relationship("FamilleActe")
     famille_acte_id = Column(Integer, ForeignKey('famille_acte.id'))
     date_sources = relationship("DateSource", secondary=tarif_datesource, backref="tarifs")
-    montant = Column(Float, nullable=False)
+    montant = Column(Float)
     borne_inf = Column(Float)
     borne_sup = Column(Float)
     montant_2 = Column(Float)

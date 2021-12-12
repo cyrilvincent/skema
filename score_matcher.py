@@ -70,10 +70,6 @@ class ScoreMatcher:
                 row.score = row.ban_score
             elif row.osm is not None:
                 d = self.calc_distance(row.ban.lon, row.ban.lat, row.osm.lon, row.osm.lat)
-                if self.echo:
-                    print(f"{d}m {row.rue1} {row.cp} {row.commune} <=> "
-                          f"{row.ban.nom_voie} {row.ban.code_postal} {row.ban.nom_commune} "
-                          f"@{row.ban_score * 100:.0f}% <=> {row.osm.adresse[:50]} @{row.osm_score * 100:.0f}%")
                 if d < 50:
                     row.source = self.sources[4]
                     row.lon, row.lat = row.ban.lon, row.ban.lat
@@ -107,6 +103,11 @@ class ScoreMatcher:
                         row.score -= 0.1
                     elif d > 10000 and row.score < config.ban_mean - 3 * config.ban_std:
                         row.score /= 2
+                if self.echo:
+                    print(f"{d}m {row.rue1} {row.cp} {row.commune} <=> "
+                          f"{row.ban.nom_voie} {row.ban.code_postal} {row.ban.nom_commune} "
+                          f"@{row.ban_score * 100:.0f}% <=> {row.osm.adresse[:40]} @{row.osm_score * 100:.0f}% "
+                          f"=> {row.source} @{row.score * 100:.0f}%")
             if row.score is not None:
                 self.total_scores.append(row.score)
                 self.session.commit()
@@ -123,6 +124,9 @@ class ScoreMatcher:
         print("Parsing...")
         for row in rows:
             self.match_row(row)
+            if self.row_num % 1000 == 0 or self.row_num == 10 or self.row_num == 100:
+                print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
+                      f"in {int(time.perf_counter() - time0)}s")
 
 
 if __name__ == '__main__':

@@ -26,6 +26,7 @@ class BaseParser(metaclass=ABCMeta):
         self.nb_new_entity = 0
         self.nb_update_entity = 0
         self.nb_new_norm = 0
+        self.nb_ram = 0
         self.date_source: Optional[DateSource] = None
         self.depts: Dict[str, Dept] = {}
         self.depts_int: Dict[int, Dept] = {}
@@ -39,16 +40,21 @@ class BaseParser(metaclass=ABCMeta):
         for d in l:
             self.depts[d.num] = d
             self.depts_int[d.id] = d
+            self.nb_ram += 2
         l = self.context.session.query(Source).all()
         for s in l:
             self.sources[s.id] = s
+            self.nb_ram += 1
         l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
         # Erreur courante, quand le key ne matche pas c'est que le cp est en str
         for a in l:
             self.adresse_raws[a.key] = a
+            self.nb_ram += 1
         l = self.context.session.query(AdresseNorm).all()
         for a in l:
             self.adresse_norms[a.key] = a
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
 
     def test_file(self, path, encoding="utf8"):
         with open(path, encoding=encoding) as f:
@@ -147,6 +153,7 @@ class BaseParser(metaclass=ABCMeta):
         self.check_date(path)
         self.test_file(path, encoding)
         self.load_cache()
+        duration_cache = time.perf_counter() - time0
         with open(path, encoding=encoding) as f:
             if header:
                 reader = csv.DictReader(f, delimiter=delimiter)
@@ -157,8 +164,12 @@ class BaseParser(metaclass=ABCMeta):
                 self.parse_row(row)
                 if self.row_num % 10000 == 0 or self.row_num == 10 or self.row_num == 100 \
                         or self.row_num == 1000 or self.row_num == self.nb_row:
+                    duration = time.perf_counter() - time0 - duration_cache + 1e-6
                     print(f"Parse {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
-                          f"in {int(time.perf_counter() - time0)}s")
+                          f"in {(duration + duration_cache):.0f}s "
+                          f"@{self.row_num / duration:.0f}row/s "
+                          f"{((self.nb_row / self.row_num) * duration) - duration:.0f}s remaining ")
+
 
     @abstractmethod
     def parse_row(self, row): ...
@@ -311,6 +322,5 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/etab_00-00.csv -e

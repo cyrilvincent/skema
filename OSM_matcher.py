@@ -157,15 +157,20 @@ class OSMMatcher:
             osm, score = self.match_norm(row)
             self.total_scores.append(score)
             if osm is None:
-                print(f"{row.rue1} {row.cp} {row.commune} => No match")
+                if self.echo:
+                    print(f"{row.rue1} {row.cp} {row.commune} => No match")
             else:
                 ban_score = 0 if row.ban_score is None else row.ban_score
-                print(f"{row.numero} {row.rue1} {row.cp} {row.commune} @{ban_score * 100:.0f}% "
-                      f"=> {osm.adresse[:70]} {osm.cp} @{score * 100:.0f}%")
+                if self.echo:
+                    print(f"{row.numero} {row.rue1} {row.cp} {row.commune} @{ban_score * 100:.0f}% "
+                          f"=> {osm.adresse[:70]} {osm.cp} @{score * 100:.0f}%")
             row.osm_score = score
             if osm is not None:
                 row.osm = osm
             self.session.commit()
+            if self.row_num % 1000 == 0 or self.row_num == 10 or self.row_num == 100:
+                print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
+                      f"in {int(time.perf_counter() - time0)}s")
         self.purge()
 
 

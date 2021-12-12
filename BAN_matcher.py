@@ -261,7 +261,8 @@ class BANMatcher:
     def match_norm(self, row: AdresseNorm, commit=True):
         cp, score = self.match_cp(row.cp)
         if cp == 0:
-            print(f"ERROR: BAD CP {cp}, cannot match")
+            if self.echo:
+                print(f"ERROR: BAD CP {cp}, cannot match")
         else:
             self.scores = [score]
             communes = self.cps[cp]
@@ -297,7 +298,7 @@ class BANMatcher:
             self.row_num += 1
             self.match_norm(row)
             self.total_scores.append(self.score)
-            if self.row_num % 100 == 0 and not self.echo:
+            if self.row_num % 1000 == 0 or self.row_num == 10 or self.row_num == 100:
                 print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
 

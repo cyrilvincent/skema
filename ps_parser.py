@@ -26,10 +26,13 @@ class PSParser(BaseParser):
             .options(joinedload(PS.ps_cabinet_date_sources).joinedload(PSCabinetDateSource.cabinet)).all()
         for e in l:
             self.entities[e.key] = e
+            self.nb_ram += 1
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
+            self.nb_ram += 1
         self.load_cache_inpp()
+        print(f"{self.nb_ram} objects in cache")
 
     def load_cache_inpp(self):
         print("Making cache level 2")
@@ -43,6 +46,7 @@ class PSParser(BaseParser):
                     self.inpps[key1] = {key2: pa.inpp}
                 else:
                     self.inpps[key1][key2] = pa.inpp
+                self.nb_ram += 1
             session.expunge(a)
 
     def mapper(self, row) -> PS:
@@ -247,9 +251,9 @@ class PSParser(BaseParser):
                 e.has_inpp = True
             if e.key in self.entities:
                 same = e.equals(self.entities[e.key])
-                if not same:
-                    self.entities[e.key].genre = e.genre
-                    self.nb_update_entity += 1
+                # if not same: # TODO à enlever provisoirement < 2000
+                #     self.entities[e.key].genre = e.genre
+                #     self.nb_update_entity += 1
                 e = self.entities[e.key]
             else:
                 self.entities[e.key] = e
@@ -289,9 +293,8 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
-    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
+    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ Enlever le update genre
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv

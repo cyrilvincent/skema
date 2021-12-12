@@ -80,6 +80,10 @@ class EnumsCreator:
         context = Context()
         context.create()
         n = Nature()
+        n.id = 0
+        n.libelle = "?"
+        context.session.add(n)
+        n = Nature()
         n.id = 1
         n.libelle = "N’exerce pas actuellement"
         context.session.add(n)

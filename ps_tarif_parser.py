@@ -1,7 +1,5 @@
 from typing import Dict, List, Tuple, Optional
-
 from sqlalchemy.orm import joinedload
-
 from ps_parser import PSParser
 from sqlentities import Context, Cabinet, PS, PSCabinetDateSource, Tarif, DateSource, \
     Profession, ModeExercice, Nature, Convention, FamilleActe, Dept
@@ -29,31 +27,40 @@ class PSTarifParser(PSParser):
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
+            self.nb_ram += 1
         l = self.context.session.query(Dept).all()
         for d in l:
             self.depts[d.num] = d
             self.depts_int[d.id] = d
+            self.nb_ram += 2
         l: List[PS] = self.context.session.query(PS) \
             .options(joinedload(PS.ps_cabinet_date_sources).joinedload(PSCabinetDateSource.cabinet)).all()
         for e in l:
             self.entities[e.key] = e
+            self.nb_ram += 1
         l: List[Profession] = self.context.session.query(Profession).all()
         for p in l:
             self.professions[p.id] = p
+            self.nb_ram += 1
         l: List[ModeExercice] = self.context.session.query(ModeExercice).all()
         for m in l:
             self.mode_exercices[m.id] = m
+            self.nb_ram += 1
         l: List[Nature] = self.context.session.query(Nature).all()
         for n in l:
             self.natures[n.id] = n
+            self.nb_ram += 1
         l: List[Convention] = self.context.session.query(Convention).all()
         for c in l:
             self.conventions[c.code] = c
+            self.nb_ram += 1
         l: List[FamilleActe] = self.context.session.query(FamilleActe).all()
         for f in l:
             self.famille_actes[f.id] = f
+            self.nb_ram += 1
         self.load_cache_inpp()
         self.load_cache_tarif()
+        print(f"{self.nb_ram} objects in cache")
 
     def load_cache_tarif(self):
         print("Making cache level 3, need a lot of RAM")
@@ -62,10 +69,11 @@ class PSTarifParser(PSParser):
             .options(joinedload(Tarif.date_sources)) \
             .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))  # TODO non testé
         for t in l:
+            self.nb_ram += 1
             self.tarifs[t.key] = t
 
     def datesource_back(self) -> int:
-        if self.date_source.year < 20:
+        if self.date_source.annee < 20:
             year = month = 0
         else:
             year, month = self.date_source.annee, self.date_source.mois - config.tarif_datesource_back
@@ -114,7 +122,7 @@ class PSTarifParser(PSParser):
             t.code = row[16]
             if row[17] != '':
                 t.famille_acte = self.famille_actes[int(row[17])]
-            t.montant = float(row[18])
+            t.montant = self.get_nullable_float(row[18])
             t.borne_inf = self.get_nullable_float(row[19])
             t.borne_sup = self.get_nullable_float(row[20])
             t.montant2 = self.get_nullable_float(row[21])
@@ -134,7 +142,7 @@ class PSTarifParser(PSParser):
             quit(3)
         return t
 
-    def create_update_tarif(self, e: PS, c: Cabinet, row):
+    def create_update_tarif(self, e: PS, c: Cabinet, row) -> Tarif:
         t = self.tarif_mapper(row)
         key = list(t.key)
         key[0] = e.id
@@ -148,6 +156,7 @@ class PSTarifParser(PSParser):
             e.tarifs.append(t)
         if self.date_source not in t.date_sources:
             t.date_sources.append(self.date_source)
+        return t
 
     def parse_row(self, row):
         dept = self.get_dept_from_cp(row[7])
@@ -164,8 +173,9 @@ class PSTarifParser(PSParser):
             if c is None:
                 print(f"ERROR cabinet row {self.row_num} {row}")
                 quit(3)
-            self.create_update_tarif(e, c, row)
+            t = self.create_update_tarif(e, c, row)
             self.context.session.commit()
+            # self.context.session.expunge(t) # en cas de pb RAM
 
 
 if __name__ == '__main__':
@@ -189,9 +199,11 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
+    # Dernier parse PS: 2101
+    # UFC seul 1200 pédiatre à été faire
+    # SS rien
