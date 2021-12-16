@@ -2,7 +2,7 @@ import os
 
 path = "data/ps"
 path = "data/UFC"
-# path = "data/SanteSpecialite"
+path = "data/SanteSpecialite"
 l = os.listdir(path)
 l.sort()
 for f in l:

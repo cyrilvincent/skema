@@ -1,0 +1,2 @@
+
+"C:\Program Files\PostgreSQL\12\bin\pg_dump.exe" --file "icip_test.bak" --host "localhost" --port "5432" --username "postgres" --password --verbose --format=c --blobs --section=pre-data --section=data --section=post-data "icip"

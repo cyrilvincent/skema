@@ -27,7 +27,7 @@ class ScoreMatcher:
         self.sources: Dict[int, Source] = {}
 
     def load_cache(self):
-        print("Make cache")
+        print("Making cache")
         l: List[Source] = self.session.query(Source).all()
         for s in l:
             self.sources[s.id] = s
@@ -103,6 +103,8 @@ class ScoreMatcher:
                         row.score -= 0.1
                     elif d > 10000 and row.score < config.ban_mean - 3 * config.ban_std:
                         row.score /= 2
+                if row.rue1 is None and row.source_id == 1:
+                    row.score = (1 + row.score) / 2
                 if self.echo:
                     print(f"{d}m {row.rue1} {row.cp} {row.commune} <=> "
                           f"{row.ban.nom_voie} {row.ban.code_postal} {row.ban.nom_commune} "
@@ -144,14 +146,15 @@ if __name__ == '__main__':
     sm = ScoreMatcher(args.force, args.log, args.echo)
     print(f"Database {sm.context.db_name}: {sm.context.db_size():.0f} Mo")
     sm.match()
-    mean = np.mean(np.array(sm.total_scores))
-    std = np.std(np.array(sm.total_scores))
-    print(f"Score average {mean * 100:.1f}%")
-    print(f"Score median {np.median(np.array(sm.total_scores)) * 100:.1f}%")
-    print(f"Score min {np.min(np.array(sm.total_scores)) * 100:.1f}%")
-    print(f"Score std {std * 100:.1f}%")
-    print(f"Score average-std {(mean - std) * 100:.1f}%")
-    print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
+    if len(sm.total_scores) > 0:
+        mean = np.mean(np.array(sm.total_scores))
+        std = np.std(np.array(sm.total_scores))
+        print(f"Score average {mean * 100:.1f}%")
+        print(f"Score median {np.median(np.array(sm.total_scores)) * 100:.1f}%")
+        print(f"Score min {np.min(np.array(sm.total_scores)) * 100:.1f}%")
+        print(f"Score std {std * 100:.1f}%")
+        print(f"Score average-std {(mean - std) * 100:.1f}%")
+        print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
     print(f"Parse {sm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
     # -e -l -d [5]
     # select percentile_cont(0.5)WITHIN GROUP (ORDER BY score) as median, stddev(score) as std, avg(score)

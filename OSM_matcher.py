@@ -193,10 +193,7 @@ if __name__ == '__main__':
     std = np.std(np.array(om.total_scores))
     print(f"Score average {mean * 100:.1f}%")
     print(f"Score median {np.median(np.array(om.total_scores)) * 100:.1f}%")
-    print(f"Score min {np.min(np.array(om.total_scores)) * 100:.1f}%")
     print(f"Score std {std * 100:.1f}%")
-    print(f"Score average-std {(mean - std) * 100:.1f}%")
-    print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
     print(f"Parse {om.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
     # -e -l -d [5]

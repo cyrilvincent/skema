@@ -60,6 +60,7 @@ class Context:
 # etab -1 adresse_raw
 #      *-* date_source
 # personne_activite *-* pa_adresse
+# /!\ FK != INDEX automatique, testé sur tarif
 
 
 class Dept(Base):
@@ -376,6 +377,7 @@ class FamilleActe(Base):
 class Tarif(Base):
     __tablename__ = "tarif"
 
+    # TODO Index métier à définir avec Benjamin
     id = Column(Integer, primary_key=True)
     profession: Profession = relationship("Profession")
     profession_id = Column(Integer, ForeignKey('profession.id'))
@@ -389,7 +391,7 @@ class Tarif(Base):
     vitale = Column(Boolean)
     code = Column(String(50), nullable=False)
     ps: PS = relationship("PS", backref="tarifs")
-    ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False)
+    ps_id = Column(Integer, ForeignKey('ps.id'), nullable=False, index=True)
     cabinet: Cabinet = relationship("Cabinet")
     cabinet_id = Column(Integer, ForeignKey('cabinet.id'), nullable=False)
     famille_acte: FamilleActe = relationship("FamilleActe")

@@ -1,11 +1,8 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
 from ps_parser import PSParser
-from sqlentities import Context, Cabinet, PS, PSCabinetDateSource, Tarif, DateSource, \
-    Profession, ModeExercice, Nature, Convention, FamilleActe, Dept
-from etab_parser import time0
+from sqlentities import *
 import argparse
-import time
 import art
 import config
 
@@ -21,6 +18,7 @@ class PSTarifParser(PSParser):
         self.natures: Dict[int, Nature] = {}
         self.conventions: Dict[str, Convention] = {}
         self.famille_actes: Dict[int, FamilleActe] = {}
+        self.ps_id = 0 # TODO temp
 
     def load_cache(self):
         print("Making cache")
@@ -34,7 +32,9 @@ class PSTarifParser(PSParser):
             self.depts_int[d.id] = d
             self.nb_ram += 2
         l: List[PS] = self.context.session.query(PS) \
-            .options(joinedload(PS.ps_cabinet_date_sources).joinedload(PSCabinetDateSource.cabinet)).all()
+            .options(joinedload(PS.ps_cabinet_date_sources).joinedload(PSCabinetDateSource.cabinet)) \
+            .all()
+            # .options(joinedload(PS.tarifs).joinedload(Tarif.date_sources.any(DateSource.id == self.date_source.id))) \
         for e in l:
             self.entities[e.key] = e
             self.nb_ram += 1
@@ -60,17 +60,19 @@ class PSTarifParser(PSParser):
             self.nb_ram += 1
         self.load_cache_inpp()
         self.load_cache_tarif()
-        print(f"{self.nb_ram} objects in cache")
+        print(f"{self.nb_ram:.0f} objects in cache")
 
     def load_cache_tarif(self):
         print("Making cache level 3, need a lot of RAM")
         ds_back = self.datesource_back()
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
-            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))  # TODO non testé
+            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))
         for t in l:
             self.nb_ram += 1
             self.tarifs[t.key] = t
+            if self.nb_ram % 100000 == 0:
+                print(f"{self.nb_ram:.0f} objects in cache")
 
     def datesource_back(self) -> int:
         if self.date_source.annee < 20:
@@ -115,7 +117,7 @@ class PSTarifParser(PSParser):
                 t.profession = self.professions[int(row[10])]
             if row[11] != '':
                 t.mode_exercice = self.mode_exercices[int(row[11])]
-            t.nature = self.natures[int(row[12])]
+            t.nature = self.natures[int(row[12])] if row[12] != '' else self.natures[0]
             t.convention = self.conventions[row[13].upper()]
             t.option_contrat = self.get_nullable_boolean(row[14])
             t.vitale = self.get_nullable_boolean(row[15])
@@ -147,18 +149,25 @@ class PSTarifParser(PSParser):
         key = list(t.key)
         key[0] = e.id
         key = tuple(key)
+        # if e.id != self.ps_id:
+        #     self.ps_id = e.id
+        #     self.tarifs.clear()
+        #     for tarif in e.tarifs:
+        #         self.tarifs[tarif.key] = tarif
         if key in self.tarifs:
             t = self.tarifs[key]
         else:
             self.nb_tarif += 1
-            # self.tarifs[key] = t # inutile dans ce cas précis
             t.cabinet = c
-            e.tarifs.append(t)
+            e.tarifs.append(t) # TODO Je pense qu'un lazy part à ce moment là select * from tarif where ps_id = ?
         if self.date_source not in t.date_sources:
             t.date_sources.append(self.date_source)
         return t
 
     def parse_row(self, row):
+        if len(self.tarifs) == 0:
+            print("Error No tarif in db")
+            quit(5)
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
             e = self.mapper(row)
@@ -204,6 +213,5 @@ if __name__ == '__main__':
     # data/ps/ps-tarifs-21-03.csv
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
-    # Dernier parse PS: 2101
-    # UFC seul 1200 pédiatre à été faire
-    # SS rien
+    # Dernier parse: 2101
+    # UFS SS Tout est fait

@@ -33,6 +33,7 @@ class BANMatcher:
         self.commune_rues: Dict[Tuple[str, str], BAN] = {}
         self.scores = []
         self.total_scores = []
+        self.nb_error = 0
         self.filter_no_force = AdresseNorm.ban_score.is_(None) & AdresseNorm.score.is_(None)
         if self.depts is None:
             self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
@@ -203,32 +204,38 @@ class BANMatcher:
         #     print(f"WARNING RUE {cp} {commune} {rue1}=>{res} @{int(score * 100)}%")
         return res, score
 
-    def match_numero(self, cp: int, commune: str, rue: str, num: Optional[int]) -> Tuple[BAN, float]:
-        l = self.cp_commune_rues[(cp, commune, rue)]
-        if num is None:
+    def match_numero(self, cp: int, commune: str, rue: str, num: Optional[int]) \
+            -> Tuple[Optional[BAN], float]:
+        try:
+            l = self.cp_commune_rues[(cp, commune, rue)]
+            if num is None:
+                for ban in l:
+                    if ban.numero is None:
+                        return ban, 1
+                return l[0], 0.9
+            min = 99999
+            res = l[0]
             for ban in l:
-                if ban.numero is None:
+                if ban.numero == num:
                     return ban, 1
-            return l[0], 0.9
-        min = 99999
-        res = l[0]
-        for ban in l:
-            if ban.numero == num:
-                return ban, 1
-            if ban.numero is None:
-                diff = num
+                if ban.numero is None:
+                    diff = num
+                else:
+                    diff = abs(ban.numero - num)
+                if diff % 2 == 1:
+                    diff *= 3
+                if diff < min:
+                    res = ban
+                    min = diff
+            if res.numero is None:
+                score = 0.6
             else:
-                diff = abs(ban.numero - num)
-            if diff % 2 == 1:
-                diff *= 3
-            if diff < min:
-                res = ban
-                min = diff
-        if res.numero is None:
-            score = 0.6
-        else:
-            score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
-        return res, score
+                score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
+            return res, score
+        except KeyError:
+            print(f"ERROR: No numero matching from {(cp, commune, rue)}")
+            self.nb_error += 1
+            return None, 0
 
     def check_low_quality(self, row: AdresseNorm, ban: BAN) -> BAN:
         ban_id = ban.id
@@ -263,6 +270,7 @@ class BANMatcher:
         if cp == 0:
             if self.echo:
                 print(f"ERROR: BAD CP {cp}, cannot match")
+                self.nb_error += 1
         else:
             self.scores = [score]
             communes = self.cps[cp]
@@ -278,14 +286,17 @@ class BANMatcher:
             rue, score = self.match_rue(commune, row.rue1, row.rue2, cp)
             self.scores.append(score)
             ban, score = self.match_numero(cp, commune, rue, row.numero)
-            self.scores.append(score)
-            if self.score < config.ban_mean - 2 * config.ban_std:
-                ban = self.check_low_quality(row, ban)
-            if self.echo and self.score < config.ban_mean - 3 * config.ban_std:
-                print(f"WARNING {row.numero} {row.rue1} {row.cp} {row.commune}  =>"
-                      f" {ban.numero} {ban.nom_voie} {ban.code_postal} {ban.nom_commune} @{self.score * 100:.1f}%")
-            row.ban_score = self.score
-            row.ban = ban
+            if ban is not None:
+                self.scores.append(score)
+                if self.score < config.ban_mean - 2 * config.ban_std:
+                    ban = self.check_low_quality(row, ban)
+                if self.echo and self.score < config.ban_mean - 3 * config.ban_std:
+                    print(f"WARNING {row.numero} {row.rue1} {row.cp} {row.commune}  =>"
+                          f" {ban.numero} {ban.nom_voie} {ban.code_postal} {ban.nom_commune} @{self.score * 100:.1f}%")
+                row.ban_score = self.score
+                row.ban = ban
+            else:
+                row.ban_score = 0
             if commit:
                 self.session.commit()
 
@@ -329,6 +340,7 @@ if __name__ == '__main__':
     bm.match()
     mean = np.mean(np.array(bm.total_scores))
     std = np.std(np.array(bm.total_scores))
+    print(f"Nb Error: {bm.nb_error}")
     print(f"Score average {mean * 100:.1f}%")
     print(f"Score median {np.median(np.array(bm.total_scores)) * 100:.1f}%")
     print(f"Score min {np.min(np.array(bm.total_scores)) * 100:.1f}%")
