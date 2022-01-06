@@ -1,5 +1,5 @@
 import difflib
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
 from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse
 from etab_parser import BaseParser, time0
@@ -18,6 +18,7 @@ class PSParser(BaseParser):
         self.nb_ps_to_match = 0
         self.cabinets: Dict[str, Cabinet] = {}
         self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], str]] = {}
+        self.inpps_france: Dict[Tuple[str, str], Set[str]] = {}
         self.inpps_temp: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
 
     def load_cache(self):
@@ -42,10 +43,15 @@ class PSParser(BaseParser):
             for pa in a.personne_activites:
                 key1 = pa.nom, pa.prenom, self.get_dept_from_cp(a.cp)
                 key2 = a.numero, a.rue, a.cp, a.commune
+                key0 = pa.nom, pa.prenom
                 if key1 not in self.inpps:
                     self.inpps[key1] = {key2: pa.inpp}
                 else:
                     self.inpps[key1][key2] = pa.inpp
+                if key0 not in self.inpps_france:
+                    self.inpps_france[key0] = {pa.inpp}
+                else:
+                    self.inpps_france[key0].add(pa.inpp)
                 self.nb_ram += 1
             session.expunge(a)
 
@@ -198,14 +204,22 @@ class PSParser(BaseParser):
         self.nb_ps_to_match += 1
         key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
         if key1 not in self.inpps:
+            # # Recherche 1 nom, prenom sur toute la france avec len == 1
+            # # Attention ca doit être la même logique ps_parser ET ps_tarif_parser
+            # # Donc ps_inpp_patcher n'est pas utilisable
+            # # Normalement va marcher tout seul et effectue les updates tout seul
+            # key0 = ps.nom, ps.prenom
+            # if key0 not in self.inpps_france:
+            #     self.inpps_temp[key3] = None
+            #     return None
+            # else:
+            #     if len(list(self.inpps_france[key0])) == 1:
+            #         self.nb_inpps += 1
+            #         self.inpps_temp[key3] = list(self.inpps_france[key0])[0]
+            #         return self.inpps_temp[key3]
             self.inpps_temp[key3] = None
             return None
         dico = self.inpps[key1]
-        # if len(dico.keys()) == 1: # Cas 1 seul dans le dept, non testé, peut être 1 seul en france
-        #                           # Si benjamin le veut on le en sql update
-        #     self.nb_inpps += 1
-        #     self.inpps_temp[key3] = list(dico.values())[0]
-        #     return self.inpps_temp[key3]
         key2 = a.numero, a.rue1, a.cp, a.commune
         if key2 in dico:
             self.nb_inpps += 1
@@ -252,19 +266,16 @@ class PSParser(BaseParser):
                 e.has_inpp = True
             if e.key in self.entities:
                 same = e.equals(self.entities[e.key])
-                # if not same: # TODO à enlever provisoirement < 2000
-                #     self.entities[e.key].genre = e.genre
-                #     self.nb_update_entity += 1
+                if not same:
+                    self.entities[e.key].genre = e.genre
+                    self.nb_update_entity += 1
                 e = self.entities[e.key]
             else:
                 self.entities[e.key] = e
                 self.nb_new_entity += 1
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
-            # a = self.create_update_adresse_raw(row)
             c.adresse_raw = a
-            # n = self.create_update_norm(c.adresse_raw)
-            # self.match_inpp(e, n)
             self.context.session.commit()
 
 
