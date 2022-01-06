@@ -201,10 +201,11 @@ class PSParser(BaseParser):
             self.inpps_temp[key3] = None
             return None
         dico = self.inpps[key1]
-        # if len(dico.keys()) == 1:
-        #     print(key3, dico)
-        # if key3 == ('POURCHET', 'MARIE', 3, 'RUE GRANDE RUE', 1600, 'TREVOUX'):
-        #     print("Debug")
+        # if len(dico.keys()) == 1: # Cas 1 seul dans le dept, non testé, peut être 1 seul en france
+        #                           # Si benjamin le veut on le en sql update
+        #     self.nb_inpps += 1
+        #     self.inpps_temp[key3] = list(dico.values())[0]
+        #     return self.inpps_temp[key3]
         key2 = a.numero, a.rue1, a.cp, a.commune
         if key2 in dico:
             self.nb_inpps += 1
