@@ -210,7 +210,6 @@ class PSParser(BaseParser):
             return self.inpps_temp[key3]
         self.nb_ps_to_match += 1
         # Recherche 1 nom, prenom sur toute la france avec len == 1
-        # Attention ca doit être la même logique ps_parser ET ps_tarif_parser
         key0 = ps.nom, ps.prenom
         if key0 not in self.inpps_france:
             self.inpps_temp[key3] = None
