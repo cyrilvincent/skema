@@ -1,7 +1,7 @@
 import difflib
 from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse
+from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
 from etab_parser import BaseParser, time0
 import argparse
 import time
@@ -20,6 +20,7 @@ class PSParser(BaseParser):
         self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], str]] = {}
         self.inpps_france: Dict[Tuple[str, str], Set[str]] = {}
         self.inpps_temp: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
+        self.ps_merges: Dict[str, str] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -31,6 +32,10 @@ class PSParser(BaseParser):
         l: List[Cabinet] = self.context.session.query(Cabinet).all()
         for c in l:
             self.cabinets[c.key] = c
+            self.nb_ram += 1
+        l: List[PSMerge] = self.context.session.query(PSMerge).all()
+        for p in l:
+            self.ps_merges[p.key] = p.inpp
             self.nb_ram += 1
         self.load_cache_inpp()
         print(f"{self.nb_ram} objects in cache")
@@ -179,9 +184,9 @@ class PSParser(BaseParser):
             if score > max:
                 max = score
                 inpp = dico[k]
-        if max > config.inpp_quality:
+        if max > 0.75:  # je confirme que ca ne doit pas être dans config
             return inpp
-        if len(set(dico.values())) == 1 and max > (config.inpp_quality * 0.9):
+        if len(set(dico.values())) == 1:  # and max > (config.inpp_quality * 0.9):
             return inpp
         return None
 
@@ -198,25 +203,25 @@ class PSParser(BaseParser):
         return False
 
     def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+        if ps.key in self.ps_merges:
+            return self.ps_merges[ps.key]
         key3 = ps.nom, ps.prenom, a.numero, a.rue1, a.cp, a.commune
         if key3 in self.inpps_temp:
             return self.inpps_temp[key3]
         self.nb_ps_to_match += 1
+        # Recherche 1 nom, prenom sur toute la france avec len == 1
+        # Attention ca doit être la même logique ps_parser ET ps_tarif_parser
+        key0 = ps.nom, ps.prenom
+        if key0 not in self.inpps_france:
+            self.inpps_temp[key3] = None
+            return None
+        else:
+            if len(list(self.inpps_france[key0])) == 1:
+                self.nb_inpps += 1
+                self.inpps_temp[key3] = list(self.inpps_france[key0])[0]
+                return self.inpps_temp[key3]
         key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
         if key1 not in self.inpps:
-            # # Recherche 1 nom, prenom sur toute la france avec len == 1
-            # # Attention ca doit être la même logique ps_parser ET ps_tarif_parser
-            # # Donc ps_inpp_patcher n'est pas utilisable
-            # # Normalement va marcher tout seul et effectue les updates tout seul
-            # key0 = ps.nom, ps.prenom
-            # if key0 not in self.inpps_france:
-            #     self.inpps_temp[key3] = None
-            #     return None
-            # else:
-            #     if len(list(self.inpps_france[key0])) == 1:
-            #         self.nb_inpps += 1
-            #         self.inpps_temp[key3] = list(self.inpps_france[key0])[0]
-            #         return self.inpps_temp[key3]
             self.inpps_temp[key3] = None
             return None
         dico = self.inpps[key1]
@@ -267,8 +272,9 @@ class PSParser(BaseParser):
             if e.key in self.entities:
                 same = e.equals(self.entities[e.key])
                 if not same:
-                    self.entities[e.key].genre = e.genre
-                    self.nb_update_entity += 1
+                    if e.genre is not None:
+                        self.entities[e.key].genre = e.genre
+                        self.nb_update_entity += 1
                 e = self.entities[e.key]
             else:
                 self.entities[e.key] = e
@@ -305,6 +311,8 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+
+    # Avant de refaire tourner valider vider la table ps_merge
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s

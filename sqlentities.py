@@ -516,3 +516,14 @@ class INPPDiplome(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.diplome_id}"
+
+
+class PSMerge(Base):
+    __tablename__ = "ps_merge"
+
+    id = Column(Integer, primary_key=True)
+    key = Column(String(255), nullable=False, unique=True, index=True)
+    inpp = Column(String(12), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.key} {self.inpp}"

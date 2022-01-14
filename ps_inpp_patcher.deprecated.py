@@ -1,12 +1,9 @@
-import difflib
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 
-from sqlalchemy import false
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PersonneActivite
-from etab_parser import BaseParser, time0
+
+from sqlentities import Context, PS, PersonneActivite, PSCabinetDateSource
 import argparse
-import time
 import art
 import config
 
@@ -21,6 +18,7 @@ class PSInppPatcher:
         self.nb_update = 0
         self.nb_no_match = 0
         self.nb_ambiguity = 0
+        self.nb_duplicate = 0
 
     def load_cache(self):
         print("Making cache")
@@ -36,7 +34,9 @@ class PSInppPatcher:
         print(f"{self.nb_ram} objects in cache")
 
     def patch(self):
-        pss = self.context.session.query(PS).filter(PS.has_inpp.is_(False))
+        pss = self.context.session.query(PS) \
+            .join(PS.ps_cabinet_date_sources) \
+            .filter(PS.has_inpp.is_(False)).order_by(PSCabinetDateSource.date_source_id.desc())
         for ps in pss:
             self.nb += 1
             pas = self.context.session.query(PersonneActivite).filter(
@@ -44,10 +44,16 @@ class PSInppPatcher:
             )
             inpps = set([pa.inpp for pa in pas])
             if len(inpps) == 1:
+                print(f"{ps} => {list(inpps)[0]}")
                 self.nb_update += 1
                 ps.key = list(inpps)[0]
                 ps.has_inpp = True
-                # self.context.session.commit()
+                try:
+                    self.context.session.commit()
+                except:
+                    self.nb_duplicate += 1
+                    self.context.session.rollback()
+                    self.context.session.expunge(ps)
             elif len(inpps) == 0:
                 self.nb_no_match += 1
             else:
@@ -74,6 +80,7 @@ if __name__ == '__main__':
     print(f"INPP update: {psp.nb_update}")
     print(f"INPP no_match: {psp.nb_no_match}")
     print(f"INPP ambiguity: {psp.nb_ambiguity}")
+    print(f"INPP duplicate: {psp.nb_duplicate}")
 
     # PS = 172404 au total 137671 au 2112
     # has_inpp = 137671 soit 88% au 2112, 74% au total
@@ -81,12 +88,12 @@ if __name__ == '__main__':
     # no_match = 5%
     # ambiguity = 3%
 
-    # select count(*) from ps, cabinet, ps_cabinet_date_source
-    # where ps_cabinet_date_source.cabinet_id = cabinet.id
-    # and ps_cabinet_date_source.date_source_id = 2103
+    # select count(*) from ps, ps_cabinet_date_source
+    # where ps_cabinet_date_source.date_source_id = 2010
     # and ps_cabinet_date_source.ps_id = ps.id
     # and ps.has_inpp = true
 
-    # NE PAS UTILISER CAR PS_TARIF_PARSER ne marcherait plus
-    # Utiliser ps_parser qui va faire les update automatiquement, à vérifier
+    # 472525 173165 = 761
+    # 472064
+
 

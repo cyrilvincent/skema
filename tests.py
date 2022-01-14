@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 
 from etab_parser import EtabParser
 from etalab_parser import EtalabParser
+from ps_merge import PSMerger
 from ps_parser import PSParser
 from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
@@ -550,6 +551,26 @@ class ICIPTests(TestCase):
         self.assertEqual("04 74 45 41 14", t.telecopie)
         self.assertEqual("26010004500012", t.siret)
         self.assertEqual("8610Z", t.codeape)
+
+    def test_ps_merger(self):
+        context = Context()
+        context.create(echo=True)
+        psm = PSMerger(context)
+        ps1 = psm.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources)) \
+            .options(joinedload(PS.tarifs)).filter(PS.key == "BENYOUB_DA_SILVA_KARIMA_01000").first()
+        nb_cabinet1 = len(ps1.ps_cabinet_date_sources)
+        nb_tarif1 = len(ps1.tarifs)
+        ps2 = psm.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources)) \
+            .options(joinedload(PS.tarifs)).filter(PS.key == "810100779536").first()
+        nb_cabinet2 = len(ps2.ps_cabinet_date_sources)
+        nb_tarif2 = len(ps2.tarifs)
+        psm.merge_ps(ps1, ps2)
+        self.assertEqual(0, len(ps1.ps_cabinet_date_sources))
+        self.assertEqual(0, len(ps1.tarifs))
+        self.assertEqual(nb_cabinet1 + nb_cabinet2, len(ps2.ps_cabinet_date_sources))
+        self.assertEqual(nb_tarif1 + nb_tarif2, len(ps2.tarifs))
+        psm.context.session.commit()
+
 
 
 
