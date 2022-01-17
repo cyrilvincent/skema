@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Tuple
 from sqlalchemy.orm import joinedload
 from ps_parser import PSParser
 from sqlentities import *
@@ -18,7 +18,7 @@ class PSTarifParser(PSParser):
         self.natures: Dict[int, Nature] = {}
         self.conventions: Dict[str, Convention] = {}
         self.famille_actes: Dict[int, FamilleActe] = {}
-        self.ps_id = 0 # TODO temp
+        # self.ps_id = 0  # TODO temp
 
     def load_cache(self):
         print("Making cache")
@@ -59,6 +59,7 @@ class PSTarifParser(PSParser):
             self.famille_actes[f.id] = f
             self.nb_ram += 1
         self.load_cache_inpp()
+        print(f"{self.nb_ram:.0f} objects in cache")
         self.load_cache_tarif()
         print(f"{self.nb_ram:.0f} objects in cache")
 
@@ -159,15 +160,15 @@ class PSTarifParser(PSParser):
         else:
             self.nb_tarif += 1
             t.cabinet = c
-            e.tarifs.append(t) # TODO Je pense qu'un lazy part à ce moment là select * from tarif where ps_id = ?
+            e.tarifs.append(t)  # TODO Je pense qu'un lazy part à ce moment là select * from tarif where ps_id = ?
         if self.date_source not in t.date_sources:
             t.date_sources.append(self.date_source)
         return t
 
     def parse_row(self, row):
         if len(self.tarifs) == 0:
-            print("Error No tarif in db")
-            quit(5)
+            print("Error: No tarif in db")
+            input("CTRL+C to stop, enter to continue")
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
             e = self.mapper(row)
@@ -215,3 +216,5 @@ if __name__ == '__main__':
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
     # Dernier parse: 2101
     # UFS SS Tout est fait
+
+    # INPP 87%, 95% pour 2112

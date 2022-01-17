@@ -1,8 +1,10 @@
 import os
 
 path = "data/ps"
-path = "data/UFC"
-path = "data/SanteSpecialite"
+# path = "data/UFC"
+exe = "ps_parser.py"
+exe = "ps_tarif_parser.py"
+
 l = os.listdir(path)
 l.sort()
 for f in l:
@@ -15,7 +17,7 @@ for f in l:
             continue
         ds = yy * 100 + mm
         if ds >= 0:
-            s = f'python ps_tarif_parser.py "{path}/{f}"'
+            s = f'python {exe} "{path}/{f}"'
             print(s)
             code = os.system(s)
             if code != 0:

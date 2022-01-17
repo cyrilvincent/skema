@@ -2,9 +2,8 @@ import difflib
 from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
 from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
-from etab_parser import BaseParser, time0
+from etab_parser import BaseParser
 import argparse
-import time
 import art
 import config
 
@@ -317,3 +316,19 @@ if __name__ == '__main__':
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ Enlever le update genre
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
+
+    # select cast(data1.count1 as float)/ cast(data2.count2 as float)
+    # from
+    # (select count(*) as count1 from ps where has_inpp is true) data1,
+    # (select count(*) as count2 from ps) data2
+
+    # select cast(data1.count1 as float)/ cast(data2.count2 as float)
+    # from
+    # (select count(*) as count1 from ps, ps_cabinet_date_source
+    #  	where ps_cabinet_date_source.ps_id = ps.id
+    #  	and ps_cabinet_date_source.date_source_id = 2112
+    #  	and has_inpp is true) data1,
+    # (select count(*) as count2 from ps, ps_cabinet_date_source
+    # 	where ps_cabinet_date_source.ps_id = ps.id
+    #  	and ps_cabinet_date_source.date_source_id = 2112
+    # ) data2
