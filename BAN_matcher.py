@@ -8,6 +8,7 @@ import config
 import difflib
 import numpy as np
 
+
 time0 = time.perf_counter()
 
 

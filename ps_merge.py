@@ -1,12 +1,8 @@
-import difflib
-from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
 
 from ps_parser import PSParser
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
-from base_parser import BaseParser, time0
+from sqlentities import Context, PS, PSMerge
 import argparse
-import time
 import art
 import config
 

@@ -6,7 +6,6 @@ from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
 from score_matcher import ScoreMatcher
 from threading import Thread
-import time
 
 
 class Cachethread(Thread):
@@ -58,7 +57,3 @@ if __name__ == '__main__':
             print(f"Distance: {d}m")
         except Exception as ex:
             print(f"ERROR: {ex}, do again")
-
-
-
-
