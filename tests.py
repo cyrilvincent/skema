@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from sqlalchemy.orm import joinedload
 
-from etab_parser import EtabParser
+from base_parser import EtabParser
 from etalab_parser import EtalabParser
 from ps_merge import PSMerger
 from ps_parser import PSParser
@@ -37,15 +37,12 @@ class ICIPTests(TestCase):
         context = Context()
         context.create(echo=True)
         ep = EtabParser(context)
-        ep.load_cache()
-
+    #     ep.load_cache()
+    #
     # def test_etab_mapper(self):
-    #     context = Context()
-    #     context.create(echo=True)
-    #     ep = EtabParser(context)
+    #     ep = EtabParser(None)
     #     s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1570 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
     #     row = s.split(";")
-    #     ep.load_cache()
     #     e = ep.mapper(row)
     #     self.assertEqual(123456789, e.id)
     #     self.assertEqual("Cyril Vincent", e.nom)

@@ -14,6 +14,7 @@ class AdresseParser:
         self.nbfile = 0
         self.nbadresse = 0
         self.set = set()
+        self.set = set()
 
     def normalize(self, s: str):
         s = unidecode.unidecode(s.upper()).replace("'", " ").replace("-", " ").replace("/", " ").replace(".", "")

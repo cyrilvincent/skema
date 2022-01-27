@@ -2,7 +2,7 @@ import difflib
 from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
 from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
-from etab_parser import BaseParser
+from base_parser import BaseParser
 import argparse
 import art
 import config

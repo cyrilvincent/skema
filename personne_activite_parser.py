@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple, Optional
 
 from sqlalchemy.orm import joinedload
 from sqlentities import Context, PersonneActivite, PAAdresse, Dept
-from etab_parser import BaseParser, time0
+from base_parser import BaseParser, time0
 import argparse
 import time
 import art

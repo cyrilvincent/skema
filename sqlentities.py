@@ -243,9 +243,9 @@ class Etablissement(Base):
     rs = Column(String(50), nullable=False)
     rslongue = Column(String(255), nullable=False)
     complrs = Column(String(255))
-    mft: Column(String(10))
-    categetab: Column(Integer)
-    categretab: Column(Integer)
+    mft = Column(String(10))
+    categetab = Column(Integer)
+    categretab = Column(Integer)
     sph = Column(Integer)
     telephone = Column(String(20))
     telecopie = Column(String(20))
@@ -265,6 +265,9 @@ class Etablissement(Base):
     def equals(self, other):
         return self.nofinesset == other.nofinesset and self.nofinessej == other.nofinessej \
                and self.rs == other.rs and self.rslongue == other.rslongue \
+               and self.complrs == other.complrs and self.mft == other.mft \
+               and self.categetab == other.categetab and self.categretab == other.categretab \
+               and self.sph == other.sph and self.siret == other.siret \
                and self.telephone == other.telephone and self.datemaj == other.datemaj \
                and self.codeape == other.codeape
 

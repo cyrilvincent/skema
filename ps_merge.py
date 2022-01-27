@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 
 from ps_parser import PSParser
 from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
-from etab_parser import BaseParser, time0
+from base_parser import BaseParser, time0
 import argparse
 import time
 import art

@@ -1,6 +1,6 @@
 from typing import Optional, List, Tuple
 from sqlalchemy.orm import joinedload
-from etab_parser import BaseParser
+from base_parser import BaseParser
 from sqlentities import Context, DateSource, Etablissement, EtablissementType, AdresseRaw, AdresseNorm
 import argparse
 import time
@@ -159,9 +159,6 @@ class EtalabParser(BaseParser):
             if e.nofinesset in self.entities:
                 same = e.equals(self.entities[e.nofinesset])
                 if not same:
-                    # Si on veut dupliquer les lignes en cas de modif
-                    # self.entities[e.nofinesset] = e
-                    # self.context.session.add(e)
                     self.pseudo_clone(e, self.entities[e.nofinesset])
                     self.nb_update_entity += 1
                 e = self.entities[e.nofinesset]
@@ -205,5 +202,5 @@ if __name__ == '__main__':
     print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/etalab/etalab_small_20201231.csv -e
-    # data/etalab/etalab_small_20041231.csv -e
+    # data/etalab/etalab_xsmall_20201231.csv -e
     # data/etalab/etalab_stock_et_20201231.csv

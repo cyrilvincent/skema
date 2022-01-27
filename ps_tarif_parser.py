@@ -214,7 +214,5 @@ if __name__ == '__main__':
     # data/ps/ps-tarifs-21-03.csv
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
-    # Dernier parse: 2101
-    # UFS SS Tout est fait
 
     # INPP 87%, 95% pour 2112
