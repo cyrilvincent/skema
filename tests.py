@@ -33,25 +33,6 @@ class ICIPTests(TestCase):
         path = "toto_00-00.csv"
         ep.check_date(path)
 
-    def test_etab_cache(self):
-        context = Context()
-        context.create(echo=True)
-        ep = EtabParser(context)
-    #     ep.load_cache()
-    #
-    # def test_etab_mapper(self):
-    #     ep = EtabParser(None)
-    #     s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1570 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
-    #     row = s.split(";")
-    #     e = ep.mapper(row)
-    #     self.assertEqual(123456789, e.id)
-    #     self.assertEqual("Cyril Vincent", e.nom)
-    #     self.assertEqual("Privé non lucratif", e.type.type)
-    #     self.assertEqual("0622538762", e.telephone)
-    #     self.assertEqual("contact@cyrilvincent.com", e.mail)
-    #     self.assertEqual("Cyril Vincent Conseil", e.nom2)
-    #     self.assertEqual("www.cyrilvincent.com", e.url)
-
     def test_pseudo_clone(self):
         ep = EtabParser(None)
         e1 = Etablissement(id=1, rs="Cyril Vincent", telephone="0622538762")
