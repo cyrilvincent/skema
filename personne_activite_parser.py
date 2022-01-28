@@ -75,6 +75,7 @@ class PersonneActiviteParser(BaseParser):
                     a.rue = row["Libellé type de voie (coord. structure)"] + " " + a.rue
             if a.rue is not None:
                 a.rue = self.normalize_street(a.rue)
+            a.code_commune = self.get_nullable(row["Code commune (coord. structure)"])
         except Exception as ex:
             print(f"ERROR pa_adresse row {self.row_num}: {a}\n{ex}\n{row}")
             quit(4)
@@ -84,7 +85,10 @@ class PersonneActiviteParser(BaseParser):
         a = self.pa_adresse_mapper(row)
         if a is not None:
             if a.key in self.pa_adresses:
+                code_commune = a.code_commune
                 a = self.pa_adresses[a.key]
+                if code_commune is not None and a.code_commune != code_commune:
+                    a.code_commune = code_commune
             else:
                 self.nb_new_adresse += 1
                 self.pa_adresses[a.key] = a

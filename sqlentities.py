@@ -254,6 +254,7 @@ class Etablissement(Base):
     dateouvert = Column(String(50))
     datemaj = Column(String(50))
     codeape = Column(String(50))  # Pas dans tous
+    cog = Column(String(5))
     adresse_raw: AdresseRaw = relationship("AdresseRaw")
     adresse_raw_id = Column(Integer, ForeignKey('adresse_raw.id'), nullable=False)
     date_sources: List[DateSource] = relationship("DateSource",
@@ -269,7 +270,7 @@ class Etablissement(Base):
                and self.categetab == other.categetab and self.categretab == other.categretab \
                and self.sph == other.sph and self.siret == other.siret \
                and self.telephone == other.telephone and self.datemaj == other.datemaj \
-               and self.codeape == other.codeape
+               and self.codeape == other.codeape and self.cog == other.cog \
 
 
 class Cabinet(Base):
@@ -469,6 +470,7 @@ class PAAdresse(Base):
     rue = Column(String(255))
     cp = Column(Integer, nullable=False)
     commune = Column(String(255), nullable=False)
+    code_commune = Column(String(5))
     dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",

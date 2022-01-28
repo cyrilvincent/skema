@@ -51,6 +51,7 @@ class EtalabParser(BaseParser):
             e.dateautor = self.get_nullable(row["dateautor"])
             e.dateouvert = self.get_nullable(row["dateouvert"])
             e.datemaj = self.get_nullable(row["datemaj"])
+            e.cog = self.get_nullable(row["cog"])
             e.codeape = None
             if "codeape" in row:
                 e.codeape = self.get_nullable(row["codeape"])
@@ -145,7 +146,7 @@ class EtalabParser(BaseParser):
         if n.source_id is None or n.source_id != 3:
             lon, lat = self.lon_lat_mapper(row)
             if lon is not None and lat is not None:
-                if 55 > lat > 40 and 10 > lon > -10:
+                if 60 > lat > 35 and 20 > lon > -20:
                     n.lat = lat
                     n.lon = lon
                     n.source = self.sources[3]
