@@ -532,3 +532,26 @@ class PSMerge(Base):
 
     def __repr__(self):
         return f"{self.id} {self.key} {self.inpp}"
+
+class OD(Base):
+    __tablename__ = "od"
+
+    id = Column(Integer, primary_key=True)
+    com1 = Column(String(5), nullable=False)
+    com2 = Column(String(5), nullable=False)
+    km = Column(Float, nullable=False)
+    hc = Column(Float, nullable=False)
+    hp = Column(Float, nullable=False)
+
+    __table_args__ = (UniqueConstraint('com1', 'com2'),)
+
+    @property
+    def key(self):
+        return self.com1, self.com2
+
+    def equals(self, other) -> bool:
+        return self.com1 == other.com1 and self.com2 == other.com2 and self.km == other.km\
+               and self.hc == other.hc and self.hp == other.hp
+
+    def __repr__(self):
+        return f"{self.id} {self.com1} {self.com2} {self.km}"

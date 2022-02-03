@@ -1,0 +1,24 @@
+Parsing d'un fichier Etablissement de type etalab_stock_et_yyyymmdd.csv
+python etalab_parser.py data/etalab/etalab_stock_et_20201231.csv
+
+Parsing d'un fichier PS de type ps-tarifs-yy-mm.csv
+python ps_parser.py data/ps/ps-tarifs-12-12.csv
+python ps_tarif_parser.py data/ps/ps-tarifs-12-12.csv
+
+Géolocalisation
+python BAN_matcher.py
+python OSM_matcher.py
+python score_matcher.py
+
+Parsing d'un fichier BAN
+python BAN_parser.py path
+
+Parsing des fichiers PS_LibreAcess_*
+python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
+python diplome_parser.py data/ps_libreacces/PS_LibreAcess_Dipl_AutExerc_202112000000.txt
+python diplome_parser.py -s data/ps_libreacces/PS_LibreAcess_SavoirFaire_202112000000.txt
+
+Parsing EHPAD
+python ehpad_parser.py path
+
+
