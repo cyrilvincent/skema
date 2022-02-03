@@ -21,4 +21,7 @@ python diplome_parser.py -s data/ps_libreacces/PS_LibreAcess_SavoirFaire_2021120
 Parsing EHPAD
 python ehpad_parser.py path
 
+Parsing OD
+python od_parser.py data/od/ODfinale.csv
+
 

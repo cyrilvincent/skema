@@ -1,7 +1,5 @@
-import difflib
-from typing import Dict, List, Tuple, Optional, Set
-from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge, OD
+from typing import List
+from sqlentities import Context, OD
 from base_parser import BaseParser
 import argparse
 import art
@@ -17,11 +15,13 @@ class ODParser(BaseParser):
         pass
 
     def load_cache(self):
-        print("Making cache")
+        print("Making cache, very slow and need a lot of RAM")
         l: List[OD] = self.context.session.query(OD).all()
         for o in l:
             self.entities[o.key] = o
             self.nb_ram += 1
+            if self.nb_ram % 1000000 == 0:
+                print(f"{self.nb_ram:.0f} objects in cache")
         print(f"{self.nb_ram} objects in cache")
 
     def mapper(self, row) -> OD:

@@ -180,6 +180,9 @@ class BaseParser(metaclass=ABCMeta):
 
 
 class EtabParser(BaseParser):
+    """
+    DEPRECATED
+    """
 
     def __init__(self, context):
         super().__init__(context)
