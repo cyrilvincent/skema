@@ -158,6 +158,11 @@ class PSParser(BaseParser):
             n.numero, n.rue1 = self.split_num(a.adresse2)
             n.rue1 = self.normalize_street(n.rue1)
             n.rue2 = self.normalize_street(a.adresse3) if a.adresse3 is not None else None
+        # Ajout release
+        if n.rue1 == '':
+            n.rue1 = None
+        if n.rue1 is None and n.numero is not None:
+            n.numero = None
         return n
 
     def convert_key_to_rue_string(self, key: Tuple[Optional[int], Optional[str], int, str]) -> str:

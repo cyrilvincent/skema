@@ -35,7 +35,7 @@ class BANMatcher:
         self.scores = []
         self.total_scores = []
         self.nb_error = 0
-        self.filter_no_force = AdresseNorm.ban_score.is_(None) & AdresseNorm.score.is_(None)
+        self.filter_no_force = AdresseNorm.ban_score.is_(None) # & AdresseNorm.score.is_(None)
         if self.depts is None:
             self.depts = list(range(1, 20)) + list(range(21, 96)) + [201, 202]
 
@@ -51,10 +51,8 @@ class BANMatcher:
                 self.cedexs[c.cedex] = c.cp
 
     def make_cache1(self, d: int):
-        print(f"Make cache level 1 for dept {d}")
         self.session = self.context.get_session(False)
         self.dept = self.session.query(Dept).options(joinedload(Dept.bans)).get(d)
-        print(f"Make cache levels 2 and 3 for dept {d}")
         self.cps = {}
         self.cp_communes = {}
         self.cp_commune_rues = {}
@@ -230,11 +228,14 @@ class BANMatcher:
                     min = diff
             if res.numero is None:
                 score = 0.6
+            elif num == 0:
+                score = 0.75
             else:
                 score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
             return res, score
         except KeyError:
-            print(f"ERROR: No numero matching from {(cp, commune, rue)}")
+            if self.echo:
+                print(f"ERROR: No numero matching from {(cp, commune, rue)}")
             self.nb_error += 1
             return None, 0
 
@@ -351,3 +352,7 @@ if __name__ == '__main__':
     print(f"Parse {bm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
     # -e -l -d [5]
+
+    # To do before matching
+    # update adresse_norm set rue1 = null where rue1 = ''
+    # update adresse_norm set numero = null where rue1 is null and numero is not null

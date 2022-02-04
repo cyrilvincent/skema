@@ -34,17 +34,13 @@ class ICIPTests(TestCase):
         ep.check_date(path)
 
     def test_pseudo_clone(self):
-        ep = EtabParser(None)
+        ep = EtalabParser(None)
         e1 = Etablissement(id=1, rs="Cyril Vincent", telephone="0622538762")
         e2 = Etablissement(id=2)
         ep.pseudo_clone(e1, e2)
         self.assertEqual(2, e2.id)
         self.assertEqual("Cyril Vincent", e2.rs)
         self.assertEqual("0622538762", e2.telephone)
-        e2.codeape = "xyz"
-        e1.codeape = None
-        self.assertIsNone(e1.codeape)
-        ep.pseudo_clone(e1, e2)
         self.assertIsNone(e2.codeape)
         e1.codeape = "abc"
         ep.pseudo_clone(e1, e2)
@@ -510,6 +506,7 @@ class ICIPTests(TestCase):
         context.create(echo=True)
         p = EtalabParser(context)
         h = "nofinesset;nofinessej;rs;rslongue;complrs;compldistrib;numvoie;typvoie;voie;compvoie;lieuditbp;region;libregion;departement;libdepartement;cog;codepostal;libelle_routage;ligneacheminement;telephone;telecopie;categetab;libcategetab;liblongcategetab;categretab;libcategretab;siret;codeape;libcodeape;mft;libmft;liblongmft;sph;libsph;numen;coordx;coordy;sourcegeocod;dategeocod;dateautor;dateouvert;datemaj"
+        # h = "nofinesset;nofinessej;rs;rslongue;complrs;compldistrib;numvoie;typvoie;voie;compvoie;lieuditbp;region;departement;libdepartement;ligneacheminement;telephone;telecopie;categetab;libcategetab;categretab;libcategretab;siret;codeape;mft;libmft;sph;libsph;dateouvert;dateautor;datemaj;nofinesset;coordx;coordy;sourcegeocod;dategeocod"
         headers = h.split(";")
         s = "010000024;010780054;CH DE FLEYRIAT;CENTRE HOSPITALIER DE BOURG-EN-BRESSE FLEYRIAT;;;900;RTE;DE PARIS;;;84;AUVERGNE-RHONE-ALPES;01;AIN;01451;01440;VIRIAT;01440 VIRIAT;04 74 45 46 47;04 74 45 41 14;355;C.H.;Centre Hospitalier (C.H.);1102;Centres Hospitaliers;26010004500012;8610Z;Activit�s hospitali�res;03;ARS / DG EPS;ARS �tablissements Publics de sant� dotation globale;1;Etab.public de sant�;;870215.7;6571590.5;1,ATLASANTE,100,IGN,BD_ADRESSE,V2.2,LAMBERT_93;2021-01-04;1979-02-13;1979-02-13;2020-02-04"
         row = s.split(";")

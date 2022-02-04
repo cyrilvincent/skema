@@ -97,8 +97,7 @@ class BaseParser(metaclass=ABCMeta):
 
     def pseudo_clone(self, from_obj: object, to_obj):
         for a in from_obj.__dict__:
-            if type(from_obj.__getattribute__(a)) in [str, int, float, type(None)] and a not in ['id'] \
-                    and not a.startswith('_'):
+            if type(from_obj.__getattribute__(a)) in [str, int, float] and a not in ['id'] and not a.startswith('_'):
                 to_obj.__setattr__(a, from_obj.__getattribute__(a))
 
     def split_num(self, s: str) -> Tuple[Optional[int], str]:

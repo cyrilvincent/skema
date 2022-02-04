@@ -24,6 +24,7 @@ class EtalabParser(BaseParser):
             .options(joinedload(Etablissement.date_sources)).all()
         for e in l:
             self.entities[e.nofinesset] = e
+        print(f"{self.nb_ram} objects in cache")
 
     def parse_date(self, path):
         try:
@@ -51,10 +52,8 @@ class EtalabParser(BaseParser):
             e.dateautor = self.get_nullable(row["dateautor"])
             e.dateouvert = self.get_nullable(row["dateouvert"])
             e.datemaj = self.get_nullable(row["datemaj"])
-            e.cog = self.get_nullable(row["cog"])
-            e.codeape = None
-            if "codeape" in row:
-                e.codeape = self.get_nullable(row["codeape"])
+            e.cog = self.get_nullable(row["cog"]) if "cog" in row else None
+            e.codeape = self.get_nullable(row["codeape"]) if "codeape" in row else None
         except Exception as ex:
             print(f"ERROR Etablissement row {self.row_num} {e}\n{ex}\n{row}")
             quit(1)
