@@ -124,6 +124,10 @@ class EtalabParser(BaseParser):
         n.cp = a.cp
         n.commune = self.normalize_commune(a.commune)
         n.dept = a.dept
+        if n.rue1 == '':
+            n.rue1 = None
+        if n.rue1 is None and n.numero is not None:
+            n.numero = None
         return n
 
     def create_update_norm(self, a: AdresseRaw):

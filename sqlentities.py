@@ -372,7 +372,7 @@ class FamilleActe(Base):
     __tablename__ = "famille_acte"
 
     id = Column(Integer, primary_key=True)
-    libelle = Column(String, nullable=False)
+    libelle = Column(String(255), nullable=False)
 
     def __repr__(self):
         return f"{self.id} {self.libelle}"

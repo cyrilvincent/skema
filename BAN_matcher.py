@@ -229,7 +229,7 @@ class BANMatcher:
             if res.numero is None:
                 score = 0.6
             elif num == 0:
-                score = 0.75
+                score = 0.9
             else:
                 score = max(0.8 - abs(res.numero - num) / (num * 0.1), 0.4)
             return res, score
@@ -347,12 +347,6 @@ if __name__ == '__main__':
     print(f"Score median {np.median(np.array(bm.total_scores)) * 100:.1f}%")
     print(f"Score min {np.min(np.array(bm.total_scores)) * 100:.1f}%")
     print(f"Score std {std * 100:.1f}%")
-    print(f"Score average-std {(mean - std) * 100:.1f}%")
-    print(f"Score average-3std {(mean - 3 * std) * 100:.1f}%")
     print(f"Parse {bm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
     # -e -l -d [5]
-
-    # To do before matching
-    # update adresse_norm set rue1 = null where rue1 = ''
-    # update adresse_norm set numero = null where rue1 is null and numero is not null
