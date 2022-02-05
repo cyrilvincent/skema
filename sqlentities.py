@@ -381,7 +381,6 @@ class FamilleActe(Base):
 class Tarif(Base):
     __tablename__ = "tarif"
 
-    # TODO Index métier à définir avec Benjamin
     id = Column(Integer, primary_key=True)
     profession: Profession = relationship("Profession")
     profession_id = Column(Integer, ForeignKey('profession.id'))

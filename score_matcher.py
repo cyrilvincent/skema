@@ -69,11 +69,11 @@ class ScoreMatcher:
                 row.score = row.ban_score
             elif row.osm is not None:
                 d = self.calc_distance(row.ban.lon, row.ban.lat, row.osm.lon, row.osm.lat)
-                if d < 50:
+                if d < 100:
                     row.source = self.sources[4]
                     row.lon, row.lat = row.ban.lon, row.ban.lat
                     row.score = 1
-                if d < 100:
+                if d < 250:
                     row.source = self.sources[4]
                     row.lon, row.lat = row.ban.lon, row.ban.lat
                     row.score = min(1, max(row.ban_score, row.osm_score) + 0.1)
