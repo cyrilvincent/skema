@@ -23,7 +23,8 @@ python OSM_matcher.py
 python score_matcher.py
 
 Parsing d'un fichier BAN
-python BAN_parser.py path
+python BAN_parser.py
+Le répertoire des fichiers BAN et lieux-dits doivent être dans data/adresse, par département
 
 Parsing des fichiers PS_LibreAcess_*
 python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
