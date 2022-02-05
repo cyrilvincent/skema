@@ -17,7 +17,6 @@ class Cachethread(Thread):
 
     def run(self) -> None:
         self.bm.make_cache1(dept)
-        print("End cache")
 
 
 if __name__ == '__main__':
@@ -26,7 +25,6 @@ if __name__ == '__main__':
     print("===============")
     print(f"V{config.version}")
     print(config.copyright)
-    print()
     bm = BANMatcher([])
     bm.make_cache0()
     olddept = 0
@@ -36,7 +34,12 @@ if __name__ == '__main__':
         try:
             ar = AdresseRaw()
             psp = PSParser(None)
-            ar.cp = int(input("Code Postal: "))
+            print()
+            print("[Enter] to exit")
+            cp = input("Code Postal: ")
+            if cp == "":
+                quit(0)
+            ar.cp = int(cp)
             dept = psp.get_dept_from_cp(ar.cp)
             if dept != olddept:
                 th = Cachethread(dept, bm)

@@ -46,7 +46,7 @@ class BaseParser(metaclass=ABCMeta):
             self.sources[s.id] = s
             self.nb_ram += 1
         l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
-        # Erreur courante, quand le key ne matche pas c'est que le cp est en str
+        # Erreur courante, quand le key ne matche pas c'est que le cpcp est en str
         for a in l:
             self.adresse_raws[a.key] = a
             self.nb_ram += 1
