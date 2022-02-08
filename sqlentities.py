@@ -554,3 +554,25 @@ class OD(Base):
 
     def __repr__(self):
         return f"{self.id} {self.com1} {self.com2} {self.km}"
+
+class CPInsee(Base):
+    __tablename__ = "cp_insee"
+
+    id = Column(Integer, primary_key=True)
+    cp = Column(Integer, nullable=False, index=True)
+    libelle = Column(String(255), nullable=False)
+    insee = Column(String(5), nullable=False)
+    is_cedex = Column(Boolean, nullable=False)
+    commune = Column(String(255), nullable=False)
+    departement = Column(String(255), nullable=False)
+    epci = Column(String(255), nullable=False)
+    region = Column(String(255), nullable=False)
+
+    __table_args__ = (UniqueConstraint('cp', 'insee'),)
+
+    @property
+    def key(self):
+        return self.cp, self.insee
+
+    def __repr__(self):
+        return f"{self.id} {self.cp} {self.insee}"

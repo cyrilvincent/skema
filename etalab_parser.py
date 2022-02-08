@@ -82,7 +82,7 @@ class EtalabParser(BaseParser):
             a.adresse2 = self.get_nullable(row["compvoie"])
             a.cp = int(row["codepostal"])
             a.dept = self.depts[row["departement"]]
-            a.commune = row["libelle_routage"]
+            a.commune = row["libelle_routage"].strip()
         except Exception as ex:
             print(f"ERROR row {self.row_num} {a}\n{ex}\n{row}")
             quit(1)
