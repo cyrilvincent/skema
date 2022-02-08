@@ -37,6 +37,9 @@ python ehpad_parser.py path
 Parsing OD
 python od_parser.py data/od/ODfinale.csv
 
+Parsing Correspondance CP-INSEE
+python cp_insee_parser.py data/cedex/correspondance-code-cedex-code-insee.csv
+
 Fusion de 2 PS
 python ps_merge.py ps1_key ps2_inpp
 Cette commande va fusionner ps1 dans ps2, l'inpp final sera celui de ps2_inpp

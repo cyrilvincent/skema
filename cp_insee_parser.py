@@ -1,5 +1,5 @@
 from typing import List
-from sqlentities import Context, OD, CPInsee
+from sqlentities import Context, CPInsee
 from base_parser import BaseParser
 import argparse
 import art
@@ -15,7 +15,7 @@ class CPInseeParser(BaseParser):
         pass
 
     def load_cache(self):
-        print("Making cache ...")
+        print("Making cache")
         l: List[CPInsee] = self.context.session.query(CPInsee).all()
         for c in l:
             self.entities[c.key] = c

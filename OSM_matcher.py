@@ -168,7 +168,7 @@ class OSMMatcher:
             if osm is not None:
                 row.osm = osm
             self.session.commit()
-            if self.row_num % 1000 == 0 or self.row_num == 10 or self.row_num == 100:
+            if self.row_num % 10 == 0:
                 print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
         self.purge()
