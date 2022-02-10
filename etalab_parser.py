@@ -81,10 +81,13 @@ class EtalabParser(BaseParser):
             a.adresse4 = self.get_nullable(row["lieuditbp"])
             a.adresse2 = self.get_nullable(row["compvoie"])
             a.cp = int(row["codepostal"])
-            a.dept = self.depts[row["departement"]]
+            d = row["departement"]
+            if d == '.':
+                d = row["nofinesset"][:2]
+            a.dept = self.depts[d]
             a.commune = row["libelle_routage"].strip()
         except Exception as ex:
-            print(f"ERROR row {self.row_num} {a}\n{ex}\n{row}")
+            print(f"ERROR AdresseRaw row {self.row_num} {a}\n{ex}\n{row}")
             quit(1)
         return a
 
@@ -194,7 +197,7 @@ if __name__ == '__main__':
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mo")
     ep = EtalabParser(context)
-    ep.load(args.path, header=True, encoding="ANSI")
+    ep.load(args.path, header=True, encoding="ANSI", delimiter=";")
     print(f"New etablissement: {ep.nb_new_entity}")
     print(f"Update etablissement: {ep.nb_update_entity}")
     print(f"New adresse: {ep.nb_new_adresse}")
@@ -208,3 +211,13 @@ if __name__ == '__main__':
     # data/etalab/etalab_small_20201231.csv -e
     # data/etalab/etalab_xsmall_20201231.csv -e
     # data/etalab/etalab_stock_et_20201231.csv
+
+    # 186992	"010003184"	"010003176"	"PHARMACIE DU CARREFOUR"	"PHARMACIE DU CARREFOUR"			"04 74 45 22 82"	"04 74 45 14 69"	"51346803300016"	"2011-10-21"	"2012-11-26"	"2020-12-18"		98202	"01"	620	3201	"01053"	98202		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"	102482	1	102482		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"			232416	0.975	3	5.242591884922576	46.203509509817984	1	1
+    # 186992	"010003184"	"010003176"	"PHARMACIE DU CARREFOUR"	"PHARMACIE DU CARREFOUR"			"04 74 45 22 82"	"04 74 45 14 69"	"51346803300016"	"2011-10-21"	"2012-11-26"	"2020-12-18"		98202	98202		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"	102482	1	102482		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"					3	5.242591884922576	46.203509509817984	1	1
+    # FINESS diff
+    # delimitter , vs ;
+    # dept 1 vs 01
+    # tel perte du 0
+    # date - vs /
+    # mft perte du 0
+    # mauvais cog 01053 => 01344
