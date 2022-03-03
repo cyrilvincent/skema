@@ -18,7 +18,6 @@ class PSTarifParser(PSParser):
         self.natures: Dict[int, Nature] = {}
         self.conventions: Dict[str, Convention] = {}
         self.famille_actes: Dict[int, FamilleActe] = {}
-        # self.ps_id = 0  # TODO temp
 
     def load_cache(self):
         print("Making cache")

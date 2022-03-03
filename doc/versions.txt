@@ -7,9 +7,14 @@
 #   \________\/     \_____\/   \________\/     \_\/
 #
 #
+# V2.0.5.Release
+# 03/03/22
+# SAE
+#
 # V2.0.4.Release
 # 03/02/22
 # OD
+# Meilleur gestion des reparsinng
 #
 # V2.0.3.RC
 # 27/01/22
