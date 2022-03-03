@@ -1,5 +1,5 @@
 name = "ICIP"
-version = "2.0.4.Release"
+version = "2.0.5.Release"
 copyright = "(c) Skema 2022"
 adresse_path = "data/adresse"
 connection_string = "postgresql://postgres:sa@localhost/icip"

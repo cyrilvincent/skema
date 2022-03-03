@@ -1,4 +1,4 @@
-set session vars.datesource = 0;
+set session vars.datesource = 2101;
 select count(*) from ps, ps_cabinet_date_source, cabinet, adresse_raw, adresse_norm, tarif, tarif_date_source
 where ps_cabinet_date_source.date_source_id = current_setting('vars.datesource')::int
 and ps_cabinet_date_source.ps_id = ps.id
