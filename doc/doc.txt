@@ -43,6 +43,10 @@ python cp_insee_parser.py data/cedex/correspondance-code-cedex-code-insee.csv
 Parsing du répertoire SAE
 python sae_parser.py data/sae
 
+Parsing POP
+Exporter le xlsx en csv avec ,
+python pop_parser.py data/pop/pop.csv
+
 Fusion de 2 PS
 python ps_merge.py ps1_key ps2_inpp
 Cette commande va fusionner ps1 dans ps2, l'inpp final sera celui de ps2_inpp
@@ -52,6 +56,8 @@ ps2_inpp correspond au ps.key du ps qui va recevoir les tarifs de ps1
 Adresse Finder
 Pour débugger une adresse via BAN et OSM
 python adresse_finder.py
+
+
 
 MAJ du code
 git add *
