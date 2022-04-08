@@ -14,7 +14,7 @@ class BaseCCParser:
         df17_com["is_com"] = True
         engine = create_engine(config.connection_string, echo=False)
         with engine.begin() as connection:
-            df17_com.to_sql("basecc17", con=connection)
+            df17_com.to_sql("basecc17", con=connection, if_exists="replace")
         df17_arm = pandas.read_excel(file17, 1, index_col="CODGEO")
         df17_arm["is_com"] = False
         engine = create_engine(config.connection_string, echo=False)
@@ -25,7 +25,7 @@ class BaseCCParser:
         df20_com["is_com"] = True
         engine = create_engine(config.connection_string, echo=False)
         with engine.begin() as connection:
-            df20_com.to_sql("basecc20", con=connection)
+            df20_com.to_sql("basecc20", con=connection, if_exists="replace")
         df20_arm = pandas.read_excel(file20, 1, index_col="CODGEO")
         df20_arm["is_com"] = False
         engine = create_engine(config.connection_string, echo=False)
