@@ -20,6 +20,7 @@ class BaseCCParser:
         engine = create_engine(config.connection_string, echo=False)
         with engine.begin() as connection:
             df17_arm.to_sql("basecc17", con=connection, if_exists="append")
+
         print(f"Load {file20}")
         df20_com = pandas.read_excel(file20, index_col="CODGEO")
         df20_com["is_com"] = True

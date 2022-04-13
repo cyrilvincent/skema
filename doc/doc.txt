@@ -57,11 +57,24 @@ Adresse Finder
 Pour débugger une adresse via BAN et OSM
 python adresse_finder.py
 
-
-
 MAJ du code
-git add *
-git reset --hard HEAD
-git pull
+git clone
 
+Backup
+A faire 1 fois par mois après les imports PS
+Clic droit sur la base de données icip
+Backup
+Choisir le filename
+Cliquer sur dump options
+Passer Pre-data, Post-data et Data à YES
+Cliquer sur Backup
+
+Restore
+Clic droit sur la base de données icip
+Restore
+Cliquer sur les ... de Filname et choisir le .bak
+Cliquer sur Restore Options
+Passer Pre-data, Post-data et Data à YES
+Passer Clean before restore à YES
+Restore
 
