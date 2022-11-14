@@ -60,8 +60,8 @@ class Context:
 # etab -1 adresse_raw
 #      *-* date_source
 # personne_activite *-* pa_adresse
-#                   *-* code_profession TODO
-#                   *-* diplome TODO
+#                   *-* code_profession
+#                   *-* diplome
 # /!\ FK != INDEX automatique, testé sur tarif
 
 
@@ -213,6 +213,12 @@ personne_activite_code_profession = Table('personne_activite_code_profession', B
                                      Column('personne_activite_id', ForeignKey('personne_activite.id'),
                                             primary_key=True),
                                      Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
+                                     )
+
+personne_activite_diplome = Table('personne_activite_diplome', Base.metadata,
+                                     Column('personne_activite_id', ForeignKey('personne_activite.id'),
+                                            primary_key=True),
+                                     Column('diplome_id', ForeignKey('diplome.id'), primary_key=True)
                                      )
 
 
@@ -466,6 +472,7 @@ class PersonneActivite(Base):
 
     # backref pa_adresses
     # backref code_professions
+    # backref diplomes
 
     def __repr__(self):
         return f"{self.id} {self.nom} {self.prenom}"
@@ -505,6 +512,10 @@ class Diplome(Base):
     code_diplome = Column(String(10), nullable=False, unique=True)
     libelle_diplome = Column(String(255), nullable=False)
     is_savoir_faire = Column(Boolean, nullable=False)
+
+    personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
+                                                              secondary=personne_activite_diplome,
+                                                              backref="diplomes")
 
     @property
     def key(self):

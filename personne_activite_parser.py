@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -14,6 +14,7 @@ class PersonneActiviteParser(BaseParser):
         super().__init__(context)
         self.pa_adresses: Dict[Tuple[int, str, str, str], PAAdresse] = {}
         self.code_professions: Dict[int, CodeProfession] = {}
+        self.savoir_faires: Dict[str, Diplome] = {}
         self.nb_new_adresse = 0
 
     def load_cache(self):
@@ -25,6 +26,9 @@ class PersonneActiviteParser(BaseParser):
         l = self.context.session.query(CodeProfession).all()
         for c in l:
             self.code_professions[c.id] = c
+        l = self.context.session.query(Diplome).filter(Diplome.is_savoir_faire == True)
+        for s in l:
+            self.savoir_faires[s.key] = s
         l: List[PersonneActivite] = self.context.session.query(PersonneActivite).all()
         for e in l:
             self.entities[e.inpp] = e
@@ -94,6 +98,18 @@ class PersonneActiviteParser(BaseParser):
             quit(5)
         return cp
 
+    def savoir_faire_mapper(self, row) -> Optional[Diplome]:
+        d = Diplome()
+        try:
+            s = row["Code savoir-faire"]
+            if s is None or s.strip() == "":
+                return None
+            d = self.savoir_faires[s]
+        except Exception as ex:
+            print(f"ERROR Savoir faire row {self.row_num} {d}\n{ex}\n{row}")
+            quit(6)
+        return d
+
     def create_update_adresse(self, e: PersonneActivite, row):
         a = self.pa_adresse_mapper(row)
         if a is not None:
@@ -119,6 +135,12 @@ class PersonneActiviteParser(BaseParser):
             if c not in e.code_professions:
                 e.code_professions.append(c)
 
+    def add_savoir_faire(self, e: PersonneActivite, row):
+        s = self.savoir_faire_mapper(row)
+        if s is not None:
+            if s not in e.diplomes:
+                e.diplomes.append(s)
+
     def parse_row(self, row):
         e = self.mapper(row)
         if e.inpp in self.entities:
@@ -129,6 +151,7 @@ class PersonneActiviteParser(BaseParser):
             self.context.session.add(e)
         self.create_update_adresse(e, row)
         self.create_update_code_profession(e, row)
+        self.add_savoir_faire(e, row)
         self.context.session.commit()
 
 

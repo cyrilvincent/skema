@@ -461,6 +461,37 @@ class ICIPTests(TestCase):
         self.assertEqual(nb_tarif1 + nb_tarif2, len(ps2.tarifs))
         psm.context.session.commit()
 
+    def test_code_profession_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PersonneActiviteParser(context)
+        p.load_cache()
+        s = "Type d'identifiant PP|Identifiant PP|Identification nationale PP|Code civilité d'exercice|Libellé civilité d'exercice|Code civilité|Libellé civilité|Nom d'exercice|Prénom d'exercice|Code profession|Libellé profession|Code catégorie professionnelle|Libellé catégorie professionnelle|Code type savoir-faire|Libellé type savoir-faire|Code savoir-faire|Libellé savoir-faire|Code mode exercice|Libellé mode exercice|Numéro SIRET site|Numéro SIREN site|Numéro FINESS site|Numéro FINESS établissement juridique|Identifiant technique de la structure|Raison sociale site|Enseigne commerciale site|Complément destinataire (coord. structure)|Complément point géographique (coord. structure)|Numéro Voie (coord. structure)|Indice répétition voie (coord. structure)|Code type de voie (coord. structure)|Libellé type de voie (coord. structure)|Libellé Voie (coord. structure)|Mention distribution (coord. structure)|Bureau cedex (coord. structure)|Code postal (coord. structure)|Code commune (coord. structure)|Libellé commune (coord. structure)|Code pays (coord. structure)|Libellé pays (coord. structure)|Téléphone (coord. structure)|Téléphone 2 (coord. structure)|Télécopie (coord. structure)|Adresse e-mail (coord. structure)|Code Département (structure)|Libellé Département (structure)|Ancien identifiant de la structure|Autorité d'enregistrement|Code secteur d'activité|Libellé secteur d'activité|Code section tableau pharmaciens|Libellé section tableau pharmaciens|"
+        headers = s.split("|")
+        s = "0|012600631|0012600631|||M|Monsieur|PETITGUYOT|ALEXANDRE|26|Audioprothésiste|C|Civil|||||S|Salarié|49940088500020||||C49940088500020|DOUBS OPTIC||DOUBS OPTIC||9||RTE|Route|DE BESANCON||25300 DOUBS|25300|||||||||||349940088500020|ARS/Variable/Variable|SA42|Appareillage médical|||"
+        row = s.split("|")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        c = p.code_profession_mapper(dico)
+        self.assertEqual(26, c.id)
+        self.assertEqual("Audioprothésiste", c.libelle)
+
+    def test_code_profession_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PersonneActiviteParser(context)
+        p.load_cache()
+        s = "Type d'identifiant PP|Identifiant PP|Identification nationale PP|Code civilité d'exercice|Libellé civilité d'exercice|Code civilité|Libellé civilité|Nom d'exercice|Prénom d'exercice|Code profession|Libellé profession|Code catégorie professionnelle|Libellé catégorie professionnelle|Code type savoir-faire|Libellé type savoir-faire|Code savoir-faire|Libellé savoir-faire|Code mode exercice|Libellé mode exercice|Numéro SIRET site|Numéro SIREN site|Numéro FINESS site|Numéro FINESS établissement juridique|Identifiant technique de la structure|Raison sociale site|Enseigne commerciale site|Complément destinataire (coord. structure)|Complément point géographique (coord. structure)|Numéro Voie (coord. structure)|Indice répétition voie (coord. structure)|Code type de voie (coord. structure)|Libellé type de voie (coord. structure)|Libellé Voie (coord. structure)|Mention distribution (coord. structure)|Bureau cedex (coord. structure)|Code postal (coord. structure)|Code commune (coord. structure)|Libellé commune (coord. structure)|Code pays (coord. structure)|Libellé pays (coord. structure)|Téléphone (coord. structure)|Téléphone 2 (coord. structure)|Télécopie (coord. structure)|Adresse e-mail (coord. structure)|Code Département (structure)|Libellé Département (structure)|Ancien identifiant de la structure|Autorité d'enregistrement|Code secteur d'activité|Libellé secteur d'activité|Code section tableau pharmaciens|Libellé section tableau pharmaciens|"
+        headers = s.split("|")
+        s = "8|10106476764|810106476764|DR|Docteur|M|Monsieur|BENHOUCHAME|Zakaria|10|Médecin|C|Civil|S|Spécialité ordinale|SM20|Gynécologie-obstétrique|S|Salarié|||||||||||||||||||||||||||||CNOM//|||||"
+        row = s.split("|")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        d = p.savoir_faire_mapper(dico)
+        self.assertEqual("SM20", d.code_diplome)
+
 
 
 
