@@ -107,7 +107,7 @@ class PersonneActiviteParser(BaseParser):
                 return None
             d = self.savoir_faires[s]
         except Exception as ex:
-            print(f"ERROR Savoir faire row {self.row_num} {d}\n{ex}\n{row}")
+            print(f"ERROR Savoir faire row {self.row_num} {d}\n{ex}\n{row}\nRun diplome_parser first")
             quit(6)
         return d
 

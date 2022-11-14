@@ -1,7 +1,8 @@
 import difflib
 from typing import Dict, List, Tuple, Optional, Set
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge
+from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge, \
+    Profession, PersonneActivite
 from base_parser import BaseParser
 import argparse
 import art
@@ -20,6 +21,8 @@ class PSParser(BaseParser):
         self.inpps_france: Dict[Tuple[str, str], Set[str]] = {}
         self.inpps_temp: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
         self.ps_merges: Dict[str, str] = {}
+        self.professions: Dict[int, Profession] = {}
+        self.personne_activites: Dict[str, PersonneActivite] = {}
 
     def load_cache(self):
         super().load_cache()
@@ -35,6 +38,11 @@ class PSParser(BaseParser):
         l: List[PSMerge] = self.context.session.query(PSMerge).all()
         for p in l:
             self.ps_merges[p.key] = p.inpp
+            self.nb_ram += 1
+        l: List[Profession] = self.context.session.query(Profession) \
+            .options(joinedload(Profession.diplomes).joinedload(Profession.code_professions)).all()
+        for p in l:
+            self.professions[p.id] = p
             self.nb_ram += 1
         self.load_cache_inpp()
         print(f"{self.nb_ram} objects in cache")
@@ -58,6 +66,15 @@ class PSParser(BaseParser):
                     self.inpps_france[key0].add(pa.inpp)
                 self.nb_ram += 1
             session.expunge(a)
+        self.load_cache_inpp_3()
+
+    def load_cache_inpp_3(self):
+        print("Making cache level 3")
+        session = self.context.get_session()
+        personne_activites = session.query(PersonneActivite) \
+            .options(joinedload(PersonneActivite.code_professions)).options(joinedload(PersonneActivite.diplomes)).all()
+        for p in personne_activites:
+            self.personne_activites[p.key] = p
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -71,6 +88,15 @@ class PSParser(BaseParser):
             print(f"ERROR PS row {self.row_num} {ps}\n{ex}")
             quit(1)
         return ps
+
+    def profession_mapper(self, row) -> Optional[int]:
+        id = None
+        try:
+            id = self.get_nullable_int(row[10])
+        except Exception as ex:
+            print(f"ERROR PS row {self.row_num} {id}\n{ex}")
+            quit(3)
+        return id
 
     def cabinet_mapper(self, row) -> Cabinet:
         c = Cabinet()
@@ -205,6 +231,34 @@ class PSParser(BaseParser):
                 return True
         return False
 
+    def match_profession_code_profession(self, profession: Profession, pa: PersonneActivite) -> bool:
+        for c in pa.code_professions:
+            if c in profession.code_professions:
+                return True
+        return False
+
+    def match_profession_savoir_faire(self, profession: Profession, pa: PersonneActivite) -> bool:
+        if len(pa.diplomes) == 0:
+            return True
+        for d in pa.diplomes:
+            if d in profession.diplomes:
+                return True
+        return False
+
+    def match_savoir_faire_code_profession(self, profession_id: Optional[int], pa: PersonneActivite) -> bool:
+        try:
+            if profession_id is None:
+                return False
+            p: Profession = self.professions[profession_id]
+            res = self.match_profession_code_profession(p, pa)
+            if res:
+                return self.match_profession_savoir_faire(p, pa)
+            return False
+        except Exception as ex:
+            print(f"ERROR Profession row {self.row_num} {profession_id}\n{ex}")
+            quit(5)
+
+
     def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
         # Règle de gestion de l'affectation d'INPP et de la fusion de 2 PS
         # La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
@@ -290,6 +344,7 @@ class PSParser(BaseParser):
             e = self.mapper(row)
             a = self.create_update_adresse_raw(row)
             n = self.create_update_norm(a)
+            profession_id = self.profession_mapper(row)
             inpp = self.match_inpp(e, n)
             if inpp is not None:
                 e.key = inpp
@@ -307,7 +362,8 @@ class PSParser(BaseParser):
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
             c.adresse_raw = a
-            self.context.session.commit()
+            if args.nosave != True:
+                self.context.session.commit()
 
 
 if __name__ == '__main__':
@@ -320,6 +376,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="PS Parser")
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
+    parser.add_argument("-n", "--nosave", help="No save", action="store_true")
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
@@ -341,8 +398,7 @@ if __name__ == '__main__':
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
-    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ Enlever le update genre
-    # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
+    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ update genre
 
     # select cast(data1.count1 as float)/ cast(data2.count2 as float)
     # from

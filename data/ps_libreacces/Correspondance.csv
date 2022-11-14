@@ -1,0 +1,140 @@
+﻿profession,mode d’exercice particulier,codeprofession,Code savoir-faire,code profession,libelléprofession
+35,,Gynécologie médicale et obstétrique (CEX),CEX22,10,Médecin
+36,,Gynécologie médicale et obstétrique (CEX),CEX22,10,Médecin
+37,,Gynécologie médicale et obstétrique (CEX),CEX22,10,Médecin
+35,,Gynécologie médicale (CEX),CEX24,10,Médecin
+36,,Gynécologie médicale (CEX),CEX24,10,Médecin
+37,,Gynécologie médicale (CEX),CEX24,10,Médecin
+37,,Obstétrique (CEX),CEX26,10,Médecin
+36,,Obstétrique (CEX),CEX26,10,Médecin
+55,,Obstétrique (CEX),CEX26,10,Médecin
+15,,Urologie (CEX),CEX64,10,Médecin
+,,Qualification Praticien adjoint contractuel (PAC),PAC00,10,Médecin
+19,,Orthopédie dento-faciale (SCD),SCD01,10,Médecin
+20,,Chirurgie orale (SCD),SCD02,10,Médecin
+21,,Médecine bucco-dentaire (SCD),SCD03,10,Médecin
+2,,Anatomie et Cytologie pathologiques (SM),SM01,10,Médecin
+3,,Anesthésie-réanimation (SM),SM02,10,Médecin
+44,,Biologie médicale (SM),SM03,10,Médecin
+6,,Cardiologie et Maladies vasculaires (SM),SM04,10,Médecin
+7,,Chirurgie générale (SM),SM05,10,Médecin
+9,,Chirurgie maxillo-faciale (SM),SM06,10,Médecin
+10,,Chirurgie maxillo-faciale et Stomatologie (SM),SM07,10,Médecin
+12,,Chirurgie orthopédique et Traumatologie (SM),SM08,10,Médecin
+8,,Chirurgie infantile (SM),SM09,10,Médecin
+13,,Chirurgie plastique reconstructrice et esthétique (SM),SM10,10,Médecin
+14,,Chirurgie thoracique et cardio-vasculaire (SM),SM11,10,Médecin
+15,,Chirurgie urologique (SM),SM12,10,Médecin
+16,,Chirurgie vasculaire (SM),SM13,10,Médecin
+17,,Chirurgie viscérale et digestive (SM),SM14,10,Médecin
+22,,Dermatologie et Vénéréologie (SM),SM15,10,Médecin
+23,,Endocrinologie et métabolisme (SM),SM16,10,Médecin
+48,,Génétique médicale (SM),SM17,10,Médecin
+34,,Gériatrie (SM),SM18,10,Médecin
+36,,Gynécologie médicale (SM),SM19,10,Médecin
+37,,Gynécologie médicale (SM),SM19,10,Médecin
+35,,Gynécologie médicale (SM),SM19,10,Médecin
+35,,Gynécologie-obstétrique (SM),SM20,10,Médecin
+37,,Gynécologie-obstétrique (SM),SM20,10,Médecin
+36,,Gynécologie-obstétrique (SM),SM20,10,Médecin
+38,,Hématologie (SM),SM21,10,Médecin
+38,,"Hématologie, option Maladie du sang (SM)",SM22,10,Médecin
+38,,"Hématologie, option Onco-hématologie (SM)",SM23,10,Médecin
+33,,Gastro-entérologie et Hépatologie (SM),SM24,10,Médecin
+,,Médecine du travail (SM),SM25,10,Médecin
+45,,Qualifié en Médecine générale (SM),SM26,10,Médecin
+46,,Qualifié en Médecine générale (SM),SM26,10,Médecin
+47,,Qualifié en Médecine générale (SM),SM26,10,Médecin
+72,,Médecine interne (SM),SM27,10,Médecin
+49,,Médecine nucléaire (SM),SM28,10,Médecin
+73,,Médecine physique et réadaptation (SM),SM29,10,Médecin
+51,,Néphrologie (SM),SM30,10,Médecin
+52,,Neuro-chirurgie (SM),SM31,10,Médecin
+53,,Neurologie (SM),SM32,10,Médecin
+54,,Neuro-psychiatrie (SM),SM33,10,Médecin
+59,,ORL et Chirurgie cervico-faciale (SM),SM34,10,Médecin
+5,,"Oncologie, option Onco-hématologie (SM)",SM35,10,Médecin
+4,,"Oncologie, option Onco-hématologie (SM)",SM35,10,Médecin
+4,,"Oncologie, option médicale (SM)",SM36,10,Médecin
+5,,"Oncologie, option médicale (SM)",SM36,10,Médecin
+5,,"Oncologie, option radiothérapie (SM)",SM37,10,Médecin
+4,,"Oncologie, option radiothérapie (SM)",SM37,10,Médecin
+56,,Ophtalmologie (SM),SM38,10,Médecin
+59,,Oto-rhino-laryngologie (SM),SM39,10,Médecin
+60,,Pédiatrie (SM),SM40,10,Médecin
+64,,Pneumologie (SM),SM41,10,Médecin
+66,,Psychiatrie (SM),SM42,10,Médecin
+65,,Psychiatrie (SM),SM42,10,Médecin
+65,,"Psychiatrie, option enfant et adolescent (SM)",SM43,10,Médecin
+66,,"Psychiatrie, option enfant et adolescent (SM)",SM43,10,Médecin
+67,,Radio-diagnostic (SM),SM44,10,Médecin
+68,,Radio-thérapie (SM),SM45,10,Médecin
+69,,Médecine intensive-réanimation (SM),SM46,10,Médecin
+,,Recherche médicale (SM),SM47,10,Médecin
+70,,Rhumatologie (SM),SM48,10,Médecin
+50,,Santé publique et Médecine sociale (SM),SM49,10,Médecin
+74,,Stomatologie (SM),SM50,10,Médecin
+36,,"Gynéco-obstétrique et Gynéco-médicale, option Gynéco-obstétrique (SM)",SM51,10,Médecin
+37,,"Gynéco-obstétrique et Gynéco-médicale, option Gynéco-obstétrique (SM)",SM51,10,Médecin
+37,,"Gynéco-obstétrique et Gynéco-médicale, option Gynéco-médicale (SM)",SM52,10,Médecin
+36,,"Gynéco-obstétrique et Gynéco-médicale, option Gynéco-médicale (SM)",SM52,10,Médecin
+45,,Spécialiste en Médecine générale (SM),SM53,10,Médecin
+46,,Spécialiste en Médecine générale (SM),SM53,10,Médecin
+47,,Spécialiste en Médecine générale (SM),SM53,10,Médecin
+45,,Médecine générale (SM),SM54,10,Médecin
+46,,Médecine générale (SM),SM54,10,Médecin
+47,,Médecine générale (SM),SM54,10,Médecin
+67,,Radio-diagnostic et Radio-thérapie (SM),SM55,10,Médecin
+68,,Radio-diagnostic et Radio-thérapie (SM),SM55,10,Médecin
+11,,Chirurgie orale (SM),SM56,10,Médecin
+,2,Allergologie (SM),SM57,10,Médecin
+,2,Allergologie (SM),SM57,10,Médecin
+,2,Allergologie (SM),SM57,10,Médecin
+,,Maladies infectieuses et tropicales (SM),SM58,10,Médecin
+,,Médecine d'urgence (SM),SM59,10,Médecin
+,,Médecine légale et expertises médicales (SM),SM60,10,Médecin
+,,Médecine vasculaire (SM),SM61,10,Médecin
+23,,"Endocrinologie, diabétologie, nutrition (SM)",SM62,10,Médecin
+44,,Biologie médicale option biologie générale (SM),SM63,10,Médecin
+44,,"Biologie médicale option médecine moléculaire, génétique et pharmacologie (SM)",SM64,10,Médecin
+44,,Biologie médicale option hématologie et immunologie (SM),SM65,10,Médecin
+44,,Biologie médicale option agents infectieux (SM),SM66,10,Médecin
+44,,Biologie médicale option biologie de la reproduction (SM),SM67,10,Médecin
+9,,Chirurgie maxillo-faciale (réforme 2017) (SM),SM68,10,Médecin
+8,,Chirurgie pédiatrique option chirurgie viscérale pédiatrique (SM),SM69,10,Médecin
+8,,Chirurgie pédiatrique option orthopédie pédiatrique (SM),SM70,10,Médecin
+38,,Hématologie (réforme 2017) (SM),SM71,10,Médecin
+72,,Médecine interne et immunologie clinique (SM),SM72,10,Médecin
+62,,,,21,Pharmacien
+63,,,,21,Pharmacien
+,,,,26,Audioprothésiste
+,,,,28,Opticien-Lunetier
+,,,,31,Assistant dentaire
+,,,,32,Physicien médical
+,,,,35,Aide-soignant
+1,,,,36,Ambulancier
+,,,,37,Auxiliaire de puériculture
+,,,,38,Préparateur en pharmacie hospitalière
+,,,,39,Préparateur en pharmacie (officine)
+18,,,,40,Chirurgien-Dentiste
+19,,,,40,Chirurgien-Dentiste
+20,,,,40,Chirurgien-Dentiste
+21,,,,40,Chirurgien-Dentiste
+71,,,,50,Sage-Femme
+39,,,,60,Infirmier
+39,,,,69,Infirmier psychiatrique
+43,,,,70,Masseur-Kinésithérapeute
+61,,,,80,Pédicure-Podologue
+,,,,81,Orthoprothésiste
+,,,,82,Podo-Orthésiste
+,,,,83,Orthopédiste-Orthésiste
+,,,,84,Oculariste
+,,,,85,Epithésiste
+,,,,86,Technicien de laboratoire médical
+57,,,,91,Orthophoniste
+58,,,,92,Orthoptiste
+,,,,93,Psychologue
+,,,,94,Ergothérapeute
+,,,,95,Diététicien
+,,,,96,Psychomotricien
+,,,,98,Manipulateur ERM

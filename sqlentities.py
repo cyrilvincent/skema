@@ -382,7 +382,7 @@ class Profession(Base):
     libelle = Column(String(50), nullable=False)
 
     # backref: diplomes
-    # backref: professions
+    # backref: code_professions
 
     def __repr__(self):
         return f"{self.id} {self.libelle}"

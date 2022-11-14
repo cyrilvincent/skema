@@ -105,5 +105,5 @@ if __name__ == '__main__':
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
-    # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202112020908.txt
-    # data/ps_libreacces/PS_LibreAcces_SavoirFaire_202112020908.txt -s
+    # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202211130507.txt
+    # data/ps_libreacces/PS_LibreAcces_SavoirFaire_202211130507.txt -s

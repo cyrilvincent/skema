@@ -51,16 +51,21 @@ class PACorrespondanceParser(BaseParser):
             p: Profession = self.entities[id]
             update = False
             if code is not None:
-                s: Diplome = self.savoir_faires[code]
-                if s not in p.diplomes:
-                    update = True
-                    p.diplomes.append(s)
+                if code in self.savoir_faires:
+                    s: Diplome = self.savoir_faires[code]
+                    if s not in p.diplomes:
+                        update = True
+                        p.diplomes.append(s)
+                else:
+                    print(f"Warning row {self.row_num} savoir_faire {code} does not exist in diplome")
             if cp is not None:
                 if cp in self.code_professions:
                     c: CodeProfession = self.code_professions[cp]
                     if c not in p.code_professions:
                         update = True
                         p.code_professions.append(c)
+                else:
+                    print(f"Warning row {self.row_num} code_profession {cp} does not exist in db")
             if update:
                 self.nb_new_entity += 1
                 self.context.session.commit()
@@ -90,4 +95,3 @@ if __name__ == '__main__':
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps_libreacces/Correspondance.csv
-    # Ajout à la main : "S"	"Spécialité ordinale"	"SM55"	"Radio-diagnostic et Radio-thérapie"
