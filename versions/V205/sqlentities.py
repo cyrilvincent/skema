@@ -60,8 +60,6 @@ class Context:
 # etab -1 adresse_raw
 #      *-* date_source
 # personne_activite *-* pa_adresse
-#                   *-* code_profession TODO
-#                   *-* diplome TODO
 # /!\ FK != INDEX automatique, testé sur tarif
 
 
@@ -207,12 +205,6 @@ personne_activite_pa_adresse = Table('personne_activite_pa_adresse', Base.metada
                                      Column('personne_activite_id', ForeignKey('personne_activite.id'),
                                             primary_key=True),
                                      Column('pa_adresse_id', ForeignKey('pa_adresse.id'), primary_key=True)
-                                     )
-
-personne_activite_code_profession = Table('personne_activite_code_profession', Base.metadata,
-                                     Column('personne_activite_id', ForeignKey('personne_activite.id'),
-                                            primary_key=True),
-                                     Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
                                      )
 
 
@@ -465,7 +457,6 @@ class PersonneActivite(Base):
     prenom = Column(String(255))
 
     # backref pa_adresses
-    # backref code_professions
 
     def __repr__(self):
         return f"{self.id} {self.nom} {self.prenom}"
@@ -530,19 +521,6 @@ class INPPDiplome(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.diplome_id}"
-
-class CodeProfession(Base):
-    __tablename__ = "code_profession"
-
-    id = Column(Integer, primary_key=True)
-    libelle = Column(String(50), nullable=False)
-
-    personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
-                                                              secondary=personne_activite_code_profession,
-                                                              backref="code_professions")
-
-    def __repr__(self):
-        return f"{self.id} {self.libelle}"
 
 
 class PSMerge(Base):

@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from sqlalchemy.orm import joinedload
 
+from base_parser import EtabParser
 from etalab_parser import EtalabParser
 from ps_merge import PSMerger
 from ps_parser import PSParser
@@ -20,7 +21,7 @@ class ICIPTests(TestCase):
         context.create(echo=True)
 
     def test_parse_date(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         path = "toto_21-10.csv"
         ep.parse_date(path)
         self.assertEqual(2110, ep.date_source.id)
@@ -28,7 +29,7 @@ class ICIPTests(TestCase):
     def test_check_data(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         path = "toto_00-00.csv"
         ep.check_date(path)
 
@@ -48,7 +49,7 @@ class ICIPTests(TestCase):
     def test_adresseraw_mapper(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         row = s.split(";")
         ep.load_cache()
@@ -60,7 +61,7 @@ class ICIPTests(TestCase):
     def test_create_update_adresse(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         row = s.split(";")
         ep.load_cache()
@@ -79,7 +80,7 @@ class ICIPTests(TestCase):
     def test_parse_row_new_etab_new_adresse(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         path = "toto_00-01.csv"
         ep.check_date(path)
         # New etab new adresse
@@ -90,29 +91,113 @@ class ICIPTests(TestCase):
         self.assertEqual(1, ep.nb_new_entity)
         self.assertEqual(1, ep.nb_new_adresse)
 
+    def test_parse_row_new_etab_known_adresse(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-01.csv"
+        ep.check_date(path)
+        s = "123456788;Cyril Vincent 2;;123456788;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+        self.assertEqual(1, ep.nb_new_entity)
+        self.assertEqual(0, ep.nb_new_adresse)
+
+    def test_etab_load(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "data/etab_00-00.csv"
+        ep.load(path)
+
+    def test_parse_row_known_etab_known_adresse(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-01.csv"
+        ep.check_date(path)
+        s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+        self.assertEqual(0, ep.nb_new_entity)
+        self.assertEqual(0, ep.nb_new_adresse)
+
+    def test_parse_row_known_etab_new_adresse(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-01.csv"
+        ep.check_date(path)
+        s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1572 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+        self.assertEqual(0, ep.nb_new_entity)
+        self.assertEqual(1, ep.nb_new_adresse)
+
+    def test_parse_row_known_etab_other_adresse(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-01.csv"
+        ep.check_date(path)
+        s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+        self.assertEqual(0, ep.nb_new_entity)
+        self.assertEqual(0, ep.nb_new_adresse)
+
+    def test_parse_row_update_etab(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-01.csv"
+        ep.check_date(path)
+        s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+        self.assertEqual(0, ep.nb_new_entity)
+        self.assertEqual(0, ep.nb_new_adresse)
+        self.assertEqual(1, ep.nb_update_entity)
+
+    def test_parse_multi_date(self):
+        context = Context()
+        context.create(echo=True)
+        ep = EtabParser(context)
+        path = "toto_00-02.csv"
+        ep.check_date(path)
+        s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
+        row = s.split(";")
+        ep.load_cache()
+        ep.parse_row(row)
+
     def test_split_num(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         num, s = ep.split_num("1571 ch des blancs")
         self.assertEqual(1571, num)
         self.assertEqual("ch des blancs", s)
 
     def test_replace_all(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         s = ep.replace_all("CYRIL VINCENT", {"CY": "MA", "RIL": "TIS"})
         self.assertEqual("MATIS VINCENT", s)
 
     def test_normalize_street(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         s = ep.normalize_street("ch. des-blancs")
         self.assertEqual("CHEMIN DES BLANCS", s)
 
     def test_normalize_commune(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         s = ep.normalize_street("st. donat")
         self.assertEqual("SAINT DONAT", s)
 
     def test_normalize(self):
-        ep = EtalabParser(None)
+        ep = EtabParser(None)
         a = AdresseRaw()
         a.adresse3 = "1571 ch. des blancs"
         a.cp = "38250"
@@ -126,7 +211,7 @@ class ICIPTests(TestCase):
     def test_create_update_norm(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         s = "123456789;Cyril Vincent;;010003978;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
         row = s.split(";")
         ep.load_cache()
@@ -145,7 +230,7 @@ class ICIPTests(TestCase):
     def test_parse_row_new_norm(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         path = "toto_00-01.csv"
         ep.check_date(path)
         s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
@@ -157,7 +242,7 @@ class ICIPTests(TestCase):
     def test_parse_row_known_norm(self):
         context = Context()
         context.create(echo=True)
-        ep = EtalabParser(context)
+        ep = EtabParser(context)
         path = "toto_00-01.csv"
         ep.check_date(path)
         s = "123456789;Cyril Vincent;;123456789;18;Privé non lucratif;;FALSE;FALSE;FALSE;FALSE;TRUE;FALSE;FALSE;TRUE;FALSE;TRUE;FALSE;TRUE;FALSE;FALSE;FALSE;FALSE;FALSE;FALSE;;;;;;;;1571 chemin des blancs;38250;38;ISERE;LANS EN VERCORS;0622538762;contact@cyrilvincent.com;Cyril Vincent Conseil;www.cyrilvincent.com;45.930657;4.814821;;;;;;;;;;;;;;;;;;;;;;;;;;;"
@@ -407,7 +492,7 @@ class ICIPTests(TestCase):
         self.assertEqual(s, "38250 LANS")
 
     def test_convert_lambert92_gps(self):
-        p = EtalabParser(None)
+        p = EtabParser(None)
         x1, y1 = 882408.3, 6543019.6
         lon, lat = p.convert_lambert93_lon_lat(x1, y1)
         self.assertAlmostEqual(5.355651287573366, lon, delta=1e-5)

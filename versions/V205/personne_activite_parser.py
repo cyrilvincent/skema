@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -13,7 +13,6 @@ class PersonneActiviteParser(BaseParser):
     def __init__(self, context):
         super().__init__(context)
         self.pa_adresses: Dict[Tuple[int, str, str, str], PAAdresse] = {}
-        self.code_professions: Dict[int, CodeProfession] = {}
         self.nb_new_adresse = 0
 
     def load_cache(self):
@@ -22,9 +21,6 @@ class PersonneActiviteParser(BaseParser):
         for d in l:
             self.depts[d.num] = d
             self.depts_int[d.id] = d
-        l = self.context.session.query(CodeProfession).all()
-        for c in l:
-            self.code_professions[c.id] = c
         l: List[PersonneActivite] = self.context.session.query(PersonneActivite).all()
         for e in l:
             self.entities[e.inpp] = e
@@ -84,16 +80,6 @@ class PersonneActiviteParser(BaseParser):
             quit(4)
         return a
 
-    def code_profession_mapper(self, row) -> CodeProfession:
-        cp = CodeProfession()
-        try:
-            cp.id = int(row["Code profession"])
-            cp.libelle = row["Libellé profession"]
-        except Exception as ex:
-            print(f"ERROR Profession row {self.row_num} {cp}\n{ex}\n{row}")
-            quit(5)
-        return cp
-
     def create_update_adresse(self, e: PersonneActivite, row):
         a = self.pa_adresse_mapper(row)
         if a is not None:
@@ -109,16 +95,6 @@ class PersonneActiviteParser(BaseParser):
             if a.key not in keys:
                 e.pa_adresses.append(a)
 
-    def create_update_code_profession(self, e: PersonneActivite, row):
-        c = self.code_profession_mapper(row)
-        if c is not None:
-            if c.id in self.code_professions:
-                c = self.code_professions[c.id]
-            else:
-                self.code_professions[c.id] = c
-            if c not in e.code_professions:
-                e.code_professions.append(c)
-
     def parse_row(self, row):
         e = self.mapper(row)
         if e.inpp in self.entities:
@@ -128,7 +104,6 @@ class PersonneActiviteParser(BaseParser):
             self.entities[e.inpp] = e
             self.context.session.add(e)
         self.create_update_adresse(e, row)
-        self.create_update_code_profession(e, row)
         self.context.session.commit()
 
 

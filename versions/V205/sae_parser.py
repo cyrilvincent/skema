@@ -65,17 +65,16 @@ if __name__ == '__main__':
 
 # data/sae
 
-# Pour mettre un FK sur nofinesset
-# ALTER TABLE IF EXISTS sae.bio
-#     ADD CONSTRAINT fk_sae_bio_nofinesset FOREIGN KEY (nofinesset)
-#     REFERENCES public.etablissement (nofinesset) MATCH SIMPLE
-#     ON UPDATE NO ACTION
-#     ON DELETE NO ACTION
-#     NOT VALID;
-# NOT VALID vérifie uniquement la FK sur les insert et updates
-# ALTER TABLE sae.bio DISABLE TRIGGER ALL; -- désactive les FK
-# update sae.bio set nofinesset = '010000024X' where nofinesset = '010000024'
-# ALTER TABLE sae.bio ENABLE TRIGGER ALL;
-# Ou alors virer les finess non existant dans etablissement
-# select * from sae.bio where nofinesset not in (select nofinesset from etablissement)
-
+# Warning low_memory=True
+# Load data/sae/PN_2020.csv
+# C:\Users\conta\git-CVC\Skema\git-skema\sae_parser.py:37: DtypeWarning: Columns (14,32) have mixed types.Specify dtype option on import or set low_memory=False.
+# pn_a74 text devrait être int
+# Load data/sae/Q20_2020.csv
+# C:\Users\conta\git-CVC\Skema\git-skema\sae_parser.py:37: DtypeWarning: Columns (1,2,3,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23) have mixed types.Specify dtype option on import or set low_memory=False.
+# header dupliqué
+# Load data/sae/Q23_2020.csv
+# C:\Users\conta\git-CVC\Skema\git-skema\sae_parser.py:37: DtypeWarning: Columns (2,3) have mixed types.Specify dtype option on import or set low_memory=False.
+# no problem
+# Load data/sae/SYGEN_2020.csv
+# C:\Users\conta\git-CVC\Skema\git-skema\sae_parser.py:37: DtypeWarning: Columns (212) have mixed types.Specify dtype option on import or set low_memory=False.
+# 212 on s'en fout

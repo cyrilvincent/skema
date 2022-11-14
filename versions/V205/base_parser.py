@@ -46,7 +46,7 @@ class BaseParser(metaclass=ABCMeta):
             self.sources[s.id] = s
             self.nb_ram += 1
         l = self.context.session.query(AdresseRaw).options(joinedload(AdresseRaw.adresse_norm)).all()
-        # Erreur courante, quand le key ne matche pas c'est que le cp est en str
+        # Erreur courante, quand le key ne matche pas c'est que le cpcp est en str
         for a in l:
             self.adresse_raws[a.key] = a
             self.nb_ram += 1
@@ -178,3 +178,152 @@ class BaseParser(metaclass=ABCMeta):
     def mapper(self, row): ...
 
 
+class EtabParser(BaseParser):
+    """
+    DEPRECATED
+    """
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.etablissement_types = List[EtablissementType]
+
+    def load_cache(self):
+        super().load_cache()
+        l = self.context.session.query(Etablissement).options(joinedload(Etablissement.type))\
+            .options(joinedload(Etablissement.adresse_raw).joinedload(AdresseRaw.adresse_norm))\
+            .options(joinedload(Etablissement.date_sources)).all()
+        for e in l:
+            self.entities[e.id] = e
+        self.etablissement_types = self.context.session.query(EtablissementType).all()
+
+    def mapper(self, row) -> Etablissement:
+        e = Etablissement()
+        try:
+            e.id = int(row[0])
+            e.nom = row[1]
+            e.numero = row[3]
+            l = ["Public", "Privé non lucratif", "Privé commercial"]
+            e.type = self.etablissement_types[l.index(row[5])]
+            e.telephone = self.get_nullable(row[37])
+            e.mail = self.get_nullable(row[38])
+            e.nom2 = row[39]
+            e.url = self.get_nullable(row[40])
+        except Exception as ex:
+            print(f"ERROR row {self.row_num} {e}\n{ex}")
+            quit(1)
+        return e
+
+    def adresse_raw_mapper(self, row) -> AdresseRaw:
+        a = AdresseRaw()
+        try:
+            a.adresse3 = self.get_nullable(row[32])
+            a.cp = row[33]
+            a.dept = self.depts[row[34]]
+            a.commune = row[36]
+        except Exception as ex:
+            print(f"ERROR row {self.row_num} {a}\n{ex}")
+            quit(1)
+        return a
+
+    def lat_lon_mapper(self, row) -> Tuple[float, float]:
+        try:
+            lat = row[41]
+            lon = row[42]
+            return lat, lon
+        except Exception as ex:
+            print(f"ERROR row {self.row_num} bad lat lon\n{ex}")
+            quit(1)
+
+    def create_update_adresse(self, e: Etablissement, a: AdresseRaw):
+        if a.key not in self.adresse_raws:
+            e.adresse_raw = a
+            self.adresse_raws[a.key] = a
+            self.nb_new_adresse += 1
+        else:
+            e.adresse_raw = self.adresse_raws[a.key]
+
+    def normalize(self, a: AdresseRaw) -> AdresseNorm:
+        n = AdresseNorm()
+        if a.adresse3 is not None:
+            n.numero, n.rue1 = self.split_num(a.adresse3)
+            n.rue1 = self.normalize_street(n.rue1)
+        n.cp = a.cp
+        n.commune = self.normalize_commune(a.commune)
+        n.dept = a.dept
+        return n
+
+    def create_update_norm(self, a: AdresseRaw):
+        n = self.normalize(a)
+        if n.key in self.adresse_norms:
+            n = self.adresse_norms[n.key]
+        else:
+            self.adresse_norms[n.key] = n
+            self.context.session.add(n)
+            self.nb_new_norm += 1
+        if a.adresse_norm is None:
+            a.adresse_norm = n
+        else:
+            same = a.adresse_norm.equals(n)
+            if not same:
+                a.adresse_norm = n
+
+    def create_update_lat_lon(self, row, n: AdresseNorm):
+        lat, lon = self.lat_lon_mapper(row)
+        if n.source is not None and n.source_id != 3:
+            n.lat = lat
+            n.lon = lon
+            n.source = self.sources[3]
+            n.score = 1
+
+    def parse_row(self, row):
+        e = self.mapper(row)
+        if e.id in self.entities:
+            same = e.equals(self.entities[e.id])
+            if not same:
+                self.pseudo_clone(e, self.entities[e.id])
+                self.nb_update_entity += 1
+            e = self.entities[e.id]
+            if self.date_source not in e.date_sources:
+                e.date_sources.append(self.date_source)
+            a = self.adresse_raw_mapper(row)
+            same = a.equals(e.adresse_raw)
+            if not same:
+                self.create_update_adresse(e, a)
+        else:
+            self.entities[e.id] = e
+            self.nb_new_entity += 1
+            e.date_sources.append(self.date_source)
+            a = self.adresse_raw_mapper(row)
+            self.create_update_adresse(e, a)
+            self.context.session.add(e)
+        self.create_update_norm(e.adresse_raw)
+        self.create_update_lat_lon(row, e.adresse_raw.adresse_norm)
+        self.context.session.commit()
+
+
+if __name__ == '__main__':
+    art.tprint(config.name, "big")
+    print("Etab Parser")
+    print("===========")
+    print(f"V{config.version}")
+    print(config.copyright)
+    print()
+    parser = argparse.ArgumentParser(description="Etab Parser")
+    parser.add_argument("path", help="Path")
+    parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
+    args = parser.parse_args()
+    context = Context()
+    context.create(echo=args.echo, expire_on_commit=False)
+    db_size = context.db_size()
+    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    ep = EtabParser(context)
+    ep.load(args.path)
+    print(f"New etablissement: {ep.nb_new_entity}")
+    print(f"Update etablissement: {ep.nb_update_entity}")
+    print(f"New adresse: {ep.nb_new_adresse}")
+    print(f"New adresse normalized: {ep.nb_new_norm}")
+    new_db_size = context.db_size()
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+
+    # data/etab_00-00.csv -e

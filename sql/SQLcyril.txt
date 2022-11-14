@@ -1,0 +1,85 @@
+J'ai corrigé ton code, c'était un petit détail ...
+
+Etape 1/
+J'ai modifier tes requêtes avec des join à la place des where
+C'est KIF KIF mais ca va être plus facile à modifier en jointure externe par la suite
+
+select count(distinct p.id) from tarif t , ps p, tarif_date_source tds 
+where t.profession_id =60
+and t.ps_id =p.id 
+and t.code like '%CS%'
+and tds.tarif_id =t.id 
+and tds.date_source_id >=2107 and tds.date_source_id <=2206
+
+Ca donne
+
+select count(distinct p.id) from tarif t
+join ps p on t.ps_id =p.id
+join tarif_date_source tds on tds.tarif_id =t.id 
+where t.profession_id =60
+and t.code like '%CS%'
+and tds.date_source_id >=2107 and tds.date_source_id <=2206
+
+****Code 2 qui me donne toutes les infos mais pas le bon nombre de pédiatres
+
+select count(distinct p.id) from ps p, ps_cabinet_date_source pcds, cabinet c, adresse_raw ar, adresse_norm an, ban b, basecc17 bcc, tarif t
+where p.id = pcds.ps_id
+and pcds.cabinet_id = c.id
+and c.adresse_raw_id = ar.id
+and ar.adresse_norm_id = an.id
+and an.ban_id  = b.id
+and t.ps_id =p.id
+and b.code_insee = bcc."CODGEO"
+and t.profession_id =60
+and (pcds.date_source_id >= 2107 and  pcds.date_source_id <= 2206)
+and t.code like ('%CS%')
+
+Etape 2 : J'ai fais pareil pour la 2ème requête ca donne
+
+select count(distinct p.id) from ps p
+join ps_cabinet_date_source pcds on p.id = pcds.ps_id
+join cabinet c on pcds.cabinet_id = c.id
+join adresse_raw ar on c.adresse_raw_id = ar.id
+join adresse_norm an on ar.adresse_norm_id = an.id
+join ban b on an.ban_id  = b.id
+join tarif t on t.ps_id =p.id
+join tarif_date_source tds on tds.tarif_id =t.id 
+join basecc17 bcc on b.code_insee = bcc."CODGEO"
+
+where t.profession_id =60
+and t.code like '%CS%'
+and tds.date_source_id >= 2107 and  tds.date_source_id <= 2206
+
+Le bug est toujours présent, c'est cette jointure qui pose problème : b.code_insee = bcc."CODGEO"
+En effet certains code_insee n'existent pas dans BCC !
+Pour s'en apercevoir il suffit d'enlever la ligne join basecc17 bcc on b.code_insee = bcc."CODGEO" et s'apercevoir que le count renvoit bien le bon résultat
+
+Etape 3
+
+Quand on fait un jointure (soit par join soit par where) avec un id qui n'existe pas (ici le CODGEO), ca renvoie rien, on pert donc la ligne avec le code_insee qui n'existe pas
+La solution : Ajouter left outer devant la ligne problématique
+NB : normalement sur mes tables, ce problème de qualité n'arrive pas, donc pas besoin d'outer join
+
+tu obtiens :
+select count(distinct p.id) from ps p
+join ps_cabinet_date_source pcds on p.id = pcds.ps_id
+join cabinet c on pcds.cabinet_id = c.id
+join adresse_raw ar on c.adresse_raw_id = ar.id
+join adresse_norm an on ar.adresse_norm_id = an.id
+join ban b on an.ban_id  = b.id
+join tarif t on t.ps_id =p.id
+join tarif_date_source tds on tds.tarif_id =t.id 
+left outer join basecc17 bcc on b.code_insee = bcc."CODGEO"
+
+where t.profession_id =60
+and t.code like '%CS%'
+and tds.date_source_id >= 2107 and  tds.date_source_id <= 2206
+
+Et tu obtiens le bon résultat
+
+Etape 4
+
+Pour connaitre les code_insee problématiques ajoute en fin de requête
+and bcc."CODGEO" is null
+
+

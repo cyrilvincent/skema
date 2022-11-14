@@ -37,7 +37,7 @@ class EhpadParser:
         print(df)
         engine = create_engine(config.connection_string, echo=False)
         with engine.begin() as connection:
-            df.to_sql("ehpad", con=connection, if_exists="fail", index=False)
+            df.to_sql("ehpad", con=connection, if_exists="append", index=False)
 
 
 if __name__ == '__main__':
@@ -54,6 +54,3 @@ if __name__ == '__main__':
     p.load(args.path)
 
     # data/ehpad/cnsa-export-prix-ehpad-2018-brute.csv
-    # 32444 => 18945
-    # select * from ehpad where "finessEt" = '010002228'
-    # 5 => 3

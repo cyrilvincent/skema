@@ -32,7 +32,7 @@ python diplome_parser.py data/ps_libreacces/PS_LibreAcess_Dipl_AutExerc_20211200
 python diplome_parser.py -s data/ps_libreacces/PS_LibreAcess_SavoirFaire_202112000000.txt
 
 Parsing EHPAD
-python ehpad_parser.py path
+python ehpad_parser.py path_2022_brute.csv
 
 Parsing OD
 python od_parser.py data/od/ODfinale.csv
@@ -58,7 +58,7 @@ Pour débugger une adresse via BAN et OSM
 python adresse_finder.py
 
 MAJ du code
-git clone
+git clone https://github.com/cyrilvincent/skema
 
 Backup
 A faire 1 fois par mois après les imports PS

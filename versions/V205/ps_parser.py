@@ -158,6 +158,7 @@ class PSParser(BaseParser):
             n.numero, n.rue1 = self.split_num(a.adresse2)
             n.rue1 = self.normalize_street(n.rue1)
             n.rue2 = self.normalize_street(a.adresse3) if a.adresse3 is not None else None
+        # Ajout release
         if n.rue1 == '':
             n.rue1 = None
         if n.rue1 is None and n.numero is not None:
@@ -206,27 +207,6 @@ class PSParser(BaseParser):
         return False
 
     def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
-        # Règle de gestion de l'affectation d'INPP et de la fusion de 2 PS
-        # La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
-        # 1/ Si cette clé est présente dans personne_activite ca matche
-        # Quand ca match ca veut dire que je lui affecte l'INPP trouvé
-        # Sinon
-        # Je cherche le nom + prenom dans personne_activite
-        # Si ca me retourne 0 résultat => pas de matching
-        # 2/ Si ca me retourne 1 et 1 seul résultat, je matche
-        # Sinon
-        # Je recherche le nom + prenom dans personne_activite dans le département du ps
-        # Si ca me retourne 0 => pas de matching
-        # J'obtiens donc la liste des PS de nom + prenom dans le département du PS que je nomme res
-        # 3/ Si le CP de res match le CP de personne_activite OU la commune de res match la commune de personne_activite ET la rue du res match à 90% la rue de personne activite ET que ca me retourne 1 et 1 seul résultat alors je matche
-        # 4/ Sinon si le nom + prenom de PS match à 87.5% le nom + prenom de personne activite et que l'adresse match à 87.5% alors je matche
-        # Sinon je ne matche pas
-        # 5/ Enfin si un PS possède un INPP déjà utilisé par un autre PS ils fusionnent
-        #
-        # Dans notre cas je pense que l'un des PS a matché facilement avec la règle 1
-        # L'autre a matché difficilement avec la règle 2 ou 3 sur le même INPP et ont donc fusionnés
-        # Corriger le problème est ardu car la profession ne fait pas parti de personne_activite et je ne sais pas entre les 2 professions lequel est le bon en cas de conflit
-        # Je pense que le règle 2 est trop permissive
         if ps.key in self.ps_merges:
             return self.ps_merges[ps.key]
         key3 = ps.nom, ps.prenom, a.numero, a.rue1, a.cp, a.commune
@@ -238,7 +218,6 @@ class PSParser(BaseParser):
         if key0 not in self.inpps_france:
             self.inpps_temp[key3] = None
             return None
-        # A virer
         else:
             if len(list(self.inpps_france[key0])) == 1:
                 self.nb_inpps += 1
@@ -250,7 +229,7 @@ class PSParser(BaseParser):
             return None
         dico = self.inpps[key1]
         key2 = a.numero, a.rue1, a.cp, a.commune
-        if key2 in dico: # Normalement n'arrive jamais
+        if key2 in dico:
             self.nb_inpps += 1
             self.inpps_temp[key3] = dico[key2]
             return dico[key2]
@@ -260,14 +239,13 @@ class PSParser(BaseParser):
             self.nb_inpps += 1
             self.inpps_temp[key3] = l[0]
             return l[0]
-        inpp = self.match_inpp_gestalt(key2, dico) # A VIRER
+        inpp = self.match_inpp_gestalt(key2, dico)
         if inpp is not None:
             self.nb_inpps += 1
         # else:
         #     print("No match", (self.nb_inpps / self.nb_ps_to_match) * 100, key3)
         self.inpps_temp[key3] = inpp
         return inpp
-
 
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:
         n = self.normalize(a)
