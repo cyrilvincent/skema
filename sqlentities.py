@@ -61,7 +61,7 @@ class Context:
 #      *-* date_source
 # personne_activite *-* pa_adresse
 #                   *-* code_profession
-#                   *-* diplome
+#                   *-* diplome *-* profession
 # /!\ FK != INDEX automatique, testé sur tarif
 
 
@@ -221,6 +221,18 @@ personne_activite_diplome = Table('personne_activite_diplome', Base.metadata,
                                      Column('diplome_id', ForeignKey('diplome.id'), primary_key=True)
                                      )
 
+profession_diplome = Table('profession_diplome', Base.metadata,
+                                     Column('profession_id', ForeignKey('profession.id'),
+                                            primary_key=True),
+                                     Column('diplome_id', ForeignKey('diplome.id'), primary_key=True)
+                                     )
+
+profession_code_profession = Table('profession_code_profession', Base.metadata,
+                                     Column('profession_id', ForeignKey('profession.id'),
+                                            primary_key=True),
+                                     Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
+                                     )
+
 
 class DateSource(Base):
     __tablename__ = "date_source"
@@ -368,6 +380,9 @@ class Profession(Base):
 
     id = Column(Integer, primary_key=True)
     libelle = Column(String(50), nullable=False)
+
+    # backref: diplomes
+    # backref: professions
 
     def __repr__(self):
         return f"{self.id} {self.libelle}"
@@ -517,6 +532,10 @@ class Diplome(Base):
                                                               secondary=personne_activite_diplome,
                                                               backref="diplomes")
 
+    professions: List[Profession] = relationship("Profession",
+                                                              secondary=profession_diplome,
+                                                              backref="diplomes")
+
     @property
     def key(self):
         return self.code_diplome
@@ -550,6 +569,10 @@ class CodeProfession(Base):
 
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
                                                               secondary=personne_activite_code_profession,
+                                                              backref="code_professions")
+
+    professions: List[Profession] = relationship("Profession",
+                                                              secondary=profession_code_profession,
                                                               backref="code_professions")
 
     def __repr__(self):

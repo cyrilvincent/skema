@@ -10,6 +10,7 @@ from OSM_matcher import OSMMatcher
 from ps_tarif_parser import PSTarifParser
 from score_matcher import ScoreMatcher
 from personne_activite_parser import PersonneActiviteParser
+from pa_correspondance_parser import PACorrespondanceParser
 from sqlentities import *
 
 
@@ -491,6 +492,23 @@ class ICIPTests(TestCase):
             dico[h] = r
         d = p.savoir_faire_mapper(dico)
         self.assertEqual("SM20", d.code_diplome)
+
+    def test_pa_correspondance_mapper(self):
+        context = Context()
+        context.create(echo=True)
+        p = PACorrespondanceParser(context)
+        p.load_cache()
+        s = "\ufeffprofession,mode d’exercice particulier,codeprofession,Code savoir-faire,code profession,libelléprofession"
+        headers = s.split(",")
+        s = "35,,Gynécologie médicale et obstétrique (CEX),CEX22,10,Médecin"
+        row = s.split(",")
+        dico = {}
+        for h, r in zip(headers, row):
+            dico[h] = r
+        id, code, cp = p.mapper(dico)
+        self.assertEqual(35, id)
+        self.assertEqual("CEX22", code)
+        self.assertEqual(10, cp)
 
 
 

@@ -29,7 +29,8 @@ class PersonneActiviteParser(BaseParser):
         l = self.context.session.query(Diplome).filter(Diplome.is_savoir_faire == True)
         for s in l:
             self.savoir_faires[s.key] = s
-        l: List[PersonneActivite] = self.context.session.query(PersonneActivite).all()
+        l: List[PersonneActivite] = self.context.session.query(PersonneActivite)\
+            .options(joinedload(PersonneActivite.diplomes)).options(joinedload(PersonneActivite.code_professions)).all()
         for e in l:
             self.entities[e.inpp] = e
         l: List[PAAdresse] = self.context.session.query(PAAdresse)\
@@ -101,8 +102,8 @@ class PersonneActiviteParser(BaseParser):
     def savoir_faire_mapper(self, row) -> Optional[Diplome]:
         d = Diplome()
         try:
-            s = row["Code savoir-faire"]
-            if s is None or s.strip() == "":
+            s = self.get_nullable(row["Code savoir-faire"])
+            if s is None:
                 return None
             d = self.savoir_faires[s]
         except Exception as ex:
