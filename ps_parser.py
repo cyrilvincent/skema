@@ -15,14 +15,16 @@ class PSParser(BaseParser):
         super().__init__(context)
         self.nb_cabinet = 0
         self.nb_inpps = 0
-        self.nb_ps_to_match = 0
+        self.nb_unique_ps = 0
         self.cabinets: Dict[str, Cabinet] = {}
-        self.inpps: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], str]] = {}
+        self.inpps_dept: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], str]] = {}
         self.inpps_france: Dict[Tuple[str, str], Set[str]] = {}
-        self.inpps_temp: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
+        self.inpps: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
-        self.personne_activites: Dict[str, PersonneActivite] = {}
+        # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
+        self.nb_rule = 3
+        self.rules: List[int] = [0 for _ in range(self.nb_rule)]
 
     def load_cache(self):
         super().load_cache()
@@ -40,10 +42,11 @@ class PSParser(BaseParser):
             self.ps_merges[p.key] = p.inpp
             self.nb_ram += 1
         l: List[Profession] = self.context.session.query(Profession) \
-            .options(joinedload(Profession.diplomes).joinedload(Profession.code_professions)).all()
+            .options(joinedload(Profession.diplomes)).options(joinedload(Profession.code_professions)).all()
         for p in l:
             self.professions[p.id] = p
             self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
         self.load_cache_inpp()
         print(f"{self.nb_ram} objects in cache")
 
@@ -56,25 +59,27 @@ class PSParser(BaseParser):
                 key1 = pa.nom, pa.prenom, self.get_dept_from_cp(a.cp)
                 key2 = a.numero, a.rue, a.cp, a.commune
                 key0 = pa.nom, pa.prenom
-                if key1 not in self.inpps:
-                    self.inpps[key1] = {key2: pa.inpp}
+                if key1 not in self.inpps_dept:
+                    self.inpps_dept[key1] = {key2: pa.inpp}
                 else:
-                    self.inpps[key1][key2] = pa.inpp
+                    self.inpps_dept[key1][key2] = pa.inpp
                 if key0 not in self.inpps_france:
                     self.inpps_france[key0] = {pa.inpp}
                 else:
                     self.inpps_france[key0].add(pa.inpp)
                 self.nb_ram += 1
             session.expunge(a)
-        self.load_cache_inpp_3()
+        print(f"{self.nb_ram} objects in cache")
+        # self.load_cache_inpp_3()
 
-    def load_cache_inpp_3(self):
-        print("Making cache level 3")
-        session = self.context.get_session()
-        personne_activites = session.query(PersonneActivite) \
-            .options(joinedload(PersonneActivite.code_professions)).options(joinedload(PersonneActivite.diplomes)).all()
-        for p in personne_activites:
-            self.personne_activites[p.inpp] = p
+    # def load_cache_inpp_3(self):
+    #     print("Making cache level 3")
+    #     session = self.context.get_session()
+    #     personne_activites = session.query(PersonneActivite) \
+    #         .options(joinedload(PersonneActivite.code_professions)).options(joinedload(PersonneActivite.diplomes)).all()
+    #     for p in personne_activites:
+    #         self.personne_activites[p.inpp] = p
+    #         self.nb_ram += 1
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -254,8 +259,46 @@ class PSParser(BaseParser):
             return self.match_profession_savoir_faire(p, pa)
         return False
 
+    def rule(self, n: int, ps: PS, a: AdresseNorm) -> Optional[str]:
+        fn = self.__getattribute__(f"rule{n}")
+        res = fn(ps, a)
+        return res
 
-    def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+    def rule1(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
+        if key1 not in self.inpps_dept:
+            return None
+        dico = self.inpps_dept[key1]
+        key2 = a.numero, a.rue1, a.cp, a.commune
+        if key2 in dico:
+            return dico[key2]
+        return None
+
+    def rule2(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
+        if key1 not in self.inpps_dept:
+            return None
+        dico = self.inpps_dept[key1]
+        l = [dico[k] for k in dico.keys() if (k[1] == a.rue1 and k[2] == a.cp and k[3] == a.commune)]
+        l = list(set(l))
+        if len(l) == 1:
+            return l[0]
+        return None
+
+    def rule3(self, ps: PS, a: AdresseNorm) -> Optional[str]:
+        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
+        if key1 not in self.inpps_dept:
+            return None
+        dico = self.inpps_dept[key1]
+        l = [dico[k] for k in dico.keys() if (k[1] == a.rue1 and k[0] == a.numero and k[3] == a.commune)]
+        l = list(set(l))
+        if len(l) == 1:
+            return l[0]
+        return None
+
+
+
+    def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         # Règle de gestion de l'affectation d'INPP et de la fusion de 2 PS
         # La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
         # 1/ Si cette clé est présente dans personne_activite ca matche
@@ -277,46 +320,58 @@ class PSParser(BaseParser):
         # L'autre a matché difficilement avec la règle 2 ou 3 sur le même INPP et ont donc fusionnés
         # Corriger le problème est ardu car la profession ne fait pas parti de personne_activite et je ne sais pas entre les 2 professions lequel est le bon en cas de conflit
         # Je pense que le règle 2 est trop permissive
+
+        # Recherche dans les ps_merges et dans le cache local des inpps déjà traités
         if ps.key in self.ps_merges:
-            return self.ps_merges[ps.key]
+            return self.ps_merges[ps.key], 0
         key3 = ps.nom, ps.prenom, a.numero, a.rue1, a.cp, a.commune
-        if key3 in self.inpps_temp:
-            return self.inpps_temp[key3]
-        self.nb_ps_to_match += 1
-        # Recherche 1 nom, prenom sur toute la france avec len == 1
-        key0 = ps.nom, ps.prenom
-        if key0 not in self.inpps_france:
-            self.inpps_temp[key3] = None
-            return None
-        # A virer
-        else:
-            if len(list(self.inpps_france[key0])) == 1:
+        print(key3)
+        if key3 in self.inpps:
+            return self.inpps[key3], 0
+        self.nb_unique_ps += 1
+
+        for n in range(1, self.nb_rule + 10):
+            res = self.rule(n, ps, a)
+            self.inpps[key3] = res
+            if res is not None:
+                print(f"Match {n}")
                 self.nb_inpps += 1
-                self.inpps_temp[key3] = list(self.inpps_france[key0])[0]
-                return self.inpps_temp[key3]
-        key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
-        if key1 not in self.inpps:
-            self.inpps_temp[key3] = None
-            return None
-        dico = self.inpps[key1]
-        key2 = a.numero, a.rue1, a.cp, a.commune
-        if key2 in dico: # Normalement n'arrive jamais
-            self.nb_inpps += 1
-            self.inpps_temp[key3] = dico[key2]
-            return dico[key2]
-        l = [dico[k] for k in dico.keys() if (k[2] == a.cp or k[3] == a.commune) and self.match_rue(k[1], a.rue1)]
-        l = list(set(l))
-        if len(l) == 1:
-            self.nb_inpps += 1
-            self.inpps_temp[key3] = l[0]
-            return l[0]
-        inpp = self.match_inpp_gestalt(key2, dico) # A VIRER
-        if inpp is not None:
-            self.nb_inpps += 1
+                return res, n
+
+        return None, -1
+
+
+        # # Recherche 1 nom, prenom sur toute la france avec len == 1
+        # key0 = ps.nom, ps.prenom
+        # if key0 not in self.inpps_france:
+        #     self.inpps[key3] = None
+        #     return None, -1
         # else:
-        #     print("No match", (self.nb_inpps / self.nb_ps_to_match) * 100, key3)
-        self.inpps_temp[key3] = inpp
-        return inpp
+        #     if len(list(self.inpps_france[key0])) == 1:
+        #         self.nb_inpps += 1
+        #         self.inpps[key3] = list(self.inpps_france[key0])[0]
+        #         return self.inpps[key3], 2
+        # # key1 = ps.nom, ps.prenom, self.get_dept_from_cp(a.cp)
+        # # if key1 not in self.inpps_dept:
+        # #     self.inpps[key3] = None
+        # #     return None, -1
+        # # dico = self.inpps_dept[key1]
+        # # key2 = a.numero, a.rue1, a.cp, a.commune
+        # # if key2 in dico:
+        # #     self.nb_inpps += 1
+        # #     self.inpps[key3] = dico[key2]
+        # #     return dico[key2], 3
+        # l = [dico[k] for k in dico.keys() if (k[2] == a.cp or k[3] == a.commune) and self.match_rue(k[1], a.rue1)]
+        # l = list(set(l))
+        # if len(l) == 1:
+        #     self.nb_inpps += 1
+        #     self.inpps[key3] = l[0]
+        #     return l[0], 4
+        # inpp = self.match_inpp_gestalt(key2, dico) # A VIRER
+        # if inpp is not None:
+        #     self.nb_inpps += 1
+        # self.inpps[key3] = inpp
+        # return inpp, 5
 
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:
         n = self.normalize(a)
@@ -340,10 +395,12 @@ class PSParser(BaseParser):
             a = self.create_update_adresse_raw(row)
             n = self.create_update_norm(a)
             p = self.profession_mapper(row)
-            inpp = self.match_inpp(e, n)
+            inpp, rule_nb = self.match_inpp(e, p, n)
             if inpp is not None:
                 e.key = inpp
                 e.has_inpp = True
+                if rule_nb > 0:
+                    self.rules[rule_nb - 1] += 1
             if e.key in self.entities:
                 same = e.equals(self.entities[e.key])
                 if not same:
@@ -384,13 +441,15 @@ if __name__ == '__main__':
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")
-    print(f"Matching INPP: {psp.nb_inpps}/{psp.nb_ps_to_match}: {(psp.nb_inpps / psp.nb_ps_to_match) * 100:.0f}%")
+    print(f"Matching INPP: {psp.nb_inpps}/{psp.nb_unique_ps}: {(psp.nb_inpps / psp.nb_unique_ps) * 100:.0f}%")
+    print(f"Matched rules: {psp.rules}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
     print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # Avant de refaire tourner valider vider la table ps_merge
 
+    # data/ps/plasticien-00-00.csv -n
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ update genre

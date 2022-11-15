@@ -383,16 +383,16 @@ class ICIPTests(TestCase):
         p.load_cache_inpp()
         max = 0
         max_key = None
-        for k in p.inpps:
-            l = len(set(p.inpps[k].values()))
+        for k in p.inpps_dept:
+            l = len(set(p.inpps_dept[k].values()))
             if l > max:
                 max = l
                 max_key = k
-        print(len(p.inpps))
+        print(len(p.inpps_dept))
         self.assertEqual(8, max)
         self.assertEqual(('LEFEBVRE', 'SOPHIE', 62), max_key)
-        self.assertEqual({(141, 'RUE DE QUIERY', 62490, 'VITRY EN ARTOIS'): '810104335319', (1601, 'BOULEVARD DES JUSTES', 62107, 'CALAIS'): '0629400748', (55, 'RUE DE ROSEMONT', 62130, 'SAINT POL SUR TERNOISE'): '810005814339', (28, 'PLACE DU GENERAL LECLERC', 62130, 'SAINT POL SUR TERNOISE'): '810100224947', (None, 'RUE DE BLENDECQUES', 62570, 'HELFAUT'): '810104257190', (39, 'RUE LESAGE', 62940, 'HAILLICOURT'): '810100124576', (1, 'RUE PRINCIPALE', 62120, 'CAMPAGNE LÈS WARDRECQUES'): '810005810808', (55, 'IMPASSE DU STADE', 62145, 'ESTRÉE BLANCHE'): '810005814339', (30, 'AVENUE DU PRESIDENT WILSON', 62100, 'CALAIS'): '810100356202', (2, 'RUE DES BRUYERES', 62120, 'RACQUINGHEM'): '810005810808'}, p.inpps[max_key])
-        print(p.inpps[('MARTIN', 'ISABELLE', 75)])
+        self.assertEqual({(141, 'RUE DE QUIERY', 62490, 'VITRY EN ARTOIS'): '810104335319', (1601, 'BOULEVARD DES JUSTES', 62107, 'CALAIS'): '0629400748', (55, 'RUE DE ROSEMONT', 62130, 'SAINT POL SUR TERNOISE'): '810005814339', (28, 'PLACE DU GENERAL LECLERC', 62130, 'SAINT POL SUR TERNOISE'): '810100224947', (None, 'RUE DE BLENDECQUES', 62570, 'HELFAUT'): '810104257190', (39, 'RUE LESAGE', 62940, 'HAILLICOURT'): '810100124576', (1, 'RUE PRINCIPALE', 62120, 'CAMPAGNE LÈS WARDRECQUES'): '810005810808', (55, 'IMPASSE DU STADE', 62145, 'ESTRÉE BLANCHE'): '810005814339', (30, 'AVENUE DU PRESIDENT WILSON', 62100, 'CALAIS'): '810100356202', (2, 'RUE DES BRUYERES', 62120, 'RACQUINGHEM'): '810005810808'}, p.inpps_dept[max_key])
+        print(p.inpps_dept[('MARTIN', 'ISABELLE', 75)])
         # ('MARTIN', 'ISABELLE') 36 dans la france
 
     def test_convert_key_to_adresse_string(self):

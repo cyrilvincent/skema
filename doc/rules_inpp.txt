@@ -1,0 +1,72 @@
+RULE 1 :
+        # La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
+        # 1/ Si cette clé est présente dans personne_activite ca matche
+        # Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+RULE 2 :
+         # La clé d'un PS est nom + prenom + rue1 + cp + commune
+         # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+
+RULE 3 :
+        # La clé d'un PS est nom + prenom + numero + rue1 + commune
+        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+
+RULE 3 :
+         # La clé d'un PS est nom + prenom + numero + rue1 + commune
+         # Si cette clé est présente dans personne_activite ca matche
+         # Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+ETAPE 3 :
+
+# La clé d'un PS est nom + numero + rue1 + cp + commune   (+ spécialité ?)
+# Si cette clé est présente dans personne_activite ca matche
+       	# Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+ETAPE 4 :
+
+# La clé d'un PS est nom + rue1 + cp + commune   (+ spécialité ?)
+# Si cette clé est présente dans personne_activite ca matche
+       	# Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+ETAPE 5 :
+# La clé d'un PS est prénom+ nom + cp + commune   (+ spécialité ?)
+# Si cette clé est présente dans personne_activite ca matche
+       	# Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+
+ETAPE 6 :
+# La clé d'un PS est nom + cp + commune   (+ spécialité ?)
+# Si cette clé est présente dans personne_activite ca matche
+       	# Quand ça match ça veut dire que je lui affecte l'INPP trouvé
+
+
+ETAPE 7 :
+        	# Je cherche le nom + prenom dans personne_activite  (+spécialité ?)
+# Si ça me retourne 1 et 1 seul résultat, je matche
+       	# Si ça me retourne 0 résultat => pas de matching
+
+# Sinon
+c’est le cas potentiel homonyme / multiples localisations
+# Je recherche le nom + prenom (+ spécialité ?) dans personne_activite dans le département du ps
+
+        # J'obtiens donc la liste des PS de nom + prenom dans le département du PS que je nomme res
+        # 3/ Si le CP de res match le CP de personne_activite OU la commune de res match la commune de personne_activite ET la rue du res match à 90% la rue de personne activite ET que ça me retourne 1 et 1 seul résultat alors je matche
+        # 4/ Sinon si le nom + prenom de res match à 87.5% le nom + prenom de personne activite et que l'adresse match à 87.5% alors je matche
+        # Sinon je ne matche pas
+
+
+Question : Comment générer un INPP pour ceux qui n’ont pas matché ???
+1/ Manque adresse base INPP
+2/ Erreur prénom cyril au lieu de cyrille ///match nom + adresse
+3/ enlever les apostrophes de INPP
+
+Besoin (pour la plateforme)
+
+1/ simplification
+2/ Matching code géo IRIS
+3/ lier toutes les bases notamment avec n°FINESS
+
+
+Question : quel nettoyage effectué sur base Personne/activité ?
+Car certain nom de rue, bd sont dans la même cellule dans le fichier brut
+Bien enlever les apostrophes également
