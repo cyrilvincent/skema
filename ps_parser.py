@@ -74,7 +74,7 @@ class PSParser(BaseParser):
         personne_activites = session.query(PersonneActivite) \
             .options(joinedload(PersonneActivite.code_professions)).options(joinedload(PersonneActivite.diplomes)).all()
         for p in personne_activites:
-            self.personne_activites[p.key] = p
+            self.personne_activites[p.inpp] = p
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -89,14 +89,15 @@ class PSParser(BaseParser):
             quit(1)
         return ps
 
-    def profession_mapper(self, row) -> Optional[int]:
-        id = None
+    def profession_mapper(self, row) -> Optional[Profession]:
+        p = None
         try:
             id = self.get_nullable_int(row[10])
+            p = self.professions[id]
         except Exception as ex:
-            print(f"ERROR PS row {self.row_num} {id}\n{ex}")
+            print(f"ERROR PS row {self.row_num} {p}\n{ex}")
             quit(3)
-        return id
+        return p
 
     def cabinet_mapper(self, row) -> Cabinet:
         c = Cabinet()
@@ -245,18 +246,13 @@ class PSParser(BaseParser):
                 return True
         return False
 
-    def match_savoir_faire_code_profession(self, profession_id: Optional[int], pa: PersonneActivite) -> bool:
-        try:
-            if profession_id is None:
-                return False
-            p: Profession = self.professions[profession_id]
-            res = self.match_profession_code_profession(p, pa)
-            if res:
-                return self.match_profession_savoir_faire(p, pa)
+    def match_specialite(self, p: Optional[Profession], pa: PersonneActivite) -> bool:
+        if p is None:
             return False
-        except Exception as ex:
-            print(f"ERROR Profession row {self.row_num} {profession_id}\n{ex}")
-            quit(5)
+        res = self.match_profession_code_profession(p, pa)
+        if res:
+            return self.match_profession_savoir_faire(p, pa)
+        return False
 
 
     def match_inpp(self, ps: PS, a: AdresseNorm) -> Optional[str]:
@@ -322,7 +318,6 @@ class PSParser(BaseParser):
         self.inpps_temp[key3] = inpp
         return inpp
 
-
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:
         n = self.normalize(a)
         if n.key in self.adresse_norms:
@@ -344,7 +339,7 @@ class PSParser(BaseParser):
             e = self.mapper(row)
             a = self.create_update_adresse_raw(row)
             n = self.create_update_norm(a)
-            profession_id = self.profession_mapper(row)
+            p = self.profession_mapper(row)
             inpp = self.match_inpp(e, n)
             if inpp is not None:
                 e.key = inpp
@@ -362,7 +357,7 @@ class PSParser(BaseParser):
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
             c.adresse_raw = a
-            if args.nosave != True:
+            if not args.nosave:
                 self.context.session.commit()
 
 

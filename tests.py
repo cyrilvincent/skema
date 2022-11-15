@@ -510,6 +510,61 @@ class ICIPTests(TestCase):
         self.assertEqual("CEX22", code)
         self.assertEqual(10, cp)
 
+    def test_match_specialite(self):
+        context = Context()
+        context.create(echo=True)
+        p = PSParser(context)
+        p.date_source = DateSource(21, 12)
+        s = "F;BRIARD;EMILIE;;;PLACE DE LA FENIERE;;13640;LA ROQUE D ANTHERON;;60;;3;c1;N;O;BLQP0100;114;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0"
+        row = s.split(";")
+        ps = p.mapper(row)
+        l = p.context.session.query(Profession).all()
+        for prof in l:
+            p.professions[prof.id] = prof
+        profession = p.profession_mapper(row)
+        self.assertEqual(60, profession.id)
+        profession = p.professions[profession.id]
+        pa = p.context.session.query(PersonneActivite).first()
+        res = p.match_profession_code_profession(profession, pa)
+        self.assertFalse(res)
+        cp = p.context.session.query(CodeProfession).filter(CodeProfession.id == 10).first()
+        pa.code_professions.append(cp)
+        res = p.match_profession_code_profession(profession, pa)
+        self.assertTrue(res)
+        res = p.match_specialite(profession, pa)
+        self.assertTrue(res)
+        res = p.match_profession_savoir_faire(profession, pa)
+        self.assertTrue(res)
+        d = p.context.session.query(Diplome).filter(Diplome.code_diplome == "SM40").first()
+        pa.diplomes.append(d)
+        res = p.match_profession_savoir_faire(profession, pa)
+        self.assertTrue(res)
+        res = p.match_specialite(profession, pa)
+        self.assertTrue(res)
+        d2 = p.context.session.query(Diplome).filter(Diplome.code_diplome == "SM01").first()
+        pa.diplomes.append(d2)
+        res = p.match_profession_savoir_faire(profession, pa)
+        self.assertTrue(res)
+        res = p.match_specialite(profession, pa)
+        self.assertTrue(res)
+        profession = p.professions[2]
+        res = p.match_profession_savoir_faire(profession, pa)
+        self.assertTrue(res)
+        profession = p.professions[3]
+        res = p.match_profession_savoir_faire(profession, pa)
+        self.assertFalse(res)
+        res = p.match_specialite(profession, pa)
+        self.assertFalse(res)
+
+
+
+
+
+
+
+
+
+
 
 
 
