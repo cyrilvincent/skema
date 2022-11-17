@@ -556,6 +556,25 @@ class ICIPTests(TestCase):
         res = p.match_specialite(profession, pa)
         self.assertFalse(res)
 
+    def test_create_ps_with_split_names(self):
+        p = PSParser(None)
+        ps = PS
+        ps.nom = "VINCENT"
+        ps.prenom = "CYRIL"
+        res = p.create_ps_with_split_names(ps)
+        self.assertIsNone(res)
+        ps.nom = "VINCENT BELRHALI"
+        res = p.create_ps_with_split_names(ps)
+        self.assertEqual("VINCENT", res.nom)
+        self.assertEqual("CYRIL", res.prenom)
+        ps.prenom = "CYRIL MATIS"
+        res = p.create_ps_with_split_names(ps)
+        self.assertEqual("VINCENT", res.nom)
+        self.assertEqual("CYRIL", res.prenom)
+        ps.nom = "VINCENT"
+        res = p.create_ps_with_split_names(ps)
+        self.assertEqual("VINCENT", res.nom)
+
 
 
 

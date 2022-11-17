@@ -24,7 +24,7 @@ class PSParser(BaseParser):
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
         # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
-        self.nb_rule = 21
+        self.nb_rule = 20
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
 
     def load_cache(self):
@@ -291,6 +291,24 @@ class PSParser(BaseParser):
         return self.context.session.query(PersonneActivite).\
             filter((PersonneActivite.nom == nom) & (PersonneActivite.prenom == prenom)).all()
 
+    def create_ps_with_split_names(self, ps: PS) -> Optional[PS]:
+        if " " in ps.nom or " " in ps.prenom:
+            nom = ps.nom
+            if " " in ps.nom:
+                nom = str(ps.nom).split(" ")[0]
+                if len(nom) < 4:
+                    return None
+            prenom = ps.prenom
+            if " " in ps.prenom:
+                prenom = str(ps.prenom).split(" ")[0]
+                if len(prenom) < 4:
+                    return None
+            res = PS()
+            res.nom = nom
+            res.prenom = prenom
+            return res
+        return None
+
     def rule(self, n: int, ps: PS, a: AdresseNorm, p: Profession) -> Optional[PersonneActivite]:
         fn = self.__getattribute__(f"rule{n}")
         res = fn(ps, a, p)
@@ -474,45 +492,8 @@ class PSParser(BaseParser):
     def rule19(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
         return self.rule18(ps, a, None)
 
-    def rule20(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        if " " not in ps.nom:
-            return None
-        nom = str(ps.nom).split(" ")[0]
-        key_nom = self.normalize_string(nom), self.get_dept_from_cp(a.cp)
-        if key_nom not in self.inpps_nom:
-            return None
-        dico = self.inpps_nom[key_nom]
-        l = [dico[k] for k in dico.keys() if (k[1] == a.rue1 and k[2] == a.cp and k[3] == a.commune)]
-        l = list(set(l))
-        if p is not None:
-            l = [pa for pa in l if self.match_specialite(p, pa)]
-        if len(l) == 1:
-            return l[0]
+    def rule20(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
         return None
-
-    def rule21(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        if " " not in ps.prenom:
-            return None
-        prenom = str(ps.nom).split(" ")[0]
-        key_dept = self.normalize_string(ps.nom), prenom, self.get_dept_from_cp(a.cp)
-        if key_dept not in self.inpps_dept:
-            return None
-        dico = self.inpps_dept[key_dept]
-        dico2 = {}
-        for k in dico.keys():
-            if k[2] == a.cp and k[3] == a.commune:
-                dico2[k] = dico[k]
-        if len(list(dico2.keys())) > 0:
-            pa = self.match_rue_inpp_gestalt(a.rue1, dico2)
-            if p is None or pa is None:
-                return pa
-            if self.match_specialite(p, pa):
-                return pa
-        return None
-
-
-
-
 
     def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
@@ -530,6 +511,13 @@ class PSParser(BaseParser):
                 print(f"Match {n}: {res.inpp}")
                 self.nb_inpps += 1
                 return res.inpp, n
+
+        ps = self.create_ps_with_split_names(ps)
+        if ps is not None:
+            self.nb_unique_ps -= 1
+            inpp, _ = self.match_inpp(ps, p, a)
+            if inpp is not None:
+                return inpp, 20
 
         return None, -1
 
