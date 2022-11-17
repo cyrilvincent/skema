@@ -1,55 +1,68 @@
-RULE 1 :
-        # La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
-        # Si cette clé est présente dans personne_activite ca matche
+RULE 0 : La clé d'un PS est nom + prenom + rue1 + cp + commune
+         Cette clé a déjà été traitée, elle est assignée automatiquement par le cache
 
-RULE 2 :
-         # La clé d'un PS est nom + prenom + rue1 + cp + commune
-         # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 1 : La clé d'un PS est nom + prenom + numero + rue1 + cp + commune
+         Si cette clé est présente dans personne_activite ca matche
 
-RULE 3 :
-        # La clé d'un PS est nom + prenom + numero + rue1 + departement + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 2 : La clé d'un PS est nom + prenom + rue1 + cp + commune + specialite
+         Le matching de specialité se détermine comme suit :
+         On regarde le matching PS.profession vs PersonneActive.code_profession
+         Si le matching est faux, le matching specialite est faux
+         Si le matching est vrai
+         On regarde la correspondance PS.profession vs PersonneActivie.savoir_faire
+         Si la correspondance n'existe pas le matching est vrai
+         Si la correspondance existe
+         On regarde le matching PS.profession vs PersonneActivie.savoir_faire
+         On renvoie la valeur du matching
 
-RULE 4 :
-        # La clé d'un PS est nom + numero + rue1 + cp + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 3 : La clé d'un PS est nom + prenom + numero + rue1 + departement + commune + specialite
 
-RULE 5 :
-        # La clé d'un PS est nom + rue1 + cp + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
-        # Jamais activée sur plasticien
+RULE 4 : La clé d'un PS est nom + numero + rue1 + cp + commune + specialite
 
-RULE 6 :
-        # La clé d'un PS est prenom + nom + rue1 (75%) + cp + commune
-        # le matching de rue1 est juste à 75%
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 5 : RULE 2 sans specialite
+         Jamais activée sur pediatre
 
-RULE 7 :
-        # La clé d'un PS est prenom + nom + cp + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 6 : La clé d'un PS est nom + rue1 + cp + commune + specialite
+         Jamais activée sur plasticien
 
-RULE 8 :
-        # La clé d'un PS est prenom + nom + (numero + rue1 + cp + commune à 75%)
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 7 : La clé d'un PS est prenom + nom + rue1 (75%) + cp + commune + specialite
+         le matching de rue1 est juste à 75%
 
-RULE 9 :
-        # La clé d'un PS est nom + cp + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 8 : La clé d'un PS est prenom + nom + cp + commune + specialite
 
-RULE 10 :
-        # La clé d'un PS est prenom + nom + dept + commune
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 9 : La clé d'un PS est prenom + nom + (numero + rue1 + cp + commune à 75%) + specialite
+         L'ensemble numero + rue1 + cp + commune doit être juste à 75%
 
-RULE 11 :
-        # La clé d'un PS est prenom + nom + dept
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
+RULE 10 : RULE 7 sans specialite
+          Jamais activée sur plasticien et pediatre
 
-RULE 12 :
-        # La clé d'un PS est prenom + nom
-        # Si cette clé est présente 1 et 1 seule fois dans personne_activite ca matche
-        # Activée 1 seule fois sur plasticien et 2 sur pediatre
+RULE 11 : RULE 8 sans specialite
+          Jamais activée sur pediatre
 
-# Plasticien : [633, 6, 39, 7, 0, 78, 32, 29, 3, 5, 4, 1]
+RULE 12 : La clé d'un PS est nom + cp + commune + specialite
+
+RULE 13 : La clé d'un PS est prenom + nom + dept + commune + specialite
+
+RULE 14 : La clé d'un PS est prenom + nom + dept + specialite
+
+RULE 15 : RULE 14 sans specialite
+
+RULE 16 : La clé d'un PS est prenom + nom + specialite
+          Activée 1 seule fois sur plasticien et 0 sur pediatre
+
+RULE 17 : RULE 16 sans specialite
+
+RULE 18 : La clé d'un PS est nom + specialite
+
+RULE 19 : RULE 18 sans specialite
+
+RULE 20 : La clé d'un PS est première partie du nom si nom composé + rue1 + specialite + cp + commune
+
+RULE 21 : La clé d'un PS est première partie du prénom si prénom composé + nom + specialite + cp + commune
+
+# Plasticien :   [633, 6, 39, 7, 0, 78, 32, 29, 3, 5, 4, 1]
+# + specialite : [633, 6, 37, 7, 0, 77, 31, 29, 2, 5, 5, 1] diff = 2,6,7,9,11
+# après ajout :  [633, 6, 37, 7, 0, 77, 31, 29, 2, 5, 5, 1, 0, 1, 1, 2, 1]
 # Pediatre : [1958, 19, 38, 43, 2, 217, 59, 40, 7, 1, 12, 2]
 
 

@@ -77,6 +77,8 @@ class BaseParser(metaclass=ABCMeta):
         dept = cp[:2]
         if dept == "20":
             dept = cp[:3]
+            if dept == "200":
+                dept = "201"
         return int(dept)
 
     def check_date(self, path):
