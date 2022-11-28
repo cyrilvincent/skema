@@ -297,7 +297,9 @@ class PSParser(BaseParser):
             if " " in ps.nom:
                 nom = str(ps.nom).split(" ")[0]
                 if len(nom) < 4:
-                    return None
+                    nom  = str(ps.nom).split(" ")[1]
+                    if len(nom) < 4:
+                        return None
             prenom = ps.prenom
             if " " in ps.prenom:
                 prenom = str(ps.prenom).split(" ")[0]
@@ -551,6 +553,7 @@ class PSParser(BaseParser):
             if inpp is not None:
                 e.key = inpp
                 e.has_inpp = True
+                e.rule_nb = rule_nb
                 if rule_nb > 0:
                     self.rules[rule_nb - 1] += 1
             if e.key in self.entities:
@@ -559,6 +562,7 @@ class PSParser(BaseParser):
                     if e.genre is not None:
                         self.entities[e.key].genre = e.genre
                         self.nb_update_entity += 1
+                    self.entities[e.key].rule_nb = e.rule_nb
                 e = self.entities[e.key]
             else:
                 self.entities[e.key] = e

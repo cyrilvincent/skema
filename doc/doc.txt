@@ -26,10 +26,10 @@ Parsing d'un fichier BAN
 python BAN_parser.py
 Le répertoire des fichiers BAN et lieux-dits doivent être dans data/adresse, par département
 
-Parsing des fichiers PS_LibreAcess_*
+Parsing des fichiers PS_LibreAccess_*
 python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
-python diplome_parser.py data/ps_libreacces/PS_LibreAcess_Dipl_AutExerc_202112000000.txt
-python diplome_parser.py -s data/ps_libreacces/PS_LibreAcess_SavoirFaire_202112000000.txt
+python diplome_parser.py data/ps_libreacces/PS_LibreAccess_Dipl_AutExerc_202112000000.txt
+python diplome_parser.py -s data/ps_libreacces/PS_LibreAccess_SavoirFaire_202112000000.txt
 
 Parsing EHPAD
 python ehpad_parser.py path_2022_brute.csv
@@ -52,6 +52,11 @@ python ps_merge.py ps1_key ps2_inpp
 Cette commande va fusionner ps1 dans ps2, l'inpp final sera celui de ps2_inpp
 ps1_key correspond au ps.key du ps qui va être fusionné
 ps2_inpp correspond au ps.key du ps qui va recevoir les tarifs de ps1
+
+Changement de la clé d'un PS
+python ps_change_key.py old_key new_key
+Cette commande va changer la clé d'un PS qui n'a pas d'INPP vers un INPP
+python ps_change_key.py VINCENT_CYRIL_38250 810000811140
 
 Adresse Finder
 Pour débugger une adresse via BAN et OSM

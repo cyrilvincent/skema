@@ -56,8 +56,8 @@ RULE 18 : La clé d'un PS est nom + specialite
 
 RULE 19 : RULE 18 sans specialite
 
-RULE 20 : Si le nom est composé et le premier mot du nom fait plus de lettres
-          ET/OU Si le prénom est composé et le premier mot du prénom fait plus de lettres
+RULE 20 : Si le nom est composé et le premier mot du nom fait plus de 3 lettres sinon on prends le 2ème mot s'il fait plus de 3 lettres
+          ET/OU Si le prénom est composé et le premier mot du prénom fait plus de 3 lettres
           On recommence toutes les règles avec la première partie du nom et/ou prénom
 
 # Plasticien :   [633, 6, 39, 7, 0, 78, 32, 29, 3, 5, 4, 1]

@@ -323,6 +323,7 @@ class PS(Base):
     has_inpp = Column(Boolean, nullable=False)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
+    rule_nb = Column(Integer)
 
     # ps_cabinet_date_sources by backref
     # tarifs by backref
@@ -331,7 +332,7 @@ class PS(Base):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
 
     def equals(self, other):
-        return self.genre == other.genre
+        return self.genre == other.genre and self.rule_nb == other.rule_nb
 
 
 class PSCabinetDateSource(Base):
