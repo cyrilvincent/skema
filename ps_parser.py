@@ -24,7 +24,7 @@ class PSParser(BaseParser):
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
         # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
-        self.nb_rule = 20
+        self.nb_rule = 22
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
 
     def load_cache(self):
@@ -291,19 +291,17 @@ class PSParser(BaseParser):
         return self.context.session.query(PersonneActivite).\
             filter((PersonneActivite.nom == nom) & (PersonneActivite.prenom == prenom)).all()
 
-    def create_ps_with_split_names(self, ps: PS) -> Optional[PS]:
+    def create_ps_with_split_names(self, ps: PS, name_ix=0, fname_ix=0) -> Optional[PS]:
         if " " in ps.nom or " " in ps.prenom:
             nom = ps.nom
             if " " in ps.nom:
-                nom = str(ps.nom).split(" ")[0]
-                if len(nom) < 4:
-                    nom  = str(ps.nom).split(" ")[1]
-                    if len(nom) < 4:
-                        return None
+                nom = str(ps.nom).split(" ")[name_ix]
+                if len(nom) < 3:
+                    return None
             prenom = ps.prenom
             if " " in ps.prenom:
-                prenom = str(ps.prenom).split(" ")[0]
-                if len(prenom) < 4:
+                prenom = str(ps.prenom).split(" ")[fname_ix]
+                if len(prenom) < 3:
                     return None
             res = PS()
             res.nom = nom
@@ -497,6 +495,12 @@ class PSParser(BaseParser):
     def rule20(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
         return None
 
+    def rule21(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
+        return None
+
+    def rule22(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
+        return None
+
     def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
             return self.ps_merges[ps.key], 0
@@ -514,12 +518,14 @@ class PSParser(BaseParser):
                 self.nb_inpps += 1
                 return res.inpp, n
 
-        ps = self.create_ps_with_split_names(ps)
-        if ps is not None:
-            self.nb_unique_ps -= 1
-            inpp, _ = self.match_inpp(ps, p, a)
-            if inpp is not None:
-                return inpp, 20
+        for i in [0, 1, 2]:
+            ps2 = self.create_ps_with_split_names(ps, i % 2, 1 if i == 2 else 0)
+            if ps2 is not None:
+                self.nb_unique_ps -= 1
+                inpp, _ = self.match_inpp(ps2, p, a)
+                if inpp is not None:
+                    self.inpps_cache[key_cache] = inpp
+                    return inpp, 20 + i
 
         return None, -1
 

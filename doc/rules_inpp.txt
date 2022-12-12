@@ -56,16 +56,16 @@ RULE 18 : La clé d'un PS est nom + specialite
 
 RULE 19 : RULE 18 sans specialite
 
-RULE 20 : Si le nom est composé et le premier mot du nom fait plus de 3 lettres sinon on prends le 2ème mot s'il fait plus de 3 lettres
-          ET/OU Si le prénom est composé et le premier mot du prénom fait plus de 3 lettres
+RULE 20 : Si le nom est composé et le premier mot du nom fait plus de 2 lettres
+          ET/OU Si le prénom est composé et le premier mot du prénom fait plus de 2 lettres
           On recommence toutes les règles avec la première partie du nom et/ou prénom
 
-# Plasticien :   [633, 6, 39, 7, 0, 78, 32, 29, 3, 5, 4, 1]
-# + specialite : [633, 6, 37, 7, 0, 77, 31, 29, 2, 5, 5, 1] diff = 2,6,7,9,11
-# après ajout :  [633, 6, 37, 7, 0, 77, 31, 29, 2, 5, 5, 1, 0, 1, 1, 2, 1]
-#                [633, 6, 37, 7, 0, 0, 77, 31, 29, 1, 1, 2, 6, 5, 2, 4, 1, 4, 1, 5]
-# Pediatre :     [1958, 19, 38, 41, 0, 2, 218, 59, 40, 0, 0, 4, 2, 11, 2, 11, 3, 6, 3, 16, 0]
-#                [1958, 19, 38, 41, 0, 2, 218, 59, 40, 0, 0, 4, 2, 11, 2, 11, 3, 6, 3, 28]
+RULE 21 : Rule 20 sur 2ème nom
+
+RULE 22 : Rule 20 sur 2ème prénom
+
+# Plasticien :   [633, 6, 37, 7, 0, 0, 77, 31, 29, 1, 1, 2, 6, 5, 2, 4, 1, 4, 1, 5, 0]
+# Pediatre :     [1958, 19, 38, 41, 0, 2, 218, 59, 40, 0, 0, 4, 2, 11, 2, 11, 3, 6, 3, 28, 6, 0]
 
 
 
