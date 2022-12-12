@@ -3,10 +3,11 @@ from unittest import TestCase
 from sqlalchemy.orm import joinedload
 
 from etalab_parser import EtalabParser
-from ps_merge import PSMerger
+from ps_change_key import PSChangeKey
 from ps_parser import PSParser
 from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
+from iris_matcher import IrisMatcher
 from ps_tarif_parser import PSTarifParser
 from score_matcher import ScoreMatcher
 from personne_activite_parser import PersonneActiviteParser
@@ -443,10 +444,10 @@ class ICIPTests(TestCase):
         self.assertEqual("26010004500012", t.siret)
         self.assertEqual("8610Z", t.codeape)
 
-    def test_ps_merger(self):
+    def test_ps_change_key(self):
         context = Context()
         context.create(echo=True)
-        psm = PSMerger(context)
+        psm = PSChangeKey(context)
         ps1 = psm.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources)) \
             .options(joinedload(PS.tarifs)).filter(PS.key == "BENYOUB_DA_SILVA_KARIMA_01000").first()
         nb_cabinet1 = len(ps1.ps_cabinet_date_sources)
@@ -574,6 +575,16 @@ class ICIPTests(TestCase):
         ps.nom = "VINCENT"
         res = p.create_ps_with_split_names(ps)
         self.assertEqual("VINCENT", res.nom)
+
+    def test_iris(self):
+        m = IrisMatcher(None, True)
+        iris = m.get_iris_from_lon_lat(5.5783773, 45.0984914)
+        self.assertEqual("382050000", iris)
+        iris = m.get_iris_from_lon_lat(2.2769951, 48.8588336)
+        self.assertEqual("751166216", iris)
+        iris = m.get_iris_from_lon_lat(2.2769951, 0)
+        self.assertIsNone(iris)
+
 
 
 

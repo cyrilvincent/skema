@@ -12,19 +12,60 @@ class PSChangeKey(PSParser):
     def __init__(self, context):
         super().__init__(context)
 
+    def merge_factory(self, key: str, inpp: str) -> PSMerge:
+        merge = PSMerge()
+        merge.key = key
+        merge.inpp = inpp
+        exist = self.context.session.query(PSMerge) \
+            .filter((PSMerge.key == merge.key) & (PSMerge.inpp == merge.inpp)).one_or_none()
+        if exist is None:
+            print(f"Create merge {merge}")
+            self.context.session.add(merge)
+        return merge
+
+    def merge_ps(self, ps1: PS, ps2: PS) -> PS:
+        print(f"Merge {ps1} to {ps2}")
+        for pcd1 in list(ps1.ps_cabinet_date_sources):
+            key1 = pcd1.cabinet_id, pcd1.date_source_id
+            l2 = [(pcd2.cabinet_id, pcd2.date_source_id) for pcd2 in ps2.ps_cabinet_date_sources]
+            ps1.ps_cabinet_date_sources.remove(pcd1)
+            if key1 not in l2:
+                ps2.ps_cabinet_date_sources.append(pcd1)
+                print(f"Move ps_cabinet_date_sources {pcd1} to {ps2}")
+            else:
+                self.context.session.delete(pcd1)
+        for tarif1 in list(ps1.tarifs):
+            l2 = [tarif2.key for tarif2 in ps2.tarifs]
+            ps1.tarifs.remove(tarif1)
+            if tarif1.key not in l2:
+                ps2.tarifs.append(tarif1)
+                print(f"Move tarif {tarif1} to {ps2}")
+            else:
+                self.context.session.delete(tarif1)
+        self.context.session.delete(ps1)
+        self.merge_factory(ps1.key, ps2.key)
+        return ps2
+
     def find_and_change(self, source: str, dest: str) -> PS:
-        ps = self.context.session.query(PS).filter(PS.key == source).one_or_none()
+        if len(dest) > 12:
+            print(f"{dest} must have less than 12 char")
+            quit(2)
+        ps = self.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources))\
+            .options(joinedload(PS.tarifs)).filter(PS.key == source).one_or_none()
         if ps is None:
-            print(f"{source} does not exist")
+            print(f"PS key {source} does not exist")
             quit(1)
         print(f"Found {ps}")
-        ps.key = dest
-        merge = PSMerge()
-        merge.key = source
-        merge.inpp = dest
-        self.context.session.add(merge)
-        print(f"Change to {ps}")
-        self.nb_new_entity += 1
+        ps_dest = self.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources))\
+            .options(joinedload(PS.tarifs)).filter(PS.key == dest).one_or_none()
+        if ps_dest is None:
+            ps.key = dest
+            self.merge_factory(source, dest)
+            print(f"Change to {ps}")
+            self.nb_new_entity += 1
+        else:
+            print(f"Found {ps_dest}")
+            self.merge_ps(ps, ps_dest)
         return ps
 
     def change(self, source: str, dest: str):
@@ -48,4 +89,3 @@ if __name__ == '__main__':
     context.create(echo=args.echo, expire_on_commit=False)
     psm = PSChangeKey(context)
     psm.change(args.source, args.dest)
-    print(f"Nb key changed: {psm.nb_new_entity}")

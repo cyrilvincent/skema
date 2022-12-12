@@ -151,6 +151,7 @@ class AdresseNorm(Base):
     score = Column(Float)
     dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
+    iris = Column(String(9))
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):

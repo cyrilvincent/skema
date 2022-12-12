@@ -181,7 +181,7 @@ if __name__ == '__main__':
     print(f"V{config.version}")
     print(config.copyright)
     print()
-    parser = argparse.ArgumentParser(description="BAN Matcher")
+    parser = argparse.ArgumentParser(description="OSM Matcher")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     parser.add_argument("-f", "--force", help="Force matching", action="store_true")
     parser.add_argument("-l", "--log", help="Log (OSM echo)", action="store_true")
