@@ -1,7 +1,7 @@
 import json
-import urllib.request
+import urllib3.request
+import urllib3
 import urllib.parse
-import urllib.error
 from typing import Optional
 from sqlentities import AdresseNorm
 from OSM_matcher import OSMMatcher
@@ -24,6 +24,7 @@ class IrisMatcher(OSMMatcher):
         self.nb_iris = 0
         self.filter_no_force = (AdresseNorm.iris.is_(None) & AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
         self.filter_force = (AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
+        self.http = urllib3.PoolManager()
 
     def stats(self):
         norm = self.session.query(AdresseNorm).count()
@@ -43,29 +44,56 @@ class IrisMatcher(OSMMatcher):
         if self.echo:
             print(url)
         try:
-            with urllib.request.urlopen(url) as response:
-                s = response.read()
-                js = json.loads(s)
-                return js
+            response = self.http.request("GET", url, timeout=10)
+            if response.status == 404:
+                print(f"ERROR 404")
+                return 404
+            s = response.data
+            response.close()
+            js = json.loads(s)
+            return js
         except Exception as ex:
-            print(url)
-            print(f"ERROR URLError: {ex}")
+            print(f"ERROR Exception: {ex}")
             return None
 
-    def get_iris_from_lon_lat(self, lon: float, lat: float) -> Optional[str]:
+    def get_iris_from_js(self, js) -> Optional[str] | int:
+        if js == 404:
+            return 404
         iris = None
-        url = f"{self.uri}&lat={lat}&lon={lon}"
-        js = self.get_json_from_url(url)
         if js is not None and len(js) > 0:
             try:
-                s = js["complete_code"].strip()
-                if s.isdigit():
-                    iris = s
+                s: str = js["complete_code"].strip()
+                if len(s) == 9:
+                    if s.isdigit() or s.startswith("2A") or s.startswith("2B"):
+                        iris = s
+                    else:
+                        print(f"ERROR {self.row_num}: IRIS is not a number {s}")
                 else:
-                    print(f"ERROR {self.row_num}: IRIS is not a number {iris}")
+                    print(f"ERROR {self.row_num}: IRIS {s} not have 9 digits")
             except ValueError:
                 return None
         return iris
+
+    def get_iris_from_lon_lat(self, lon: float, lat: float) -> Optional[str]:
+        url = f"{self.uri}&lat={lat}&lon={lon}"
+        js = self.get_json_from_url(url)
+        return self.get_iris_from_js(js)
+
+    def get_iris_from_address(self, numero: Optional[int], rue: Optional[str], cp: int, commune: str) -> Optional[str]:
+        url = f"{self.uri.replace('coords', 'search')}&q="
+        s = ""
+        if rue is not None:
+            if numero is None:
+                s += f"{rue} "
+            else:
+                s += f"{numero} {rue} "
+        s += f"{cp} "
+        if commune.endswith("CEDE"):
+            commune = commune[:-5]
+        s += commune
+        url += urllib.parse.quote(s)
+        js = self.get_json_from_url(url)
+        return self.get_iris_from_js(js)
 
     def match(self):
         self.stats()
@@ -78,6 +106,8 @@ class IrisMatcher(OSMMatcher):
             iris = self.get_iris_from_lon_lat(row.lon, row.lat)
             if self.echo:
                 print(f"{row.cp} {row.commune} ({row.lon}, {row.lat}) => {iris}")
+            if iris == 404 and row.cp is not None and row.commune is not None:
+                iris = self.get_iris_from_address(row.numero, row.rue1, row.cp, row.commune)
             if iris is not None:
                 row.iris = iris
                 self.nb_iris += 1

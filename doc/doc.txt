@@ -47,6 +47,9 @@ Parsing POP
 Exporter le xlsx en csv avec ,
 python pop_parser.py data/pop/pop.csv
 
+Parsing IRIS
+python iris_matcher.py -l
+
 changement de la clé d'un PS
 python ps_change_key.py ps_old_key ps_new_key
 Cette commande modifier la clé (ou l'INPP) d'un PS

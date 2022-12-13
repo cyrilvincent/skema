@@ -583,7 +583,9 @@ class ICIPTests(TestCase):
         iris = m.get_iris_from_lon_lat(2.2769951, 48.8588336)
         self.assertEqual("751166216", iris)
         iris = m.get_iris_from_lon_lat(2.2769951, 0)
-        self.assertIsNone(iris)
+        self.assertEqual(404, iris)
+        iris = m.get_iris_from_address(1571, "CHEMIN DES BLANCS", 38250, "LANS EN VERCORS")
+        self.assertEqual("382050000", iris)
 
 
 
