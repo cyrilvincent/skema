@@ -45,25 +45,11 @@ RULE 13 : La clé d'un PS est prenom + nom + dept + commune + specialite (ok)
 
 RULE 14 : La clé d'un PS est prenom + nom + dept + specialite (ok)
 
-RULE 15 : RULE 14 sans specialite (fonctionne pour les plasticiens et pas pour les pediatres, trop peu de data, à virer)
-
-RULE 16 : La clé d'un PS est prenom + nom + specialite
+RULE 15 (ex 16) : La clé d'un PS est prenom + nom + specialite
           Activée 1 seule fois sur plasticien et 0 sur pediatre (correct)
 
-RULE 17 : RULE 16 sans specialite (non correct)
 
-RULE 18 : La clé d'un PS est nom + specialite (non correct)
 
-RULE 19 : RULE 18 sans specialite (non correct)
-
-RULE 20 : Si le nom est composé et le premier mot du nom fait plus de 2 lettres
-          ET/OU Si le prénom est composé et le premier mot du prénom fait plus de 2 lettres
-          On recommence toutes les règles avec la première partie du nom et/ou prénom
-          (100% pédiatre, 80% plasticien, à garder en virant les regles qui ne matchent pas)
-
-RULE 21 : Rule 20 sur 2ème nom (non correct)
-
-RULE 22 : Rule 20 sur 2ème prénom (jamais activée)
 
 # Plasticien :   [633, 6, 37, 7, 0, 0, 77, 31, 29, 1, 1, 2, 6, 5, 2, 4, 1, 4, 1, 5, 0, 0]
 # Pediatre :     [1958, 19, 38, 41, 0, 2, 218, 59, 40, 0, 0, 4, 2, 11, 2, 11, 3, 6, 3, 28, 6, 0]

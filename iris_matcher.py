@@ -113,8 +113,9 @@ class IrisMatcher(OSMMatcher):
                 self.nb_iris += 1
                 self.session.commit()
             if self.row_num % 10 == 0:
-                print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
+                print(f"Found {self.row_num} IRIS {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':

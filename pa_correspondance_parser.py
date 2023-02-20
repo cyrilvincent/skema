@@ -43,7 +43,7 @@ class PACorrespondanceParser(BaseParser):
         except Exception as ex:
             print(f"ERROR Correspondance row {self.row_num} {profession_id} {savoir_faire_code}\n{ex}\n{row}")
             quit(1)
-        return (profession_id, savoir_faire_code, code_profession)
+        return profession_id, savoir_faire_code, code_profession
 
     def parse_row(self, row):
         id, code, cp = self.mapper(row)
