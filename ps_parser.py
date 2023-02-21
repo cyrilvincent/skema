@@ -64,7 +64,7 @@ class PSParser(BaseParser):
                 nom = self.normalize_string(pa.nom)
                 key_dept = nom, pa.prenom, self.get_dept_from_cp(a.cp)
                 key_dept_2 = a.numero, a.rue, a.cp, a.commune
-                key_france = nom, pa.prenom
+                # key_france = nom, pa.prenom
                 key_nom = nom, self.get_dept_from_cp(a.cp)
                 if key_dept not in self.inpps_dept:
                     self.inpps_dept[key_dept] = {key_dept_2: pa}
@@ -505,7 +505,7 @@ class PSParser(BaseParser):
         if ps.key in self.ps_merges:
             return self.ps_merges[ps.key], 0
         key_cache = self.normalize_string(ps.nom), ps.prenom, a.numero, a.rue1, a.cp, a.commune
-        print(key_cache)
+        # print(key_cache)
         if key_cache in self.inpps_cache:
             return self.inpps_cache[key_cache], 0
         self.nb_unique_ps += 1
@@ -514,7 +514,7 @@ class PSParser(BaseParser):
             res = self.rule(n, ps, a, p)
             self.inpps_cache[key_cache] = res.inpp if res is not None else None
             if res is not None:
-                print(f"Match {n}: {res.inpp}")
+                # print(f"Match {n}: {res.inpp}")
                 self.nb_inpps += 1
                 return res.inpp, n
 
@@ -571,8 +571,8 @@ class PSParser(BaseParser):
                     # self.entities[e.key].rule_nb = e.rule_nb # Normalement c'est inutile car self.entities[e.key].rule_nb ne devrait jamais changer de valeur (à vérifier)
                 e = self.entities[e.key]
             else:
-                if rule_nb >= 0:
-                    e.rule_nb = rule_nb # Normalement jamais de 0 à vérifier
+                if rule_nb > 0:
+                    e.rule_nb = rule_nb
                 self.entities[e.key] = e
                 self.nb_new_entity += 1
                 self.context.session.add(e)
@@ -580,6 +580,7 @@ class PSParser(BaseParser):
             c.adresse_raw = a
             if not args.nosave:
                 self.context.session.commit()
+                # Tester d'abord avec les pediatres et plasticiens et verif avec l'xlsx
 
 
 if __name__ == '__main__':
