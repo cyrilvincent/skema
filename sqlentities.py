@@ -333,7 +333,7 @@ class PS(Base):
         return f"{self.id} {self.key} {self.nom} {self.prenom}"
 
     def equals(self, other):
-        return self.genre == other.genre and self.rule_nb == other.rule_nb
+        return self.genre == other.genre
 
 
 class PSCabinetDateSource(Base):

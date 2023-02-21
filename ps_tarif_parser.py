@@ -63,7 +63,7 @@ class PSTarifParser(PSParser):
         print(f"{self.nb_ram:.0f} objects in cache")
 
     def load_cache_tarif(self):
-        print("Making cache level 3, need a lot of RAM")
+        print("Making cache level 3, need a lot of RAM (>= 32Gb)")
         ds_back = self.datesource_back()
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
@@ -73,6 +73,9 @@ class PSTarifParser(PSParser):
             self.tarifs[t.key] = t
             if self.nb_ram % 100000 == 0:
                 print(f"{self.nb_ram:.0f} objects in cache")
+        if len(self.tarifs) == 0:
+            print("Error: No previous tarif found in db")
+            input("CTRL+C to stop, enter to continue")
 
     def datesource_back(self) -> int:
         if self.date_source.annee < 20:
@@ -165,15 +168,13 @@ class PSTarifParser(PSParser):
         return t
 
     def parse_row(self, row):
-        if len(self.tarifs) == 0:
-            print("Error: No tarif in db")
-            input("CTRL+C to stop, enter to continue")
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
             e = self.mapper(row)
             a = self.create_update_adresse_raw(row)
             n = self.create_update_norm(a)
-            inpp = self.match_inpp(e, n)
+            p = self.profession_mapper(row)
+            inpp, _ = self.match_inpp(e, p, n)
             if inpp is not None:
                 e.key = inpp
             e = self.entities[e.key]

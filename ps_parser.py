@@ -559,7 +559,6 @@ class PSParser(BaseParser):
             if inpp is not None:
                 e.key = inpp
                 e.has_inpp = True
-                # e.rule_nb = rule_nb
                 if rule_nb > 0:
                     self.rules[rule_nb - 1] += 1
             if e.key in self.entities:
@@ -568,7 +567,8 @@ class PSParser(BaseParser):
                     if e.genre is not None:
                         self.entities[e.key].genre = e.genre
                         self.nb_update_entity += 1
-                    # self.entities[e.key].rule_nb = e.rule_nb # Normalement c'est inutile car self.entities[e.key].rule_nb ne devrait jamais changer de valeur (à vérifier)
+                if 0 < rule_nb < self.entities[e.key].rule_nb:
+                    self.entities[e.key].rule_nb = rule_nb
                 e = self.entities[e.key]
             else:
                 if rule_nb > 0:

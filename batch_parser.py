@@ -1,7 +1,7 @@
 import os
 
 path = "data/ps"
-# path = "data/UFC"
+path = "data/UFC"
 # path = "data/etalab"
 exe = "ps_parser.py"
 # exe = "ps_tarif_parser.py"
@@ -23,6 +23,7 @@ for f in l:
             print(s)
             code = os.system(s)
             if code != 0:
+                print(f"Error {code}, stopping")
                 quit(code)
             print()
         else:
