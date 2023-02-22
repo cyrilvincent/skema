@@ -337,7 +337,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     depts = None if args.dept is None else eval(args.dept)
     bm = BANMatcher(depts, args.force, args.log, args.echo)
-    print(f"Database {bm.context.db_name}: {bm.context.db_size():.0f} Mo")
+    print(f"Database {bm.context.db_name}: {bm.context.db_size():.0f} Mb")
     bm.match()
     mean = np.mean(np.array(bm.total_scores))
     std = np.std(np.array(bm.total_scores))

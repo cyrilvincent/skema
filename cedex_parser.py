@@ -57,7 +57,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     ep = CedexParser(context)
     ep.load(args.path)
     print(f"Nb Cedex: {ep.nb_cedex}")

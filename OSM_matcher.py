@@ -187,7 +187,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--log", help="Log (OSM echo)", action="store_true")
     args = parser.parse_args()
     om = OSMMatcher(args.force, args.log, args.echo)
-    print(f"Database {om.context.db_name}: {om.context.db_size():.0f} Mo")
+    print(f"Database {om.context.db_name}: {om.context.db_size():.0f} Mb")
     om.match()
     mean = np.mean(np.array(om.total_scores))
     std = np.std(np.array(om.total_scores))

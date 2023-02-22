@@ -73,8 +73,8 @@ class PSTarifParser(PSParser):
             self.tarifs[t.key] = t
             if self.nb_ram % 100000 == 0:
                 print(f"{self.nb_ram:.0f} objects in cache")
-        if len(self.tarifs) == 0:
-            print("Error: No previous tarif found in db")
+        if len(self.tarifs) == 0 and self.date_source.id > 2009:
+            print("Warning: No previous tarif found in db")
             input("CTRL+C to stop, enter to continue")
 
     def datesource_back(self) -> int:
@@ -202,13 +202,13 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     psp = PSTarifParser(context)
     psp.load(args.path, encoding=None)
     print(f"New tarif: {psp.nb_tarif}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv

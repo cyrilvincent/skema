@@ -167,7 +167,7 @@ class BaseParser(metaclass=ABCMeta):
                     print(f"Parse {self.row_num} rows {(self.row_num / self.nb_row) * 100:.1f}% "
                           f"in {(duration + duration_cache):.0f}s "
                           f"@{self.row_num / duration:.0f}row/s "
-                          f"{((self.nb_row / self.row_num) * duration) - duration:.0f}s remaining ")
+                          f"{((self.nb_row / self.row_num) * duration) - duration + 1:.0f}s remaining ")
 
 
     @abstractmethod

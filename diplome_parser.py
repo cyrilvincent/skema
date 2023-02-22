@@ -95,14 +95,14 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     psp = DiplomeParser(context, args.savoir)
     psp.load(args.path, delimiter='|', encoding="UTF-8", header=True)
     print(f"New INPP-Diplome: {psp.nb_new_entity}")
     print(f"New diplome: {psp.nb_new_diplome}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202211130507.txt

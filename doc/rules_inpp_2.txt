@@ -33,25 +33,19 @@ RULE 8 : La clé d'un PS est prenom + nom + cp + commune + specialite
 RULE 9 : La clé d'un PS est prenom + nom + (numero + rue1 + cp + commune à 75%) + specialite
          L'ensemble numero + rue1 + cp + commune doit être juste à 75%
 
-RULE 10 : RULE 7 sans specialite
-          Jamais activée sur plasticien et pediatre (ok mais trop peu data)
+RULE 10 (ex 12) : La clé d'un PS est nom + cp + commune + specialite (ok)
 
-RULE 11 : RULE 8 sans specialite
-          Jamais activée sur pediatre (ok mais trop peu de data)
+RULE 11 (ex 13) : La clé d'un PS est prenom + nom + dept + commune + specialite (ok)
 
-RULE 12 : La clé d'un PS est nom + cp + commune + specialite (ok)
+RULE 12 (ex 14) : La clé d'un PS est prenom + nom + dept + specialite (ok)
 
-RULE 13 : La clé d'un PS est prenom + nom + dept + commune + specialite (ok)
-
-RULE 14 : La clé d'un PS est prenom + nom + dept + specialite (ok)
-
-RULE 15 (ex 16) : La clé d'un PS est prenom + nom + specialite
+RULE 13 (ex 16) : La clé d'un PS est prenom + nom + specialite
           Activée 1 seule fois sur plasticien et 0 sur pediatre (correct)
 
 
 
 
-# Plasticien :   [645, 7, 33, 7, 0, 0, 78, 31, 25, 1, 1, 2, 5, 1, 3]
+# Plasticien :   [645, 7, 33, 7, 0, 0, 78, 31, 25, 2, 5, 1, 3]
 # Pediatre :     [1970, 19, 38, 41, 0, 2, 219, 59, 40, 0, 0, 4, 2, 8, 1]
 
 

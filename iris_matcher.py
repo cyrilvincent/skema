@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--log", help="Log (Pyris echo)", action="store_true")
     args = parser.parse_args()
     im = IrisMatcher(args.force, args.log, args.echo)
-    print(f"Database {im.context.db_name}: {im.context.db_size():.0f} Mo")
+    print(f"Database {im.context.db_name}: {im.context.db_size():.0f} Mb")
     im.match()
     print(f"Nb address {im.total_nb_norm}")
     print(f"Nb iris {im.nb_iris}")

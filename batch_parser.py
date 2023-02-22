@@ -1,11 +1,14 @@
 import os
 
 path = "data/ps"
-path = "data/UFC"
+# path = "data/UFC"
 # path = "data/etalab"
 exe = "ps_parser.py"
 # exe = "ps_tarif_parser.py"
 # exe = "etalab_parser.py"
+
+print("Batch Parser")
+print()
 
 l = os.listdir(path)
 l.sort()

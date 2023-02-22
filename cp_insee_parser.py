@@ -63,12 +63,12 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     odp = CPInseeParser(context)
     odp.load(args.path, encoding="utf-8", header=True, delimiter=';')
     print(f"New CP-INSEE: {odp.nb_new_entity}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # data/cedex/correspondance-code-cedex-code-insee.csv

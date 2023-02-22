@@ -24,7 +24,7 @@ class PSParser(BaseParser):
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
         # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
-        self.nb_rule = 15
+        self.nb_rule = 13
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
 
     def load_cache(self):
@@ -80,7 +80,6 @@ class PSParser(BaseParser):
                     self.inpps_nom[key_nom][key_dept_2] = pa
                 self.nb_ram += 1
             session.expunge(a)
-        print(f"{self.nb_ram} objects in cache")
         # self.load_cache_inpp_3()
 
     # def load_cache_inpp_3(self):
@@ -109,9 +108,10 @@ class PSParser(BaseParser):
         p = None
         try:
             id = self.get_nullable_int(row[10])
-            p = self.professions[id]
+            if id is not None:
+                p = self.professions[id]
         except Exception as ex:
-            print(f"ERROR PS row {self.row_num} {p}\n{ex}")
+            print(f"ERROR profession row {self.row_num} {p}\n{ex}")
             quit(3)
         return p
 
@@ -423,13 +423,13 @@ class PSParser(BaseParser):
             return pa
         return None
 
-    def rule10(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-        return self.rule7(ps, a, None)
+    # def rule10(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
+    #     return self.rule7(ps, a, None)
+    #
+    # def rule11(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
+    #     return self.rule8(ps, a, None)
 
-    def rule11(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-        return self.rule8(ps, a, None)
-
-    def rule12(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule10(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
         key_nom = self.normalize_string(ps.nom), self.get_dept_from_cp(a.cp)
         if key_nom not in self.inpps_nom:
             return None
@@ -442,7 +442,7 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule13(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule11(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
         key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
@@ -455,7 +455,7 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule14(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule12(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
         key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
@@ -470,7 +470,7 @@ class PSParser(BaseParser):
     # def rule15(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
     #     return self.rule14(ps, a, None)
 
-    def rule15(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
+    def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
         l = list(self.get_pa_france(self.normalize_string(ps.nom), ps.prenom))
         if p is not None:
             l = [pa for pa in l if self.match_specialite(p, pa)]
@@ -568,6 +568,7 @@ class PSParser(BaseParser):
                         self.entities[e.key].genre = e.genre
                         self.nb_update_entity += 1
                 if 0 < rule_nb < self.entities[e.key].rule_nb:
+                    # print(e, self.entities[e.key].rule_nb, rule_nb)
                     self.entities[e.key].rule_nb = rule_nb
                 e = self.entities[e.key]
             else:
@@ -599,7 +600,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     out_file = None
     if args.trace:
         out_file = open("data/ps/out/out.csv", "w")
@@ -615,8 +616,8 @@ if __name__ == '__main__':
     print(f"Matching INPP: {psp.nb_inpps}/{psp.nb_unique_ps}: {(psp.nb_inpps / psp.nb_unique_ps) * 100:.0f}%")
     print(f"Matched rules: {psp.rules}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # Avant de refaire tourner valider vider la table ps_merge
 
@@ -640,6 +641,3 @@ if __name__ == '__main__':
     # 	where ps_cabinet_date_source.ps_id = ps.id
     #  	and ps_cabinet_date_source.date_source_id = 2112
     # ) data2
-
-    # Rule 19 : 810100445831 259300739 469100804
-    # Rule 18 : 810107140252 810108170977 810108225961 810108142273 810003099651 810108167379

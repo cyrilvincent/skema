@@ -143,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--log", help="Log (debug echo)", action="store_true")
     args = parser.parse_args()
     sm = ScoreMatcher(args.force, args.log, args.echo)
-    print(f"Database {sm.context.db_name}: {sm.context.db_size():.0f} Mo")
+    print(f"Database {sm.context.db_name}: {sm.context.db_size():.0f} Mb")
     sm.match()
     if len(sm.total_scores) > 0:
         mean = np.mean(np.array(sm.total_scores))

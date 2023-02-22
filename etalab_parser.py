@@ -195,7 +195,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mo")
+    print(f"Database {context.db_name}: {db_size:.0f} Mb")
     ep = EtalabParser(context)
     ep.load(args.path, header=True, encoding="ANSI", delimiter=";")
     print(f"New etablissement: {ep.nb_new_entity}")
@@ -204,8 +204,8 @@ if __name__ == '__main__':
     print(f"New adresse normalized: {ep.nb_new_norm}")
     print(f"New GPS: {ep.nb_new_lon_lat}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mo")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mo ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {ep.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/etalab/etalab_small_20201231.csv -e
