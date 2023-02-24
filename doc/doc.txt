@@ -8,7 +8,7 @@
 
 Documentation
 =============
-V2.0.4.Release
+V3.0.3.Release
 
 Parsing d'un fichier Etablissement de type etalab_stock_et_yyyymmdd.csv
 python etalab_parser.py data/etalab/etalab_stock_et_20201231.csv
@@ -27,9 +27,9 @@ python BAN_parser.py
 Le répertoire des fichiers BAN et lieux-dits doivent être dans data/adresse, par département
 
 Parsing des fichiers PS_LibreAccess_*
-python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
 python diplome_parser.py data/ps_libreacces/PS_LibreAccess_Dipl_AutExerc_202112000000.txt
 python diplome_parser.py -s data/ps_libreacces/PS_LibreAccess_SavoirFaire_202112000000.txt
+python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
 
 Parsing EHPAD
 python ehpad_parser.py path_2022_brute.csv
@@ -50,9 +50,9 @@ python pop_parser.py data/pop/pop.csv
 Parsing IRIS
 python iris_matcher.py -l
 
-changement de la clé d'un PS
+Changement de la clé d'un PS
 python ps_change_key.py ps_old_key ps_new_key
-Cette commande modifier la clé (ou l'INPP) d'un PS
+Cette commande modifie la clé (ou l'INPP) d'un PS
 ps_old_key correspond au ps.key du ps qui va être modifié
 ps_new_key correspond au nouvel INPP du PS
 python ps_change_key.py VINCENT_CYRIL_38250 810000811140
@@ -62,7 +62,7 @@ Pour débugger une adresse via BAN et OSM
 python adresse_finder.py
 
 MAJ du code
-git clone https://github.com/cyrilvincent/skema
+git clone https://github.com/cyrilvincent/skema --depth 1
 
 Backup
 A faire 1 fois par mois après les imports PS

@@ -66,6 +66,7 @@ class BaseParser(metaclass=ABCMeta):
             self.date_source = DateSource(annee=yy, mois=mm)
         except IndexError:
             print("ERROR: file must have date like this: file_YY-MM.csv")
+            quit(1)
 
     def get_dept_from_cp(self, cp):
         cp = str(cp)

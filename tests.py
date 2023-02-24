@@ -295,7 +295,7 @@ class ICIPTests(TestCase):
         context = Context()
         context.create(echo=True)
         l: List[Tarif] = context.session.query(Tarif).options(joinedload(Tarif.date_sources))\
-            .filter(Tarif.date_sources.any(DateSource.annee >= 2020))
+            .filter(Tarif.date_sources.any(DateSource.annee >= 20))
         print(l)
 
     def test_tarif_mapper(self):

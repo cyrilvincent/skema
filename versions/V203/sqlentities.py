@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
-    Table, Index
+    Table, Index, CheckConstraint
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
 from typing import Optional, List
@@ -213,7 +213,7 @@ class DateSource(Base):
     id = Column(Integer, primary_key=True)
     mois = Column(Integer)
     annee = Column(Integer, nullable=False)
-    __table_args__ = (UniqueConstraint('mois', 'annee'),)
+    __table_args__ = (UniqueConstraint('mois', 'annee'), CheckConstraint('annee < 100'), CheckConstraint('mois < 13'))
 
     def __init__(self, annee, mois):
         self.annee = annee

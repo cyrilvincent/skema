@@ -73,7 +73,7 @@ class PSTarifParser(PSParser):
             self.tarifs[t.key] = t
             if self.nb_ram % 100000 == 0:
                 print(f"{self.nb_ram:.0f} objects in cache")
-        if len(self.tarifs) == 0 and self.date_source.id > 2009:
+        if len(self.tarifs) == 0 and self.date_source.id > 1200 and self.date_source.id != 2009:
             print("Warning: No previous tarif found in db")
             input("CTRL+C to stop, enter to continue")
 
