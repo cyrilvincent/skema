@@ -43,6 +43,12 @@ python cp_insee_parser.py data/cedex/correspondance-code-cedex-code-insee.csv
 Parsing du répertoire SAE
 python sae_parser.py data/sae
 
+Parsing d'un fichier générique avec numéro de FINESS
+Le nom du fichier doit être au format NOMTABLE_ANNEE.csv
+Le fichier doit être au format CSV avec les 3 colonnes nofinessj, nofinesset et AN (casse importante, ordre nom important)
+Tous les fichiers doivent être dans le répertoire generic
+python generic_finess_parser.py data/generic
+
 Parsing POP
 Exporter le xlsx en csv avec ,
 python pop_parser.py data/pop/pop.csv
