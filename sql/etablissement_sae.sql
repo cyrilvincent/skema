@@ -1,10 +1,14 @@
-select * from etablissement e, sae.bio b
-where e.nofinesset = b.nofinesset
-and b.an = 2019
+select * from etablissement e
+full join sae.bio as bio on bio.nofinesset = e.nofinesset
+full join etablissement_date_source as eds on eds.etablissement_id = e.id
+where  bio.an = 2019
+and eds.date_source_id = 1912
 
+387
 
---select count(*) from etablissement e, sae.bio b, etablissement_date_source ds
---where e.nofinesset = b.nofinesset
---and ds.etablissement_id = e.id
---and b.an = 2019
---and ds.date_source_id = 1912
+select * from etablissement_adresse_codecc e
+full join sae.bio as bio on bio.nofinesset = e.nofinesset
+where e.date_source_id = 1912
+and  bio.an = 2019
+
+387
