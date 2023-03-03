@@ -1,0 +1,45 @@
+create view ps_tarif as
+select ps.*, tarif.id as tarif_id, profession_id, mode_exercice_id, nature_id, convention_id, option_contrat, vitale, code, cabinet_id, famille_acte_id, montant, borne_inf, borne_sup, montant_2, borne_inf_2, borne_sup_2, montant_imagerie, borne_inf_imagerie, borne_sup_imagerie, montant_anesthesie, borne_inf_anesthesie, borne_sup_anesthesie, montant_cec, borne_inf_cec, borne_sup_cec, date_source_id  from ps
+full join tarif on tarif.ps_id = ps.id
+full join tarif_date_source tds on tds.tarif_id = tarif.id
+
+select * from ps_tarif where date_source_id = 2101
+
+create or replace view ps_adresse as
+select ps.*, pcds.id as pcds_id, pcds.date_source_id as date_source_id, c.id as cabinet_id, raw.id as raw_id, norm.id as norm_id, norm.dept_id as dept_id, norm.numero as numero, rue1, rue2, norm.cp as cp, norm.commune as commune, norm.lon as lon, norm.lat as lat, iris, ban_id, code_insee from ps
+full join ps_cabinet_date_source as pcds on pcds.ps_id = ps.id
+full join cabinet as c on pcds.cabinet_id = c.id
+full join adresse_raw as raw on c.adresse_raw_id = raw.id
+full join adresse_norm as norm on raw.adresse_norm_id = norm.id
+full join ban on norm.ban_id = ban.id
+
+select * from ps_adresse where date_source_id = 2101
+
+create or replace view ps_tarif_adresse as
+select ps.*, tarif.id as tarif_id, profession_id, mode_exercice_id, nature_id, convention_id, option_contrat, vitale, code, famille_acte_id, montant, borne_inf, borne_sup, montant_2, borne_inf_2, borne_sup_2, montant_imagerie, borne_inf_imagerie, borne_sup_imagerie, montant_anesthesie, borne_inf_anesthesie, borne_sup_anesthesie, montant_cec, borne_inf_cec, borne_sup_cec,
+    pcds.id as pcds_id, pcds.date_source_id as date_source_id, c.id as cabinet_id, raw.id as raw_id, norm.id as norm_id, norm.dept_id as dept_id, norm.numero as numero, rue1, rue2, norm.cp as cp, norm.commune as commune, norm.lon as lon, norm.lat as lat, iris, ban_id, code_insee
+from ps
+full join ps_cabinet_date_source as pcds on pcds.ps_id = ps.id
+full join cabinet as c on pcds.cabinet_id = c.id
+full join adresse_raw as raw on c.adresse_raw_id = raw.id
+full join adresse_norm as norm on raw.adresse_norm_id = norm.id
+full join tarif on tarif.ps_id = ps.id
+full join tarif_date_source as tds on tds.tarif_id = tarif.id
+full join ban on norm.ban_id = ban.id
+where tds.date_source_id = pcds.date_source_id
+
+select * from ps_tarif_adresse where date_source_id = 2101
+
+create or replace view etablissement_adresse as
+select etablissement.*, eds.date_source_id as date_source_id, raw.id as raw_id, norm.id as norm_id, norm.dept_id as dept_id, norm.numero as numero, rue1, rue2, norm.cp as cp, norm.commune as commune, norm.lon as lon, norm.lat as lat, iris, ban_id, code_insee from etablissement
+full join etablissement_date_source as eds on eds.etablissement_id = etablissement.id
+full join adresse_raw as raw on raw.id = etablissement.adresse_raw_id
+full join adresse_norm as norm on norm.id = raw.adresse_norm_id
+full join ban on norm.ban_id = ban.id
+
+select * from etablissement_adresse where date_source_id = 2012
+
+
+
+
+

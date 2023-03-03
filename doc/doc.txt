@@ -45,12 +45,13 @@ python sae_parser.py data/sae
 
 Parsing d'un fichier générique avec numéro de FINESS
 Le nom du fichier doit être au format NOMTABLE_ANNEE.csv
-Le fichier doit être au format CSV avec les 3 colonnes nofinessj, nofinesset et AN (casse importante, ordre nom important)
+Le fichier doit être au format CSV avec séparateur ;
+Le fichier doit posséder au moins les 3 colonnes nofinessj, nofinesset et AN (casse importante, ordre nom important)
 Tous les fichiers doivent être dans le répertoire generic
 python generic_finess_parser.py data/generic
 
 Parsing POP
-Exporter le xlsx en csv avec ,
+Exporter le xlsx en csv avec , comme séparateur
 python pop_parser.py data/pop/pop.csv
 
 Parsing IRIS
