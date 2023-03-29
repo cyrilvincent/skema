@@ -83,7 +83,7 @@ Cliquer sur Backup
 Restore
 Clic droit sur la base de données icip
 Restore
-Cliquer sur les ... de Filname et choisir le .bak
+Cliquer sur les ... de Filename et choisir le .bak
 Cliquer sur Restore Options
 Passer Pre-data, Post-data et Data à YES
 Passer Clean before restore à YES
