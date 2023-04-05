@@ -56,7 +56,7 @@ class IrisMatcher(OSMMatcher):
             print(f"ERROR Exception: {ex}")
             return None
 
-    def get_iris_from_js(self, js) -> Optional[str] | int:
+    def get_iris_from_js(self, js) -> Optional[str]:
         if js == 404:
             return 404
         iris = None
@@ -93,7 +93,8 @@ class IrisMatcher(OSMMatcher):
         s += commune
         url += urllib.parse.quote(s)
         js = self.get_json_from_url(url)
-        return self.get_iris_from_js(js)
+        res = self.get_iris_from_js(js)
+        return res
 
     def match(self):
         self.stats()
@@ -108,7 +109,7 @@ class IrisMatcher(OSMMatcher):
                 print(f"{row.cp} {row.commune} ({row.lon}, {row.lat}) => {iris}")
             if iris == 404 and row.cp is not None and row.commune is not None:
                 iris = self.get_iris_from_address(row.numero, row.rue1, row.cp, row.commune)
-            if iris is not None:
+            if iris is not None and iris != 404: # and ajouté après coup
                 row.iris = iris
                 self.nb_iris += 1
                 self.session.commit()

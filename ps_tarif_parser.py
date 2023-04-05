@@ -68,6 +68,7 @@ class PSTarifParser(PSParser):
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
             .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))
+        print(f"{self.nb_ram + 1:.0f} objects in cache")
         for t in l:
             self.nb_ram += 1
             self.tarifs[t.key] = t
