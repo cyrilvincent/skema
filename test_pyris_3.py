@@ -1,4 +1,7 @@
 import urllib3
+import certifi
+
+print(certifi.where())
 
 url = "https://pyris.datajazz.io/api/coords?geojson=false&lat=45.0984&lon=5.5783"
 http = urllib3.PoolManager()

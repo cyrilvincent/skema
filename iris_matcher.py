@@ -1,6 +1,4 @@
 import json
-import urllib3.request
-import urllib3
 import urllib.parse
 from typing import Optional
 from sqlentities import AdresseNorm
@@ -9,6 +7,7 @@ import argparse
 import time
 import art
 import config
+import ssl
 
 
 time0 = time.perf_counter()
@@ -24,7 +23,7 @@ class IrisMatcher(OSMMatcher):
         self.nb_iris = 0
         self.filter_no_force = (AdresseNorm.iris.is_(None) & AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
         self.filter_force = (AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
-        self.http = urllib3.PoolManager()
+        ssl._create_default_https_context = ssl._create_unverified_context
 
     def stats(self):
         norm = self.session.query(AdresseNorm).count()
@@ -40,25 +39,7 @@ class IrisMatcher(OSMMatcher):
             print("Everything is up to date")
             quit(0)
 
-    def get_json_from_url(self, url, _=0):
-        if self.echo:
-            print(url)
-        try:
-            response = self.http.request("GET", url, timeout=10)
-            if response.status == 404:
-                print(f"ERROR 404")
-                return 404
-            s = response.data
-            response.close()
-            js = json.loads(s)
-            return js
-        except Exception as ex:
-            print(f"ERROR Exception: {ex}")
-            return None
-
     def get_iris_from_js(self, js) -> Optional[str]:
-        if js == 404:
-            return 404
         iris = None
         if js is not None and len(js) > 0:
             try:
@@ -76,11 +57,14 @@ class IrisMatcher(OSMMatcher):
 
     def get_iris_from_lon_lat(self, lon: float, lat: float) -> Optional[str]:
         url = f"{self.uri}&lat={lat}&lon={lon}"
-        js = self.get_json_from_url(url)
-        return self.get_iris_from_js(js)
+        try:
+            js = self.get_json_from_url(url, 5)
+            return self.get_iris_from_js(js)
+        except Exception as _:
+            return None
 
     def get_iris_from_address(self, numero: Optional[int], rue: Optional[str], cp: int, commune: str) -> Optional[str]:
-        url = f"{self.uri.replace('coords', 'search')}&q="
+        url = f"{self.uri.replace('coords', 'search/')}&q="
         s = ""
         if rue is not None:
             if numero is None:
@@ -92,23 +76,12 @@ class IrisMatcher(OSMMatcher):
             commune = commune[:-5]
         s += commune
         url += urllib.parse.quote(s)
-        js = self.get_json_from_url(url)
-        res = self.get_iris_from_js(js)
-        return res
-
-    def test_pyris(self):
-        print(f"Test Pyris")
-        url = f"{self.uri}&lat=45.0984&lon=5.5783"
-        js = self.get_json_from_url(url)
-        if self.echo:
-            print(js)
-        iris = self.get_iris_from_js(js)
-        if iris == "382050000":
-            print("Pyris is OK")
-        else:
-            print(f"Network problem {iris}")
-            quit(1)
-
+        try:
+            js = self.get_json_from_url(url, 5)
+            res = self.get_iris_from_js(js)
+            return res
+        except Exception:
+            return None
 
     def match(self):
         self.stats()
@@ -121,9 +94,11 @@ class IrisMatcher(OSMMatcher):
             iris = self.get_iris_from_lon_lat(row.lon, row.lat)
             if self.echo:
                 print(f"{row.cp} {row.commune} ({row.lon}, {row.lat}) => {iris}")
-            if iris == 404 and row.cp is not None and row.commune is not None:
+            if iris is None and row.cp is not None and row.commune is not None: # Ne marche qu'avec urllib3 erreur 308 permanent redirect
                 iris = self.get_iris_from_address(row.numero, row.rue1, row.cp, row.commune)
-            if iris is not None and iris != 404: # and ajouté après coup
+                if self.echo:
+                    print(f"{row.cp} {row.commune} ({row.lon}, {row.lat}) => {iris}")
+            if iris is not None:
                 row.iris = iris
                 self.nb_iris += 1
                 self.session.commit()
@@ -132,6 +107,22 @@ class IrisMatcher(OSMMatcher):
                       f"in {int(time.perf_counter() - time0)}s")
             time.sleep(0.1)
 
+    def test_pyris(self):
+        print(f"Test Pyris")
+        url = f"{self.uri}&lat=45.0984&lon=5.5783"
+        try:
+            js = self.get_json_from_url(url, 5)
+            if self.echo:
+                print(js)
+            iris = self.get_iris_from_js(js)
+            if iris == "382050000":
+                print("Pyris is OK")
+            else:
+                print(f"Pyris problem: {iris}")
+                quit(1)
+        except Exception as ex:
+            print(f"Network problem: {ex}")
+            quit(2)
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -149,8 +140,8 @@ if __name__ == '__main__':
     print(f"Database {im.context.db_name}: {im.context.db_size():.0f} Mb")
     im.test_pyris()
     im.match()
-    print(f"Nb address {im.total_nb_norm}")
-    print(f"Nb iris {im.nb_iris}")
+    print(f"Nb address: {im.total_nb_norm}")
+    print(f"Nb iris: {im.nb_iris}")
     print(f"Parse {im.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
 
