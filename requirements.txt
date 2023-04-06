@@ -6,6 +6,7 @@ numpy
 pdoc3
 xlrd
 openpyxl
-sqlalchemy
+sqlalchemy==1.4.29
 pyproj
 psycopg2
+urllib3

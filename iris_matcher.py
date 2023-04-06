@@ -96,6 +96,20 @@ class IrisMatcher(OSMMatcher):
         res = self.get_iris_from_js(js)
         return res
 
+    def test_pyris(self):
+        print(f"Test Pyris")
+        url = f"{self.uri}&lat=45.0984&lon=5.5783"
+        js = self.get_json_from_url(url)
+        if self.echo:
+            print(js)
+        iris = self.get_iris_from_js(js)
+        if iris == "382050000":
+            print("Pyris is OK")
+        else:
+            print(f"Network problem {iris}")
+            quit(1)
+
+
     def match(self):
         self.stats()
         if self.force:
@@ -133,6 +147,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     im = IrisMatcher(args.force, args.log, args.echo)
     print(f"Database {im.context.db_name}: {im.context.db_size():.0f} Mb")
+    im.test_pyris()
     im.match()
     print(f"Nb address {im.total_nb_norm}")
     print(f"Nb iris {im.nb_iris}")
