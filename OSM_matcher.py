@@ -173,6 +173,18 @@ class OSMMatcher:
                       f"in {int(time.perf_counter() - time0)}s")
         self.purge()
 
+    def test_osm(self):
+        print(f"Test OSM")
+        url = f"{self.uri}&street=1571%20chemin%20des%20blancs&postalcode=38250&city=lans%20en%vercors"
+        js = self.get_json_from_url(url)
+        print(js)
+        lat = int(float(js[0]["lat"]))
+        if lat == 45:
+            print("OSM is OK")
+        else:
+            print(f"Network problem {lat}")
+            quit(1)
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -187,6 +199,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--log", help="Log (OSM echo)", action="store_true")
     args = parser.parse_args()
     om = OSMMatcher(args.force, args.log, args.echo)
+    om.test_osm()
     print(f"Database {om.context.db_name}: {om.context.db_size():.0f} Mb")
     om.match()
     mean = np.mean(np.array(om.total_scores))
