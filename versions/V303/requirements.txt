@@ -1,0 +1,12 @@
+unidecode
+art
+jsonpickle
+pandas
+numpy
+pdoc3
+xlrd
+openpyxl
+sqlalchemy==1.4.29
+pyproj
+psycopg2
+urllib3
