@@ -58,7 +58,7 @@ class OSMMatcher:
                 return js
         except Exception as ex:
             print(url)
-            print(f"ERROR URLError: {ex}")
+            print(f"WARNING URLError: {ex}")
             if nbretry == 5:
                 raise ex
             else:

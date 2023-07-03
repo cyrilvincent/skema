@@ -29,6 +29,7 @@ full join tarif on tarif.ps_id = ps.id
 full join tarif_date_source as tds on tds.tarif_id = tarif.id
 full join ban on norm.ban_id = ban.id
 where tds.date_source_id = pcds.date_source_id
+and tarif.cabinet_id = c.id
 
 select * from ps_tarif_adresse where date_source_id = 2101
 
@@ -82,6 +83,7 @@ full join ban on norm.ban_id = ban.id
 full join basecc20 as b20 on b20."CODGEO" = ban.code_insee
 full join basecc17 as b17 on b17."CODGEO" = ban.code_insee
 where tds.date_source_id = pcds.date_source_id
+and tarif.cabinet_id = c.id 'TODO
 
 select * from ps_tarif_adresse_bcc where date_source_id = 2101
 

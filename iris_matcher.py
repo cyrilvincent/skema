@@ -23,7 +23,6 @@ class IrisMatcher(OSMMatcher):
         self.nb_iris = 0
         self.filter_no_force = (AdresseNorm.iris.is_(None) & AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
         self.filter_force = (AdresseNorm.lat.isnot(None) & AdresseNorm.lon.isnot(None))
-        ssl._create_default_https_context = ssl._create_unverified_context
 
     def stats(self):
         norm = self.session.query(AdresseNorm).count()
