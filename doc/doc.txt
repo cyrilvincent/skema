@@ -8,7 +8,7 @@
 
 Documentation
 =============
-V3.0.3.Release
+V3.1.0.Alpha
 
 Parsing d'un fichier Etablissement de type etalab_stock_et_yyyymmdd.csv
 python etalab_parser.py data/etalab/etalab_stock_et_20201231.csv
@@ -68,6 +68,15 @@ Le fichier doit être au format CSV avec séparateur ;
 Le fichier doit posséder au moins les 3 colonnes nofinessj, nofinesset et AN (casse importante, ordre nom important)
 Tous les fichiers doivent être dans le répertoire generic
 python generic_finess_parser.py data/generic
+
+Ajout du code IRIS à un fichier
+L'extension du fichier doit être .csv
+Le séparateur doit être ,
+Les 2 dernières colonnes doivent contenir lon et lat (ordre indifférent)
+Le nom des colonnes n'est pas important
+Une dernière colonne iris sera créée dans un nouveau fichier d'extension .iris.csv
+iris = 0 en cas d'erreur de pyris
+python iris_csv_mather.py data/my_file.csv
 
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
