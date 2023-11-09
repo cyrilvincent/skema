@@ -17,7 +17,7 @@ full join ban on norm.ban_id = ban.id
 
 select * from ps_adresse where date_source_id = 2101
 
---A virer
+--Ancienne vue en erreur
 --create or replace view ps_tarif_adresse as
 --select ps.*, tarif.id as tarif_id, profession_id, mode_exercice_id, nature_id, convention_id, option_contrat, vitale, code, famille_acte_id, montant, borne_inf, borne_sup, montant_2, borne_inf_2, borne_sup_2, montant_imagerie, borne_inf_imagerie, borne_sup_imagerie, montant_anesthesie, borne_inf_anesthesie, borne_sup_anesthesie, montant_cec, borne_inf_cec, borne_sup_cec,
 --    pcds.id as pcds_id, pcds.date_source_id as date_source_id, c.id as cabinet_id, raw.id as raw_id, norm.id as norm_id, norm.dept_id as dept_id, norm.numero as numero, rue1, rue2, norm.cp as cp, norm.commune as commune, norm.lon as lon, norm.lat as lat, iris, ban_id, code_insee
@@ -34,8 +34,8 @@ select * from ps_adresse where date_source_id = 2101
 --
 --select * from ps_tarif_adresse where date_source_id = 2101
 
--- drop view ps_tarif_adresse; TODO
-create or replace view ps_tarif_adresse_2 as
+drop view ps_tarif_adresse;
+create or replace view ps_tarif_adresse as
 select ps.*, tarif.id as tarif_id, profession_id, mode_exercice_id, nature_id, convention_id, option_contrat, vitale, code, famille_acte_id, montant, borne_inf, borne_sup, montant_2, borne_inf_2, borne_sup_2, montant_imagerie, borne_inf_imagerie, borne_sup_imagerie, montant_anesthesie, borne_inf_anesthesie, borne_sup_anesthesie, montant_cec, borne_inf_cec, borne_sup_cec,
     tds.date_source_id as date_source_id, c.id as cabinet_id, raw.id as raw_id, norm.id as norm_id, norm.dept_id as dept_id, norm.numero as numero, rue1, rue2, norm.cp as cp, norm.commune as commune, norm.lon as lon, norm.lat as lat, iris, ban_id, code_insee
 from ps
@@ -46,7 +46,7 @@ full join adresse_raw as raw on c.adresse_raw_id = raw.id
 full join adresse_norm as norm on raw.adresse_norm_id = norm.id
 full join ban on norm.ban_id = ban.id
 
-select * from ps_tarif_adresse_2 where date_source_id = 2101
+select * from ps_tarif_adresse where date_source_id = 2101
 
 create or replace view etablissement_view as
 select etablissement.*, eds.date_source_id as date_source_id
