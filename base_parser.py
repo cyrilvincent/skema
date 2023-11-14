@@ -1,3 +1,4 @@
+import datetime
 from typing import Dict, Optional, Tuple
 from sqlalchemy.orm import joinedload
 import unidecode
@@ -95,6 +96,17 @@ class BaseParser(metaclass=ABCMeta):
     def get_nullable_int(self, v):
         return None if v == "" else int(v)
 
+    def get_date(self, s: str) -> datetime.date:
+        return datetime.datetime.strptime(s, "%d/%m/%Y").date()
+
+    def get_nullable_date(self, s: str) -> datetime.date:
+        return None if s == "" else self.get_date(s)
+
+    def strip_quotes(self, s: str) -> str:
+        if len(s) > 0 and ((s[0] == '"' and s[-1] == '"') or (s[0] == "'" and s[-1] == "'")):
+            return s[1:-1]
+        return s
+
     def pseudo_clone(self, from_obj: object, to_obj):
         for a in from_obj.__dict__:
             if type(from_obj.__getattribute__(a)) in [str, int, float] and a not in ['id'] and not a.startswith('_'):
@@ -147,7 +159,7 @@ class BaseParser(metaclass=ABCMeta):
         lon, lat = transformer.transform(x, y)
         return lon, lat
 
-    def load(self, path, delimiter=';', encoding="utf8", header=False):
+    def load(self, path: str, delimiter=';', encoding="utf8", header=False):
         print(f"Loading {path}")
         self.path = path
         self.check_date(path)
@@ -156,7 +168,7 @@ class BaseParser(metaclass=ABCMeta):
         duration_cache = time.perf_counter() - time0
         with open(path, encoding=encoding) as f:
             if header:
-                reader = csv.DictReader(f, delimiter=delimiter)
+                reader = csv.DictReader(f, delimiter=delimiter, quotechar="|")
             else:
                 reader = csv.reader(f, delimiter=delimiter)
             for row in reader:
@@ -169,6 +181,15 @@ class BaseParser(metaclass=ABCMeta):
                           f"in {(duration + duration_cache):.0f}s "
                           f"@{self.row_num / duration:.0f}row/s "
                           f"{((self.nb_row / self.row_num) * duration) - duration + 1:.0f}s remaining ")
+
+    def strip_double_quotes_writer(self, path: str, out_path: str, encoding="utf8"):
+        print(f"Loading {path}")
+        with open(path, encoding=encoding) as f:
+            print(f"Creating {out_path}")
+            with open(out_path, "w", encoding=encoding) as out:
+                for row in f:
+                    row = row.replace('"', "")
+                    out.write(row)
 
 
     @abstractmethod

@@ -1,3 +1,4 @@
+import datetime
 from unittest import TestCase
 
 from sqlalchemy.orm import joinedload
@@ -12,6 +13,7 @@ from ps_tarif_parser import PSTarifParser
 from score_matcher import ScoreMatcher
 from personne_activite_parser import PersonneActiviteParser
 from pa_correspondance_parser import PACorrespondanceParser
+from rpps_personne_parser import RPPSPersonneParser
 from sqlentities import *
 
 
@@ -587,18 +589,35 @@ class ICIPTests(TestCase):
         iris = m.get_iris_from_address(1571, "CHEMIN DES BLANCS", 38250, "LANS EN VERCORS")
         self.assertEqual("382050000", iris)
 
+    def test_get_date(self):
+        p = RPPSPersonneParser(None)
+        d = p.get_date("15/11/1972")
+        self.assertEqual(datetime.date(1972, 11, 15), d)
 
+    def test_remove_double_quotes(self):
+        p = RPPSPersonneParser(None)
+        res = p.strip_quotes('""')
+        self.assertEqual("", res)
+        res = p.strip_quotes('"A"')
+        self.assertEqual("A", res)
 
-
-
-
-
-
-
-
-
-
-
-
-
+    def test_personne_mapper(self):
+        p = RPPSPersonneParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code civilité";"Libellé civilité";"Nom d'usage";"Prénom d'usage";"Nature";"Code nationalité";"Libellé nationalité";"Date d'acquisition de la nationalité française";"Date d'effet";"Date de mise à jour personne";"""
+        values = """"8";"10100669562";"810100669562";"M";"Monsieur";"PREVOST";"Nicolas";"";"";"";"";"29/10/2014";"30/10/2014";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        personne = p.mapper(row)
+        self.assertEqual("810100669562", personne.inpp)
+        self.assertEqual("M", personne.civilite)
+        self.assertEqual("PREVOST", personne.nom)
+        self.assertEqual("NICOLAS", personne.prenom)
+        self.assertIsNone(personne.nature)
+        self.assertIsNone(personne.code_nationalite)
+        self.assertIsNone(personne.date_acquisition_nationalite)
+        self.assertEqual(datetime.date(2014,10,29), personne.date_effet)
+        self.assertEqual(datetime.date(2014, 10, 30), personne.date_maj)
 

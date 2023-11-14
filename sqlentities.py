@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
-    Table, Index
+    Table, Index, Date
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
 from typing import Optional, List
@@ -60,7 +60,7 @@ class Context:
 # etab -1 adresse_raw
 #      *-* date_source
 # personne_activite *-* pa_adresse
-#                   *-* code_profession
+#                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
 # /!\ FK != INDEX automatique, testé sur tarif
 
@@ -635,3 +635,30 @@ class CPInsee(Base):
 
     def __repr__(self):
         return f"{self.id} {self.cp} {self.insee}"
+
+class Personne(Base):
+    __tablename__ = "personne"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False, unique=True)
+    nom = Column(String(255), nullable=False)
+    prenom = Column(String(255))
+    civilite = Column(String(3))
+    nature = Column(String(2))
+    code_nationalite = Column(String(5))
+    date_acquisition_nationalite = Column(Date())
+    date_effet = Column(Date())
+    date_maj = Column(Date())
+
+    # TODO backref pa_adresses
+    # TODO backref code_professions
+    # TODO backref diplomes
+
+    def equals(self, other):
+        return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
+            and self.nature == other.nature and self.code_nationalite == other.code_nationalite \
+            and self.date_acquisition_nationalite == other.date_acquisition_nationalite \
+            and self.date_effet == other.date_effet and self.date_maj == other.date_maj
+
+    def __repr__(self):
+        return f"{self.id} {self.nom} {self.prenom}"
