@@ -23,22 +23,22 @@ class RPPSPersonneParser(BaseParser):
         pass
 
     def mapper(self, row) -> Personne:
-        p = Personne()
+        e = Personne()
         try:
-            p.inpp = self.strip_quotes(row["Identification nationale PP"])
-            p.civilite = self.get_nullable(row["Code civilité"])
-            p.nom = self.normalize_string(row["Nom d'usage"])
-            p.prenom = self.normalize_string(row["Prénom d'usage"])
-            p.nature = self.get_nullable(row["Nature"])
-            p.code_nationalite = self.get_nullable(row["Code nationalité"])
-            p.date_acquisition_nationalite = self.get_nullable_date(
+            e.inpp = row["Identification nationale PP"]
+            e.civilite = self.get_nullable(row["Code civilité"])
+            e.nom = self.normalize_string(row["Nom d'usage"])
+            e.prenom = self.normalize_string(row["Prénom d'usage"])
+            e.nature = self.get_nullable(row["Nature"])
+            e.code_nationalite = self.get_nullable(row["Code nationalité"])
+            e.date_acquisition_nationalite = self.get_nullable_date(
                 row["Date d'acquisition de la nationalité française"])
-            p.date_effet = self.get_nullable_date(row["Date d'effet"])
-            p.date_maj = self.get_nullable_date(row["Date de mise à jour personne"])
+            e.date_effet = self.get_nullable_date(row["Date d'effet"])
+            e.date_maj = self.get_nullable_date(row["Date de mise à jour personne"])
         except Exception as ex:
-            print(f"ERROR Personne row {self.row_num} {p}\n{ex}\n{row}")
+            print(f"ERROR Personne row {self.row_num} {e}\n{ex}\n{row}")
             quit(1)
-        return p
+        return e
 
     def update(self, e: Personne):
         self.entities[e.inpp].nom = e.nom

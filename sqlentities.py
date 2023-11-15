@@ -62,7 +62,7 @@ class Context:
 # personne_activite *-* pa_adresse
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
-# personne
+# personne *-* exercice_pro *-1 code_profession *-* profession
 #
 # structure
 # /!\ FK != INDEX automatique, testé sur tarif
@@ -235,6 +235,12 @@ profession_code_profession = Table('profession_code_profession', Base.metadata,
                                      Column('profession_id', ForeignKey('profession.id'),
                                             primary_key=True),
                                      Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
+                                     )
+
+personne_exercice_pro = Table('personne_exercice_pro', Base.metadata,
+                                     Column('personne_id', ForeignKey('personne.id'),
+                                            primary_key=True),
+                                     Column('exercice_pro_id', ForeignKey('exercice_pro.id'), primary_key=True)
                                      )
 
 
@@ -580,6 +586,8 @@ class CodeProfession(Base):
                                                               secondary=profession_code_profession,
                                                               backref="code_professions")
 
+    # backref exercice_pros
+
     def __repr__(self):
         return f"{self.id} {self.libelle}"
 
@@ -653,9 +661,7 @@ class Personne(Base):
     date_effet = Column(Date())
     date_maj = Column(Date())
 
-    # TODO backref pa_adresses
-    # TODO backref code_professions
-    # TODO backref diplomes
+    # backref exercice_pros
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -689,10 +695,6 @@ class Structure(Base):
     raison_sociale = Column(String(255))
     enseigne = Column(String(255))
 
-    # TODO backref pa_adresses
-    # TODO backref code_professions
-    # TODO backref diplomes
-
     @property
     def key(self):
         return self.id_technique
@@ -706,3 +708,32 @@ class Structure(Base):
 
     def __repr__(self):
         return f"{self.id} {self.id_technique} {self.raison_sociale}"
+
+class ExercicePro(Base):
+    __tablename__ = "exercice_pro"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    nom = Column(String(255), nullable=False)
+    prenom = Column(String(255))
+    civilite = Column(String(3))
+    code_profession: CodeProfession = relationship("CodeProfession", backref="exercice_pros")
+    code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
+    categorie_pro = Column(String(5), nullable=False)
+    date_fin = Column(Date())
+    date_maj = Column(Date())
+    date_effet = Column(Date())
+    ae = Column(String(5))
+    date_debut_inscription = Column(Date())
+    departement_inscription = Column(String(3))
+    personnes: List[Personne] = relationship("Personne", secondary=personne_exercice_pro, backref="exercice_pros")
+    __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession_id'),)
+
+    def key(self):
+        return self.inpp, self.categorie_pro, self.code_profession_id
+
+    def equals(self, other):
+        return self.key() == other.key() and self.date_fin == other.date_fin and self.date_maj == other.date_maj
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.categorie_pro} {self.code_profession_id}"

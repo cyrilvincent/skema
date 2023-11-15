@@ -43,7 +43,7 @@ class RPPSStructureParser(BaseParser):
             e.raison_sociale = self.get_nullable(row["Raison sociale"])
             e.enseigne = self.get_nullable(row["Enseigne commerciale"])
         except Exception as ex:
-            print(f"ERROR Personne row {self.row_num} {e}\n{ex}\n{row}")
+            print(f"ERROR Structure row {self.row_num} {e}\n{ex}\n{row}")
             quit(1)
         return e
 

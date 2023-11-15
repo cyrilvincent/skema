@@ -13,6 +13,7 @@ from personne_activite_parser import PersonneActiviteParser
 from pa_correspondance_parser import PACorrespondanceParser
 from rpps_personne_parser import RPPSPersonneParser
 from rpps_structure_parser import RPPSStructureParser
+from rpps_exercice_pro_parser import RPPSExerciceProParser
 from sqlentities import *
 
 
@@ -641,5 +642,26 @@ class ICIPTests(TestCase):
         self.assertEqual("SA07", e.secteur_activite)
         self.assertEqual("CABINET DU DR DOMINIQUE SAVELLI", e.enseigne)
         self.assertEqual("CABINET DU DR DOMINIQUE SAVELLI", e.raison_sociale)
+
+    def test_exercice_pro_mapper(self):
+        p = RPPSExerciceProParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code civilité d'exercice";"Libellé civilité d'exercice";"Nom d'exercice";"Prénom d'exercice";"Code profession";"Libellé profession";"Code catégorie professionnelle";"Libellé catégorie professionnelle";"Date de fin exercice";"Date de mise à jour exercice";"Date effet exercice";"Code AE 1e inscription";"Libellé AE 1e inscription";"Date début 1e inscription";"Département 1e inscription";"Libellé département 1e inscription";"""
+        values = """"8";"10100669273";"810100669273";"DR";"Docteur";"MONTOUT";"Anne-Lise";"10";"Médecin";"C";"Civil";"";"13/07/2022";"27/10/2014";"CNOM";"Ordre des Médecins";"27/10/2014";"75";"Paris";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810100669273", e.inpp)
+        self.assertEqual("DR", e.civilite)
+        self.assertEqual("MONTOUT", e.nom)
+        self.assertEqual("Anne-Lise", e.prenom)
+        self.assertEqual("C", e.categorie_pro)
+        self.assertEqual(datetime.date(2022,7,13), e.date_maj)
+        self.assertEqual(datetime.date(2014, 10, 27), e.date_effet)
+        self.assertEqual("CNOM", e.ae)
+        self.assertEqual(datetime.date(2014, 10, 27), e.date_debut_inscription)
+        self.assertEqual("75", e.departement_inscription)
 
 

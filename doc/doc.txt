@@ -82,6 +82,15 @@ RPPS import personne
 Importé dans la table personne
 python rpps_personne_parser.py data/rpps/Extraction_RPPS_Profil4_Personne_202310250948.csv
 
+RPPS import structure
+Importé dans la table structure
+python rpps_structure_parser.py data/rpps/Extraction_RPPS_Profil4_Structure_202310250948.csv
+
+RPPS import exercice pro
+Importé dans la table exercice_pro
+python rpps_exercice_pro_parser.py data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
+
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 
