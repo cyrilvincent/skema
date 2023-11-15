@@ -1,8 +1,6 @@
 import datetime
 from unittest import TestCase
-
 from sqlalchemy.orm import joinedload
-
 from etalab_parser import EtalabParser
 from ps_change_key import PSChangeKey
 from ps_parser import PSParser
@@ -14,6 +12,7 @@ from score_matcher import ScoreMatcher
 from personne_activite_parser import PersonneActiviteParser
 from pa_correspondance_parser import PACorrespondanceParser
 from rpps_personne_parser import RPPSPersonneParser
+from rpps_structure_parser import RPPSStructureParser
 from sqlentities import *
 
 
@@ -603,21 +602,44 @@ class ICIPTests(TestCase):
 
     def test_personne_mapper(self):
         p = RPPSPersonneParser(None)
-        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code civilité";"Libellé civilité";"Nom d'usage";"Prénom d'usage";"Nature";"Code nationalité";"Libellé nationalité";"Date d'acquisition de la nationalité française";"Date d'effet";"Date de mise à jour personne";"""
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code civilité";"Libellé civilité";"Nom d'usage";"Prénom d'usage";"Nature";"Code nationalité";"Libellé nationalité";"Date d'acquisition de la nationalité française";"Date d'effet";"Date de mise à jour e";"""
         values = """"8";"10100669562";"810100669562";"M";"Monsieur";"PREVOST";"Nicolas";"";"";"";"";"29/10/2014";"30/10/2014";"""
         keys = keys.replace('"', "").split(";")
         values = values.replace('"', "").split(";")
         row = {}
         for key, value in zip(keys, values):
             row[key] = value
-        personne = p.mapper(row)
-        self.assertEqual("810100669562", personne.inpp)
-        self.assertEqual("M", personne.civilite)
-        self.assertEqual("PREVOST", personne.nom)
-        self.assertEqual("NICOLAS", personne.prenom)
-        self.assertIsNone(personne.nature)
-        self.assertIsNone(personne.code_nationalite)
-        self.assertIsNone(personne.date_acquisition_nationalite)
-        self.assertEqual(datetime.date(2014,10,29), personne.date_effet)
-        self.assertEqual(datetime.date(2014, 10, 30), personne.date_maj)
+        e = p.mapper(row)
+        self.assertEqual("810100669562", e.inpp)
+        self.assertEqual("M", e.civilite)
+        self.assertEqual("PREVOST", e.nom)
+        self.assertEqual("NICOLAS", e.prenom)
+        self.assertIsNone(e.nature)
+        self.assertIsNone(e.code_nationalite)
+        self.assertIsNone(e.date_acquisition_nationalite)
+        self.assertEqual(datetime.date(2014,10,29), e.date_effet)
+        self.assertEqual(datetime.date(2014, 10, 30), e.date_maj)
+        
+    def test_structure_mapper(self):
+        p = RPPSStructureParser(None)
+        keys = """"Type de structure";"Identifiant technique de la structure";"Identification nationale de la structure";"Numéro SIRET";"Numéro SIREN";"Numéro FINESS Etablissement";"Numéro FINESS EJ";"RPPS rang";"ADELI rang";"Numéro licence officine";"Date d'ouverture structure";"Date de fermeture structure";"Date de mise à jour structure";"Code APE";"Libellé APE";"Code catégorie juridique";"Libellé catégorie juridique";"Code secteur d'activité";"Libellé secteur d'activité";"Raison sociale";"Enseigne commerciale";"""
+        values = """"EG";"R10000000586941";"410000464692001";"";"";"";"";"10000464692001";"";"";"17/01/1994";"";"30/12/2015";"";"";"70";"Personne Physique";"SA07";"Cabinet individuel";"CABINET DU DR DOMINIQUE SAVELLI";"CABINET DU DR DOMINIQUE SAVELLI";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("EG", e.type)
+        self.assertEqual("R10000000586941", e.id_technique)
+        self.assertEqual("410000464692001", e.id_national)
+        self.assertEqual("10000464692001", e.rpps)
+        self.assertIsNone(e.siret)
+        self.assertEqual(datetime.date(1994,1,17), e.date_ouverture)
+        self.assertEqual(datetime.date(2015, 12, 30), e.date_maj)
+        self.assertEqual("70", e.categorie_juridique)
+        self.assertEqual("SA07", e.secteur_activite)
+        self.assertEqual("CABINET DU DR DOMINIQUE SAVELLI", e.enseigne)
+        self.assertEqual("CABINET DU DR DOMINIQUE SAVELLI", e.raison_sociale)
+
 

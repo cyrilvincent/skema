@@ -26,15 +26,15 @@ class RPPSPersonneParser(BaseParser):
         p = Personne()
         try:
             p.inpp = self.strip_quotes(row["Identification nationale PP"])
-            p.civilite = self.get_nullable(self.strip_quotes(row["Code civilité"]))
-            p.nom = self.normalize_string(self.strip_quotes(row["Nom d'usage"]))
-            p.prenom = self.normalize_string(self.strip_quotes(row["Prénom d'usage"]))
-            p.nature = self.get_nullable(self.strip_quotes(row["Nature"]))
-            p.code_nationalite = self.get_nullable(self.strip_quotes(row["Code nationalité"]))
-            p.date_acquisition_nationalite = self.get_nullable_date(self.strip_quotes(
-                row["Date d'acquisition de la nationalité française"]))
-            p.date_effet = self.get_nullable_date(self.strip_quotes(row["Date d'effet"]))
-            p.date_maj = self.get_nullable_date(self.strip_quotes(row["Date de mise à jour personne"]))
+            p.civilite = self.get_nullable(row["Code civilité"])
+            p.nom = self.normalize_string(row["Nom d'usage"])
+            p.prenom = self.normalize_string(row["Prénom d'usage"])
+            p.nature = self.get_nullable(row["Nature"])
+            p.code_nationalite = self.get_nullable(row["Code nationalité"])
+            p.date_acquisition_nationalite = self.get_nullable_date(
+                row["Date d'acquisition de la nationalité française"])
+            p.date_effet = self.get_nullable_date(row["Date d'effet"])
+            p.date_maj = self.get_nullable_date(row["Date de mise à jour personne"])
         except Exception as ex:
             print(f"ERROR Personne row {self.row_num} {p}\n{ex}\n{row}")
             quit(1)
@@ -94,7 +94,6 @@ if __name__ == '__main__':
     rpp.load(args.path, delimiter=';', encoding="UTF-8", header=True)
     print(f"New personne: {rpp.nb_new_entity}")
     print(f"Nb personne update: {rpp.nb_update_entity}")
-    print(f"New adresse: {rpp.nb_new_adresse}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")

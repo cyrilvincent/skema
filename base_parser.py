@@ -188,6 +188,7 @@ class BaseParser(metaclass=ABCMeta):
             print(f"Creating {out_path}")
             with open(out_path, "w", encoding=encoding) as out:
                 for row in f:
+                    row = row.replace("matriçage ; métallurgie", "matriçage, métallurgie")
                     row = row.replace('"', "")
                     out.write(row)
 

@@ -78,6 +78,10 @@ Une dernière colonne iris sera créée dans un nouveau fichier d'extension .iri
 iris = 0 en cas d'erreur de pyris
 python iris_csv_mather.py data/my_file.csv
 
+RPPS import personne
+Importé dans la table personne
+python rpps_personne_parser.py data/rpps/Extraction_RPPS_Profil4_Personne_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 

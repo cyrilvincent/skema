@@ -62,6 +62,9 @@ class Context:
 # personne_activite *-* pa_adresse
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
+# personne
+#
+# structure
 # /!\ FK != INDEX automatique, testé sur tarif
 
 
@@ -662,3 +665,44 @@ class Personne(Base):
 
     def __repr__(self):
         return f"{self.id} {self.nom} {self.prenom}"
+
+class Structure(Base):
+    __tablename__ = "structure"
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(2), nullable=False)
+    id_technique = Column(String(25), nullable=False, unique=True)
+    id_national = Column(String(15), nullable=False)
+    siret = Column(String(14))
+    siren = Column(String(9))
+    finess = Column(String(9))
+    finessj = Column(String(9))
+    rpps = Column(String(14))
+    adeli = Column(String(14))
+    licence = Column(String(10))
+    date_ouverture = Column(Date())
+    date_fermeture = Column(Date())
+    date_maj = Column(Date())
+    ape = Column(String(10))
+    categorie_juridique = Column(String(5))
+    secteur_activite = Column(String(4))
+    raison_sociale = Column(String(255))
+    enseigne = Column(String(255))
+
+    # TODO backref pa_adresses
+    # TODO backref code_professions
+    # TODO backref diplomes
+
+    @property
+    def key(self):
+        return self.id_technique
+
+    def equals(self, other):
+        return self.type == other.type and self.id_technique == other.id_technique \
+            and self.id_national == other.id_national and self.siret == other.siret \
+            and self.siren == other.siren and self.licence == other.licence \
+            and self.date_fermeture == other.date_fermeture and self.date_maj == other.date_maj \
+            and self.raison_sociale == other.raison_sociale and self.enseigne == other.enseigne
+
+    def __repr__(self):
+        return f"{self.id} {self.id_technique} {self.raison_sociale}"
