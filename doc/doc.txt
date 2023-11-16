@@ -90,6 +90,9 @@ RPPS import exercice pro
 Importé dans la table exercice_pro
 python rpps_exercice_pro_parser.py data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
 
+RPPS import activite
+Importé dans la table activite
+python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_Activite_202310250948.csv
 
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1

@@ -21,11 +21,11 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         print("Making cache")
         l: List[ExercicePro] = self.context.session.query(ExercicePro).all()
         for e in l:
-            self.entities[e.key()] = e
+            self.entities[e.key] = e
         l: List[Personne] = self.context.session.query(Personne).all()
         for p in l:
             self.personnes[p.inpp] = p
-        l = self.context.session.query(CodeProfession).all()
+        l: List[CodeProfession] = self.context.session.query(CodeProfession).all()
         for c in l:
             self.code_professions[c.id] = c
 
@@ -59,21 +59,21 @@ class RPPSExerciceProParser(RPPSPersonneParser):
 
     def update(self, e: ExercicePro):
         if e.date_fin is not None:
-            self.entities[e.key()].date_fin = e.date_fin
+            self.entities[e.key].date_fin = e.date_fin
         if e.date_maj is not None:
-            self.entities[e.key()].date_maj = e.date_maj
+            self.entities[e.key].date_maj = e.date_maj
         self.nb_update_entity += 1
 
     def parse_row(self, row):
         e = self.mapper(row)
-        if e.key() in self.entities:
-            same = e.equals(self.entities[e.key()])
+        if e.key in self.entities:
+            same = e.equals(self.entities[e.key])
             if not same:
                 self.update(e)
-            e = self.entities[e.key()]
+            e = self.entities[e.key]
         else:
             self.nb_new_entity += 1
-            self.entities[e.key()] = e
+            self.entities[e.key] = e
             self.make_relations(e)
             self.context.session.add(e)
         self.context.session.commit()

@@ -63,9 +63,9 @@ class Context:
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
 # personne 1-* exercice_pro *-1 code_profession *-* profession
-#
-# structure
-# /!\ FK != INDEX automatique, testé sur tarif
+#          1-* activite *-1 structure
+#                       *-1 code_profession *-* profession
+# structure 1-* activite *-1 code_profession *-* profession
 
 
 class Dept(Base):
@@ -733,11 +733,12 @@ class ExercicePro(Base):
     departement_inscription = Column(String(3))
     __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession_id'),)
 
+    @property
     def key(self):
         return self.inpp, self.categorie_pro, self.code_profession_id
 
     def equals(self, other):
-        return self.key() == other.key() and self.date_fin == other.date_fin and self.date_maj == other.date_maj
+        return self.key == other.key and self.date_fin == other.date_fin and self.date_maj == other.date_maj
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.categorie_pro} {self.code_profession_id}"
@@ -751,9 +752,9 @@ class Activite(Base):
     inpp = Column(String(12), nullable=False)
     personne: Personne = relationship("Personne", backref="activite")
     personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
-    id_technique_structure = Column(String(25), nullable=False)
+    id_technique_structure = Column(String(25))
     structure: Structure = relationship("Structure", backref="activite")
-    structure_id = Column(Integer, ForeignKey('structure.id'), nullable=False, index=True)
+    structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
     fonction = Column(String(10), nullable=False)
     mode_exercice = Column(String(1), nullable=False)
     date_debut = Column(Date())
@@ -762,19 +763,21 @@ class Activite(Base):
     region = Column(String(3))
     genre = Column(String(6), nullable=False)
     motif_fin = Column(String(10))
-    section_tableau_pharmacien = Column(String(10))
-    sous_section_tableau_pharmacien = Column(String(10))
+    section_tableau_pharmaciens = Column(String(10))
+    sous_section_tableau_pharmaciens = Column(String(10))
+    type_activite_liberale = Column(String(10))
     statut_ps_ssa = Column(String(10))
     statut_hospitalier = Column(String(10))
     code_profession: CodeProfession = relationship("CodeProfession", backref="activites")
     code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
     categorie_pro = Column(String(5), nullable=False)
 
+    @property
     def key(self):
         return self.activite_id
 
     def equals(self, other):
-        return self.key() == other.key() and self.date_fin == other.date_fin and self.date_maj == other.date_maj
+        return self.key == other.key and self.date_fin == other.date_fin and self.date_maj == other.date_maj
 
     def __repr__(self):
         return f"{self.id} {self.activite_id}"

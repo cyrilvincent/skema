@@ -14,6 +14,7 @@ from pa_correspondance_parser import PACorrespondanceParser
 from rpps_personne_parser import RPPSPersonneParser
 from rpps_structure_parser import RPPSStructureParser
 from rpps_exercice_pro_parser import RPPSExerciceProParser
+from rpps_activite_parser import RPPSActiviteParser
 from sqlentities import *
 
 
@@ -663,5 +664,28 @@ class ICIPTests(TestCase):
         self.assertEqual("CNOM", e.ae)
         self.assertEqual(datetime.date(2014, 10, 27), e.date_debut_inscription)
         self.assertEqual("75", e.departement_inscription)
+
+    def test_activite_mapper(self):
+        p = RPPSActiviteParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identifiant de l'activité";"Identification nationale PP";"Identifiant technique de la structure";"Code fonction";"Libellé fonction";"Code mode exercice";"Libellé mode exercice";"Date de début activité";"Date de fin activité";"Date de mise à jour activité";"Code région exercice";"Libellé région exercice";"Code genre activité";"Libellé genre activité";"Code motif de fin d'activité";"Libellé motif de fin d'activité";"Code section tableau pharmaciens";"Libellé section tableau pharmaciens";"Code sous-section tableau pharmaciens";"Libellé sous-section tableau pharmaciens";"Code type activité libérale";"Libellé type activité libérale";"Code statut des PS du SSA";"Libellé statut des PS du SSA";"Code statut hospitalier";"Libellé statut hospitalier";"Code profession";"Libellé profession";"Code catégorie professionnelle";"Libellé catégorie professionnelle";"""
+        values = """"8";"10100669182";"1012552948";"810100669182";"R10100000515498";"FON-01";"Titulaire de cabinet";"L";"Lib,indép,artis,com";"01/09/2021";"";"30/09/2021";"";"";"GENR01";"Activité standard de soin ou de pharmacien";"";"";"";"";"";"";"ACT-LIB-06";"Cabinet";"";"";"";"";"10";"Médecin";"C";"Civil";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810100669182", e.inpp)
+        self.assertEqual("R10100000515498", e.id_technique_structure)
+        self.assertEqual("FON-01", e.fonction)
+        self.assertEqual("L", e.mode_exercice)
+        self.assertEqual("C", e.categorie_pro)
+        self.assertEqual(datetime.date(2021,9,1), e.date_debut)
+        self.assertEqual(datetime.date(2021, 9, 30), e.date_maj)
+        self.assertIsNone(e.date_fin)
+        self.assertEqual("GENR01", e.genre)
+        self.assertEqual("ACT-LIB-06", e.type_activite_liberale)
+        self.assertEqual(10, e.code_profession_id)
+        self.assertEqual("C", e.categorie_pro)
 
 
