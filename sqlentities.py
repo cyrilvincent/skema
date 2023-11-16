@@ -66,6 +66,7 @@ class Context:
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
+#          1-*(1) etat_civil
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -812,4 +813,38 @@ class DiplomeObtenu(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.code_diplome} {self.lieu_obtention}"
+
+class EtatCivil(Base):
+    __tablename__ = "etat_civil"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False, unique=True)
+    personne: Personne = relationship("Personne", backref="etat_civils")
+    personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
+    statut = Column(String(3), nullable=False)
+    sexe = Column(String(1), nullable=False)
+    nom = Column(String(255), nullable=False)
+    nom_norm = Column(String(255), nullable=False)
+    prenoms = Column(String(255), nullable=False)
+    prenom_norm = Column(String(255), nullable=False)
+    date_naissance = Column(Date(), nullable=False)
+    lieu_naissance = Column(String(255))
+    date_deces = Column(Date())
+    date_effet = Column(Date(), nullable=False)
+    code_commune = Column(String(5))
+    commune = Column(String(255))
+    code_pays = Column(String(5))
+    pays = Column(String(2555))
+    date_maj = Column(Date(), nullable=False)
+
+    @property
+    def key(self):
+        return self.inpp
+
+    def equals(self, other):
+        return self.key == other.key and self.statut == other.statut and self.date_deces == other.date_deces \
+            and self.date_effet == other.date_effet and self.date_maj == other.date_maj
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.nom} {self.prenoms}"
 

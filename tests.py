@@ -16,6 +16,7 @@ from rpps_structure_parser import RPPSStructureParser
 from rpps_exercice_pro_parser import RPPSExerciceProParser
 from rpps_activite_parser import RPPSActiviteParser
 from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
+from rpps_etat_civil_parser import RPPSEtatCivilParser
 from sqlentities import *
 
 
@@ -705,6 +706,32 @@ class ICIPTests(TestCase):
         self.assertEqual(datetime.date(2014,10,30), e.date_maj)
         self.assertEqual(datetime.date(2014, 10, 6), e.date_obtention)
         self.assertEqual("U51", e.lieu_obtention)
+
+    def test_etat_civil_mapper(self):
+        p = RPPSEtatCivilParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code statut état-civil";"Libellé statut état-civil";"Code sexe";"Libellé sexe";"Nom de famille";"Prénoms";"Date de naissance";"Lieu de naissance";"Date de décès";"Date d'effet de l'état-civil";"Code commune de naissance";"Libellé commune de naissance";"Code pays de naissance";"Libellé pays de naissance";"Date de mise à jour état-civil";"""
+        values = """"8";"10004973441";"810004973441";"NCI";"Non certifié INSEE, Immatriculation en cours";"M";"Masculin";"YANG-CROSSON";"SONG'TO'";"25/08/1962";"VIENTIANE";"";"21/10/2014";"38250";"LANS";"99241";"Laos";"28/10/2014";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810004973441", e.inpp)
+        self.assertEqual("NCI", e.statut)
+        self.assertEqual("M", e.sexe)
+        self.assertEqual("YANG-CROSSON", e.nom)
+        self.assertEqual("YANG CROSSON", e.nom_norm)
+        self.assertEqual("SONG'TO'", e.prenoms)
+        self.assertEqual("SONG", e.prenom_norm)
+        self.assertEqual(datetime.date(1962,8,25), e.date_naissance)
+        self.assertEqual("VIENTIANE", e.lieu_naissance)
+        self.assertEqual(datetime.date(2014, 10, 21), e.date_effet)
+        self.assertEqual("38250", e.code_commune)
+        self.assertEqual("LANS", e.commune)
+        self.assertEqual("99241", e.code_pays)
+        self.assertEqual("LAOS", e.pays)
+        self.assertEqual(datetime.date(2014, 10, 28), e.date_maj)
 
 
 

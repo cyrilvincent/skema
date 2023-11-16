@@ -98,6 +98,10 @@ RPPS import diplome obtenu
 Importé dans la table diplome_obtenu
 python rpps_activite_parser.py Extraction_RPPS_Profil4_DiplObt_202310250948.csv
 
+RPPS import etat civil
+Importé dans la table etat_civil
+python rpps_activite_parser.py Extraction_RPPS_Profil4_EtatCiv_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 
