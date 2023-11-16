@@ -65,6 +65,7 @@ class Context:
 # personne 1-* exercice_pro *-1 code_profession *-* profession
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
+#          1-* diplome_obtenu *-1 diplome *-* profession
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -535,17 +536,17 @@ class Diplome(Base):
     id = Column(Integer, primary_key=True)
     code_type_diplome = Column(String(10), nullable=False)
     libelle_type_diplome = Column(String(255), nullable=False)
-    code_diplome = Column(String(10), nullable=False, unique=True)
+    code_diplome = Column(String(10), nullable=False, unique=True) #Warning: d'après la doc clé fonctionnelle est code_type_diplome + code_diplome
     libelle_diplome = Column(String(255), nullable=False)
     is_savoir_faire = Column(Boolean, nullable=False)
-
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
                                                               secondary=personne_activite_diplome,
                                                               backref="diplomes")
-
     professions: List[Profession] = relationship("Profession",
                                                               secondary=profession_diplome,
                                                               backref="diplomes")
+
+    # backref diplome_obtenus
 
     @property
     def key(self):
@@ -662,7 +663,9 @@ class Personne(Base):
     date_effet = Column(Date())
     date_maj = Column(Date())
 
-    # backref exercice_pro
+    # backref exercice_pros
+    # backref activites
+    # backref diplome_obtenus
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -696,7 +699,7 @@ class Structure(Base):
     raison_sociale = Column(String(255))
     enseigne = Column(String(255))
 
-    # backref activite
+    # backref activites
 
     @property
     def key(self):
@@ -717,7 +720,7 @@ class ExercicePro(Base):
 
     id = Column(Integer, primary_key=True)
     inpp = Column(String(12), nullable=False)
-    personne: Personne = relationship("Personne", backref="exercice_pro")
+    personne: Personne = relationship("Personne", backref="exercice_pros")
     personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
@@ -750,10 +753,10 @@ class Activite(Base):
     id = Column(Integer, primary_key=True)
     activite_id = Column(String(15), nullable=False, unique=True)
     inpp = Column(String(12), nullable=False)
-    personne: Personne = relationship("Personne", backref="activite")
+    personne: Personne = relationship("Personne", backref="activites")
     personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
     id_technique_structure = Column(String(25))
-    structure: Structure = relationship("Structure", backref="activite")
+    structure: Structure = relationship("Structure", backref="activites")
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
     fonction = Column(String(10), nullable=False)
     mode_exercice = Column(String(1), nullable=False)
@@ -781,3 +784,32 @@ class Activite(Base):
 
     def __repr__(self):
         return f"{self.id} {self.activite_id}"
+
+
+class DiplomeObtenu(Base):
+    __tablename__ = "diplome_obtenu"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    personne: Personne = relationship("Personne", backref="diplome_obtenus")
+    personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
+    type_diplome = Column(String(10), nullable=False)
+    code_diplome = Column(String(10), nullable=False)
+    diplome: Diplome = relationship("Diplome", backref="diplome_obtenus")
+    diplome_id = Column(Integer, ForeignKey('diplome.id'), nullable=False, index=True)
+    date_obtention = Column(Date(), nullable=False)
+    date_maj = Column(Date(), nullable=False)
+    lieu_obtention = Column(String(10), nullable=False)
+    numero = Column(String(50))
+    __table_args__ = (UniqueConstraint('inpp', 'type_diplome', 'code_diplome', 'lieu_obtention'),)
+
+    @property
+    def key(self):
+        return self.inpp, self.type_diplome, self.code_diplome, self.lieu_obtention
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj and self.numero == other.numero
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.code_diplome} {self.lieu_obtention}"
+

@@ -62,7 +62,7 @@ class RPPSActiviteParser(RPPSExerciceProParser):
             quit(1)
         return e
 
-    def make_relations(self, e: Activite):
+    def make_relations(self, e: Activite, _):
         try:
             e.personne = self.personnes[e.inpp]
             if e.id_technique_structure in self.structures:

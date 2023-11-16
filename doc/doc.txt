@@ -94,6 +94,10 @@ RPPS import activite
 Importé dans la table activite
 python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_Activite_202310250948.csv
 
+RPPS import diplome obtenu
+Importé dans la table diplome_obtenu
+python rpps_activite_parser.py Extraction_RPPS_Profil4_DiplObt_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 

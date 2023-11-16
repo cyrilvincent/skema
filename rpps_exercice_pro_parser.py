@@ -49,7 +49,7 @@ class RPPSExerciceProParser(RPPSPersonneParser):
             quit(1)
         return e
 
-    def make_relations(self, e: ExercicePro):
+    def make_relations(self, e: ExercicePro, _):
         try:
             e.personne = self.personnes[e.inpp]
             e.code_profession = self.code_professions[e.code_profession_id]
@@ -74,7 +74,7 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         else:
             self.nb_new_entity += 1
             self.entities[e.key] = e
-            self.make_relations(e)
+            self.make_relations(e, row)
             self.context.session.add(e)
         self.context.session.commit()
 

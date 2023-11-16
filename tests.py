@@ -15,6 +15,7 @@ from rpps_personne_parser import RPPSPersonneParser
 from rpps_structure_parser import RPPSStructureParser
 from rpps_exercice_pro_parser import RPPSExerciceProParser
 from rpps_activite_parser import RPPSActiviteParser
+from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
 from sqlentities import *
 
 
@@ -687,5 +688,23 @@ class ICIPTests(TestCase):
         self.assertEqual("ACT-LIB-06", e.type_activite_liberale)
         self.assertEqual(10, e.code_profession_id)
         self.assertEqual("C", e.categorie_pro)
+
+    def test_diplome_obtenu_mapper(self):
+        p = RPPSDiplomeObtenuParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code type diplôme obtenu";"Libellé type diplôme obtenu";"Code diplôme obtenu";"Libellé diplôme obtenu";"Date de mise à jour diplôme obtenu";"Code lieu obtention";"Libellé lieu obtention";"Date d'obtention diplôme";"Numéro diplôme";"""
+        values = """"8";"10100670032";"810100670032";"DES";"Diplôme d'Etudes Spécialisées";"DSM41";"DES Psychiatrie";"30/10/2014";"U51";"Université de Reims (Université de Champagne-Arden";"06/10/2014";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810100670032", e.inpp)
+        self.assertEqual("DES", e.type_diplome)
+        self.assertEqual("DSM41", e.code_diplome)
+        self.assertEqual(datetime.date(2014,10,30), e.date_maj)
+        self.assertEqual(datetime.date(2014, 10, 6), e.date_obtention)
+        self.assertEqual("U51", e.lieu_obtention)
+
 
 
