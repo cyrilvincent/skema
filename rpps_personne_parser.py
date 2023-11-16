@@ -56,7 +56,7 @@ class RPPSPersonneParser(BaseParser):
         self.nb_update_entity += 1
 
     def load(self, path: str, delimiter=';', encoding="utf8", header=False):
-        out_path = path.replace(".csv", ".temp")
+        out_path = path.replace(".csv", ".tmp")
         self.strip_double_quotes_writer(path, out_path, encoding)
         super().load(out_path, delimiter, encoding, header)
 

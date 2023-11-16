@@ -1,8 +1,10 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
 
+from rpps_exercice_pro_parser import RPPSExerciceProParser
 from rpps_personne_parser import RPPSPersonneParser
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro, \
+    Structure, Activite
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -10,16 +12,17 @@ import art
 import config
 
 
-class RPPSExerciceProParser(RPPSPersonneParser):
+class RPPSActiviteParser(RPPSExerciceProParser):
 
     def __init__(self, context):
         super().__init__(context)
         self.personnes: Dict[str, Personne] = {}
+        self.structures : Dict[str, Structure] = {}
         self.code_professions: Dict[int, CodeProfession] = {}
 
     def load_cache(self):
         print("Making cache")
-        l: List[ExercicePro] = self.context.session.query(ExercicePro).all()
+        l: List[Activite] = self.context.session.query(Activite).all()
         for e in l:
             self.entities[e.key()] = e
         l: List[Personne] = self.context.session.query(Personne).all()
@@ -28,9 +31,12 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         l = self.context.session.query(CodeProfession).all()
         for c in l:
             self.code_professions[c.id] = c
+        l = self.context.session.query(Structure).all()
+        for s in l:
+            self.code_professions[s.key()] = s
 
-    def mapper(self, row) -> ExercicePro:
-        e = ExercicePro()
+    def mapper(self, row) -> Activite:
+        e = Activite()
         try:
             e.inpp = row["Identification nationale PP"]
             e.civilite = self.get_nullable(row["Code civilité d'exercice"])
@@ -63,20 +69,6 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         if e.date_maj is not None:
             self.entities[e.key()].date_maj = e.date_maj
         self.nb_update_entity += 1
-
-    def parse_row(self, row):
-        e = self.mapper(row)
-        if e.key() in self.entities:
-            same = e.equals(self.entities[e.key()])
-            if not same:
-                self.update(e)
-            e = self.entities[e.key()]
-        else:
-            self.nb_new_entity += 1
-            self.entities[e.key()] = e
-            self.make_relations(e)
-            self.context.session.add(e)
-        self.context.session.commit()
 
 
 if __name__ == '__main__':
