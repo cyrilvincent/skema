@@ -63,6 +63,7 @@ class Context:
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
 # personne 1-* exercice_pro *-1 code_profession *-* profession
+#                           1-*(1) reference_ae
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
@@ -737,6 +738,8 @@ class ExercicePro(Base):
     departement_inscription = Column(String(3))
     __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession_id'),)
 
+    # reference_aes
+
     @property
     def key(self):
         return self.inpp, self.categorie_pro, self.code_profession_id
@@ -847,4 +850,35 @@ class EtatCivil(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.nom} {self.prenoms}"
+
+
+
+class ReferenceAE(Base):
+    __tablename__ = "reference_ae"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    ae = Column(String(5), nullable=False)
+    date_debut = Column(Date(), nullable=False)
+    date_fin = Column(Date())
+    date_maj = Column(Date(), nullable=False)
+    statut = Column(String(1), nullable=False)
+    departement = Column(String(3))
+    departement_acceuil = Column(String(3))
+    code_profession = Column(Integer, nullable=False, index=True)
+    exercice_pro: ExercicePro = relationship("ExercicePro", backref="reference_aes")
+    exercice_pro_id = Column(Integer, ForeignKey('exercice_pro.id'), nullable=False, index=True)
+    categorie_pro = Column(String(5), nullable=False)
+    __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession', 'ae', 'date_debut'),)
+
+
+    @property
+    def key(self):
+        return self.inpp, self.categorie_pro, self.code_profession, self.ae, self.date_debut
+
+    def equals(self, other):
+        return self.key == other.key and self.date_fin == other.date_fin and self.date_maj == other.date_maj
+
+    def __repr__(self):
+        return f"{self.id} {self.categorie_pro} {self.code_profession} {self.ae} {self.date_debut}"
 

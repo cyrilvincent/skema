@@ -16,7 +16,6 @@ class RPPSEtatCivilParser(RPPSExerciceProParser):
 
     def __init__(self, context):
         super().__init__(context)
-        self.personnes: Dict[str, Personne] = {}
 
     def load_cache(self):
         print("Making cache")

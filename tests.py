@@ -17,6 +17,7 @@ from rpps_exercice_pro_parser import RPPSExerciceProParser
 from rpps_activite_parser import RPPSActiviteParser
 from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
 from rpps_etat_civil_parser import RPPSEtatCivilParser
+from rpps_reference_ae_parser import RPPSReferenceAEParser
 from sqlentities import *
 
 
@@ -732,6 +733,26 @@ class ICIPTests(TestCase):
         self.assertEqual("99241", e.code_pays)
         self.assertEqual("LAOS", e.pays)
         self.assertEqual(datetime.date(2014, 10, 28), e.date_maj)
+
+    def test_reference_ae_mapper(self):
+        p = RPPSReferenceAEParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code AE";"Libellé AE";"Date début inscription";"Date fin inscription";"Date de mise à jour inscription";"Code statut inscription";"Libellé statut inscription";"Code département inscription";"Libellé département inscription";"Code département accueil";"Libellé département accueil";"Code profession";"Libellé profession";"Code catégorie professionnelle";"Libellé catégorie professionnelle";"""
+        values = """"8";"10000037662";"810000037662";"CNOSF";"Ordre des Sages Femmes";"22/01/1988";"";"30/04/2009";"D";"Définitif";"34";"Hérault";"";"";"50";"Sage-Femme";"C";"Civil";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810000037662", e.inpp)
+        self.assertEqual("CNOSF", e.ae)
+        self.assertEqual(datetime.date(1988, 1, 22), e.date_debut)
+        self.assertEqual(datetime.date(2009, 4, 30), e.date_maj)
+        self.assertEqual("D", e.statut)
+        self.assertEqual("34", e.departement)
+        self.assertEqual(50, e.code_profession)
+        self.assertEqual("C", e.categorie_pro)
+
 
 
 
