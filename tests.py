@@ -18,6 +18,7 @@ from rpps_activite_parser import RPPSActiviteParser
 from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
 from rpps_etat_civil_parser import RPPSEtatCivilParser
 from rpps_reference_ae_parser import RPPSReferenceAEParser
+from rpps_savoir_faire_parser import RPPSSavoirFaireParser
 from sqlentities import *
 
 
@@ -752,6 +753,25 @@ class ICIPTests(TestCase):
         self.assertEqual("34", e.departement)
         self.assertEqual(50, e.code_profession)
         self.assertEqual("C", e.categorie_pro)
+
+    def test_savoir_faire_obtenu_mapper(self):
+        p = RPPSSavoirFaireParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Code savoir-faire";"Libellé savoir-faire";"Code type savoir-faire";"Libellé type savoir-faire";"Code profession";"Libellé profession";"Code catégorie professionnelle";"Libellé catégorie professionnelle";"Date reconnaissance savoir-faire";"Date de mise à jour savoir-faire";"Date abandon savoir-faire";"""
+        values = """"8";"10100669372";"810100669372";"SM53";"Spécialiste en Médecine Générale";"S";"Spécialité ordinale";"10";"Médecin";"C";"Civil";"28/10/2014";"29/10/2014";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810100669372", e.inpp)
+        self.assertEqual("SM53", e.code_sf)
+        self.assertEqual("S", e.type_sf)
+        self.assertEqual(10, e.code_profession)
+        self.assertEqual("C", e.categorie_pro)
+        self.assertEqual("C", e.categorie_pro)
+        self.assertEqual(datetime.date(2014, 10, 28), e.date_reconnaissance)
+        self.assertEqual(datetime.date(2014, 10, 29), e.date_maj)
 
 
 

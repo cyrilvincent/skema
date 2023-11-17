@@ -43,7 +43,7 @@ class RPPSDiplomeObtenuParser(RPPSExerciceProParser):
             e.date_maj = self.get_nullable_date(row["Date de mise à jour diplôme obtenu"])
             e.numero = self.get_nullable(row["Numéro diplôme"])
         except Exception as ex:
-            print(f"ERROR Diplome row {self.row_num} {e}\n{ex}\n{row}")
+            print(f"ERROR DiplomeObtenu row {self.row_num} {e}\n{ex}\n{row}")
             quit(1)
         return e
 

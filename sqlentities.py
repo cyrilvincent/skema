@@ -67,7 +67,8 @@ class Context:
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
-#          1-*(1) etat_civil
+#          1-* savoir_faire_obtenu *-1 diplome
+#          ?-*(1) etat_civil
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -549,6 +550,7 @@ class Diplome(Base):
                                                               backref="diplomes")
 
     # backref diplome_obtenus
+    # backref savoir_faire_obtenus
 
     @property
     def key(self):
@@ -668,6 +670,7 @@ class Personne(Base):
     # backref exercice_pros
     # backref activites
     # backref diplome_obtenus
+    # backref savoir_faire_obtenus
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -881,4 +884,33 @@ class ReferenceAE(Base):
 
     def __repr__(self):
         return f"{self.id} {self.categorie_pro} {self.code_profession} {self.ae} {self.date_debut}"
+
+class SavoirFaireObtenu(Base):
+    __tablename__ = "savoir_faire_obtenu"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    personne: Personne = relationship("Personne", backref="savoir_faire_obtenus")
+    personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
+    type_sf = Column(String(10), nullable=False)
+    code_sf = Column(String(10), nullable=False)
+    diplome: Diplome = relationship("Diplome", backref="savoir_faire_obtenus")
+    diplome_id = Column(Integer, ForeignKey('diplome.id'), nullable=False, index=True)
+    code_profession = Column(Integer, nullable=False)
+    categorie_pro = Column(String(5), nullable=False)
+    date_reconnaissance = Column(Date(), nullable=False)
+    date_maj = Column(Date(), nullable=False)
+    date_abandon = Column(Date())
+    __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession', 'code_sf',
+                                       'type_sf', 'date_reconnaissance'),)
+
+    @property
+    def key(self):
+        return self.inpp, self.categorie_pro, self.code_profession, self.code_sf, self.type_sf, self.date_reconnaissance
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj and self.date_abandon == other.date_abandon
+
+    def __repr__(self):
+        return f"{self.id} {self.categorie_pro} {self.code_profession} {self.code_sf} {self.date_reconnaissance}"
 

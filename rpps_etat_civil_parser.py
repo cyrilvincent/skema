@@ -66,6 +66,24 @@ class RPPSEtatCivilParser(RPPSExerciceProParser):
             self.entities[e.key].date_maj = e.date_maj
         self.nb_update_entity += 1
 
+    def parse_row(self, row):
+        e = self.mapper(row)
+        if e.key in self.entities:
+            same = e.equals(self.entities[e.key])
+            if not same:
+                self.update(e)
+            e = self.entities[e.key]
+            if e.personne is None and e.inpp in self.personnes:
+                e.personne = self.personnes[e.inpp]
+                if same:
+                    self.nb_update_entity += 1
+        else:
+            self.nb_new_entity += 1
+            self.entities[e.key] = e
+            self.make_relations(e, row)
+            self.context.session.add(e)
+        self.context.session.commit()
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
