@@ -17,15 +17,16 @@ class RPPSSavoirFaireParser(RPPSDiplomeObtenuParser):
 
     def __init__(self, context):
         super().__init__(context)
+        self.exercices_pro: Dict[Tuple[str, str, int], ExercicePro] = {}
 
     def load_cache(self):
         print("Making cache")
         l: List[SavoirFaireObtenu] = self.context.session.query(SavoirFaireObtenu).all()
         for e in l:
             self.entities[e.key] = e
-        l: List[Personne] = self.context.session.query(Personne).all()
-        for p in l:
-            self.personnes[p.inpp] = p
+        l: List[ExercicePro] = self.context.session.query(ExercicePro).all()
+        for e in l:
+            self.exercices_pro[e.key] = e
         l: List[Diplome] = self.context.session.query(Diplome).all()
         for d in l:
             self.diplomes[d.key] = d
@@ -48,7 +49,7 @@ class RPPSSavoirFaireParser(RPPSDiplomeObtenuParser):
 
     def make_relations(self, e: SavoirFaireObtenu, row):
         try:
-            e.personne = self.personnes[e.inpp]
+            e.exercice_pro = self.exercices_pro[(e.inpp, e.categorie_pro, e.code_profession)]
             if e.code_sf in self.diplomes:
                 e.diplome = self.diplomes[e.code_sf]
             else:

@@ -64,10 +64,10 @@ class Context:
 #                   *-* diplome *-* profession
 # personne 1-* exercice_pro *-1 code_profession *-* profession
 #                           1-*(1) reference_ae
+#                           1-*(1) savoir_faire_obtenu *-1 diplome
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
-#          1-* savoir_faire_obtenu *-1 diplome
 #          ?-*(1) etat_civil
 # structure 1-* activite *-1 code_profession *-* profession
 
@@ -670,7 +670,6 @@ class Personne(Base):
     # backref exercice_pros
     # backref activites
     # backref diplome_obtenus
-    # backref savoir_faire_obtenus
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -741,7 +740,8 @@ class ExercicePro(Base):
     departement_inscription = Column(String(3))
     __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession_id'),)
 
-    # reference_aes
+    # backref reference_aes
+    # backref savoir_faire_obtenus
 
     @property
     def key(self):
@@ -890,14 +890,14 @@ class SavoirFaireObtenu(Base):
 
     id = Column(Integer, primary_key=True)
     inpp = Column(String(12), nullable=False)
-    personne: Personne = relationship("Personne", backref="savoir_faire_obtenus")
-    personne_id = Column(Integer, ForeignKey('personne.id'), nullable=False, index=True)
     type_sf = Column(String(10), nullable=False)
     code_sf = Column(String(10), nullable=False)
     diplome: Diplome = relationship("Diplome", backref="savoir_faire_obtenus")
     diplome_id = Column(Integer, ForeignKey('diplome.id'), nullable=False, index=True)
     code_profession = Column(Integer, nullable=False)
     categorie_pro = Column(String(5), nullable=False)
+    exercice_pro: ExercicePro = relationship("ExercicePro", backref="savoir_faire_obtenus")
+    exercice_pro_id = Column(Integer, ForeignKey('exercice_pro.id'), nullable=False, index=True)
     date_reconnaissance = Column(Date(), nullable=False)
     date_maj = Column(Date(), nullable=False)
     date_abandon = Column(Date())
