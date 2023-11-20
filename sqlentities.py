@@ -65,6 +65,7 @@ class Context:
 # personne 1-* exercice_pro *-1 code_profession *-* profession
 #                           1-*(1) reference_ae
 #                           1-*(1) savoir_faire_obtenu *-1 diplome
+#                           *-1 categorie_pro
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
@@ -717,6 +718,18 @@ class Structure(Base):
     def __repr__(self):
         return f"{self.id} {self.id_technique} {self.raison_sociale}"
 
+class CategoriePro(Base):
+    __tablename__ = "categorie_pro"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(7), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    # backref exercice_pros
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
+
 class ExercicePro(Base):
     __tablename__ = "exercice_pro"
 
@@ -729,21 +742,23 @@ class ExercicePro(Base):
     civilite = Column(String(3))
     code_profession: CodeProfession = relationship("CodeProfession", backref="exercice_pros")
     code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
-    categorie_pro = Column(String(5), nullable=False)
+    code_categorie_pro = Column(String(5), nullable=False)
+    categorie_pro: CategoriePro = relationship("CategoriePro", backref="exercice_pros")
+    categorie_pro_id = Column(Integer, ForeignKey('categorie_pro.id'), nullable=False, index=True)
     date_fin = Column(Date())
     date_maj = Column(Date())
     date_effet = Column(Date())
     ae = Column(String(5))
     date_debut_inscription = Column(Date())
     departement_inscription = Column(String(3))
-    __table_args__ = (UniqueConstraint('inpp', 'categorie_pro', 'code_profession_id'),)
+    __table_args__ = (UniqueConstraint('inpp', 'code_categorie_pro', 'code_profession_id'),)
 
     # backref reference_aes
     # backref savoir_faire_obtenus
 
     @property
     def key(self):
-        return self.inpp, self.categorie_pro, self.code_profession_id
+        return self.inpp, self.code_categorie_pro, self.code_profession_id
 
     def equals(self, other):
         return self.key == other.key and self.date_fin == other.date_fin and self.date_maj == other.date_maj

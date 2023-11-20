@@ -2,7 +2,8 @@ from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
 
 from rpps_personne_parser import RPPSPersonneParser
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro, \
+    CategoriePro
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -16,6 +17,7 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         super().__init__(context)
         self.personnes: Dict[str, Personne] = {}
         self.code_professions: Dict[int, CodeProfession] = {}
+        self.categorie_pros: Dict[str, CategoriePro] = {}
 
     def load_cache(self):
         print("Making cache")
@@ -28,6 +30,9 @@ class RPPSExerciceProParser(RPPSPersonneParser):
         l: List[CodeProfession] = self.context.session.query(CodeProfession).all()
         for c in l:
             self.code_professions[c.id] = c
+        l: List[CategoriePro] = self.context.session.query(CategoriePro).all()
+        for c in l:
+            self.categorie_pros[c.code] = c
 
     def mapper(self, row) -> ExercicePro:
         e = ExercicePro()
@@ -36,7 +41,7 @@ class RPPSExerciceProParser(RPPSPersonneParser):
             e.civilite = self.get_nullable(row["Code civilité d'exercice"])
             e.nom = row["Nom d'exercice"].upper()
             e.prenom = row["Prénom d'exercice"].upper()
-            e.categorie_pro = self.get_nullable(row["Code catégorie professionnelle"])
+            e.code_categorie_pro = self.get_nullable(row["Code catégorie professionnelle"])
             e.code_profession_id = int(row["Code profession"])
             e.date_fin = self.get_nullable_date(row["Date de fin exercice"])
             e.date_maj = self.get_nullable_date(row["Date de mise à jour exercice"])
@@ -49,10 +54,16 @@ class RPPSExerciceProParser(RPPSPersonneParser):
             quit(1)
         return e
 
-    def make_relations(self, e: ExercicePro, _):
+    def make_relations(self, e: ExercicePro, row):
         try:
             e.personne = self.personnes[e.inpp]
             e.code_profession = self.code_professions[e.code_profession_id]
+            if e.code_categorie_pro not in self.categorie_pros:
+                c = CategoriePro()
+                c.code = e.code_categorie_pro
+                c.libelle = row["Libellé catégorie professionnelle"]
+                self.categorie_pros[c.code] = c
+            e.categorie_pro = self.categorie_pros[e.code_categorie_pro]
         except Exception as ex:
             print(f"ERROR ExercicePro unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
@@ -105,3 +116,5 @@ if __name__ == '__main__':
 
     # data/rpps/ExercPro_small.csv
     # data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
+
+    # todo reference_ae & savoir_faire_obtenu
