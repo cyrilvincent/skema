@@ -722,7 +722,7 @@ class Structure(Base):
     categorie_juridique_id = Column(Integer, ForeignKey('categorie_juridique.id'), index=True)
     code_secteur_activite = Column(String(4))
     secteur_activite: SecteurActivite = relationship("SecteurActivite", backref="structures")
-    secteur_activite_id = Column(Integer, ForeignKey('secteur_activite.id'), nullable=False, index=True)
+    secteur_activite_id = Column(Integer, ForeignKey('secteur_activite.id'), index=True)
     raison_sociale = Column(String(255))
     enseigne = Column(String(255))
 
@@ -815,7 +815,7 @@ class Activite(Base):
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
     code_fonction = Column(String(10), nullable=False)
     fonction: Fonction = relationship("Fonction", backref="activites")
-    fonction_id = Column(Integer, ForeignKey('fonction.id'), index=True)
+    fonction_id = Column(Integer, ForeignKey('fonction.id'), index=True, nullable=False)
     mode_exercice = Column(String(1), nullable=False)
     date_debut = Column(Date())
     date_fin = Column(Date())
@@ -1074,5 +1074,4 @@ class PersonneAttribution(Base):
 
 
     # todo reference_ae & savoir_faire_obtenu
-    # todo structure & activite
 

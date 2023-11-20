@@ -82,12 +82,13 @@ class RPPSStructureParser(BaseParser):
                     c.libelle = row["Libellé catégorie juridique"]
                     self.categorie_juridiques[c.id] = c
                 e.categorie_juridique =  self.categorie_juridiques[e.categorie_juridique_id]
-            if e.code_secteur_activite not in self.secteur_activites:
-                s = SecteurActivite()
-                s.code = e.code_secteur_activite
-                s.libelle = row["Libellé secteur d'activité"]
-                self.secteur_activites[s.code] = s
-            e.secteur_activite =  self.secteur_activites[e.code_secteur_activite]
+            if e.secteur_activite_id is not None:
+                if e.code_secteur_activite not in self.secteur_activites:
+                    s = SecteurActivite()
+                    s.code = e.code_secteur_activite
+                    s.libelle = row["Libellé secteur d'activité"]
+                    self.secteur_activites[s.code] = s
+                e.secteur_activite =  self.secteur_activites[e.code_secteur_activite]
         except Exception as ex:
             print(f"ERROR Structure unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
