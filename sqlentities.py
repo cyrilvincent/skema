@@ -72,6 +72,7 @@ class Context:
 #          1-* personne_langue *-1 langue
 #          1-* personne_autorisation *-1 autorisation
 #                                    *-1 code_profession
+#          1-+ personne_attribution *-1 attribution
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -666,6 +667,7 @@ class Personne(Base):
     # backref exercice_pros
     # backref activites
     # backref diplome_obtenus
+    # backref personne_attributions
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -979,3 +981,41 @@ class PersonneAutorisation(Base):
 
     def __repr__(self):
         return f"{self.id} {self.code} {self.code_profession_id}"
+
+
+class Attribution(Base):
+    __tablename__ = "attribution"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(7), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
+
+
+class PersonneAttribution(Base):
+    __tablename__ = "personne_attribution"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    code = Column(String(7), nullable=False)
+    attribution: Attribution = relationship("Attribution", backref="personne_attributions")
+    attribution_id = Column(Integer, ForeignKey('attribution.id'), nullable=False, index=True)
+    date_reconnaissance = Column(Date(), nullable=False)
+    date_abandon = Column(Date())
+    date_maj = Column(Date(), nullable=False)
+    code_profession: CodeProfession = relationship("CodeProfession", backref="personne_attributions")
+    code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
+    categorie_pro = Column(String(5), nullable=False)
+
+
+    @property
+    def key(self):
+        return self.inpp, self.code, self.code_profession_id, self.categorie_pro, self.date_reconnaissance
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj and self.date_abandon == other.date_abandon
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.code} {self.code_profession_id} {self.categorie_pro}"

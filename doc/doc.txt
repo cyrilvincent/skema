@@ -96,19 +96,23 @@ python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_Activite_202310
 
 RPPS import diplome obtenu
 Importé dans la table diplome_obtenu
-python rpps_activite_parser.py Extraction_RPPS_Profil4_DiplObt_202310250948.csv
+python rpps_diplome_obtenu_parser.py data/rpps/Extraction_RPPS_Profil4_DiplObt_202310250948.csv
+
+RPPS import autre diplome
+Importé dans la table autre_diplome
+python rpps_autre_diplome_parser.py data/rpps/Extraction_RPPS_Profil4_AutreDiplObt_202310250948.csv
 
 RPPS import savoir faire
 Importé dans la table savoir_faire_obtenu
-python rpps_savoir_faire_parser.py Extraction_RPPS_Profil4_SavoirFaire_202310250948
+python rpps_savoir_faire_parser.py data/rpps/Extraction_RPPS_Profil4_SavoirFaire_202310250948
 
 RPPS import etat civil
 Importé dans la table etat_civil
-python rpps_activite_parser.py Extraction_RPPS_Profil4_EtatCiv_202310250948.csv
+python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_EtatCiv_202310250948.csv
 
 RPPS import reference AE
 Importé dans la table reference_ae
-python rpps_reference_ae_parser.py Extraction_RPPS_Profil4_ReferAe_202310250948
+python rpps_reference_ae_parser.py data/rpps/Extraction_RPPS_Profil4_ReferAe_202310250948
 
 RPPS import langue
 Importé dans les tables langue et personne_langue
