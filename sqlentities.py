@@ -70,6 +70,8 @@ class Context:
 #          1-* diplome_obtenu *-1 diplome *-* profession
 #          ?-*(1) etat_civil
 #          1-* personne_langue *-1 langue
+#          1-* personne_autorisation *-1 autorisation
+#                                    *-1 code_profession
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -586,6 +588,7 @@ class CodeProfession(Base):
 
     # backref exercice_pros
     # backref activites
+    # backref personne_autorisations
 
     def __repr__(self):
         return f"{self.id} {self.libelle}"
@@ -939,3 +942,40 @@ class PersonneLangue(Base):
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.code}"
 
+
+class Autorisation(Base):
+    __tablename__ = "autorisation"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(4), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
+
+
+class PersonneAutorisation(Base):
+    __tablename__ = "personne_autorisation"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    code = Column(String(4), nullable=False)
+    autorisation: Autorisation = relationship("Autorisation", backref="personne_autorisations")
+    autorisation_id = Column(Integer, ForeignKey('autorisation.id'), nullable=False, index=True)
+    date_effet = Column(Date(), nullable=False)
+    date_fin = Column(Date())
+    date_maj = Column(Date(), nullable=False)
+    discipline = Column(String(10))
+    code_profession: CodeProfession = relationship("CodeProfession", backref="personne_autorisations")
+    code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
+
+
+    @property
+    def key(self):
+        return self.inpp, self.code, self.code_profession_id
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj and self.date_fin == other.date_fin
+
+    def __repr__(self):
+        return f"{self.id} {self.code} {self.code_profession_id}"
