@@ -95,7 +95,7 @@ if __name__ == '__main__':
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
-    print(f"Parse {rpp.row_num} rows in {time.perf_counter() - time0:.0f} s")
+    print(f"Parse {rpp.row_num} rows in {time.perf_counter() - time0:.0f}s")
 
     # data/rpps/SavoirFaire_small.csv
     # data/rpps/Extraction_RPPS_Profil4_SavoirFaire_202310250948.csv
