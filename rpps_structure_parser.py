@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, Structure
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, Structure, \
+    CategorieJuridique, SecteurActivite
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -12,12 +13,20 @@ class RPPSStructureParser(BaseParser):
 
     def __init__(self, context):
         super().__init__(context)
+        self.categorie_juridiques: Dict[int, CategorieJuridique] = {}
+        self.secteur_activites: Dict[str, SecteurActivite] = {}
 
     def load_cache(self):
         print("Making cache")
         l: List[Structure] = self.context.session.query(Structure).all()
         for e in l:
             self.entities[e.key] = e
+        l: List[CategorieJuridique] = self.context.session.query(CategorieJuridique).all()
+        for e in l:
+            self.categorie_juridiques[e.id] = e
+        l: List[SecteurActivite] = self.context.session.query(SecteurActivite).all()
+        for e in l:
+            self.secteur_activites[e.code] = e
 
     def check_date(self, path):
         pass
@@ -38,8 +47,8 @@ class RPPSStructureParser(BaseParser):
             e.date_fermeture = self.get_nullable_date(row["Date de fermeture structure"])
             e.date_maj = self.get_nullable_date(row["Date de mise à jour structure"])
             e.ape = self.get_nullable(row["Code APE"])
-            e.categorie_juridique = self.get_nullable(row["Code catégorie juridique"].strip()[:5])
-            e.secteur_activite = self.get_nullable(row["Code secteur d'activité"])
+            e.categorie_juridique_id = self.get_nullable_int(row["Code catégorie juridique"].strip()[:5])
+            e.code_secteur_activite = self.get_nullable(row["Code secteur d'activité"])
             e.raison_sociale = self.get_nullable(row["Raison sociale"])
             e.enseigne = self.get_nullable(row["Enseigne commerciale"])
         except Exception as ex:
@@ -64,6 +73,25 @@ class RPPSStructureParser(BaseParser):
             self.entities[e.key].raison_sociale = e.raison_sociale
         self.nb_update_entity += 1
 
+    def make_relations(self, e: Structure, row):
+        try:
+            if e.categorie_juridique_id is not None:
+                if e.categorie_juridique_id not in self.categorie_juridiques:
+                    c = CategorieJuridique()
+                    c.id = e.categorie_juridique_id
+                    c.libelle = row["Libellé catégorie juridique"]
+                    self.categorie_juridiques[c.id] = c
+                e.categorie_juridique =  self.categorie_juridiques[e.categorie_juridique_id]
+            if e.code_secteur_activite not in self.secteur_activites:
+                s = SecteurActivite()
+                s.code = e.code_secteur_activite
+                s.libelle = row["Libellé secteur d'activité"]
+                self.secteur_activites[s.code] = s
+            e.secteur_activite =  self.secteur_activites[e.code_secteur_activite]
+        except Exception as ex:
+            print(f"ERROR Structure unknow FK row {self.row_num} {e}\n{ex}")
+            quit(2)
+
     def load(self, path: str, delimiter=';', encoding="utf8", header=False):
         out_path = path.replace(".csv", ".temp")
         self.strip_double_quotes_writer(path, out_path, encoding)
@@ -80,6 +108,7 @@ class RPPSStructureParser(BaseParser):
         else:
             self.nb_new_entity += 1
             self.entities[e.key] = e
+            self.make_relations(e, row)
             self.context.session.add(e)
         self.context.session.commit()
 

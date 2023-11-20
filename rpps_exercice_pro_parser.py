@@ -116,5 +116,3 @@ if __name__ == '__main__':
 
     # data/rpps/ExercPro_small.csv
     # data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
-
-    # todo reference_ae & savoir_faire_obtenu

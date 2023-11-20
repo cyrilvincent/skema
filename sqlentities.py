@@ -679,6 +679,27 @@ class Personne(Base):
     def __repr__(self):
         return f"{self.id} {self.nom} {self.prenom}"
 
+class CategorieJuridique(Base):
+    __tablename__ = "categorie_juridique"
+
+    id = Column(Integer, primary_key=True)
+    libelle = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.libelle}"
+
+class SecteurActivite(Base):
+    __tablename__ = "secteur_activite"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(4), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    # backref exercice_pros
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
+
 class Structure(Base):
     __tablename__ = "structure"
 
@@ -697,8 +718,11 @@ class Structure(Base):
     date_fermeture = Column(Date())
     date_maj = Column(Date())
     ape = Column(String(10))
-    categorie_juridique = Column(String(5))
-    secteur_activite = Column(String(4))
+    categorie_juridique: CategorieJuridique = relationship("CategorieJuridique", backref="structures")
+    categorie_juridique_id = Column(Integer, ForeignKey('categorie_juridique.id'), index=True)
+    code_secteur_activite = Column(String(4))
+    secteur_activite: SecteurActivite = relationship("SecteurActivite", backref="structures")
+    secteur_activite_id = Column(Integer, ForeignKey('secteur_activite.id'), nullable=False, index=True)
     raison_sociale = Column(String(255))
     enseigne = Column(String(255))
 
@@ -766,6 +790,17 @@ class ExercicePro(Base):
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.categorie_pro} {self.code_profession_id}"
 
+class Fonction(Base):
+    __tablename__ = "fonction"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(10), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    # backref activites
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
 
 class Activite(Base):
     __tablename__ = "activite"
@@ -778,7 +813,9 @@ class Activite(Base):
     id_technique_structure = Column(String(25))
     structure: Structure = relationship("Structure", backref="activites")
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
-    fonction = Column(String(10), nullable=False)
+    code_fonction = Column(String(10), nullable=False)
+    fonction: Fonction = relationship("Fonction", backref="activites")
+    fonction_id = Column(Integer, ForeignKey('fonction.id'), index=True)
     mode_exercice = Column(String(1), nullable=False)
     date_debut = Column(Date())
     date_fin = Column(Date())
@@ -1034,3 +1071,8 @@ class PersonneAttribution(Base):
 
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.code} {self.code_profession_id} {self.categorie_pro}"
+
+
+    # todo reference_ae & savoir_faire_obtenu
+    # todo structure & activite
+

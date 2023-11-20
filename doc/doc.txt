@@ -118,6 +118,10 @@ RPPS import langue
 Importé dans les tables langue et personne_langue
 python rpps_langue_parser.py data/rpps/Extraction_RPPS_Profil4_Langue_202310250948.csv
 
+RPPS import attribution
+Importé dans les tables attribution et personne_attribution
+python rpps_attribution_parser.py data/rpps/Extraction_RPPS_Profil4_AttribPart_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 

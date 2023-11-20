@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 from rpps_exercice_pro_parser import RPPSExerciceProParser
 from rpps_personne_parser import RPPSPersonneParser
 from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro, \
-    Structure, Activite
+    Structure, Activite, Fonction
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -19,6 +19,7 @@ class RPPSActiviteParser(RPPSExerciceProParser):
         self.personnes: Dict[str, Personne] = {}
         self.structures : Dict[str, Structure] = {}
         self.code_professions: Dict[int, CodeProfession] = {}
+        self.fonctions: Dict[str, Fonction] = {}
 
     def load_cache(self):
         print("Making cache")
@@ -34,6 +35,9 @@ class RPPSActiviteParser(RPPSExerciceProParser):
         l: List[Structure] = self.context.session.query(Structure).all()
         for s in l:
             self.structures[s.key] = s
+        l: List[Fonction] = self.context.session.query(Fonction).all()
+        for f in l:
+            self.fonctions[f.code] = f
 
     def mapper(self, row) -> Activite:
         e = Activite()
@@ -41,7 +45,7 @@ class RPPSActiviteParser(RPPSExerciceProParser):
             e.activite_id = row["Identifiant de l'activité"]
             e.inpp = row["Identification nationale PP"]
             e.id_technique_structure = self.get_nullable(row["Identifiant technique de la structure"])
-            e.fonction = self.get_nullable(row["Code fonction"])
+            e.code_fonction = self.get_nullable(row["Code fonction"])
             e.mode_exercice = self.get_nullable(row["Code mode exercice"])
             e.categorie_pro = self.get_nullable(row["Code catégorie professionnelle"])
             e.date_debut = self.get_nullable_date(row["Date de début activité"])
@@ -62,12 +66,18 @@ class RPPSActiviteParser(RPPSExerciceProParser):
             quit(1)
         return e
 
-    def make_relations(self, e: Activite, _):
+    def make_relations(self, e: Activite, row):
         try:
             e.personne = self.personnes[e.inpp]
             if e.id_technique_structure in self.structures:
                 e.structure = self.structures[e.id_technique_structure]
             e.code_profession = self.code_professions[e.code_profession_id]
+            if e.code_fonction not in self.fonctions:
+                f = Fonction()
+                f.code = e.code_fonction
+                f.libelle = row["Libellé fonction"]
+                self.fonctions[f.code] = f
+            e.fonction = self.fonctions[e.code_fonction]
         except Exception as ex:
             print(f"ERROR Activite unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
