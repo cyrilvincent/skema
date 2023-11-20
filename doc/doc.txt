@@ -110,6 +110,10 @@ RPPS import reference AE
 Importé dans la table reference_ae
 python rpps_reference_ae_parser.py Extraction_RPPS_Profil4_ReferAe_202310250948
 
+RPPS import langue
+Importé dans les tables langue et personne_langue
+python rpps_langue_parser.py data/rpps/Extraction_RPPS_Profil4_Langue_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 

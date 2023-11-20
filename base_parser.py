@@ -189,6 +189,7 @@ class BaseParser(metaclass=ABCMeta):
             with open(out_path, "w", encoding=encoding) as out:
                 for row in f:
                     row = row.replace("matriçage ; métallurgie", "matriçage, métallurgie")
+                    row = row.replace("Créole haïtien; haïtien", "haïtien")
                     row = row.replace('"', "")
                     out.write(row)
 

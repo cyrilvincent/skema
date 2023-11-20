@@ -69,6 +69,7 @@ class Context:
 #                       *-1 code_profession *-* profession
 #          1-* diplome_obtenu *-1 diplome *-* profession
 #          ?-*(1) etat_civil
+#          1-* personne_langue *-1 langue
 # structure 1-* activite *-1 code_profession *-* profession
 
 
@@ -159,6 +160,7 @@ class AdresseNorm(Base):
     dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     iris = Column(String(9))
+    rpps_score = Column(Float)
     __table_args__ = (UniqueConstraint('numero', 'rue1', 'rue2', 'cp', 'commune'),)
 
     def __repr__(self):
@@ -240,13 +242,6 @@ profession_code_profession = Table('profession_code_profession', Base.metadata,
                                             primary_key=True),
                                      Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
                                      )
-
-# personne_exercice_pro = Table('personne_exercice_pro', Base.metadata,
-#                                      Column('personne_id', ForeignKey('personne.id'),
-#                                             primary_key=True),
-#                                      Column('exercice_pro_id', ForeignKey('exercice_pro.id'), primary_key=True)
-#                                      )
-
 
 class DateSource(Base):
     __tablename__ = "date_source"
@@ -582,11 +577,9 @@ class CodeProfession(Base):
 
     id = Column(Integer, primary_key=True)
     libelle = Column(String(50), nullable=False)
-
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
                                                               secondary=personne_activite_code_profession,
                                                               backref="code_professions")
-
     professions: List[Profession] = relationship("Profession",
                                                               secondary=profession_code_profession,
                                                               backref="code_professions")
@@ -913,4 +906,36 @@ class SavoirFaireObtenu(Base):
 
     def __repr__(self):
         return f"{self.id} {self.categorie_pro} {self.code_profession} {self.code_sf} {self.date_reconnaissance}"
+
+
+class Langue(Base):
+    __tablename__ = "langue"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(2), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"{self.id} {self.code}"
+
+
+class PersonneLangue(Base):
+    __tablename__ = "personne_langue"
+
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    code = Column(String(2), nullable=False)
+    langue: Langue = relationship("Langue", backref="personne_langues")
+    langue_id = Column(Integer, ForeignKey('langue.id'), nullable=False, index=True)
+    date_maj = Column(Date(), nullable=False)
+
+    @property
+    def key(self):
+        return self.inpp, self.code
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj
+
+    def __repr__(self):
+        return f"{self.id} {self.inpp} {self.code}"
 
