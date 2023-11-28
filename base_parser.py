@@ -190,6 +190,8 @@ class BaseParser(metaclass=ABCMeta):
                 for row in f:
                     row = row.replace("matriçage ; métallurgie", "matriçage, métallurgie")
                     row = row.replace("Créole haïtien; haïtien", "haïtien")
+                    row = row.replace("BAT I ;", "BAT I, ")
+                    row = row.replace("BÂTIMENT H ; LOT 409 ;", "BÂTIMENT H, LOT 409,")
                     row = row.replace('"', "")
                     out.write(row)
 

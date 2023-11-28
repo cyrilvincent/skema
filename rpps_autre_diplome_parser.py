@@ -1,12 +1,6 @@
-from typing import Dict, List, Tuple, Optional
-from sqlalchemy.orm import joinedload
-
 from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
-from rpps_exercice_pro_parser import RPPSExerciceProParser
-from rpps_personne_parser import RPPSPersonneParser
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, ExercicePro, \
-    Structure, Activite, DiplomeObtenu
-from base_parser import BaseParser, time0
+from sqlentities import Context, Diplome, DiplomeObtenu
+from base_parser import time0
 import argparse
 import time
 import art

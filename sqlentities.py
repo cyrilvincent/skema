@@ -74,7 +74,10 @@ class Context:
 #          1-* personne_autorisation *-1 autorisation
 #                                    *-1 code_profession
 #          1-+ personne_attribution *-1 attribution
+#          1-* coord *-1 adresse_norm
 # structure 1-* activite *-1 code_profession *-* profession
+#                        1-* coord
+#           1-* coord
 
 
 class Dept(Base):
@@ -669,6 +672,7 @@ class Personne(Base):
     # backref activites
     # backref diplome_obtenus
     # backref personne_attributions
+    # backref coord_personnes
 
     def equals(self, other):
         return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
@@ -1072,6 +1076,54 @@ class PersonneAttribution(Base):
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.code} {self.code_profession_id} {self.categorie_pro}"
 
+class CoordPersonne(Base):
+    __tablename__ = "coord"
 
-    # todo reference_ae & savoir_faire_obtenu
+    id = Column(Integer, primary_key=True)
+    inpp = Column(String(12), nullable=False)
+    personne: Personne = relationship("Personne", backref="coord_personnes")
+    personne_id = Column(Integer, ForeignKey('personne.id'), index=True)
+    activite: Activite = relationship("Activite", backref="coord_personnes")
+    activite_id = Column(Integer, ForeignKey('activite.id'), index=True)
+    structure: Structure = relationship("Structure", backref="coord_personnes")
+    structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
+    complement_destinataire = Column(String(255))
+    complement_geo = Column(String(255))
+    numero = Column(String(10))
+    indice = Column(String(10))
+    code_type_voie = Column(String(10))
+    type_voie = Column(String(50))
+    voie = Column(String(255))
+    mention = Column(String(50))
+    cedex = Column(String(50))
+    cp = Column(String(10), nullable=False)
+    code_commune = Column(String(10))
+    commune = Column(String(255))
+    code_pays = Column(String(5))
+    pays = Column(String(255))
+    tel = Column(String(50))
+    tel2 = Column(String(50))
+    fax = Column(String(50))
+    mail = Column(String(255))
+    date_maj = Column(Date(), nullable=False)
+    date_fin = Column(Date())
+    adresse_norm: AdresseNorm = relationship("AdresseNorm", backref="coord_personnes")
+    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'), index=True)
+
+
+    @property
+    def key(self):
+        return self.inpp
+
+    def equals(self, other):
+        return self.key == other.key and self.date_maj == other.date_maj and self.date_fin == other.date_fin \
+            and self.tel == other.tel and self.tel2 == other.tel2 and self.mail == other.mail \
+            and self.mention == other.mention and self.cedex == other.cedex \
+            and self.complement_geo == other.complement_geo \
+            and self.complement_destinataire == other.complement_destinataire \
+            and self.numero == other.numero and self.code_type_voie == other.code_type_voie and self.cp == other.cp
+
+
+    def __repr__(self):
+        return f"{self.inpp} {self.numero} {self.voie} {self.cp} {self.commune}"
 

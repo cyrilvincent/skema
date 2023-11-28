@@ -1,7 +1,5 @@
-from typing import Dict, List, Tuple, Optional
-from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne, Structure, \
-    CategorieJuridique, SecteurActivite
+from typing import Dict, List
+from sqlentities import Context, Structure, CategorieJuridique, SecteurActivite
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -81,14 +79,14 @@ class RPPSStructureParser(BaseParser):
                     c.id = e.categorie_juridique_id
                     c.libelle = row["Libellé catégorie juridique"]
                     self.categorie_juridiques[c.id] = c
-                e.categorie_juridique =  self.categorie_juridiques[e.categorie_juridique_id]
+                e.categorie_juridique = self.categorie_juridiques[e.categorie_juridique_id]
             if e.secteur_activite_id is not None:
                 if e.code_secteur_activite not in self.secteur_activites:
                     s = SecteurActivite()
                     s.code = e.code_secteur_activite
                     s.libelle = row["Libellé secteur d'activité"]
                     self.secteur_activites[s.code] = s
-                e.secteur_activite =  self.secteur_activites[e.code_secteur_activite]
+                e.secteur_activite = self.secteur_activites[e.code_secteur_activite]
         except Exception as ex:
             print(f"ERROR Structure unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
@@ -97,7 +95,6 @@ class RPPSStructureParser(BaseParser):
         out_path = path.replace(".csv", ".temp")
         self.strip_double_quotes_writer(path, out_path, encoding)
         super().load(out_path, delimiter, encoding, header)
-
 
     def parse_row(self, row):
         e = self.mapper(row)

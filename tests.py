@@ -19,6 +19,7 @@ from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
 from rpps_etat_civil_parser import RPPSEtatCivilParser
 from rpps_reference_ae_parser import RPPSReferenceAEParser
 from rpps_savoir_faire_parser import RPPSSavoirFaireParser
+from rpps_coord_corresp_parser import RPPSCoordPersonneParser
 from sqlentities import *
 
 
@@ -772,6 +773,51 @@ class ICIPTests(TestCase):
         self.assertEqual("C", e.categorie_pro)
         self.assertEqual(datetime.date(2014, 10, 28), e.date_reconnaissance)
         self.assertEqual(datetime.date(2014, 10, 29), e.date_maj)
+
+    def test_coord_corresp_mapper(self):
+        p = RPPSCoordPersonneParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Complément destinataire (coord. correspondance)";"Complément point géographique (coord. correspondance)";"Numéro Voie (coord. correspondance)";"Indice répétition voie (coord. correspondance)";"Code type de voie (coord. correspondance)";"Libellé type de voie (coord. correspondance)";"Libellé Voie (coord. correspondance)";"Mention distribution (coord. correspondance)";"Bureau cedex (coord. correspondance)";"Code postal (coord. correspondance)";"Code commune (coord. correspondance)";"Libellé commune (coord. correspondance)";"Code pays (coord. correspondance)";"Libellé pays (coord. correspondance)";"Téléphone (coord. correspondance)";"Téléphone 2 (coord. correspondance)";"Télécopie (coord. correspondance)";"Adresse e-mail (coord. correspondance)";"Date de mise à jour (coord. correspondance)";"Date de fin (coord. correspondance)";"""
+        values = """"8";"10000026632";"810000026632";"";"RESIDENCE FLEURS DE PARADIS";"";"";"";"";"RUE DU GENERAL DE GAULLE";"";"97118 ST FRANCOIS";"97118";"97125";"Saint-François";"99000";"France";"0590884193";"";"";"";"17/02/2022";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("810000026632", e.inpp)
+        self.assertEqual("RESIDENCE FLEURS DE PARADIS", e.complement_geo)
+        self.assertEqual("RUE DU GENERAL DE GAULLE", e.voie)
+        self.assertEqual("97118 ST FRANCOIS", e.cedex)
+        self.assertEqual("97118", e.cp)
+        self.assertEqual("97125", e.code_commune)
+        self.assertEqual("Saint-François", e.commune)
+        self.assertEqual("99000", e.code_pays)
+        self.assertEqual("0590884193", e.tel)
+        self.assertEqual(datetime.date(2022, 2, 17), e.date_maj)
+
+    def test_coord_corresp_norm_mapper(self):
+        p = RPPSCoordPersonneParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identification nationale PP";"Complément destinataire (coord. correspondance)";"Complément point géographique (coord. correspondance)";"Numéro Voie (coord. correspondance)";"Indice répétition voie (coord. correspondance)";"Code type de voie (coord. correspondance)";"Libellé type de voie (coord. correspondance)";"Libellé Voie (coord. correspondance)";"Mention distribution (coord. correspondance)";"Bureau cedex (coord. correspondance)";"Code postal (coord. correspondance)";"Code commune (coord. correspondance)";"Libellé commune (coord. correspondance)";"Code pays (coord. correspondance)";"Libellé pays (coord. correspondance)";"Téléphone (coord. correspondance)";"Téléphone 2 (coord. correspondance)";"Télécopie (coord. correspondance)";"Adresse e-mail (coord. correspondance)";"Date de mise à jour (coord. correspondance)";"Date de fin (coord. correspondance)";"""
+        values = """107133661";"810107133661";"BATIMENT C ; APPARTEMENT 16";"";"";"";"";"";"183 AVENUE DES MARRONNIERS";"";"59113 SECLIN";"59113";"59560";"Seclin";"99000";"France";"";"";"";"";"31/05/2023";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        context = Context()
+        context.create(echo=True)
+        l = context.session.query(Dept).all()
+        for d in l:
+            p.depts[d.num] = d
+        n = p.norm_mapper(e)
+        self.assertEqual("59113", n.cp)
+        self.assertEqual("SECLIN", n.commune)
+        self.assertEqual(97, n.dept_id)
+        self.assertEqual("97125", n.iris)
+        self.assertEqual("183", n.numero)
+        self.assertEqual("AVENUE DES MARRONNIERS", n.rue1)
+
 
 
 

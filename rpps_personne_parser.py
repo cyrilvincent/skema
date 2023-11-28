@@ -1,6 +1,5 @@
-from typing import Dict, List, Tuple, Optional
-from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, Personne
+from typing import List
+from sqlentities import Context, Personne
 from base_parser import BaseParser, time0
 import argparse
 import time

@@ -76,7 +76,7 @@ Les 2 dernières colonnes doivent contenir lon et lat (ordre indifférent)
 Le nom des colonnes n'est pas important
 Une dernière colonne iris sera créée dans un nouveau fichier d'extension .iris.csv
 iris = 0 en cas d'erreur de pyris
-python iris_csv_mather.py data/my_file.csv
+python iris_csv_matcher.py data/my_file.csv
 
 RPPS import personne
 Importé dans la table personne
