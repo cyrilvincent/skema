@@ -1076,7 +1076,7 @@ class PersonneAttribution(Base):
     def __repr__(self):
         return f"{self.id} {self.inpp} {self.code} {self.code_profession_id} {self.categorie_pro}"
 
-class CoordPersonne(Base):
+class Coord(Base):
     __tablename__ = "coord"
 
     id = Column(Integer, primary_key=True)
@@ -1085,6 +1085,7 @@ class CoordPersonne(Base):
     personne_id = Column(Integer, ForeignKey('personne.id'), index=True)
     activite: Activite = relationship("Activite", backref="coord_personnes")
     activite_id = Column(Integer, ForeignKey('activite.id'), index=True)
+    identifiant_activite = Column(String(15))
     structure: Structure = relationship("Structure", backref="coord_personnes")
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
     complement_destinataire = Column(String(255))

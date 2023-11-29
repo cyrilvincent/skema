@@ -2,7 +2,7 @@ import datetime
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
 from rpps_exercice_pro_parser import RPPSExerciceProParser
-from sqlentities import Context, Dept, Personne, CoordPersonne, AdresseNorm
+from sqlentities import Context, Dept, Personne, Coord, AdresseNorm
 from base_parser import time0
 import argparse
 import time
@@ -20,8 +20,8 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
 
     def load_cache(self):
         print("Making cache")
-        l: List[CoordPersonne] = self.context.session.query(CoordPersonne)\
-            .options(joinedload(CoordPersonne.adresse_norm)).all()
+        l: List[Coord] = self.context.session.query(Coord)\
+            .options(joinedload(Coord.adresse_norm)).filter(Coord.personne_id.isnot(None))
         for e in l:
             self.entities[e.key] = e
             self.nb_ram += 1
@@ -40,8 +40,8 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
 
-    def mapper(self, row) -> CoordPersonne:
-        e = CoordPersonne()
+    def mapper(self, row) -> Coord:
+        e = Coord()
         try:
             e.inpp = row["Identification nationale PP"]
             e.complement_destinataire = self.get_nullable(row["Complément destinataire (coord. correspondance)"])
@@ -82,7 +82,7 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
             quit(1)
         return e
 
-    def norm_mapper(self, e: CoordPersonne) -> Optional[AdresseNorm]:
+    def norm_mapper(self, e: Coord) -> Optional[AdresseNorm]:
         if e.code_pays is not None and e.code_pays != "99000":
             return None
         n = AdresseNorm()
@@ -127,7 +127,7 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
             n.numero = None
         return n
 
-    def make_relations(self, e: CoordPersonne, row):
+    def make_relations(self, e: Coord, row):
         try:
             if e.inpp in self.personnes:
                 e.personne = self.personnes[e.inpp]
@@ -142,7 +142,7 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
             print(f"ERROR CoordPersonne unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
 
-    def update(self, e: CoordPersonne):
+    def update(self, e: Coord):
         self.entities[e.key].date_maj = e.date_maj
         if e.date_fin is not None:
             self.entities[e.key].date_fin = e.date_fin

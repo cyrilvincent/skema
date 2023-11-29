@@ -20,6 +20,7 @@ from rpps_etat_civil_parser import RPPSEtatCivilParser
 from rpps_reference_ae_parser import RPPSReferenceAEParser
 from rpps_savoir_faire_parser import RPPSSavoirFaireParser
 from rpps_coord_corresp_parser import RPPSCoordPersonneParser
+from rpps_coord_activite_parser import RPPSCoordActiviteParser
 from sqlentities import *
 
 
@@ -818,7 +819,30 @@ class ICIPTests(TestCase):
         self.assertEqual("183", n.numero)
         self.assertEqual("AVENUE DES MARRONNIERS", n.rue1)
 
-
+    def test_coord_activite_mapper(self):
+        p = RPPSCoordActiviteParser(None)
+        keys = """"Type d'identifiant PP";"Identifiant PP";"Identifiant de l'activité";"Identification nationale PP";"Identifiant technique de la structure";"Code profession";"Libellé profession";"Code catégorie professionnelle";"Libellé catégorie professionnelle";"Complément destinataire (coord. activité)";"Complément point géographique (coord. activité)";"Numéro Voie (coord. activité)";"Indice répétition voie (coord. activité)";"Code type de voie (coord. activité)";"Libellé type de voie (coord. activité)";"Libellé Voie (coord. activité)";"Mention distribution (coord. activité)";"Bureau cedex (coord. activité)";"Code postal (coord. activité)";"Code commune (coord. activité)";"Libellé commune (coord. activité)";"Code pays (coord. activité)";"Libellé pays (coord. activité)";"Téléphone (coord. activité)";"Téléphone 2 (coord. activité)";"Télécopie (coord. activité)";"Adresse e-mail (coord. activité)";"Date de mise à jour (coord. activité)";"Date de fin (coord. activité)";"""
+        values = """"8";"10004973441";"1010656965";810004973441;"R10100000026103";"10";"Médecin";"C";"Civil";"DRSMG";"ESPACE TURENNE RADAMONTHE";"";"";"";"";"RTE DE RABAN";"BP 167";"97307 CAYENNE CEDEX";"97307";"97302";"Cayenne";"99000";"France";"0594396140";"0694490698";"0594396148";"songyangcrosson@yahoo.fr";"23/04/2015";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("1010656965", e.identifiant_activite)
+        self.assertEqual("DRSMG", e.complement_destinataire)
+        self.assertEqual("ESPACE TURENNE RADAMONTHE", e.complement_geo)
+        self.assertEqual("RTE DE RABAN", e.voie)
+        self.assertEqual("BP 167", e.mention)
+        self.assertEqual("97307 CAYENNE CEDEX", e.cedex)
+        self.assertEqual("97307", e.cp)
+        self.assertEqual("97302", e.code_commune)
+        self.assertEqual("Cayenne", e.commune)
+        self.assertEqual("99000", e.code_pays)
+        self.assertEqual("0594396140", e.tel)
+        self.assertEqual("0694490698", e.tel2)
+        self.assertEqual("songyangcrosson@yahoo.fr", e.mail)
+        self.assertEqual(datetime.date(2015, 4, 23), e.date_maj)
 
 
 

@@ -122,6 +122,14 @@ RPPS import attribution
 Importé dans les tables attribution et personne_attribution
 python rpps_attribution_parser.py data/rpps/Extraction_RPPS_Profil4_AttribPart_202310250948.csv
 
+RPPS import coord corresp
+Importé dans les tables coord
+python rpps_coord_corresp_parser.py data/rpps/data/rpps/Extraction_RPPS_Profil4_CoordCorresp_202310250948.csv
+
+RPPS import coord activite
+Importé dans les tables coord
+python rpps_coord_activite_parser.py data/rpps/data/rpps/data/rpps/Extraction_RPPS_Profil4_CoordAct_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 
