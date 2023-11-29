@@ -20,10 +20,11 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
     def load_cache(self):
         print("Making cache")
         l: List[Coord] = self.context.session.query(Coord)\
-            .options(joinedload(Coord.adresse_norm)).filter(Coord.activite_id.isnot(None))
+            .options(joinedload(Coord.adresse_norm)).all() #.filter(Coord.activite_id.isnot(None))
         for e in l:
-            self.entities[e.key] = e
-            self.nb_ram += 1
+            if e.identifiant_activite is not None:
+                self.entities[e.identifiant_activite] = e
+                self.nb_ram += 1
         l: List[Activite] = self.context.session.query(Activite).all()
         for a in l:
             self.activites[a.key] = a
@@ -67,6 +68,8 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
             e.mail = self.get_nullable(row["Adresse e-mail (coord. activité)"])
             try:
                 e.date_maj = self.get_nullable_date(row["Date de mise à jour (coord. activité)"])
+                if e.date_maj is None:
+                    raise ValueError()
                 e.date_fin = self.get_nullable_date(row["Date de fin (coord. activité)"])
             except:
                 try:
@@ -77,6 +80,20 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
                 e.code_commune = self.get_nullable(row["Libellé commune (coord. activité)"])
                 e.commune = self.get_nullable(row["Code pays (coord. activité)"])
                 e.code_pays = self.get_nullable(row["Libellé pays (coord. activité)"])
+            if e.numero is not None and len(e.numero) > 10:
+                e.numero = None
+            if e.indice is not None and len(e.indice) > 10:
+                e.indice = None
+            if e.code_type_voie is not None and len(e.code_type_voie) > 10:
+                e.code_type_voie = None
+            if e.cp is not None and len(e.cp) > 10:
+                e.cp = None
+            if e.code_commune is not None and len(e.code_commune) > 10:
+                e.code_commune = None
+            if e.code_pays is not None and len(e.code_pays) > 5:
+                e.code_pays = None
+            if e.date_maj is None:
+                e.date_maj = datetime.date(1970, 1, 1)
         except Exception as ex:
             print(f"ERROR Coord row {self.row_num} {e}\n{ex}\n{row}")
             quit(1)
@@ -91,11 +108,37 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
                     if n.key in self.norms:
                         n = self.norms[n.key]
                     else:
+                        self.norms[n.key] = n
                         self.nb_new_norm += 1
                     e.adresse_norm = n
         except Exception as ex:
             print(f"ERROR Coord unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
+
+    def parse_row(self, row):
+        e = self.mapper(row)
+        if e.identifiant_activite in self.entities:
+            same = e.equals(self.entities[e.identifiant_activite])
+            if not same:
+                self.update(e)
+                self.nb_update_entity += 1
+            e = self.entities[e.identifiant_activite]
+            if e.adresse_norm is None and e.inpp is not None:
+                n = self.norm_mapper(e)
+                if n is not None:
+                    if n.key in self.norms:
+                        n = self.norms[n.key]
+                    else:
+                        self.norms[n.key] = n
+                        self.nb_new_norm += 1
+                    e.adresse_norm = n
+                    self.nb_update_entity += 1
+        else:
+            self.nb_new_entity += 1
+            self.entities[e.identifiant_activite] = e
+            self.make_relations(e, row)
+            self.context.session.add(e)
+        self.context.session.commit()
 
 
 if __name__ == '__main__':
@@ -117,7 +160,6 @@ if __name__ == '__main__':
     rpp.load(args.path, delimiter=';', encoding="UTF-8", header=True)
     print(f"New coord: {rpp.nb_new_entity}")
     print(f"Nb coord update: {rpp.nb_update_entity}")
-    print(f"Nb bad coord: {rpp.nb_error}")
     print(f"Nb new adresse norm: {rpp.nb_new_norm}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
