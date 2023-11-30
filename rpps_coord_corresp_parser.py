@@ -22,7 +22,7 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
         l: List[Coord] = self.context.session.query(Coord)\
             .options(joinedload(Coord.adresse_norm)).all()
         for e in l:
-            if e.personne_id is not None:
+            if e.inpp is not None:
                 self.entities[e.key] = e
                 self.nb_ram += 1
         l: List[Personne] = self.context.session.query(Personne).all()
@@ -183,6 +183,7 @@ class RPPSCoordPersonneParser(RPPSExerciceProParser):
                 self.update(e)
                 self.nb_update_entity += 1
             e = self.entities[e.key]
+            # Inutile sauf si on a une entité sans adresse norm qui dans une second parsing aura une adresse norm
             if e.adresse_norm is None and e.inpp is not None:
                 n = self.norm_mapper(e)
                 if n is not None:
@@ -228,3 +229,4 @@ if __name__ == '__main__':
 
     # data/rpps/CoordCorresp_small.csv
     # data/rpps/Extraction_RPPS_Profil4_CoordCorresp_202310250948.csv
+    # delete from adresse_norm where id >= 287554

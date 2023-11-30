@@ -2,7 +2,7 @@ import datetime
 from typing import Dict, List
 from sqlalchemy.orm import joinedload
 from rpps_coord_corresp_parser import RPPSCoordPersonneParser
-from sqlentities import Context, Dept, Coord, AdresseNorm, Activite
+from sqlentities import Context, Dept, Coord, AdresseNorm, Structure
 from base_parser import time0
 import argparse
 import time
@@ -10,24 +10,23 @@ import art
 import config
 
 
-class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
+class RPPSCoordStructureParser(RPPSCoordPersonneParser):
 
     def __init__(self, context):
         super().__init__(context)
-        self.activites: Dict[str, Activite] = {}
+        self.structures: Dict[str, Structure] = {}
 
 
     def load_cache(self):
         print("Making cache")
         l: List[Coord] = self.context.session.query(Coord)\
-            .options(joinedload(Coord.adresse_norm)).all() #.filter(Coord.identifiant_activite.isnot(None))
+            .options(joinedload(Coord.adresse_norm)).filter(Coord.structure_id_technique.isnot(None)).all()
         for e in l:
-            if e.identifiant_activite is not None:
-                self.entities[e.identifiant_activite] = e
-                self.nb_ram += 1
-        l: List[Activite] = self.context.session.query(Activite).all()
-        for a in l:
-            self.activites[a.key] = a
+            self.entities[e.structure_id_technique] = e
+            self.nb_ram += 1
+        l: List[Structure] = self.context.session.query(Structure).all()
+        for s in l:
+            self.structures[s.key] = s
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
         l: List[Dept] = self.context.session.query(Dept).all()
@@ -43,43 +42,42 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
     def mapper(self, row) -> Coord:
         e = Coord()
         try:
-            e.inpp = row["Identification nationale PP"]
-            e.identifiant_activite = row["Identifiant de l'activité"]
-            e.complement_destinataire = self.get_nullable(row["Complément destinataire (coord. activité)"])
-            e.complement_geo = self.get_nullable(row["Complément point géographique (coord. activité)"])
-            e.numero = self.get_nullable(row["Numéro Voie (coord. activité)"])
-            e.indice = self.get_nullable(row["Indice répétition voie (coord. activité)"])
-            e.code_type_voie = self.get_nullable(row["Code type de voie (coord. activité)"])
-            e.type_voie = self.get_nullable(row["Libellé type de voie (coord. activité)"])
-            e.voie = self.get_nullable(row["Libellé Voie (coord. activité)"])
-            e.mention = self.get_nullable(row["Mention distribution (coord. activité)"])
-            e.cedex = self.get_nullable(row["Bureau cedex (coord. activité)"])
-            e.cp = self.get_nullable(row["Code postal (coord. activité)"])
-            e.code_commune = self.get_nullable(row["Code commune (coord. activité)"])
-            e.commune = self.get_nullable(row["Libellé commune (coord. activité)"])
+            e.structure_id_technique = row["Identifiant technique de la structure"]
+            e.complement_destinataire = self.get_nullable(row["Complément destinataire (coord. structure)"])
+            e.complement_geo = self.get_nullable(row["Complément point géographique (coord. structure)"])
+            e.numero = self.get_nullable(row["Numéro Voie (coord. structure)"])
+            e.indice = self.get_nullable(row["Indice répétition voie (coord. structure)"])
+            e.code_type_voie = self.get_nullable(row["Code type de voie (coord. structure)"])
+            e.type_voie = self.get_nullable(row["Libellé type de voie (coord. structure)"])
+            e.voie = self.get_nullable(row["Libellé Voie (coord. structure)"])
+            e.mention = self.get_nullable(row["Mention distribution (coord. structure)"])
+            e.cedex = self.get_nullable(row["Bureau cedex (coord. structure)"])
+            e.cp = self.get_nullable(row["Code postal (coord. structure)"])
+            e.code_commune = self.get_nullable(row["Code commune (coord. structure)"])
+            e.commune = self.get_nullable(row["Libellé commune (coord. structure)"])
             if e.commune is None:
                 if e.cedex is not None and len(e.cedex) > 7:
                     e.commune = e.cedex[6:]
-            e.code_pays = self.get_nullable(row["Code pays (coord. activité)"])
-            e.pays = None if e.code_pays == "99000" else self.get_nullable(row["Libellé pays (coord. activité)"])
-            e.tel = self.get_nullable(row["Téléphone (coord. activité)"])
-            e.tel2 = self.get_nullable(row["Téléphone 2 (coord. activité)"])
-            e.fax = self.get_nullable(row["Télécopie (coord. activité)"])
-            e.mail = self.get_nullable(row["Adresse e-mail (coord. activité)"])
+            e.code_pays = self.get_nullable(row["Code pays (coord. structure)"])
+            e.pays = None if e.code_pays == "99000" else self.get_nullable(row["Libellé pays (coord. structure)"])
+            e.tel = self.get_nullable(row["Téléphone (coord. structure)"])
+            e.tel2 = self.get_nullable(row["Téléphone 2 (coord. structure)"])
+            e.fax = self.get_nullable(row["Télécopie (coord. structure)"])
+            e.mail = self.get_nullable(row["Adresse e-mail (coord. structure)"])
             try:
-                e.date_maj = self.get_nullable_date(row["Date de mise à jour (coord. activité)"])
+                e.date_maj = self.get_nullable_date(row["Date de mise à jour (coord. structure)"])
                 if e.date_maj is None:
                     raise ValueError()
-                e.date_fin = self.get_nullable_date(row["Date de fin (coord. activité)"])
+                e.date_fin = self.get_nullable_date(row["Date de fin (coord. structure)"])
             except:
                 try:
-                    e.date_maj = self.get_nullable_date(row["Date de fin (coord. activité)"])
+                    e.date_maj = self.get_nullable_date(row["Date de fin (coord. structure)"])
                 except:
                     e.date_maj = datetime.date(1970,1,1)
-                e.cp = self.get_nullable(row["Code commune (coord. activité)"])
-                e.code_commune = self.get_nullable(row["Libellé commune (coord. activité)"])
-                e.commune = self.get_nullable(row["Code pays (coord. activité)"])
-                e.code_pays = self.get_nullable(row["Libellé pays (coord. activité)"])
+                e.cp = self.get_nullable(row["Code commune (coord. structure)"])
+                e.code_commune = self.get_nullable(row["Libellé commune (coord. structure)"])
+                e.commune = self.get_nullable(row["Code pays (coord. structure)"])
+                e.code_pays = self.get_nullable(row["Libellé pays (coord. structure)"])
             if e.numero is not None and len(e.numero) > 10:
                 e.numero = None
             if e.indice is not None and len(e.indice) > 10:
@@ -101,8 +99,8 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
 
     def make_relations(self, e: Coord, row):
         try:
-            if e.identifiant_activite in self.activites:
-                e.activite = self.activites[e.identifiant_activite]
+            if e.structure_id_technique in self.structures:
+                e.structure = self.structures[e.structure_id_technique]
                 n = self.norm_mapper(e)
                 if n is not None:
                     if n.key in self.norms:
@@ -117,13 +115,13 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
 
     def parse_row(self, row):
         e = self.mapper(row)
-        if e.identifiant_activite in self.entities:
-            same = e.equals(self.entities[e.identifiant_activite])
+        if e.structure_id_technique in self.entities:
+            same = e.equals(self.entities[e.structure_id_technique])
             if not same:
                 self.update(e)
                 self.nb_update_entity += 1
-            e = self.entities[e.identifiant_activite]
-            if e.adresse_norm is None and e.identifiant_activite is not None:
+            e = self.entities[e.structure_id_technique]
+            if e.adresse_norm is None and e.structure_id_technique is not None:
                 n = self.norm_mapper(e)
                 if n is not None:
                     if n.key in self.norms:
@@ -135,7 +133,7 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
                     self.nb_update_entity += 1
         else:
             self.nb_new_entity += 1
-            self.entities[e.identifiant_activite] = e
+            self.entities[e.structure_id_technique] = e
             self.make_relations(e, row)
             self.context.session.add(e)
         self.context.session.commit()
@@ -143,12 +141,12 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("RPPS Coord Activite Parser")
-    print("==========================")
+    print("RPPS Coord Structure Parser")
+    print("===========================")
     print(f"V{config.version}")
     print(config.copyright)
     print()
-    parser = argparse.ArgumentParser(description="RPPS Coord Activite Parser")
+    parser = argparse.ArgumentParser(description="RPPS Coord Structure Parser")
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     args = parser.parse_args()
@@ -156,7 +154,7 @@ if __name__ == '__main__':
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mb")
-    rpp = RPPSCoordActiviteParser(context)
+    rpp = RPPSCoordStructureParser(context)
     rpp.load(args.path, delimiter=';', encoding="UTF-8", header=True)
     print(f"New coord: {rpp.nb_new_entity}")
     print(f"Nb coord update: {rpp.nb_update_entity}")
@@ -166,5 +164,6 @@ if __name__ == '__main__':
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {rpp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
-    # data/rpps/CoordActivite_small.csv
-    # data/rpps/Extraction_RPPS_Profil4_CoordAct_202310250948.csv
+    # data/rpps/CoordStruct_small.csv
+    # data/rpps/Extraction_RPPS_Profil4_CoordStruct_202310250948.csv
+    # adresse_nomr limit 287554

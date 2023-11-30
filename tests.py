@@ -21,6 +21,7 @@ from rpps_reference_ae_parser import RPPSReferenceAEParser
 from rpps_savoir_faire_parser import RPPSSavoirFaireParser
 from rpps_coord_corresp_parser import RPPSCoordPersonneParser
 from rpps_coord_activite_parser import RPPSCoordActiviteParser
+from rpps_coord_structure_parser import RPPSCoordStructureParser
 from sqlentities import *
 
 
@@ -845,4 +846,26 @@ class ICIPTests(TestCase):
         self.assertEqual(datetime.date(2015, 4, 23), e.date_maj)
 
 
+    def test_coord_structure_mapper(self):
+        p = RPPSCoordStructureParser(None)
+        keys = """"Identifiant technique de la structure";"Complément destinataire (coord. structure)";"Complément point géographique (coord. structure)";"Numéro Voie (coord. structure)";"Indice répétition voie (coord. structure)";"Code type de voie (coord. structure)";"Libellé type de voie (coord. structure)";"Libellé Voie (coord. structure)";"Mention distribution (coord. structure)";"Bureau cedex (coord. structure)";"Code postal (coord. structure)";"Code commune (coord. structure)";"Libellé commune (coord. structure)";"Code pays (coord. structure)";"Libellé pays (coord. structure)";"Téléphone (coord. structure)";"Téléphone 2 (coord. structure)";"Télécopie (coord. structure)";"Adresse e-mail (coord. structure)";"Date de mise à jour (coord. structure)";"Date de fin (coord. structure)";"""
+        values = """"F97010871811041988";"";"";"55";"";"LOT";"Lotissement";"DE BELCOURT";"";"97122 BAIE-MAHAULT";"97122";"97103";"Baie-Mahault";"99000";"France";"0590262224";"";"0059026222";"";"07/09/2009";"";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("F97010871811041988", e.structure_id_technique)
+        self.assertEqual("55", e.numero)
+        self.assertEqual("LOT", e.code_type_voie)
+        self.assertEqual("Lotissement", e.type_voie)
+        self.assertEqual("DE BELCOURT", e.voie)
+        self.assertEqual("97122 BAIE-MAHAULT", e.cedex)
+        self.assertEqual("97122", e.cp)
+        self.assertEqual("97103", e.code_commune)
+        self.assertEqual("Baie-Mahault", e.commune)
+        self.assertEqual("99000", e.code_pays)
+        self.assertEqual("0590262224", e.tel)
+        self.assertEqual(datetime.date(2009, 9, 7), e.date_maj)
 

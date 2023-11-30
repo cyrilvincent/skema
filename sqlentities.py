@@ -1080,7 +1080,7 @@ class Coord(Base):
     __tablename__ = "coord"
 
     id = Column(Integer, primary_key=True)
-    inpp = Column(String(12), nullable=False)
+    inpp = Column(String(12))
     personne: Personne = relationship("Personne", backref="coord_personnes")
     personne_id = Column(Integer, ForeignKey('personne.id'), index=True)
     activite: Activite = relationship("Activite", backref="coord_personnes")
