@@ -22,6 +22,7 @@ from rpps_savoir_faire_parser import RPPSSavoirFaireParser
 from rpps_coord_corresp_parser import RPPSCoordPersonneParser
 from rpps_coord_activite_parser import RPPSCoordActiviteParser
 from rpps_coord_structure_parser import RPPSCoordStructureParser
+from rpps_coord_structure_geoloc_parser import RPPSCoordStructureGeolocParser
 from sqlentities import *
 
 
@@ -869,3 +870,18 @@ class ICIPTests(TestCase):
         self.assertEqual("0590262224", e.tel)
         self.assertEqual(datetime.date(2009, 9, 7), e.date_maj)
 
+    def test_coord_structure_geoloc_mapper(self):
+        p = RPPSCoordStructureGeolocParser(None)
+        keys = """"Identifiant technique de la structure";Latitude (coordonnées GPS);Longitude (coordonnées GPS);Type de précision (coordonnées GPS);"Précision (coordonnées GPS)";"""
+        values = """"F92002048422031994";"48.774916";" 2.313346";Street number;",93";"""
+        keys = keys.replace('"', "").split(";")
+        values = values.replace('"', "").split(";")
+        row = {}
+        for key, value in zip(keys, values):
+            row[key] = value
+        e = p.mapper(row)
+        self.assertEqual("F92002048422031994", e.structure_id_technique)
+        self.assertEqual(48.774916, e.lat)
+        self.assertEqual(2.313346, e.lon)
+        self.assertEqual(0, e.type_precision)
+        self.assertEqual(0.93, e.precision)

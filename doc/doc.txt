@@ -134,6 +134,10 @@ RPPS import coord structure
 Importé dans les tables coord
 python rpps_coord_structure_parser.py data/rpps/Extraction_RPPS_Profil4_CoordStruct_202310250948.csv
 
+RPPS import coord structure geoloc
+Importé dans les tables coord
+python rpps_coord_structure_geoloc_parser.py data/rpps/Extraction_RPPS_Profil4_CoordStructGeoloc_202310250948.csv
+
 MAJ du code
 git clone https://github.com/cyrilvincent/skema --depth 1
 

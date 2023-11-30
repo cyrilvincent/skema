@@ -61,7 +61,8 @@ class ScoreMatcher:
 
     def match_row(self, row: AdresseNorm):
         self.row_num += 1
-        if (row.source is None or (row.source_id != 3 and row.source_id != 5)) and row.ban is not None:
+        if (row.source is None or (row.source_id != 3 and row.source_id != 5 and row.source_id != 6)) \
+                and row.ban is not None:
             if (row.osm is None and row.ban_score >= config.ban_mean - config.osm_nb_std * config.ban_std)\
                     or row.osm_score == 0:
                 row.source = self.sources[2]

@@ -1,5 +1,4 @@
 from typing import Dict, List
-
 from rpps_exercice_pro_parser import RPPSExerciceProParser
 from sqlentities import Context, CodeProfession, Personne, Structure, Activite, Fonction
 from base_parser import time0

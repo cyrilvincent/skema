@@ -149,7 +149,7 @@ class EtalabParser(BaseParser):
                 a.adresse_norm = n
 
     def create_update_lon_lat(self, row, n: AdresseNorm):
-        if n.source_id is None or n.source_id != 3:
+        if n.source_id is None or (n.source_id != 3 and n.source_id != 5 and n.source_id != 6):
             lon, lat = self.lon_lat_mapper(row)
             if lon is not None and lat is not None:
                 if 60 > lat > 35 and 20 > lon > -20:

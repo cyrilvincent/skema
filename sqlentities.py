@@ -1111,6 +1111,10 @@ class Coord(Base):
     date_fin = Column(Date())
     adresse_norm: AdresseNorm = relationship("AdresseNorm", backref="coord_personnes")
     adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'), index=True)
+    lon = Column(Float)
+    lat = Column(Float)
+    type_precision = Column(Integer)
+    precision = Column(Float)
 
 
     @property
