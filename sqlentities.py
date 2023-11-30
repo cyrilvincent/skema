@@ -1118,7 +1118,9 @@ class Coord(Base):
         return self.inpp
 
     def equals(self, other):
-        return self.key == other.key and self.date_maj == other.date_maj and self.date_fin == other.date_fin \
+        return self.key == other.key and self.identifiant_activite == other.identifiant_activite \
+            and self.structure_id_technique == other.structure_id_technique \
+            and self.date_maj == other.date_maj and self.date_fin == other.date_fin \
             and self.tel == other.tel and self.tel2 == other.tel2 and self.mail == other.mail \
             and self.mention == other.mention and self.cedex == other.cedex \
             and self.complement_geo == other.complement_geo \

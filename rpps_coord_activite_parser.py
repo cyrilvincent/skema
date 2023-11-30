@@ -115,6 +115,23 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
             print(f"ERROR Coord unknow FK row {self.row_num} {e}\n{ex}")
             quit(2)
 
+    def update(self, e: Coord):
+        key = e.identifiant_activite
+        self.entities[key].date_maj = e.date_maj
+        if e.date_fin is not None:
+            self.entities[key].date_fin = e.date_fin
+        if e.tel is not None:
+            self.entities[key].tel = e.tel
+        if e.tel2 is not None:
+            self.entities[key].tel2 = e.tel2
+        if e.mail is not None:
+            self.entities[key].mail = e.mail
+        if e.mention is not None:
+            self.entities[key].mention = e.mention
+        if e.cedex is not None:
+            self.entities[key].cedex = e.cedex
+        self.nb_update_entity += 1
+
     def parse_row(self, row):
         e = self.mapper(row)
         if e.identifiant_activite in self.entities:
