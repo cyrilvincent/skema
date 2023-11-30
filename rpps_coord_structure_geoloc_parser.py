@@ -78,13 +78,14 @@ class RPPSCoordStructureGeolocParser(RPPSCoordPersonneParser):
             e.adresse_norm.rpps_score = score
             self.nb_rpps_score += 1
         if e.adresse_norm.score is None or score > e.adresse_norm.score:
-            if e.adresse_norm.source_id != 5:
+            if  e.adresse_norm.source_id is None or e.adresse_norm.source_id != 5:
                 e.adresse_norm.lon = e.lon
                 e.adresse_norm.lat = e.lat
                 e.adresse_norm.score = score
                 e.adresse_norm.source = self.sources[6]
                 self.nb_score_improvment += 1
-        elif e.adresse_norm.source_id == 3 and e.adresse_norm.score > config.source_rpps_win_etab:
+        elif (e.adresse_norm.source_id is None
+              or (e.adresse_norm.source_id == 3 and score > config.source_rpps_win_etab)):
             e.adresse_norm.lon = e.lon
             e.adresse_norm.lat = e.lat
             e.adresse_norm.score = score
@@ -137,4 +138,16 @@ if __name__ == '__main__':
     # data/rpps/CoordStructGeoloc_small.csv
     # data/rpps/CoordStructGeoloc_medium.csv
     # data/rpps/Extraction_RPPS_Profil4_CoordStructGeoloc_202310250948.csv
+
+    # to reset
+    # update public.coord set lon = null where lon is not null
+    # update public.adresse_norm set score = null where lon is null and lat is null and score is not null and rpps_score is not null
+    # update public.adresse_norm set rpps_score = null where rpps_score is not null
+    # verify
+    # SELECT * FROM public.coord
+    # full join public.adresse_norm ON adresse_norm.id = coord.adresse_norm_id
+    # where coord.lon is not null
+    # ORDER BY coord.id DESC LIMIT 1000
+    # remplacer full par inner pour eviter les vides
+
 
