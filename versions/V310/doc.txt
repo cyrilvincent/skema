@@ -1,0 +1,49 @@
+Tout d'abord exécuter le script rpps_migrate.sql sur postgresql
+Puis exécuter les scripts ci dessous dans l'ordre indiqué
+Pour l'instant les fichiers RPPS Coord ne sont pas pris en compte
+En cas d'errur : arrêter les imports et m'envoyer le message d'erreur
+
+RPPS import personne
+Importé dans la table personne
+python rpps_personne_parser.py data/rpps/Extraction_RPPS_Profil4_Personne_202310250948.csv
+
+RPPS import structure
+Importé dans la table structure
+python rpps_structure_parser.py data/rpps/Extraction_RPPS_Profil4_Structure_202310250948.csv
+
+RPPS import exercice pro
+Importé dans la table exercice_pro
+python rpps_exercice_pro_parser.py data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
+
+RPPS import activite
+Importé dans la table activite
+python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_Activite_202310250948.csv
+
+RPPS import diplome obtenu
+Importé dans la table diplome_obtenu
+python rpps_diplome_obtenu_parser.py data/rpps/Extraction_RPPS_Profil4_DiplObt_202310250948.csv
+
+RPPS import autre diplome
+Importé dans la table autre_diplome
+python rpps_autre_diplome_parser.py data/rpps/Extraction_RPPS_Profil4_AutreDiplObt_202310250948.csv
+
+RPPS import savoir faire
+Importé dans la table savoir_faire_obtenu
+python rpps_savoir_faire_parser.py data/rpps/Extraction_RPPS_Profil4_SavoirFaire_202310250948
+
+RPPS import etat civil
+Importé dans la table etat_civil
+python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_EtatCiv_202310250948.csv
+
+RPPS import reference AE
+Importé dans la table reference_ae
+python rpps_reference_ae_parser.py data/rpps/Extraction_RPPS_Profil4_ReferAe_202310250948
+
+RPPS import langue
+Importé dans les tables langue et personne_langue
+python rpps_langue_parser.py data/rpps/Extraction_RPPS_Profil4_Langue_202310250948.csv
+
+RPPS import attribution
+Importé dans les tables attribution et personne_attribution
+python rpps_attribution_parser.py data/rpps/Extraction_RPPS_Profil4_AttribPart_202310250948.csv
+
