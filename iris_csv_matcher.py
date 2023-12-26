@@ -16,10 +16,14 @@ class IrisCsvMatcher:
         self.row_num = 0
         self.nb_iris = 0
         self.nb_error = 0
+        self.nb_iris_a = 0
+        self.nb_error_a = 0
 
-    def parse_row(self, row: str, out):
+    def parse_row(self, row: str, out, with_address=False):
         self.row_num += 1
         values = row.split(",")
+        if with_address:
+            a = values[-3].strip()
         lon = float(values[-2].strip())
         lat = float(values[-1].strip())
         if lon > lat:
@@ -30,9 +34,28 @@ class IrisCsvMatcher:
             iris = 0
         else:
             self.nb_iris += 1
-        out.write(f"{row.strip()},{iris}\n")
+        out.write(f"{row.strip()},{iris}")
+        if with_address:
+            iris_a = self.matcher.get_iris_from_concatenate_address(a)
+            if iris_a is None:
+                self.nb_error_a += 1
+                iris_a = 0
+            else:
+                self.nb_iris_a += 1
+            score = 1
+            if iris_a == 0 and iris == 0:
+                score = 0
+            elif iris_a == 0:
+                score = 0.8
+            elif iris == 0:
+                score = 0.7
+            elif iris != iris_a:
+                score = 0.5
+            out.write(f",{iris_a},{score}")
+        out.write("\n")
+        time.sleep(0.1)
 
-    def load(self):
+    def load(self, with_address=False):
         print(f"Load {self.path}")
         if ".csv" not in self.path:
             print("Error the file must have extension .csv")
@@ -45,10 +68,13 @@ class IrisCsvMatcher:
                 print("Error separator must be ,")
                 sys.exit(2)
             with open(out_path, "w") as out:
-                out.write(row.strip() + ",iris\n")
+                out.write(row.strip() + ",iris")
+                if with_address:
+                    out.write(",iris_a,iris_score")
+                out.write("\n")
                 self.row_num += 1
                 for row in f:
-                    self.parse_row(row, out)
+                    self.parse_row(row, out, with_address)
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -59,11 +85,14 @@ if __name__ == '__main__':
     print()
     parser = argparse.ArgumentParser(description="IRIS CSV Matcher")
     parser.add_argument("path", help="Path")
+    parser.add_argument("-a", "--address", help="PYRIS address", action="store_true")
     args = parser.parse_args()
     icm = IrisCsvMatcher(args.path)
-    icm.load()
+    icm.load(args.address)
     print(f"Nb iris: {icm.nb_iris}")
     print(f"Nb error: {icm.nb_error}")
-    print(f"Parse {icm.row_num - 1} geolocalisations in {time.perf_counter() - time0:.0f} s")
+    print(f"Nb iris with address: {icm.nb_iris_a}")
+    print(f"Nb error with address: {icm.nb_error_a}")
+    print(f"Parse {icm.row_num - 1} rows in {time.perf_counter() - time0:.0f} s")
 
 

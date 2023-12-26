@@ -74,7 +74,13 @@ class IrisMatcher(OSMMatcher):
         if commune.endswith("CEDE"):
             commune = commune[:-5]
         s += commune
-        url += urllib.parse.quote(s)
+        return self.get_iris_from_concatenate_address(s)
+
+    def get_iris_from_concatenate_address(self, address: str) -> Optional[str]:
+        url = f"{self.uri.replace('coords', 'search/')}&q="
+        if address is None or len(address.strip()) == 0:
+            return None
+        url += urllib.parse.quote(address)
         try:
             js = self.get_json_from_url(url, 5)
             res = self.get_iris_from_js(js)

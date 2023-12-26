@@ -48,7 +48,7 @@ class OSMMatcher:
             print("Everything is up to date")
             quit(0)
 
-    def get_json_from_url(self, url, nbretry=0):
+    def get_json_from_url(self, url, nbretry_minus5=0):
         if self.echo:
             print(url)
         try:
@@ -59,12 +59,12 @@ class OSMMatcher:
         except Exception as ex:
             print(url)
             print(f"WARNING URLError: {ex}")
-            if nbretry == 5:
+            if nbretry_minus5 == 5:
                 raise ex
             else:
-                print(f"RETRY {nbretry + 1}")
-                time.sleep(nbretry * 30 + 1)
-                return self.get_json_from_url(url, nbretry + 1)
+                print(f"RETRY {nbretry_minus5 + 1}")
+                time.sleep(nbretry_minus5 * 30 + 1)
+                return self.get_json_from_url(url, nbretry_minus5 + 1)
 
     def get_osm_from_adresse(self, numero: Optional[int], rue: Optional[str],
                              commune: Optional[str], cp: Optional[int]) -> Optional[OSM]:

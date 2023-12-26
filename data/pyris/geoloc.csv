@@ -1,5 +1,7 @@
-toto,lon,lat
-0,5.5783,45.0984
-1,45.0984,5.5783
-2,45,5
-3,45,45
+toto,adresse,lon,lat
+0,1571 chemin des blancs,5.5783,45.0984
+1,1571 chemin des blancs,45.0984,5.5783
+2,1571 chemin des blancs,45.0984,0
+3,,45,5
+4,toto titi,45,45
+5,,0,0
