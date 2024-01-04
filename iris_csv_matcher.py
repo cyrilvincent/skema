@@ -22,8 +22,6 @@ class IrisCsvMatcher:
     def parse_row(self, row: str, out, with_address=False):
         self.row_num += 1
         values = row.split(",")
-        if with_address:
-            a = values[-3].strip()
         lon = float(values[-2].strip())
         lat = float(values[-1].strip())
         if lon > lat:
@@ -36,22 +34,14 @@ class IrisCsvMatcher:
             self.nb_iris += 1
         out.write(f"{row.strip()},{iris}")
         if with_address:
+            a = values[-3].strip()
             iris_a = self.matcher.get_iris_from_concatenate_address(a)
             if iris_a is None:
                 self.nb_error_a += 1
                 iris_a = 0
             else:
                 self.nb_iris_a += 1
-            score = 1
-            if iris_a == 0 and iris == 0:
-                score = 0
-            elif iris_a == 0:
-                score = 0.8
-            elif iris == 0:
-                score = 0.7
-            elif iris != iris_a:
-                score = 0.5
-            out.write(f",{iris_a},{score}")
+            out.write(f",{iris_a}")
         out.write("\n")
         time.sleep(0.1)
 
@@ -70,7 +60,7 @@ class IrisCsvMatcher:
             with open(out_path, "w") as out:
                 out.write(row.strip() + ",iris")
                 if with_address:
-                    out.write(",iris_a,iris_score")
+                    out.write(",iris_a")
                 out.write("\n")
                 self.row_num += 1
                 for row in f:

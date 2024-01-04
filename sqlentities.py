@@ -68,6 +68,7 @@ class Context:
 #                           *-1 categorie_pro
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
+#                       1-* coord
 #          1-* diplome_obtenu *-1 diplome *-* profession
 #          ?-*(1) etat_civil
 #          1-* personne_langue *-1 langue
@@ -1083,10 +1084,10 @@ class Coord(Base):
     inpp = Column(String(12))
     personne: Personne = relationship("Personne", backref="coord_personnes")
     personne_id = Column(Integer, ForeignKey('personne.id'), index=True)
-    activite: Activite = relationship("Activite", backref="coord_personnes")
+    activite: Activite = relationship("Activite", backref="coord_activites")
     activite_id = Column(Integer, ForeignKey('activite.id'), index=True)
     identifiant_activite = Column(String(15))
-    structure: Structure = relationship("Structure", backref="coord_personnes")
+    structure: Structure = relationship("Structure", backref="coord_structures")
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
     structure_id_technique = Column(String(25))
     complement_destinataire = Column(String(255))
