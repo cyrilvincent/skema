@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 from etalab_parser import EtalabParser
 from ps_change_key import PSChangeKey
 from ps_parser import PSParser
+from ps_parser_v2 import PSParserV2
 from BAN_matcher import BANMatcher
 from OSM_matcher import OSMMatcher
 from iris_matcher import IrisMatcher
@@ -567,6 +568,53 @@ class ICIPTests(TestCase):
         self.assertFalse(res)
         res = p.match_specialite(profession, pa)
         self.assertFalse(res)
+
+    def test_match_specialite_v2(self):
+        context = Context()
+        context.create(echo=True)
+        parser = PSParserV2(context)
+        parser.date_source = DateSource(21, 12)
+        s = "F;BRIARD;EMILIE;;;PLACE DE LA FENIERE;;13640;LA ROQUE D ANTHERON;;60;;3;c1;N;O;BLQP0100;114;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0"
+        row = s.split(";")
+        ps = parser.mapper(row)
+        l = parser.context.session.query(Profession).all()
+        for prof in l:
+            parser.professions[prof.id] = prof
+        profession = parser.profession_mapper(row)
+        self.assertEqual(60, profession.id)
+        profession = parser.professions[profession.id]
+        p = parser.context.session.query(Personne).filter((Personne.nom == "JOLY") & (Personne.prenom == "ODILON")).first()
+        res = parser.match_profession_code_profession(profession, p)
+        self.assertFalse(res)
+        a = parser.context.session.query(Activite).filter(Activite.code_profession_id == 10).first()
+        p.activites.append(a)
+        res = parser.match_profession_code_profession(profession, p)
+        self.assertTrue(res)
+        res = parser.match_profession_savoir_faire(profession, p)
+        self.assertFalse(res)
+        res = parser.match_specialite(profession, p)
+        self.assertFalse(res)
+        do = parser.context.session.query(DiplomeObtenu).join(Diplome).filter(Diplome.code_diplome == "SM40").first()
+        p.diplome_obtenus.append(do)
+        res = parser.match_profession_savoir_faire(profession, p)
+        self.assertTrue(res)
+        res = parser.match_specialite(profession, p)
+        self.assertTrue(res)
+        d2 = parser.context.session.query(Diplome).filter(Diplome.code_diplome == "SM01").first()
+        p.diplomes.append(d2)
+        res = parser.match_profession_savoir_faire(profession, p)
+        self.assertTrue(res)
+        res = parser.match_specialite(profession, p)
+        self.assertTrue(res)
+        profession = parser.professions[2]
+        res = parser.match_profession_savoir_faire(profession, p)
+        self.assertTrue(res)
+        profession = parser.professions[3]
+        res = parser.match_profession_savoir_faire(profession, p)
+        self.assertFalse(res)
+        res = parser.match_specialite(profession, p)
+        self.assertFalse(res)
+
 
     def test_create_ps_with_split_names(self):
         p = PSParser(None)

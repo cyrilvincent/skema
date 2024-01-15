@@ -72,13 +72,15 @@ python generic_finess_parser.py data/generic
 Ajout du code IRIS à un fichier
 L'extension du fichier doit être .csv
 Le séparateur doit être ,
-Les 2 dernières colonnes doivent contenir lon et lat (ordre indifférent)
+Les 3 dernières colonnes doivent contenir adresse (en une seule ligne), lon et lat (ordre indifférent)
 Le nom des colonnes n'est pas important
 Une dernière colonne iris sera créée dans un nouveau fichier d'extension .iris.csv
 iris = 0 en cas d'erreur de pyris
-python iris_csv_matcher.py data/my_file.csv
+L'option -a permet de gérer la colonne adresse, sil est est omise l'adresse n'est pas prise en compte
+python iris_csv_matcher.py -a data/my_file.csv
 
 RPPS import personne
+Tous les imports RPPS sont à faire dans cet ordre
 Importé dans la table personne
 python rpps_personne_parser.py data/rpps/Extraction_RPPS_Profil4_Personne_202310250948.csv
 

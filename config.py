@@ -1,6 +1,6 @@
 name = "ICIP"
-version = "3.1.1.Beta"
-copyright = "(c) Skema 2021 - 2023"
+version = "3.1.2.Release"
+copyright = "(c) Skema 2021 - 2024"
 adresse_path = "data/adresse"
 connection_string = "postgresql://postgres:sa@localhost/icip"
 ban_mean = 0.975

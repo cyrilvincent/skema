@@ -7,7 +7,7 @@ import art
 import config
 
 
-class PSTarifParser(PSParser):
+class PSTarifParser(PSParser): # todo inheriit v2
 
     def __init__(self, context):
         super().__init__(context)
