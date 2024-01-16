@@ -173,6 +173,8 @@ class BANMatcher:
             return commune, 1
         elif len(communes) == 1:
             return list(communes)[0], 0.95
+        elif len(commune.strip()) < 2:
+            return list(communes)[0], 0.5
         else:
             res, score = self.gestalts(commune, communes)
             return res, score
@@ -339,13 +341,14 @@ if __name__ == '__main__':
     bm = BANMatcher(depts, args.force, args.log, args.echo)
     print(f"Database {bm.context.db_name}: {bm.context.db_size():.0f} Mb")
     bm.match()
-    mean = np.mean(np.array(bm.total_scores))
-    std = np.std(np.array(bm.total_scores))
     print(f"Nb Error: {bm.nb_error}")
-    print(f"Score average {mean * 100:.1f}%")
-    print(f"Score median {np.median(np.array(bm.total_scores)) * 100:.1f}%")
-    print(f"Score min {np.min(np.array(bm.total_scores)) * 100:.1f}%")
-    print(f"Score std {std * 100:.1f}%")
+    if len(bm.total_scores) > 0:
+        mean = np.mean(np.array(bm.total_scores))
+        std = np.std(np.array(bm.total_scores))
+        print(f"Score average {mean * 100:.1f}%")
+        print(f"Score median {np.median(np.array(bm.total_scores)) * 100:.1f}%")
+        print(f"Score min {np.min(np.array(bm.total_scores)) * 100:.1f}%")
+        print(f"Score std {std * 100:.1f}%")
     print(f"Parse {bm.row_num} adresses in {time.perf_counter() - time0:.0f} s")
 
     # -e -l -d [5]
