@@ -31,6 +31,15 @@ if __name__ == '__main__':
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
+# Solution 1 : pg_views : b de la limite des colonnes et des colonnes AN qui sont dupliquées
+# Solution 2 : Parser dynamique qui créé 1 seule (ou 2, voir 3) table SAE avec les colonnes id, nofinness et an commune et qui créer dynamiquement la colonne au besoin en la prefixant par le nom de l'ancienne table si pas présent
+#   avant chaque insert, il vérifie l'an et la colonne si la colonne n'existe pas il fait un alter puis un update
+#   on commence dont pas une table contenant uniquement id, nofiness et an, le reste est créé automatiquement
+#   CREATE TABLE IF NOT EXISTS sae{i} (id ...);
+#   Beaucoup de numérique => Créer la colonne en float si erreur passer en varchar => avoir la structure de la table en dict(nomcol:type)
+#   Insert from dict (hélas pas de update) : https://stackoverflow.com/questions/29461933/insert-python-dictionary-using-psycopg2
+# Parser directement les fichiers originaux
+
 # data/sae
 
 # Pour mettre un FK sur nofinesset

@@ -1136,3 +1136,27 @@ class Coord(Base):
     def __repr__(self):
         return f"{self.inpp} {self.numero} {self.voie} {self.cp} {self.commune}"
 
+
+class SAE0(Base):
+    __tablename__ = "sae0"
+
+    id = Column(Integer, primary_key=True)
+    an = Column(Integer, nullable=False)
+    nofinesset = Column(String(10), nullable=False)
+    nofinessej = Column(String(10), nullable=False)
+    structure: Structure = relationship("Structure")
+    structure_id = Column(Integer, ForeignKey('structure.id'), index=True)
+    etablissement: Etablissement = relationship("Etablissement")
+    etablissement_id = Column(Integer, ForeignKey('etablissement.id'), index=True)
+
+    __table_args__ = (UniqueConstraint('nofinesset', 'an'),)
+
+    @property
+    def key(self):
+        return self.nofinesset, self.an
+
+    def equals(self, other):
+        return self.key == other.key
+
+    def __repr__(self):
+        return f"{self.nofinesset} {self.an}"
