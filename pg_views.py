@@ -5,8 +5,9 @@ import argparse
 
 class PGIntrospection:
 
-    def __init__(self, connection_string, echo=True):
+    def __init__(self, connection_string, echo=True, left=False):
         self.echo = echo
+        self.join = "LEFT" if left else "FULL"
         print(f"Connect to {connection_string}")
         self.connection = psycopg2.connect(connection_string)
         self.nb_col = 0
@@ -42,7 +43,7 @@ class PGIntrospection:
         self.nb_col += len(cols)
         return ", ".join(cols)
 
-    def get_tables_from_schema(self, schema: str, except_table:List[str]=["covid19"]):
+    def get_tables_from_schema(self, schema: str, except_table:List[str]=["sae"]):
         sql = f"select * from pg_tables where schemaname='{schema}'"
         rows = self.execute(sql)
         tables = [f"{schema}.{row[1]}" for row in rows if row[1] not in except_table]
@@ -57,13 +58,22 @@ class PGIntrospection:
         return self.get_view_from_tables(view_name, from_table, tables, parent_key, child_key)
 
     def get_view_from_tables(self, view_name: str, from_table: str, tables: List[str], parent_key: str, child_key: str):
-        cols = [self.get_columns_view_from_table(table, ["id", "nofinessej", "bor", child_key]) for table in tables]
+        cols = [self.get_columns_view_from_table(table, ["id", "nofinessej", "bor", "an", child_key]) for table in tables]
         view = f"CREATE OR REPLACE VIEW {view_name} AS\n"
         view += f"SELECT {from_table}.*,\n\t"
         view += ",\n\t".join(cols)
         view += f"\nFROM {from_table}\n"
         for table in tables:
-            view += f"FULL JOIN {table} ON {from_table}.{parent_key} = {table}.{child_key}\n"
+            view += f"{self.join} JOIN {table} ON {from_table}.{parent_key} = {table}.{child_key}\n"
+        first = None
+        for table in tables:
+            if first is None:
+                first = table
+                view += f"WHERE "
+            else:
+                if not(view.endswith("WHERE ")):
+                    view += "AND "
+                view += f"{first}.an={table}.an\n"
         return view
 
     def __del__(self):
@@ -86,8 +96,9 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--parent_key", help="Parent key")
     parser.add_argument("-c", "--child_key", help="Child key")
     parser.add_argument("-v", "--view_name", help="View name")
+    parser.add_argument("-t", "--left", help="left instead of full join", action="store_true")
     args = parser.parse_args()
-    pg = PGIntrospection(args.connection_string, args.echo)
+    pg = PGIntrospection(args.connection_string, args.echo, args.left)
     if args.schema and args.table_list:
         res = pg.get_view_from_table_list(args.view_name, args.from_table, args.table_list, args.parent_key, args.child_key)
         print(res)
@@ -100,4 +111,5 @@ if __name__ == '__main__':
     print(f"Found {pg.nb_col} columns")
 
 
-    # "postgresql://postgres:sa@localhost/icip" -e -s sae -f structure -c nofinesset -p finess -v structure_sae
+    # "postgresql://postgres:sa@localhost/icip" -e -s sae2 -f structure -c nofinesset -p finess -v structure_sae -t
+    # Faire également sur etablissement

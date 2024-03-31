@@ -1137,8 +1137,8 @@ class Coord(Base):
         return f"{self.inpp} {self.numero} {self.voie} {self.cp} {self.commune}"
 
 
-class SAE0(Base):
-    __tablename__ = "sae0"
+class SAE(Base):
+    __tablename__ = "sae"
 
     id = Column(Integer, primary_key=True)
     an = Column(Integer, nullable=False)
@@ -1149,7 +1149,7 @@ class SAE0(Base):
     etablissement: Etablissement = relationship("Etablissement")
     etablissement_id = Column(Integer, ForeignKey('etablissement.id'), index=True)
 
-    __table_args__ = (UniqueConstraint('nofinesset', 'an'),)
+    __table_args__ = (UniqueConstraint('nofinesset', 'an'), {"schema": "sae2"},)
 
     @property
     def key(self):

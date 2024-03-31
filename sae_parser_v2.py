@@ -1,9 +1,6 @@
-import difflib
 import os
-from typing import Dict, List, Tuple, Optional, Set
-from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge, \
-    Profession, PersonneActivite, SAE0
+from typing import Dict, List, Tuple, Optional
+from sqlentities import Context, SAE, Structure, Etablissement
 from base_parser import BaseParser
 import argparse
 import art
@@ -16,14 +13,18 @@ class SAEParser(BaseParser):
     def __init__(self, context, echo=False):
         super().__init__(context)
         self.echo = echo
-        self.saes: Tuple[Dict[Tuple[str, int], int], Dict[Tuple[str, int], int]] = ({}, {})
-        self.sae_num = 0
+        self.saes: Dict[Tuple[str, int], int] = {}
+        self.structures: Dict[str, int] = {}
+        self.etablissements: Dict[str, int] = {}
         self.file: Optional[str] = None
         self.encoding = "utf-8"
         self.connection = psycopg2.connect(self.context.connection_string)
         self.dataframe: Optional[pandas.DataFrame] = None
-        self.columns: Tuple[Dict[str, str], Dict[str, str]] = ({}, {})
+        self.columns: Dict[str, str] = {}
         self.bor = ""
+        self.varchar_limit = 10
+        self.nb_unique = 0
+        self.schema = "sae2"
 
     def __del__(self):
         try:
@@ -33,9 +34,17 @@ class SAEParser(BaseParser):
 
     def load_cache(self):
         print("Making cache")
-        l: List[SAE0] = self.context.session.query(SAE0).all()
+        l: List[SAE] = self.context.session.query(SAE).all()
         for e in l:
-            self.saes[0][e.key] = e.id
+            self.saes[e.key] = e.id
+            self.nb_ram += 1
+        l: List[Structure] = self.context.session.query(Structure).filter(Structure.finess.is_not(None)).all()
+        for e in l:
+            self.structures[e.finess] = e.id
+            self.nb_ram += 1
+        l: List[Etablissement] = self.context.session.query(Etablissement).all()
+        for e in l:
+            self.etablissements[e.nofinesset] = e.id
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
         self.context.session.commit()
@@ -59,7 +68,7 @@ class SAEParser(BaseParser):
         sql = f"SELECT * FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{table}'"
         rows = self.execute(sql)
         for row in rows:
-            self.columns[self.sae_num][row[3]] = row[7] if row[8] is None else f"{row[7]}[{row[8]}]"
+            self.columns[row[3]] = row[7] if row[8] is None else f"{row[7]}[{row[8]}]"
 
     def alter_table(self, table: str, column: str, type: str, schema="public"):
         sql = f"ALTER TABLE {schema}.{table} ADD {column} {type}"
@@ -67,19 +76,30 @@ class SAEParser(BaseParser):
         self.connection.commit()
 
     def update_row(self, key: Tuple[str, int], cols):
-        sql = f"UPDATE sae{self.sae_num}"
+        sql = f"UPDATE {self.schema}.sae"
         first = True
         for col in cols.keys():
             if str(cols[col]) != "nan":
+                value = str(cols[col]).replace("'", "''")[:self.varchar_limit]
                 if first:
                     first = False
-                    sql += f" SET {self.column_name(col)}='{cols[col]}'"
+                    sql += f" SET {self.column_name(col)}='{value}'"
                 else:
-                    sql += f",{self.column_name(col)}='{cols[col]}'"
+                    sql += f",{self.column_name(col)}='{value}'"
         sql += f" WHERE nofinesset='{key[0]}' AND an={key[1]}"
         if first == False:
             self.execute_void(sql)
-            self.connection.commit()
+        self.connection.commit()
+
+    def insert_sae(self, nofinesset: str, nofinessej: str, an: int, structure_id: int, etablissement_id: int):
+        if structure_id == None:
+            structure_id = "null"
+        if etablissement_id == None:
+            etablissement_id = "null"
+        sql = f"INSERT INTO {self.schema}.sae (nofinesset, nofinessej, an, structure_id, etablissement_id) "
+        sql += f"VALUES ('{nofinesset}', '{nofinessej}', {an}, {structure_id}, {etablissement_id})"
+        self.execute_void(sql)
+        self.connection.commit()
 
     def bor_from_file(self):
         index = self.file.rindex("_")
@@ -96,14 +116,21 @@ class SAEParser(BaseParser):
             return "FLOAT"
         if s == "integer":
             return "INTEGER"
-        return "VARCHAR[255]"
+        return f"VARCHAR({self.varchar_limit})"
 
     def mapper(self, row):
-        sae = SAE0() #if self.sae_num == 0 else SAE1()
+        sae = SAE() #if self.sae_num == 0 else SAE1()
         try:
-            sae.an = row["AN"]
+            try:
+                sae.an = row["AN"]
+            except:
+                sae.an = row["an"]
             sae.nofinesset = row["nofinesset"]
             sae.nofinessej = row["nofinessej"]
+            if sae.nofinesset in self.structures:
+                sae.structure_id = self.structures[sae.nofinesset]
+            if sae.nofinesset in self.etablissements:
+                sae.etablissement_id = self.etablissements[sae.nofinesset]
         except Exception as ex:
             print(f"ERROR SAE {self.file} row {self.row_num} {sae}\n{ex}")
             quit(1)
@@ -111,20 +138,24 @@ class SAEParser(BaseParser):
 
     def parse_row(self, row):
         e = self.mapper(row[1])
-        if e.key not in self.saes[self.sae_num]:
-            self.saes[self.sae_num][e.key] = e.id
-            self.context.session.add(e)
-            self.context.session.commit()
+        if e.key not in self.saes:
+            self.saes[e.key] = e.id
+            self.insert_sae(e.nofinesset, e.nofinessej, e.an, e.structure_id, e.etablissement_id)
         self.update_row(e.key, row[1][4:])
 
 
     def check_columns(self):
         for c in self.dataframe.columns[4:]:
             name = self.column_name(c)
-            if name not in self.columns[self.sae_num]:
+            if not(name.startswith("nofiness")) and name not in self.columns:
                 type = self.convert_pandas_type(str(self.dataframe[c].dtype))
-                print(f"Create columns {name} of type {type}")
-                self.alter_table(f"sae{self.sae_num}", name, type)
+                # print(f"Creating columns {name} {type}")
+                self.alter_table(f"sae", name, type, self.schema)
+
+    def check_unique(self):
+        df = self.dataframe[["nofinesset", "AN"]]
+        res = df.drop_duplicates()
+        return len(res) == len(df)
 
     def load_dataframe(self, path: str):
         dtype = {"nofinesset": str, "nofinessj": str, "AN":int, "BOR":str}
@@ -137,22 +168,31 @@ class SAEParser(BaseParser):
         print(f"Found {len(self.dataframe)} lines")
 
     def load_sae(self, file: str):
-        self.load_cache()
         self.file = file
         print(f"Load {self.path + self.file}")
         self.bor_from_file()
         self.load_dataframe(self.path + self.file)
-        self.columns_from_sae(f"sae{self.sae_num}")
-        self.check_columns()
-        for row in self.dataframe.iterrows():
-            self.parse_row(row)
+        if self.check_unique():
+            print(f"Adding to table {self.schema}.sae")
+            self.nb_unique += 1
+            self.columns_from_sae("sae", self.schema)
+            self.check_columns()
+            for row in self.dataframe.iterrows():
+                self.parse_row(row)
+        else:
+            self.dataframe.columns = self.dataframe.columns.str.strip().str.lower()
+            print(f"Creating table {self.schema}.{self.bor}")
+            context.create_engine()
+            with context.engine.begin() as connection:
+                self.dataframe.to_sql(self.bor, connection, schema=self.schema, if_exists="replace", index_label='id')
 
     def scan(self, path: str):
+        self.load_cache()
         print(f"Scan {path}")
         self.path = path
         l = os.listdir(path)
         for f in l:
-            if f.endswith(".csv"):
+            if f.endswith(".csv") and not(f.startswith("ID_")):
                 self.load_sae(f)
 
 if __name__ == '__main__':
@@ -170,13 +210,14 @@ if __name__ == '__main__':
     context.create(echo=args.echo)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mb")
-    sp = SAEParser(context)
-    # sp.scan(args.path, args.echo)
-    sp.path = args.path
-    sp.echo = False
-    sp.load_sae("BIO_2019.csv")
+    sp = SAEParser(context, args.echo)
+    sp.scan(args.path)
+    # sp.path = args.path
+    # sp.load_cache()
+    # sp.load_sae("BIO_2019.csv")
     new_db_size = context.db_size()
-    print(f"Number of columns: {len(sp.columns[0])}+{len(sp.columns[1])}")
+    print(f"Number of unique nofinesset+an: {sp.nb_unique}")
+    print(f"Number of columns: {len(sp.columns)}")
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
