@@ -58,7 +58,7 @@ class PGIntrospection:
         return self.get_view_from_tables(view_name, from_table, tables, parent_key, child_key)
 
     def get_view_from_tables(self, view_name: str, from_table: str, tables: List[str], parent_key: str, child_key: str):
-        cols = [self.get_columns_view_from_table(table, ["id", "nofinessej", "bor", "an", child_key]) for table in tables]
+        cols = [self.get_columns_view_from_table(table, ["id", "nofinessej", "bor", "an", "structure_id", "etablissement_id", child_key]) for table in tables]
         view = f"CREATE OR REPLACE VIEW {view_name} AS\n"
         view += f"SELECT {from_table}.*,\n\t"
         view += ",\n\t".join(cols)
@@ -113,3 +113,5 @@ if __name__ == '__main__':
 
     # "postgresql://postgres:sa@localhost/icip" -e -s sae2 -f structure -c nofinesset -p finess -v structure_sae -t
     # Faire également sur etablissement
+    # Choisir les colonnes que l'ont veut + distinct
+    # Car si blocs_p.an=2020 = 8 rows et brules_p.an=2020 = 10 rows la vue retourne 80 rows

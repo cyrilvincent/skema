@@ -1,7 +1,7 @@
 unidecode
 art
 jsonpickle
-pandas
+pandas==2.0.0
 numpy
 pdoc3
 xlrd

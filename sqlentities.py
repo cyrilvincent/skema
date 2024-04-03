@@ -69,7 +69,7 @@ class Context:
 #          1-* activite *-1 structure
 #                       *-1 code_profession *-* profession
 #                       1-* coord
-#          1-* diplome_obtenu *-1 diplome *-* profession
+#          1-* diplome_obtenu *-1 diplome *-* profession (vue direct profession)
 #          ?-*(1) etat_civil
 #          1-* personne_langue *-1 langue
 #          1-* personne_autorisation *-1 autorisation
@@ -1142,7 +1142,7 @@ class SAE(Base):
 
     id = Column(Integer, primary_key=True)
     an = Column(Integer, nullable=False)
-    nofinesset = Column(String(10), nullable=False)
+    nofinesset = Column(String(10), nullable=False, index=True)
     nofinessej = Column(String(10), nullable=False)
     structure: Structure = relationship("Structure")
     structure_id = Column(Integer, ForeignKey('structure.id'), index=True)

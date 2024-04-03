@@ -7,7 +7,7 @@ import art
 import config
 import psycopg2
 import pandas
-
+import numpy as np
 class SAEParser(BaseParser):
 
     def __init__(self, context, echo=False):
@@ -157,6 +157,22 @@ class SAEParser(BaseParser):
         res = df.drop_duplicates()
         return len(res) == len(df)
 
+    def modify_dataframe(self):
+        self.dataframe.columns = self.dataframe.columns.str.strip().str.lower()
+        s = []
+        e = []
+        for f in self.dataframe["nofinesset"].values:
+            if f in self.structures:
+                s.append(self.structures[f])
+            else:
+                s.append(None)
+            if f in self.etablissements:
+                e.append(self.etablissements[f])
+            else:
+                e.append(None)
+        self.dataframe.insert(4, "structure_id", np.array(s))
+        self.dataframe.insert(4, "etablissement_id", np.array(e))
+
     def load_dataframe(self, path: str):
         dtype = {"nofinesset": str, "nofinessj": str, "AN":int, "BOR":str}
         self.encoding = "utf-8"
@@ -180,7 +196,7 @@ class SAEParser(BaseParser):
             for row in self.dataframe.iterrows():
                 self.parse_row(row)
         else:
-            self.dataframe.columns = self.dataframe.columns.str.strip().str.lower()
+            self.modify_dataframe()
             print(f"Creating table {self.schema}.{self.bor}")
             context.create_engine()
             with context.engine.begin() as connection:
@@ -214,7 +230,7 @@ if __name__ == '__main__':
     sp.scan(args.path)
     # sp.path = args.path
     # sp.load_cache()
-    # sp.load_sae("BIO_2019.csv")
+    # sp.load_sae("BLOCS_P_2020.csv")
     new_db_size = context.db_size()
     print(f"Number of unique nofinesset+an: {sp.nb_unique}")
     print(f"Number of columns: {len(sp.columns)}")
