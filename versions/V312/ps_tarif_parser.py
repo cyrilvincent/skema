@@ -152,15 +152,18 @@ class PSTarifParser(PSParser): # todo inherit v2
         t = self.tarif_mapper(row)
         key = list(t.key)
         key[0] = e.id
-        key[-1] = c.id
         key = tuple(key)
+        # if e.id != self.ps_id:
+        #     self.ps_id = e.id
+        #     self.tarifs.clear()
+        #     for tarif in e.tarifs:
+        #         self.tarifs[tarif.key] = tarif
         if key in self.tarifs:
             t = self.tarifs[key]
-            self.nb_existing_entity += 1
         else:
-            self.nb_tarif += 1 # Si nb tarif augmente > mettre ce point d'arrêt
+            self.nb_tarif += 1
             t.cabinet = c
-            e.tarifs[t.key] = t # Bug .append(t)
+            e.tarifs.append(t)  # TODO Je pense qu'un lazy part à ce moment là select * from tarif where ps_id = ?
         if self.date_source not in t.date_sources:
             t.date_sources.append(self.date_source)
         return t
@@ -184,8 +187,6 @@ class PSTarifParser(PSParser): # todo inherit v2
             t = self.create_update_tarif(e, c, row)
             self.context.session.commit()
             # self.context.session.expunge(t) # en cas de pb RAM
-        else:
-            self.nb_out_dept += 1
 
 
 if __name__ == '__main__':
@@ -206,47 +207,13 @@ if __name__ == '__main__':
     psp = PSTarifParser(context)
     psp.load(args.path, encoding=None)
     print(f"New tarif: {psp.nb_tarif}")
-    print(f"Existing tarif: {psp.nb_existing_entity} ({psp.nb_tarif + psp.nb_existing_entity})")
-    print(f"Dept >95 tarif: {psp.nb_out_dept} ({psp.nb_new_entity + psp.nb_existing_entity + psp.nb_out_dept})")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
-    # data/ps/pediatres-small-00-00.csv -e
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
 
     # INPP 87%, 95% pour 2112
-
-    # select * from ps p
-    # join tarif t on t.ps_id =p.id
-    # join tarif_date_source tds on tds.tarif_id =t.id
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
-    #
-    # select * from ps p
-    # join tarif t on t.ps_id =p.id
-    # join tarif_date_source tds on tds.tarif_id =t.id
-    # join cabinet c on c.id = t.cabinet_id
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
-    #
-    # select *, c.* from ps p
-    # join ps_cabinet_date_source pcds on pcds.ps_id = p.id
-    # join cabinet c on c.id = pcds.cabinet_id
-    # where pcds.date_source_id = 0
-    # and p.nom = 'BRIARD'
-    #
-    # select *, c.* from ps p
-    # join ps_cabinet_date_source pcds on pcds.ps_id = p.id
-    # join cabinet c on c.id = pcds.cabinet_id
-    # join tarif t on t.cabinet_id = c.id
-    # join tarif_date_source tds on tds.tarif_id = t.id
-    # where pcds.date_source_id = 0
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
-
-    # Effacer tarif_date_source tarif  ps_cabinet_date_source cabinet ps?
-    # verif nb de cabinet

@@ -26,8 +26,6 @@ class PSParser(BaseParser):
         # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
         self.nb_rule = 13
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
-        self.nb_out_dept = 0
-        self.nb_existing_entity = 0
 
     def load_cache(self):
         super().load_cache()
@@ -81,7 +79,17 @@ class PSParser(BaseParser):
                 else:
                     self.inpps_nom[key_nom][key_dept_2] = pa
                 self.nb_ram += 1
-            # session.expunge(a)
+            session.expunge(a)
+        # self.load_cache_inpp_3()
+
+    # def load_cache_inpp_3(self):
+    #     print("Making cache level 3")
+    #     session = self.context.get_session()
+    #     personne_activites = session.query(PersonneActivite) \
+    #         .options(joinedload(PersonneActivite.code_professions)).options(joinedload(PersonneActivite.diplomes)).all()
+    #     for p in personne_activites:
+    #         self.personne_activites[p.inpp] = p
+    #         self.nb_ram += 1
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -563,7 +571,6 @@ class PSParser(BaseParser):
                     # print(e, self.entities[e.key].rule_nb, rule_nb)
                     self.entities[e.key].rule_nb = rule_nb
                 e = self.entities[e.key]
-                self.nb_existing_entity += 1
             else:
                 if rule_nb > 0:
                     e.rule_nb = rule_nb
@@ -575,8 +582,6 @@ class PSParser(BaseParser):
             if not args.nosave:
                 self.context.session.commit()
                 # Tester d'abord avec les pediatres et plasticiens et verif avec l'xlsx
-        else:
-            self.nb_out_dept += 1
 
 
 if __name__ == '__main__':
@@ -605,8 +610,6 @@ if __name__ == '__main__':
         out_file.close()
     print(f"New PS: {psp.nb_new_entity}")
     print(f"Update PS: {psp.nb_update_entity}")
-    print(f"Existing PS: {psp.nb_existing_entity} ({psp.nb_new_entity + psp.nb_existing_entity})")
-    print(f"Dept >95 PS: {psp.nb_out_dept} ({psp.nb_new_entity + psp.nb_existing_entity + psp.nb_out_dept})")
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")

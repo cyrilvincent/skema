@@ -1,0 +1,27 @@
+V1 PersonneActivite
+Profession 60 Pédiatre lié à Code Profession 10 et Diplomes [SM40 (Savoir Faire)]
+1 JOLY ODILON
+    CodeProfessions [71 Ostheopathe]
+    Diplomes []
+    match = False
+    Ajout de CodeProfession 10 Médecin
+    match = True sur CodeProfession car Diplome = []
+    Ajout diplome SM40
+    match = True sur CodeProfession + Diplome
+
+V2 Personne
+Profession 60 Pédiatre lié à Code Profession 10 et Diplomes [SM40]
+35321 JOLY ODILON
+    Activite.CodeProfession [70 Masseur Kiné] * 3
+    DiplomeObtenu.Diplome [D85]
+    match = False
+    Ajout de CodeProfession 10 Médecin
+    match = False ok pour CodeProfession mais Diplome != []
+    Ajout diplome SM40 : Lié à aucune DiplomeObtenu (comme la plupart des des SM*), refaire ps_libreacces/Correspondance.xlsx
+
+Des activites sans coord
+Des coords liées à des activités inexistantes
+
+Idem plasticiens
+
+

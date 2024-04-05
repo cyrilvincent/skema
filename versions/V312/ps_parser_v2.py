@@ -1,15 +1,16 @@
 import difflib
-from typing import Dict, List, Tuple, Optional, Set
+from operator import and_
+from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PAAdresse, PSMerge, \
-    Profession, PersonneActivite
+from sqlentities import Context, Cabinet, PS, AdresseRaw, AdresseNorm, PSCabinetDateSource, PSMerge, Profession, \
+    Personne, Coord, Activite, DiplomeObtenu
 from base_parser import BaseParser
 import argparse
 import art
 import config
 
 
-class PSParser(BaseParser):
+class PSParserV2(BaseParser):
 
     def __init__(self, context):
         super().__init__(context)
@@ -17,17 +18,13 @@ class PSParser(BaseParser):
         self.nb_inpps = 0
         self.nb_unique_ps = 0
         self.cabinets: Dict[str, Cabinet] = {}
-        self.inpps_dept: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], PersonneActivite]] = {}
-        #self.inpps_france: Dict[Tuple[str, str], Set[PersonneActivite]] = {}
-        self.inpps_nom: Dict[Tuple[str, int], Dict[Tuple[int, str, int, str], PersonneActivite]] = {}
+        self.inpps_dept: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], Personne]] = {}
+        self.inpps_nom: Dict[Tuple[str, int], Dict[Tuple[int, str, int, str], Personne]] = {}
         self.inpps_cache: Dict[Tuple[str, str, int, str, int, str], Optional[str]] = {}
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
-        # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
         self.nb_rule = 13
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
-        self.nb_out_dept = 0
-        self.nb_existing_entity = 0
 
     def load_cache(self):
         super().load_cache()
@@ -56,32 +53,34 @@ class PSParser(BaseParser):
     def load_cache_inpp(self):
         print("Making cache level 2")
         session = self.context.get_session()
-        pa_adresses = session.query(PAAdresse) \
-            .options(joinedload(PAAdresse.personne_activites)\
-                .options(joinedload(PersonneActivite.code_professions))
-                .options(joinedload(PersonneActivite.diplomes)))\
-            .all()
-        for a in pa_adresses:
-            for pa in a.personne_activites:
-                nom = self.normalize_string(pa.nom)
-                key_dept = nom, pa.prenom, self.get_dept_from_cp(a.cp)
-                key_dept_2 = a.numero, a.rue, a.cp, a.commune
-                # key_france = nom, pa.prenom
-                key_nom = nom, self.get_dept_from_cp(a.cp)
-                if key_dept not in self.inpps_dept:
-                    self.inpps_dept[key_dept] = {key_dept_2: pa}
-                else:
-                    self.inpps_dept[key_dept][key_dept_2] = pa
-                # if key_france not in self.inpps_france:
-                #     self.inpps_france[key_france] = {pa}
-                # else:
-                #     self.inpps_france[key_france].add(pa)
-                if key_nom not in self.inpps_nom:
-                    self.inpps_nom[key_nom] = {key_dept_2: pa}
-                else:
-                    self.inpps_nom[key_nom][key_dept_2] = pa
-                self.nb_ram += 1
-            # session.expunge(a)
+        coords: List[Coord] = session.query(Coord)\
+            .options(joinedload(Coord.activite)\
+                .options(joinedload(Activite.code_professions))
+                .options(joinedload(Activite.personne).options(joinedload(Personne.diplome_obtenus))))\
+            .filter(and_(Coord.activite.isnot(None), Coord.activite.personne.isnot(None)))
+        # todo à tester
+        for c in coords:
+            p = c.activite.personne
+            nom = self.normalize_string(p.nom)
+            prenom = self.normalize_string(p.prenom)
+            dept = self.get_dept_from_cp(c.cp)
+            key_dept = nom, prenom, dept
+            rue = c.voie
+            if rue is not None:
+                rue = rue.upper()
+                if c.type_voie is not None and rue is not None and c.type_voie.upper() not in rue:
+                    rue = c.type_voie.upper() + " " + rue
+            key_dept_2 = c.numero, rue, c.cp, c.commune
+            key_nom = nom, dept
+            if key_dept not in self.inpps_dept:
+                self.inpps_dept[key_dept] = {key_dept_2: p}
+            else:
+                self.inpps_dept[key_dept][key_dept_2] = p
+            if key_nom not in self.inpps_nom:
+                self.inpps_nom[key_nom] = {key_dept_2: p}
+            else:
+                self.inpps_nom[key_nom][key_dept_2] = p
+            self.nb_ram += 1
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -214,31 +213,31 @@ class PSParser(BaseParser):
         return sm.ratio()
 
     def match_key_inpp_gestalt(self, a: AdresseNorm,
-                           dico: Dict[Tuple[int, str, int, str], PersonneActivite]) -> Optional[PersonneActivite]:
+                           dico: Dict[Tuple[int, str, int, str], Personne]) -> Optional[Personne]:
         s = self.convert_key_to_rue_string((a.numero, a.rue1, a.cp, a.commune))
         max = 0
-        inpp = None
+        p = None
         for k in dico.keys():
             s2 = self.convert_key_to_rue_string(k)
             score = self.gestalt(s, s2)
             if score > max:
                 max = score
-                inpp = dico[k]
+                p = dico[k]
         if max > 0.75:
-            return inpp
+            return p
         return None
 
     def match_rue_inpp_gestalt(self, rue: str,
-                               dico: Dict[Tuple[int, str, int, str], PersonneActivite]) -> Optional[PersonneActivite]:
+                               dico: Dict[Tuple[int, str, int, str], Personne]) -> Optional[Personne]:
         max = 0
-        pa = None
+        p = None
         for k in dico.keys():
             score = self.gestalt(rue, k[1])
             if score > max:
                 max = score
-                pa = dico[k]
+                p = dico[k]
         if max > 0.75:
-            return pa
+            return p
         return None
 
     def match_rue(self, rue1: Optional[str], rue2: Optional[str]):
@@ -253,35 +252,35 @@ class PSParser(BaseParser):
                 return True
         return False
 
-    def match_profession_code_profession(self, profession: Profession, pa: PersonneActivite) -> bool:
-        for c in pa.code_professions:
-            for c2 in profession.code_professions:
-                if c.id == c2.id:
+    # todo refaire tests.test_match_specialite
+    def match_profession_code_profession(self, profession: Profession, p: Personne) -> bool:
+        for cp in profession.code_professions:
+            for a in p.activites: # Le faire également avec exercice_pro ?
+                if a.code_profession_id == cp.id:
                     return True
         return False
 
-    def match_profession_savoir_faire(self, profession: Profession, pa: PersonneActivite) -> bool:
-        if len(pa.diplomes) == 0:
+    def match_profession_savoir_faire(self, profession: Profession, p: Personne) -> bool:
+        if len(p.diplome_obtenus) == 0:
             return True
-        for d in pa.diplomes:
-            for d2 in profession.diplomes:
-                if d.code_diplome == d2.code_diplome:
+        for do in p.diplome_obtenus:
+            for d in profession.diplomes:
+                if do.diplome_id == d.id:
                     return True
         return False
 
-    def match_specialite(self, p: Optional[Profession], pa: PersonneActivite) -> bool:
+    def match_specialite(self, profession: Optional[Profession], p: Personne) -> bool:
         if p is None:
             return False
-        res = self.match_profession_code_profession(p, pa)
+        res = self.match_profession_code_profession(profession, p)
         if res:
-            return self.match_profession_savoir_faire(p, pa)
+            return self.match_profession_savoir_faire(profession, p)
         return False
 
-    def get_pa_france(self, nom: str, prenom: Optional[str]) -> Optional[PersonneActivite]:
+    def get_personne_france(self, nom: str, prenom: Optional[str]) -> List[Personne]:
         if prenom is None:
-            return self.context.session.query(PersonneActivite).filter(PersonneActivite.nom == nom).all()
-        return self.context.session.query(PersonneActivite).\
-            filter((PersonneActivite.nom == nom) & (PersonneActivite.prenom == prenom)).all()
+            return self.context.session.query(Personne).filter(Personne.nom == nom).all()
+        return self.context.session.query(Personne).filter((Personne.nom == nom) & (Personne.prenom == prenom)).all()
 
     def create_ps_with_split_names(self, ps: PS, name_ix=0, fname_ix=0) -> Optional[PS]:
         if " " in ps.nom or " " in ps.prenom:
@@ -301,13 +300,13 @@ class PSParser(BaseParser):
             return res
         return None
 
-    def rule(self, n: int, ps: PS, a: AdresseNorm, p: Profession) -> Optional[PersonneActivite]:
+    def rule(self, n: int, ps: PS, a: AdresseNorm, p: Profession) -> Optional[Personne]:
         fn = self.__getattribute__(f"rule{n}")
         res = fn(ps, a, p)
         return res
 
-    def rule1(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule1(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom), self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -317,8 +316,8 @@ class PSParser(BaseParser):
             return pa
         return None
 
-    def rule2(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule2(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -330,8 +329,8 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule3(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule3(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -343,7 +342,7 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule4(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule4(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
         key_nom = self.normalize_string(ps.nom), self.get_dept_from_cp(a.cp)
         if key_nom not in self.inpps_nom:
             return None
@@ -357,10 +356,10 @@ class PSParser(BaseParser):
                 return pa
         return None
 
-    def rule5(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule5(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[Personne]:
         return self.rule2(ps, a, None)
 
-    def rule6(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule6(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
         key_nom = self.normalize_string(ps.nom), self.get_dept_from_cp(a.cp)
         if key_nom not in self.inpps_nom:
             return None
@@ -373,8 +372,8 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule7(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule7(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -390,8 +389,8 @@ class PSParser(BaseParser):
                 return pa
         return None
 
-    def rule8(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule8(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -403,8 +402,8 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule9(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule9(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -415,13 +414,7 @@ class PSParser(BaseParser):
             return pa
         return None
 
-    # def rule10(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule7(ps, a, None)
-    #
-    # def rule11(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule8(ps, a, None)
-
-    def rule10(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
+    def rule10(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
         key_nom = self.normalize_string(ps.nom), self.get_dept_from_cp(a.cp)
         if key_nom not in self.inpps_nom:
             return None
@@ -434,8 +427,8 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule11(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule11(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -447,8 +440,8 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule12(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-        key_dept = self.normalize_string(ps.nom), ps.prenom, self.get_dept_from_cp(a.cp)
+    def rule12(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        key_dept = self.normalize_string(ps.nom),  self.normalize_string(ps.prenom), self.get_dept_from_cp(a.cp)
         if key_dept not in self.inpps_dept:
             return None
         dico = self.inpps_dept[key_dept]
@@ -459,39 +452,13 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    # def rule15(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule14(ps, a, None)
-
-    def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
-        l = list(self.get_pa_france(self.normalize_string(ps.nom), ps.prenom))
+    def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
+        l = list(self.get_personne_france(self.normalize_string(ps.nom),  self.normalize_string(ps.prenom)))
         if p is not None:
             l = [pa for pa in l if self.match_specialite(p, pa)]
         if len(l) == 1:
             return l[0]
         return None
-
-    # def rule17(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule16(ps, a, None)
-    #
-    # def rule18(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     l = list(set(self.get_pa_france(self.normalize_string(ps.nom), None)))
-    #     if p is not None:
-    #         l = [pa for pa in l if self.match_specialite(p, pa)]
-    #     if len(l) == 1:
-    #         return l[0]
-    #     return None
-    #
-    # def rule19(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule18(ps, a, None)
-    #
-    # def rule20(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
-    #
-    # def rule21(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
-    #
-    # def rule22(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
 
     def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
@@ -509,15 +476,6 @@ class PSParser(BaseParser):
                 # print(f"Match {n}: {res.inpp}")
                 self.nb_inpps += 1
                 return res.inpp, n
-
-        # for i in [0, 1, 2]:
-        #     ps2 = self.create_ps_with_split_names(ps, i % 2, 1 if i == 2 else 0)
-        #     if ps2 is not None:
-        #         self.nb_unique_ps -= 1
-        #         inpp, _ = self.match_inpp(ps2, p, a)
-        #         if inpp is not None:
-        #             self.inpps_cache[key_cache] = inpp
-        #             return inpp, 20 + i
 
         return None, -1
 
@@ -563,7 +521,6 @@ class PSParser(BaseParser):
                     # print(e, self.entities[e.key].rule_nb, rule_nb)
                     self.entities[e.key].rule_nb = rule_nb
                 e = self.entities[e.key]
-                self.nb_existing_entity += 1
             else:
                 if rule_nb > 0:
                     e.rule_nb = rule_nb
@@ -575,14 +532,12 @@ class PSParser(BaseParser):
             if not args.nosave:
                 self.context.session.commit()
                 # Tester d'abord avec les pediatres et plasticiens et verif avec l'xlsx
-        else:
-            self.nb_out_dept += 1
 
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("PS Parser")
-    print("=========")
+    print("PS Parser V2")
+    print("============")
     print(f"V{config.version}")
     print(config.copyright)
     print()
@@ -599,14 +554,12 @@ if __name__ == '__main__':
     out_file = None
     if args.trace:
         out_file = open("data/ps/out/out.csv", "w")
-    psp = PSParser(context)
+    psp = PSParserV2(context)
     psp.load(args.path, encoding=None)
     if args.trace:
         out_file.close()
     print(f"New PS: {psp.nb_new_entity}")
     print(f"Update PS: {psp.nb_update_entity}")
-    print(f"Existing PS: {psp.nb_existing_entity} ({psp.nb_new_entity + psp.nb_existing_entity})")
-    print(f"Dept >95 PS: {psp.nb_out_dept} ({psp.nb_new_entity + psp.nb_existing_entity + psp.nb_out_dept})")
     print(f"New cabinet: {psp.nb_cabinet}")
     print(f"New adresse: {psp.nb_new_adresse}")
     print(f"New adresse normalized: {psp.nb_new_norm}")
