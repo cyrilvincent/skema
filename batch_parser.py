@@ -1,10 +1,10 @@
 import os
 
-path = "data/ps/backup"
+path = "data/ps"
 # path = "data/UFC"
 # path = "data/etalab"
 exe = "ps_parser.py"
-exe = "ps_tarif_parser.py"
+exe2 = "ps_tarif_parser.py"
 # exe = "etalab_parser.py"
 
 print("Batch Parser")
@@ -29,6 +29,13 @@ for f in l:
             if code != 0:
                 print(f"Error {code}, stopping")
                 quit(code)
+            if exe2:
+                s = f'python {exe2} "{path}/{f}"'
+                print(s)
+                code = os.system(s)
+                if code != 0:
+                    print(f"Error {code}, stopping")
+                    quit(code)
             print()
         else:
             print(f"Exclude {f}")

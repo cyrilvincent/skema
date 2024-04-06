@@ -160,7 +160,8 @@ class PSTarifParser(PSParser): # todo inherit v2
         else:
             self.nb_tarif += 1 # Si nb tarif augmente > mettre ce point d'arrêt
             t.cabinet = c
-            e.tarifs[t.key] = t # Bug .append(t)
+            e.tarifs.append(t)
+            self.tarifs[key] = t # Bug line missing
         if self.date_source not in t.date_sources:
             t.date_sources.append(self.date_source)
         return t
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     psp.load(args.path, encoding=None)
     print(f"New tarif: {psp.nb_tarif}")
     print(f"Existing tarif: {psp.nb_existing_entity} ({psp.nb_tarif + psp.nb_existing_entity})")
-    print(f"Dept >95 tarif: {psp.nb_out_dept} ({psp.nb_new_entity + psp.nb_existing_entity + psp.nb_out_dept})")
+    print(f"Dept >95 tarif: {psp.nb_out_dept} ({psp.nb_tarif + psp.nb_existing_entity + psp.nb_out_dept})")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
@@ -215,38 +216,49 @@ if __name__ == '__main__':
     # data/ps/pediatres-small-00-00.csv -e
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv
-    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
+    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-12-00.csv"
     # data/SanteSpecialite/ps-tarifs-Santé_Spécialité_1_Gynécologues_201306_v0-97-13-00.csv
 
     # INPP 87%, 95% pour 2112
 
-    # select * from ps p
+    # select count(*) from ps p
     # join tarif t on t.ps_id =p.id
-    # join tarif_date_source tds on tds.tarif_id =t.id
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
+    # join tarif_date_source tds on tds.tarif_id=t.id
+    # and tds.date_source_id = 2106
     #
-    # select * from ps p
+    #
+    # select count(*) from ps p
     # join tarif t on t.ps_id =p.id
-    # join tarif_date_source tds on tds.tarif_id =t.id
+    # join tarif_date_source tds on tds.tarif_id=t.id
     # join cabinet c on c.id = t.cabinet_id
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
+    # and tds.date_source_id = 2107
+    #
     #
     # select *, c.* from ps p
     # join ps_cabinet_date_source pcds on pcds.ps_id = p.id
     # join cabinet c on c.id = pcds.cabinet_id
-    # where pcds.date_source_id = 0
-    # and p.nom = 'BRIARD'
+    # where pcds.date_source_id = 2107
     #
-    # select *, c.* from ps p
+    # -- ne marche pas x2
+    # select count(*) from ps p
     # join ps_cabinet_date_source pcds on pcds.ps_id = p.id
     # join cabinet c on c.id = pcds.cabinet_id
     # join tarif t on t.cabinet_id = c.id
     # join tarif_date_source tds on tds.tarif_id = t.id
-    # where pcds.date_source_id = 0
-    # and tds.date_source_id = 0
-    # and p.nom = 'BRIARD'
+    # where pcds.date_source_id = 2106
+    # and tds.date_source_id = 2106
+    #
+    # select count(*) from tarif t
+    # join tarif_date_source tds on tds.tarif_id = t.id
+    # join ps p on p.id = t.ps_id
+    # where tds.date_source_id = 2106
+    #
+    # select count(*) from tarif t
+    # join tarif_date_source tds on tds.tarif_id = t.id
+    # join ps p on p.id = t.ps_id
+    # join cabinet c on c.id = t.cabinet_id
+    # where tds.date_source_id = 2106
 
     # Effacer tarif_date_source tarif  ps_cabinet_date_source cabinet ps?
     # verif nb de cabinet
+    # drop table tarif_date_source,tarif,ps_cabinet_date_sourc,cabinet,ps

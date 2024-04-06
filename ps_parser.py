@@ -554,11 +554,11 @@ class PSParser(BaseParser):
                 if rule_nb > 0:
                     self.rules[rule_nb - 1] += 1
             if e.key in self.entities:
-                same = e.equals(self.entities[e.key])
-                if not same:
-                    if e.genre is not None:
-                        self.entities[e.key].genre = e.genre
-                        self.nb_update_entity += 1
+                # same = e.equals(self.entities[e.key])
+                # if not same:
+                #     if e.genre is not None:
+                #         self.entities[e.key].genre = e.genre
+                #         self.nb_update_entity += 1
                 if 0 < rule_nb < self.entities[e.key].rule_nb:
                     # print(e, self.entities[e.key].rule_nb, rule_nb)
                     self.entities[e.key].rule_nb = rule_nb
@@ -604,7 +604,7 @@ if __name__ == '__main__':
     if args.trace:
         out_file.close()
     print(f"New PS: {psp.nb_new_entity}")
-    print(f"Update PS: {psp.nb_update_entity}")
+    # print(f"Update PS: {psp.nb_update_entity}")
     print(f"Existing PS: {psp.nb_existing_entity} ({psp.nb_new_entity + psp.nb_existing_entity})")
     print(f"Dept >95 PS: {psp.nb_out_dept} ({psp.nb_new_entity + psp.nb_existing_entity + psp.nb_out_dept})")
     print(f"New cabinet: {psp.nb_cabinet}")
