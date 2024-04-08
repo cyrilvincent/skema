@@ -75,6 +75,12 @@ class SAEParser(BaseParser):
         self.execute_void(sql)
         self.connection.commit()
 
+    def add_fk(self, table: str, fk: str, foreign_table: str, foreign_column: str, schema="public", foreign_schema="public"):
+        name = f"fk_{table}_{fk}_{foreign_table}_{foreign_column}"
+        sql = f"ALTER TABLE {schema}.{table} ADD CONSTRAINT {name} FOREIGN KEY {fk} REFERENCES {foreign_schema}.{foreign_table} ({foreign_column})"
+        self.execute_void(sql)
+        self.connection.commit()
+
     def update_row(self, key: Tuple[str, int], cols):
         sql = f"UPDATE {self.schema}.sae"
         first = True
@@ -201,6 +207,9 @@ class SAEParser(BaseParser):
             context.create_engine()
             with context.engine.begin() as connection:
                 self.dataframe.to_sql(self.bor, connection, schema=self.schema, if_exists="replace", index_label='id')
+            print(f"Adding FKs")
+            self.add_fk(self.bor, "structure_id", "structure", "id", "sae2")
+            self.add_fk(self.bor, "etablissement_id", "etablissement", "id", "sae2")
 
     def scan(self, path: str):
         self.load_cache()

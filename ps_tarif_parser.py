@@ -261,4 +261,6 @@ if __name__ == '__main__':
 
     # Effacer tarif_date_source tarif  ps_cabinet_date_source cabinet ps?
     # verif nb de cabinet
-    # drop table tarif_date_source,tarif,ps_cabinet_date_sourc,cabinet,ps
+    # drop table tarif_date_source,tarif,ps_cabinet_date_sourc,cabinet
+
+    # Il faut enlever des rêgles : trop de matching pas assez de nouveau ps

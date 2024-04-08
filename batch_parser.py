@@ -1,6 +1,6 @@
 import os
 
-path = "data/ps"
+path = "data/batch"
 # path = "data/UFC"
 # path = "data/etalab"
 exe = "ps_parser.py"
