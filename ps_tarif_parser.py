@@ -18,6 +18,7 @@ class PSTarifParser(PSParser): # todo inherit v2
         self.natures: Dict[int, Nature] = {}
         self.conventions: Dict[str, Convention] = {}
         self.famille_actes: Dict[int, FamilleActe] = {}
+        self.nb_warning = 0
 
     def load_cache(self):
         print("Making cache")
@@ -176,13 +177,14 @@ class PSTarifParser(PSParser): # todo inherit v2
             inpp, _ = self.match_inpp(e, p, n)
             if inpp is not None:
                 e.key = inpp
-            e = self.entities[e.key]
-            c = self.cabinet_mapper(row)
-            c = self.cabinets[c.key]
-            if c is None:
-                print(f"ERROR cabinet row {self.row_num} {row}")
-                quit(3)
-            t = self.create_update_tarif(e, c, row)
+            try:
+                e = self.entities[e.key]
+                c = self.cabinet_mapper(row)
+                c = self.cabinets[c.key]
+                t = self.create_update_tarif(e, c, row)
+            except KeyError:
+                print(f"Warning {e.key}")
+                self.nb_warning += 1
             self.context.session.commit()
             # self.context.session.expunge(t) # en cas de pb RAM
         else:
@@ -209,6 +211,7 @@ if __name__ == '__main__':
     print(f"New tarif: {psp.nb_tarif}")
     print(f"Existing tarif: {psp.nb_existing_entity} ({psp.nb_tarif + psp.nb_existing_entity})")
     print(f"Dept >95 tarif: {psp.nb_out_dept} ({psp.nb_tarif + psp.nb_existing_entity + psp.nb_out_dept})")
+    print(f"Nb warning: {psp.nb_warning}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
@@ -261,6 +264,7 @@ if __name__ == '__main__':
 
     # Effacer tarif_date_source tarif  ps_cabinet_date_source cabinet ps?
     # verif nb de cabinet
-    # drop table tarif_date_source,tarif,ps_cabinet_date_sourc,cabinet
+    # drop table tarif_date_source,tarif,ps_cabinet_date_source,cabinet
 
     # Il faut enlever des rêgles : trop de matching pas assez de nouveau ps
+    # Error BUTNARU_CRISTINA_AGRIPI_51000

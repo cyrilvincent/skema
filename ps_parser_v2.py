@@ -61,18 +61,39 @@ if __name__ == '__main__':
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ update genre
 
-    # select cast(data1.count1 as float)/ cast(data2.count2 as float)
-    # from
-    # (select count(*) as count1 from ps where has_inpp is true) data1,
-    # (select count(*) as count2 from ps) data2
-
-    # select cast(data1.count1 as float)/ cast(data2.count2 as float)
-    # from
-    # (select count(*) as count1 from ps, ps_cabinet_date_source
-    #  	where ps_cabinet_date_source.ps_id = ps.id
-    #  	and ps_cabinet_date_source.date_source_id = 2112
-    #  	and has_inpp is true) data1,
-    # (select count(*) as count2 from ps, ps_cabinet_date_source
-    # 	where ps_cabinet_date_source.ps_id = ps.id
-    #  	and ps_cabinet_date_source.date_source_id = 2112
-    # ) data2
+    # select pa.id, cp.* from personne_activite pa
+    # join personne_activite_code_profession pacp ON pacp.personne_activite_id = pa.id
+    # join code_profession cp on cp.id = pacp.code_profession_id
+    # limit 10
+    #
+    # select pa.id, d.id, d.code_diplome, d.libelle_diplome, d.is_savoir_faire from personne_activite pa
+    # join personne_activite_diplome pad ON pad.personne_activite_id = pa.id
+    # join diplome d on d.id = pad.diplome_id
+    # limit 10
+    #
+    # select t.id, p.id, p.libelle, cp.* from tarif t
+    # join profession p on t.profession_id = p.id
+    # join profession_code_profession pcp ON pcp.profession_id = p.id
+    # join code_profession cp on cp.id = pcp.code_profession_id
+    # limit 10
+    #
+    # select p.id, p.inpp, cp.*, pro.id, pro.libelle from personne p
+    # join exercice_pro ep on ep.personne_id = p.id
+    # join code_profession cp on cp.id = ep.code_profession_id
+    # join profession_code_profession pcp ON pcp.code_profession_id = cp.id
+    # join profession pro on pro.id = pcp.profession_id
+    # limit 10
+    #
+    # select p.id, p.inpp, cp.*, pro.id, pro.libelle from personne p
+    # join activite a on a.personne_id = p.id
+    # join code_profession cp on cp.id = a.code_profession_id
+    # join profession_code_profession pcp ON pcp.code_profession_id = cp.id
+    # join profession pro on pro.id = pcp.profession_id
+    # limit 10
+    #
+    # select p.id, p.inpp, d.id, d.libelle_diplome from personne p
+    # join diplome_obtenu dob on dob.personne_id = p.id
+    # join diplome d on d.id = dob.diplome_id
+    # join profession_diplome pd on pd.diplome_id = d.id
+    # -- join profession pr on pr.id = pd.profession_id
+    # limit 10 retourne rien

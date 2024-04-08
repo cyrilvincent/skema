@@ -8,5 +8,5 @@ xlrd
 openpyxl
 sqlalchemy==1.4.29
 pyproj
-psycopg2
+psycopg2==2.9.6
 urllib3

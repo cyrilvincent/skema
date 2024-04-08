@@ -77,7 +77,9 @@ class SAEParser(BaseParser):
 
     def add_fk(self, table: str, fk: str, foreign_table: str, foreign_column: str, schema="public", foreign_schema="public"):
         name = f"fk_{table}_{fk}_{foreign_table}_{foreign_column}"
-        sql = f"ALTER TABLE {schema}.{table} ADD CONSTRAINT {name} FOREIGN KEY {fk} REFERENCES {foreign_schema}.{foreign_table} ({foreign_column})"
+        sql = f"ALTER TABLE {schema}.{table} DROP CONSTRAINT IF EXISTS  {name}"
+        self.execute_void(sql)
+        sql = f"ALTER TABLE {schema}.{table} ADD CONSTRAINT {name} FOREIGN KEY ({fk}) REFERENCES {foreign_schema}.{foreign_table} ({foreign_column})"
         self.execute_void(sql)
         self.connection.commit()
 
