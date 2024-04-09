@@ -415,12 +415,6 @@ class PSParser(BaseParser):
             return pa
         return None
 
-    # def rule10(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule7(ps, a, None)
-    #
-    # def rule11(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule8(ps, a, None)
-
     def rule10(self, ps: PS, a: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
         key_nom = self.normalize_string(ps.nom), self.get_dept_from_cp(a.cp)
         if key_nom not in self.inpps_nom:
@@ -459,9 +453,6 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    # def rule15(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule14(ps, a, None)
-
     def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
         l = list(self.get_pa_france(self.normalize_string(ps.nom), ps.prenom))
         if p is not None:
@@ -469,29 +460,6 @@ class PSParser(BaseParser):
         if len(l) == 1:
             return l[0]
         return None
-
-    # def rule17(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule16(ps, a, None)
-    #
-    # def rule18(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     l = list(set(self.get_pa_france(self.normalize_string(ps.nom), None)))
-    #     if p is not None:
-    #         l = [pa for pa in l if self.match_specialite(p, pa)]
-    #     if len(l) == 1:
-    #         return l[0]
-    #     return None
-    #
-    # def rule19(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return self.rule18(ps, a, None)
-    #
-    # def rule20(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
-    #
-    # def rule21(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
-    #
-    # def rule22(self, _: PS, __: AdresseNorm, ___: Optional[Profession]) -> Optional[PersonneActivite]:
-    #     return None
 
     def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
@@ -509,16 +477,6 @@ class PSParser(BaseParser):
                 # print(f"Match {n}: {res.inpp}")
                 self.nb_inpps += 1
                 return res.inpp, n
-
-        # for i in [0, 1, 2]:
-        #     ps2 = self.create_ps_with_split_names(ps, i % 2, 1 if i == 2 else 0)
-        #     if ps2 is not None:
-        #         self.nb_unique_ps -= 1
-        #         inpp, _ = self.match_inpp(ps2, p, a)
-        #         if inpp is not None:
-        #             self.inpps_cache[key_cache] = inpp
-        #             return inpp, 20 + i
-
         return None, -1
 
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:

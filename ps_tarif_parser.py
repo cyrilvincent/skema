@@ -7,7 +7,7 @@ import art
 import config
 
 
-class PSTarifParser(PSParser): # todo inherit v2
+class PSTarifParser(PSParser):
 
     def __init__(self, context):
         super().__init__(context)
@@ -19,6 +19,7 @@ class PSTarifParser(PSParser): # todo inherit v2
         self.conventions: Dict[str, Convention] = {}
         self.famille_actes: Dict[int, FamilleActe] = {}
         self.nb_warning = 0
+        self.last_warning = ""
 
     def load_cache(self):
         print("Making cache")
@@ -183,10 +184,11 @@ class PSTarifParser(PSParser): # todo inherit v2
                 c = self.cabinets[c.key]
                 t = self.create_update_tarif(e, c, row)
             except KeyError:
-                print(f"Warning {e.key}")
-                self.nb_warning += 1
+                if e.key != self.last_warning:
+                    self.last_warning = e.key
+                    print(f"Warning {e.key}")
+                    self.nb_warning += 1
             self.context.session.commit()
-            # self.context.session.expunge(t) # en cas de pb RAM
         else:
             self.nb_out_dept += 1
 
