@@ -107,7 +107,7 @@ class PSTarifParser(PSParser):
     def mapper(self, row) -> PS:
         ps = PS()
         try:
-            ps.genre = row[0]
+            ps.genre = self.get_nullable(row[0])
             ps.nom = row[1]
             ps.prenom = row[2]
             ps.key = f"{ps.nom}_{ps.prenom}_{row[7]}".replace(" ", "_")[:255]
@@ -270,3 +270,5 @@ if __name__ == '__main__':
 
     # Il faut enlever des rêgles : trop de matching pas assez de nouveau ps
     # Error BUTNARU_CRISTINA_AGRIPI_51000
+    # Warning NITA_GABRIELA_MADALI_84700
+    # J'ai trouvé, le ps avait été créé avec split_name que j'ai enlevé par la suite

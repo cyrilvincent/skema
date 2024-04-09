@@ -465,7 +465,6 @@ class PSParser(BaseParser):
         if ps.key in self.ps_merges:
             return self.ps_merges[ps.key], 0
         key_cache = self.normalize_string(ps.nom), ps.prenom, a.numero, a.rue1, a.cp, a.commune
-        # print(key_cache)
         if key_cache in self.inpps_cache:
             return self.inpps_cache[key_cache], 0
         self.nb_unique_ps += 1
@@ -474,9 +473,19 @@ class PSParser(BaseParser):
             res = self.rule(n, ps, a, p)
             self.inpps_cache[key_cache] = res.inpp if res is not None else None
             if res is not None:
-                # print(f"Match {n}: {res.inpp}")
                 self.nb_inpps += 1
                 return res.inpp, n
+
+        # A Activer dans V2
+        # ps2 = self.create_ps_with_split_names(ps, 0, 0)
+        # if ps2 is not None:
+        #     for n in range(1, self.nb_rule + 1):
+        #         res = self.rule(n, ps, a, p)
+        #         self.inpps_cache[key_cache] = res.inpp if res is not None else None
+        #         if res is not None:
+        #             self.nb_inpps += 1
+        #             return res.inpp, n
+
         return None, -1
 
     def create_update_norm(self, a: AdresseRaw) -> AdresseNorm:

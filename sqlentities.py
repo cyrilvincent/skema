@@ -76,6 +76,7 @@ class Context:
 #                                    *-1 code_profession
 #          1-+ personne_attribution *-1 attribution
 #          1-* coord *-1 adresse_norm
+#                    *-1 activite *-1 code_profession *-* profession
 # structure 1-* activite *-1 code_profession *-* profession
 #                        1-* coord
 #           1-* coord
