@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional, Iterable
 from sqlalchemy.orm import joinedload
 from ps_parser import PSParser
-from sqlentities import Context, PS, AdresseNorm, Profession, Personne, Coord, Activite, DiplomeObtenu, Structure
+from sqlentities import Context, PS, AdresseNorm, Profession, Personne, Coord, Activite
 import argparse
 import art
 import config
@@ -19,24 +19,17 @@ class PSParserV2(PSParser):
     # personne 1-* activite 1-* coord
     #          1-* diplome_obtenu
 
-
     def load_cache_inpp(self):
         print("Making cache level 2")
         personnes: List[Personne] = self.context.session.query(Personne) \
-            .options(joinedload(Personne.activites) \
-                     .options(joinedload(Activite.coord_activites))) \
+            .options(joinedload(Personne.activites).options(joinedload(Activite.coord_activites))) \
             .options(joinedload(Personne.diplome_obtenus)) \
-            .filter((Personne.nom != '') & (Personne.prenom != '')).all()
+            .filter(Personne.nom != '').all() # .filter((Personne.nom != '') & (Personne.prenom != '')).all()
         print(datetime.now()) #1min50 30Go vs 1min40 27Go
         for p in personnes:
             for a in p.activites:
                 for c in a.coord_activites:
                     self.make_keys(p, c)
-                # if a.structure is not None: # A virer
-                #     for c in a.structure.coord_structures:
-                #         self.make_keys(p, c)
-            # for c in p.coord_personnes: # A virer
-            #         self.make_keys(p, c)
 
     def make_keys(self, p: Personne, c: Coord):
         if c is not None and c.cp is not None and c.cp.isnumeric():
@@ -48,6 +41,11 @@ class PSParserV2(PSParser):
                 voie = self.normalize_string(c.voie) if c.voie is not None else ""
                 commune = self.normalize_string(c.commune) if c.commune is not None else ""
                 numero = int(c.numero) if c.numero is not None and c.numero.isnumeric() else None
+                if c.adresse_norm_id is not None:
+                    a = self.adresse_norms_id[int(c.adresse_norm_id)]
+                    voie = a.rue1
+                    commune = a.commune
+                    numero = a.numero
                 key_dept_2 = numero, voie, int(c.cp), commune
                 key_nom = nom, dept
                 if key_dept not in self.inpps_dept:
@@ -341,12 +339,14 @@ if __name__ == '__main__':
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
-    # PlasticienV2 [533, 6, 27, 7, 1, 0, 66, 41, 21, 1, 13, 15] 731/852: 86% NewPS 108 soit 13%
+    # PlasticienV2 [548, 6, 30, 7, 4, 0, 57, 36, 19, 1, 12, 15] 735/852: 86% NewPS 108 soit 13%
     # PlacticienV1 [645, 7, 33, 7, 0, 0, 78, 31, 25, 2, 5, 1] 834/852: 98%
     # PediatreV1 [1970, 19, 38, 41, 0, 2, 219, 59, 40, 4, 2, 8] 2402/2495: 96%
-    # PediatreV2 [1314, 11, 17, 22, 4, 0, 111, 95, 19, 6, 31, 53] 1683/2495: 67%
+    # PediatreV2 [1327, 11, 17, 22, 4, 0, 104, 90, 18, 6, 32, 53] 1684/2495: 67%
     # +structure [1314, 11, 17, 22, 4, 0, 111, 96, 19, 7, 30, 53] 1684/2495: 67%
     # +personne  [1362, 10, 16, 23, 6, 1, 109, 100, 17, 15, 28, 53] 1740/2495: 70%
+    # 2107 Matching INPP: 99750/152230: 66%
+    # Matched rules: [83540, 730, 1531, 502, 869, 14, 4413, 3545, 1530, 246, 876, 1954]
     # Benjamin gagne quand même la jointure vers profession_diplome
 
     # data/ps/plasticien-00-00.csv -n -t -e

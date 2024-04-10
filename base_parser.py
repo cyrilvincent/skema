@@ -29,8 +29,9 @@ class BaseParser(metaclass=ABCMeta):
         self.depts: Dict[str, Dept] = {}
         self.depts_int: Dict[int, Dept] = {}
         self.sources: Dict[int, Source] = {}
-        self.adresse_raws: [Dict[Tuple[str, str, str, str, str]], AdresseRaw] = {}
-        self.adresse_norms: [Dict[Tuple[int, str, str, str, str]], AdresseNorm] = {}
+        self.adresse_raws: Dict[Tuple[str, str, str, str, str], AdresseRaw] = {}
+        self.adresse_norms: Dict[Tuple[int, str, str, str, str], AdresseNorm] = {}
+        self.adresse_norms_id: Dict[int, AdresseNorm] = {}
 
     def load_cache(self):
         print("Making cache")
@@ -51,6 +52,7 @@ class BaseParser(metaclass=ABCMeta):
         l = self.context.session.query(AdresseNorm).all()
         for a in l:
             self.adresse_norms[a.key] = a
+            self.adresse_norms_id[int(a.id)] = a
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
 
