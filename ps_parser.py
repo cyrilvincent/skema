@@ -24,7 +24,7 @@ class PSParser(BaseParser):
         self.ps_merges: Dict[str, str] = {}
         self.professions: Dict[int, Profession] = {}
         # self.personne_activites: Dict[str, PersonneActivite] = {} Peut être faut il stocker PErsonneActivite au lieu de INPP dans les précédent dico, ce dico serait alors inutile pour match_specialite
-        self.nb_rule = 13
+        self.nb_rule = 12
         self.rules: List[int] = [0 for _ in range(self.nb_rule)]
         self.nb_out_dept = 0
         self.nb_existing_entity = 0
@@ -81,7 +81,6 @@ class PSParser(BaseParser):
                 else:
                     self.inpps_nom[key_nom][key_dept_2] = pa
                 self.nb_ram += 1
-            # session.expunge(a)
 
     def mapper(self, row) -> PS:
         ps = PS()
@@ -277,11 +276,11 @@ class PSParser(BaseParser):
             return self.match_profession_savoir_faire(p, pa)
         return False
 
-    def get_pa_france(self, nom: str, prenom: Optional[str]) -> Optional[PersonneActivite]:
-        if prenom is None:
-            return self.context.session.query(PersonneActivite).filter(PersonneActivite.nom == nom).all()
-        return self.context.session.query(PersonneActivite).\
-            filter((PersonneActivite.nom == nom) & (PersonneActivite.prenom == prenom)).all()
+    # def get_pa_france(self, nom: str, prenom: Optional[str]) -> Optional[PersonneActivite]:
+    #     if prenom is None:
+    #         return self.context.session.query(PersonneActivite).filter(PersonneActivite.nom == nom).all()
+    #     return self.context.session.query(PersonneActivite).\
+    #         filter((PersonneActivite.nom == nom) & (PersonneActivite.prenom == prenom)).all()
 
     def create_ps_with_split_names(self, ps: PS, name_ix=0, fname_ix=0) -> Optional[PS]:
         if " " in ps.nom or " " in ps.prenom:
@@ -453,13 +452,13 @@ class PSParser(BaseParser):
             return l[0]
         return None
 
-    def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
-        l = list(self.get_pa_france(self.normalize_string(ps.nom), ps.prenom))
-        if p is not None:
-            l = [pa for pa in l if self.match_specialite(p, pa)]
-        if len(l) == 1:
-            return l[0]
-        return None
+    # def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[PersonneActivite]: # Ex16
+    #     l = list(self.get_pa_france(self.normalize_string(ps.nom), ps.prenom))
+    #     if p is not None:
+    #         l = [pa for pa in l if self.match_specialite(p, pa)]
+    #     if len(l) == 1:
+    #         return l[0]
+    #     return None
 
     def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
@@ -476,15 +475,14 @@ class PSParser(BaseParser):
                 self.nb_inpps += 1
                 return res.inpp, n
 
-        # A Activer dans V2
-        # ps2 = self.create_ps_with_split_names(ps, 0, 0)
-        # if ps2 is not None:
-        #     for n in range(1, self.nb_rule + 1):
-        #         res = self.rule(n, ps, a, p)
-        #         self.inpps_cache[key_cache] = res.inpp if res is not None else None
-        #         if res is not None:
-        #             self.nb_inpps += 1
-        #             return res.inpp, n
+        ps2 = self.create_ps_with_split_names(ps)
+        if ps2 is not None:
+            for n in range(1, self.nb_rule): # -1 rule
+                res = self.rule(n, ps, a, p)
+                self.inpps_cache[key_cache] = res.inpp if res is not None else None
+                if res is not None:
+                    self.nb_inpps += 1
+                    return res.inpp, n
 
         return None, -1
 
@@ -585,7 +583,9 @@ if __name__ == '__main__':
 
     # Avant de refaire tourner valider vider la table ps_merge
 
-    # data/ps/plasticien-00-00.csv -n
+    # [645, 7, 33, 7, 0, 0, 78, 31, 25, 2, 5, 1, 3]
+
+    # data/ps/plasticien-00-00.csv -n -t
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
     # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ update genre

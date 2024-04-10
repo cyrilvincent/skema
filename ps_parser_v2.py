@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import Dict, List, Tuple, Optional, Iterable
 from sqlalchemy.orm import joinedload
 from ps_parser import PSParser
-from sqlentities import Context, PS, AdresseNorm, Profession, Personne, Coord, Activite, DiplomeObtenu
+from sqlentities import Context, PS, AdresseNorm, Profession, Personne, Coord, Activite, DiplomeObtenu, Structure
 import argparse
 import art
 import config
@@ -13,36 +14,42 @@ class PSParserV2(PSParser):
         super().__init__(context)
         self.inpps_dept: Dict[Tuple[str, str, int], Dict[Tuple[int, str, int, str], Personne]] = {}
         self.inpps_nom: Dict[Tuple[str, int], Dict[Tuple[int, str, int, str], Personne]] = {}
-        self.nb_rule = 13
+        self.nb_rule = 12
 
-    # personne 1-* exercice_pro *-1 code_profession *-* profession
-    #                           1-*(1) reference_ae
-    #                           1-*(1) savoir_faire_obtenu *-1 diplome
-    #                           *-1 categorie_pro
-    #          1-* activite *-1 structure
-    #                       *-1 code_profession *-* profession
-    #                       1-* coord
-    #          1-* diplome_obtenu *-1 diplome *-* profession (vue direct profession)
-    #          1-* coord *-1 adresse_norm
-    #                    *-1 activite *-1 code_profession *-* profession
+    # personne 1-* activite 1-* coord
+    #          1-* diplome_obtenu
+
 
     def load_cache_inpp(self):
         print("Making cache level 2")
-        session = self.context.get_session()
-        personnes: List[Personne] = session.query(Personne) \
-            .options(joinedload(Personne.coord_personnes) \
-                     .options(joinedload(Coord.adresse_norm))) \
-            .options(joinedload(Personne.diplome_obtenus) \
-                     .options(joinedload(DiplomeObtenu.diplome))) \
-            .options(joinedload(Coord.activite)) \
-            .all()
+        personnes: List[Personne] = self.context.session.query(Personne) \
+            .options(joinedload(Personne.activites) \
+                     .options(joinedload(Activite.coord_activites))) \
+            .options(joinedload(Personne.diplome_obtenus)) \
+            .filter((Personne.nom != '') & (Personne.prenom != '')).all()
+        print(datetime.now()) #1min50 30Go vs 1min40 27Go
         for p in personnes:
-            for c in p.coord_personnes:
-                nom = self.normalize_string(p.nom)
-                prenom = self.normalize_string(p.prenom)
-                key_dept = nom, prenom, self.get_dept_from_cp(c.adresse_norm.cp)
-                key_dept_2 = c.adresse_norm.numero, c.adresse_norm.rue1, c.adresse_norm.cp, c.adresse_norm.commune
-                key_nom = nom, self.get_dept_from_cp(c.adresse_norm.cp)
+            for a in p.activites:
+                for c in a.coord_activites:
+                    self.make_keys(p, c)
+                # if a.structure is not None: # A virer
+                #     for c in a.structure.coord_structures:
+                #         self.make_keys(p, c)
+            # for c in p.coord_personnes: # A virer
+            #         self.make_keys(p, c)
+
+    def make_keys(self, p: Personne, c: Coord):
+        if c is not None and c.cp is not None and c.cp.isnumeric():
+            nom = self.normalize_string(p.nom)
+            prenom = self.normalize_string(p.prenom)
+            dept = self.get_dept_from_cp(c.cp)
+            if dept in self.depts_int:
+                key_dept = nom, prenom, dept
+                voie = self.normalize_string(c.voie) if c.voie is not None else ""
+                commune = self.normalize_string(c.commune) if c.commune is not None else ""
+                numero = int(c.numero) if c.numero is not None and c.numero.isnumeric() else None
+                key_dept_2 = numero, voie, int(c.cp), commune
+                key_nom = nom, dept
                 if key_dept not in self.inpps_dept:
                     self.inpps_dept[key_dept] = {key_dept_2: p}
                 else:
@@ -65,7 +72,7 @@ class PSParserV2(PSParser):
             return True
         for do in personne.diplome_obtenus:
             for d in profession.diplomes:
-                if d.code_diplome == do.diplome.code_diplome:
+                if do.code_diplome == d.code_diplome:
                     return True
         return False
 
@@ -76,11 +83,6 @@ class PSParserV2(PSParser):
         if res:
             return self.match_profession_diplome(profession, personne)
         return False
-
-    def get_personne_france(self, nom: str, prenom: Optional[str]) -> Iterable[Personne]:
-        if prenom is None:
-            return self.context.session.query(Personne).filter(Personne.nom == nom).all()
-        return self.context.session.query(Personne).filter((Personne.nom == nom) & (Personne.prenom == prenom)).all()
 
     # nom + prenom + numero + rue1 + cp + commune
     def rule1(self, ps: PS, a: AdresseNorm, _: Optional[Profession]) -> Optional[Personne]:
@@ -241,16 +243,8 @@ class PSParserV2(PSParser):
             return l[0]
         return None
 
-    # prenom + nom + specialite A VIRER
-    def rule13(self, ps: PS, _: AdresseNorm, p: Optional[Profession]) -> Optional[Personne]:
-        l = list(self.get_personne_france(self.normalize_string(ps.nom), self.normalize_string(ps.prenom)))
-        if p is not None:
-            l = [pa for pa in l if self.match_specialite(p, pa)]
-        if len(l) == 1:
-            return l[0]
-        return None
 
-    def match_inpp(self, ps: PS, p: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
+    def match_inpp(self, ps: PS, profession: Profession, a: AdresseNorm) -> Tuple[Optional[str], int]:
         if ps.key in self.ps_merges:
             return self.ps_merges[ps.key], 0
         key_cache = self.normalize_string(ps.nom), self.normalize_string(ps.prenom), a.numero, a.rue1, a.cp, a.commune
@@ -259,7 +253,7 @@ class PSParserV2(PSParser):
         self.nb_unique_ps += 1
 
         for n in range(1, self.nb_rule + 1):
-            res = self.rule(n, ps, a, p)
+            res = self.rule(n, ps, a, profession)
             self.inpps_cache[key_cache] = res.inpp if res is not None else None
             if res is not None:
                 self.nb_inpps += 1
@@ -268,7 +262,7 @@ class PSParserV2(PSParser):
         ps2 = self.create_ps_with_split_names(ps)
         if ps2 is not None:
             for n in range(1, self.nb_rule): # -1 rule
-                res = self.rule(n, ps, a, p)
+                res = self.rule(n, ps, a, profession)
                 self.inpps_cache[key_cache] = res.inpp if res is not None else None
                 if res is not None:
                     self.nb_inpps += 1
@@ -276,6 +270,40 @@ class PSParserV2(PSParser):
 
         return None, -1
 
+    def parse_row(self, row):
+        dept = self.get_dept_from_cp(row[7])
+        if dept in self.depts_int:
+            if args.trace:
+                out_file.write(",".join([str(x.strip()) for x in row]))
+            e = self.mapper(row)
+            a = self.create_update_adresse_raw(row)
+            n = self.create_update_norm(a)
+            p = self.profession_mapper(row)
+            inpp, rule_nb = self.match_inpp(e, p, n)
+            if args.trace:
+                out_file.write(f",{inpp},{rule_nb}\n")
+            if inpp is not None:
+                e.key = inpp
+                e.has_inpp = True
+                if rule_nb > 0:
+                    self.rules[rule_nb - 1] += 1
+            if e.key in self.entities:
+                if 0 < rule_nb < self.entities[e.key].rule_nb:
+                    self.entities[e.key].rule_nb = rule_nb
+                e = self.entities[e.key]
+                self.nb_existing_entity += 1
+            else:
+                if rule_nb > 0:
+                    e.rule_nb = rule_nb
+                self.entities[e.key] = e
+                self.nb_new_entity += 1
+                self.context.session.add(e)
+            c = self.create_update_cabinet(e, row)
+            c.adresse_raw = a
+            if not args.nosave:
+                self.context.session.commit()
+        else:
+            self.nb_out_dept += 1
 
 
 if __name__ == '__main__':
@@ -313,23 +341,19 @@ if __name__ == '__main__':
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
-    # Avant de refaire tourner valider vider la table ps_merge
+    # PlasticienV2 [533, 6, 27, 7, 1, 0, 66, 41, 21, 1, 13, 15] 731/852: 86% NewPS 108 soit 13%
+    # PlacticienV1 [645, 7, 33, 7, 0, 0, 78, 31, 25, 2, 5, 1] 834/852: 98%
+    # PediatreV1 [1970, 19, 38, 41, 0, 2, 219, 59, 40, 4, 2, 8] 2402/2495: 96%
+    # PediatreV2 [1314, 11, 17, 22, 4, 0, 111, 95, 19, 6, 31, 53] 1683/2495: 67%
+    # +structure [1314, 11, 17, 22, 4, 0, 111, 96, 19, 7, 30, 53] 1684/2495: 67%
+    # +personne  [1362, 10, 16, 23, 6, 1, 109, 100, 17, 15, 28, 53] 1740/2495: 70%
+    # Benjamin gagne quand même la jointure vers profession_diplome
 
-    # data/ps/plasticien-00-00.csv -n
+    # data/ps/plasticien-00-00.csv -n -t -e
     # data/ps/ps-tarifs-small-00-00.csv -e
     # data/ps/ps-tarifs-21-03.csv 88% 584s 89% 701s
-    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv" /!\ update genre
+    # "data/UFC/ps-tarifs-UFC Santé, Pédiatres 2016 v1-3-16-00.csv"
 
-    # select pa.id, cp.* from personne_activite pa
-    # join personne_activite_code_profession pacp ON pacp.personne_activite_id = pa.id
-    # join code_profession cp on cp.id = pacp.code_profession_id
-    # limit 10
-    #
-    # select pa.id, d.id, d.code_diplome, d.libelle_diplome, d.is_savoir_faire from personne_activite pa
-    # join personne_activite_diplome pad ON pad.personne_activite_id = pa.id
-    # join diplome d on d.id = pad.diplome_id
-    # limit 10
-    #
     # select t.id, p.id, p.libelle, cp.* from tarif t
     # join profession p on t.profession_id = p.id
     # join profession_code_profession pcp ON pcp.profession_id = p.id

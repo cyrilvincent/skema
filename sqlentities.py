@@ -839,6 +839,7 @@ class Activite(Base):
     code_profession_id = Column(Integer, ForeignKey('code_profession.id'), nullable=False, index=True)
     categorie_pro = Column(String(5), nullable=False)
 
+    # Backref coord_activites
     @property
     def key(self):
         return self.activite_id
