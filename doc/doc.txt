@@ -41,7 +41,7 @@ Parsing Correspondance CP-INSEE
 python cp_insee_parser.py data/cedex/correspondance-code-cedex-code-insee.csv
 
 Parsing du répertoire SAE
-python sae_parser.py data/sae
+python sae_parser_v2.py data/sae
 
 Parsing POP
 Exporter le xlsx en csv avec , comme séparateur

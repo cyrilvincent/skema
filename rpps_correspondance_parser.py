@@ -82,12 +82,12 @@ class RPPSCorrespondanceParser(BaseParser):
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("Personne Activite Correspondance Parser")
-    print("=======================================")
+    print("RPPS Correspondance Parser")
+    print("==========================")
     print(f"V{config.version}")
     print(config.copyright)
     print()
-    parser = argparse.ArgumentParser(description="Personne Activite Correspondance Parser")
+    parser = argparse.ArgumentParser(description="RPPS Correspondance Parser")
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     args = parser.parse_args()
@@ -104,5 +104,4 @@ if __name__ == '__main__':
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps_libreacces/CorrespondanceV2.csv
-    # profession_code_profession 64
-    # profession_diplome 96
+

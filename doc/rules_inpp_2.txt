@@ -39,7 +39,7 @@ RULE 11 (ex 13) : La clé d'un PS est prenom + nom + dept + commune + specialite
 
 RULE 12 (ex 14) : La clé d'un PS est prenom + nom + dept + specialite (ok)
 
-RULE 13 (ex 16) : La clé d'un PS est prenom + nom + specialite
+Annulée : RULE 13 (ex 16) : La clé d'un PS est prenom + nom + specialite
           Activée 1 seule fois sur plasticien et 0 sur pediatre (correct)
 
 

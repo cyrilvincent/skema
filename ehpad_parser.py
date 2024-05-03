@@ -19,6 +19,7 @@ class EhpadParser:
         # noinspection PyBroadException
         try:
             self.yy = int(path[-12:-10])
+            self.mm = 0
             if self.yy < 13:
                 self.mm = self.yy
                 self.yy = int(path[-14:-12])
