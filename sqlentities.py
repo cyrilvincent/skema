@@ -1163,3 +1163,21 @@ class SAE(Base):
 
     def __repr__(self):
         return f"{self.nofinesset} {self.an}"
+
+
+class Lieu(Base):
+    __tablename__ = "lieu"
+
+    id = Column(Integer, primary_key=True)
+    lieu = Column(String(10), nullable=False, unique=True)
+    libelle = Column(String(255), nullable=False)
+
+    @property
+    def key(self):
+        return self.lieu
+
+    def __repr__(self):
+        return f"{self.id} {self.lieu}"
+
+    def equals(self, other):
+        return self.lieu == other.lieu

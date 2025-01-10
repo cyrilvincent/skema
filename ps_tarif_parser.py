@@ -244,7 +244,6 @@ if __name__ == '__main__':
     # join cabinet c on c.id = pcds.cabinet_id
     # where pcds.date_source_id = 2107
     #
-    # -- ne marche pas x2
     # select count(*) from ps p
     # join ps_cabinet_date_source pcds on pcds.ps_id = p.id
     # join cabinet c on c.id = pcds.cabinet_id
@@ -252,6 +251,7 @@ if __name__ == '__main__':
     # join tarif_date_source tds on tds.tarif_id = t.id
     # where pcds.date_source_id = 2106
     # and tds.date_source_id = 2106
+    # and t.ps_id =p.id
     #
     # select count(*) from tarif t
     # join tarif_date_source tds on tds.tarif_id = t.id
@@ -263,12 +263,3 @@ if __name__ == '__main__':
     # join ps p on p.id = t.ps_id
     # join cabinet c on c.id = t.cabinet_id
     # where tds.date_source_id = 2106
-
-    # Effacer tarif_date_source tarif  ps_cabinet_date_source cabinet ps?
-    # verif nb de cabinet
-    # drop table tarif_date_source,tarif,ps_cabinet_date_source,cabinet
-
-    # Il faut enlever des rêgles : trop de matching pas assez de nouveau ps
-    # Error BUTNARU_CRISTINA_AGRIPI_51000
-    # Warning NITA_GABRIELA_MADALI_84700
-    # J'ai trouvé, le ps avait été créé avec split_name que j'ai enlevé par la suite
