@@ -63,29 +63,32 @@ class AdresseParser:
                 e = BAN()
                 e.adresse_id = row["id"][:50]
                 if e.adresse_id not in self.set:
-                    e.numero = int(row["numero"])
-                    e.rep = row["rep"][:50] if row["rep"] != "" else None
-                    e.nom_voie = self.normalize(row["nom_voie"])
-                    e.code_postal = int(row["code_postal"])
-                    e.code_insee = row["code_insee"]
-                    e.nom_commune = self.normalize(row["nom_commune"])
-                    e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
-                    if e.nom_ancienne_commune == "":
-                        e.nom_ancienne_commune = None
-                    e.lon = float(row["lon"])
-                    e.lat = float(row["lat"])
-                    e.libelle_acheminement = self.normalize(row["libelle_acheminement"])
-                    if e.libelle_acheminement == e.nom_commune or e.libelle_acheminement == e.nom_ancienne_commune \
-                            or e.libelle_acheminement == "":
-                        e.libelle_acheminement = None
-                    e.nom_afnor = self.normalize(row["nom_afnor"])
-                    if e.nom_afnor == e.nom_voie or e.nom_afnor == "":
-                        e.nom_afnor = None
-                    e.dept = dept
-                    e.is_lieu_dit = False
-                    context.session.add(e)
-                    context.session.commit()
-                    self.set.add(e.adresse_id)
+                    try:
+                        e.numero = int(row["numero"])
+                        e.rep = row["rep"][:50] if row["rep"] != "" else None
+                        e.nom_voie = self.normalize(row["nom_voie"])
+                        e.code_postal = int(row["code_postal"])
+                        e.code_insee = row["code_insee"]
+                        e.nom_commune = self.normalize(row["nom_commune"])
+                        e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
+                        if e.nom_ancienne_commune == "":
+                            e.nom_ancienne_commune = None
+                        e.lon = float(row["lon"])
+                        e.lat = float(row["lat"])
+                        e.libelle_acheminement = self.normalize(row["libelle_acheminement"])
+                        if e.libelle_acheminement == e.nom_commune or e.libelle_acheminement == e.nom_ancienne_commune \
+                                or e.libelle_acheminement == "":
+                            e.libelle_acheminement = None
+                        e.nom_afnor = self.normalize(row["nom_afnor"])
+                        if e.nom_afnor == e.nom_voie or e.nom_afnor == "":
+                            e.nom_afnor = None
+                        e.dept = dept
+                        e.is_lieu_dit = False
+                        context.session.add(e)
+                        context.session.commit()
+                        self.set.add(e.adresse_id)
+                    except Exception as ex:
+                        print(f"Error row {self.numrow}: {ex}")
                 if self.numrow % 10000 == 0:
                     print(f"Found {self.nbadresse} adresses {(self.numrow/nb)*100:.1f}%")
         print(f"Found {self.nbfile} files and {self.nbadresse} adresses in {int(time.perf_counter() - time0)}s")
@@ -105,23 +108,26 @@ class AdresseParser:
                 e = BAN()
                 e.adresse_id = row["id"]
                 if e.adresse_id not in self.set:
-                    e.nom_voie = self.normalize(row["nom_lieu_dit"])
-                    e.code_postal = int(row["code_postal"])
-                    e.code_insee = row["code_insee"]
-                    e.nom_commune = self.normalize(row["nom_commune"])
-                    e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
-                    if e.nom_ancienne_commune == "":
-                        e.nom_ancienne_commune = None
                     try:
-                        e.lon = float(row["lon"])
-                        e.lat = float(row["lat"])
-                    except ValueError:
-                        e.lon = e.lat = 0
-                    e.dept = dept
-                    e.is_lieu_dit = True
-                    context.session.add(e)
-                    context.session.commit()
-                    self.set.add(e.adresse_id)
+                        e.nom_voie = self.normalize(row["nom_lieu_dit"])
+                        e.code_postal = int(row["code_postal"])
+                        e.code_insee = row["code_insee"]
+                        e.nom_commune = self.normalize(row["nom_commune"])
+                        e.nom_ancienne_commune = self.normalize(row["nom_ancienne_commune"])
+                        if e.nom_ancienne_commune == "":
+                            e.nom_ancienne_commune = None
+                        try:
+                            e.lon = float(row["lon"])
+                            e.lat = float(row["lat"])
+                        except ValueError:
+                            e.lon = e.lat = 0
+                        e.dept = dept
+                        e.is_lieu_dit = True
+                        context.session.add(e)
+                        context.session.commit()
+                        self.set.add(e.adresse_id)
+                    except Exception as ex:
+                        print(f"Error row {self.numrow}: {ex}")
         print(f"Found {self.nbfile} files and {self.nbadresse} adresses in {int(time.perf_counter() - time0)}s")
 
     def scan(self):
