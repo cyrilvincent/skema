@@ -136,10 +136,13 @@ class AdresseParser:
             if item.endswith(".csv") and item.startswith("adresses-"):
                 dept = item[9:11].replace("A", "01").replace("B", "02")
                 dept = int(dept)
-                path = f"{config.adresse_path}/{item}"
-                self.load(path, dept)
-                path = path.replace('adresses-', 'lieux-dits-').replace('.csv', '-beta.csv')
-                self.load_lieuxdits(path, dept)
+                if 1 <= dept <= 95 or dept == 201 or dept == 202:
+                    path = f"{config.adresse_path}/{item}"
+                    self.load(path, dept)
+                    path = path.replace('adresses-', 'lieux-dits-').replace('.csv', '-beta.csv')
+                    self.load_lieuxdits(path, dept)
+                else:
+                    print(f"Skipping {dept}")
 
 
 if __name__ == '__main__':

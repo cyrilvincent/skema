@@ -54,6 +54,11 @@ class RPPSExerciceProParser(RPPSPersonneParser):
     def make_relations(self, e: ExercicePro, row):
         try:
             e.personne = self.personnes[e.inpp]
+            if e.code_profession_id not in self.code_professions:
+                c = CodeProfession()
+                c.id = e.code_profession_id
+                c.libelle = row["Libellé profession"]
+                self.code_professions[c.id] = c
             e.code_profession = self.code_professions[e.code_profession_id]
             if e.code_categorie_pro not in self.categorie_pros:
                 c = CategoriePro()
@@ -62,7 +67,7 @@ class RPPSExerciceProParser(RPPSPersonneParser):
                 self.categorie_pros[c.code] = c
             e.categorie_pro = self.categorie_pros[e.code_categorie_pro]
         except Exception as ex:
-            print(f"ERROR ExercicePro unknow FK row {self.row_num} {e}\n{ex}")
+            print(f"ERROR ExercicePro unknow FK row {self.row_num} {e}\n{ex}\nParse personne before")
             quit(2)
 
     def update(self, e: ExercicePro):
@@ -113,3 +118,4 @@ if __name__ == '__main__':
 
     # data/rpps/ExercPro_small.csv
     # data/rpps/Extraction_RPPS_Profil4_ExercPro_202310250948.csv
+    # data/rpps/Extraction_RPPS_Profil4_ExercPro_small.csv
