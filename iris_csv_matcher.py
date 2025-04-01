@@ -85,4 +85,4 @@ if __name__ == '__main__':
     print(f"Nb error with address: {icm.nb_error_a}")
     print(f"Parse {icm.row_num - 1} rows in {time.perf_counter() - time0:.0f} s")
 
-
+    # data/pyris/geoloc.csv
