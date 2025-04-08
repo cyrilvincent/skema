@@ -20,7 +20,6 @@ class RPPSCoordStructureGeolocParser(RPPSCoordPersonneParser):
         self.nb_score_improvment = 0
         self.nb_rpps_score = 0
 
-
     def load_cache(self):
         print("Making cache")
         l: List[Coord] = self.context.session.query(Coord)\
@@ -39,7 +38,7 @@ class RPPSCoordStructureGeolocParser(RPPSCoordPersonneParser):
         print(f"{self.nb_ram} objects in cache")
 
     def to_float(self, s: str):
-        s = s.replace(",",".")
+        s = s.replace(",", ".")
         if s.startswith("."):
             s = "0" + s
         return float(s)
@@ -78,7 +77,7 @@ class RPPSCoordStructureGeolocParser(RPPSCoordPersonneParser):
             e.adresse_norm.rpps_score = score
             self.nb_rpps_score += 1
         if e.adresse_norm.score is None or score > e.adresse_norm.score:
-            if  e.adresse_norm.source_id is None or e.adresse_norm.source_id != 5:
+            if e.adresse_norm.source_id is None or e.adresse_norm.source_id != 5:
                 e.adresse_norm.lon = e.lon
                 e.adresse_norm.lat = e.lat
                 e.adresse_norm.score = score
