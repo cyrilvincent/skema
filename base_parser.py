@@ -184,16 +184,26 @@ class BaseParser(metaclass=ABCMeta):
                           f"@{self.row_num / duration:.0f}row/s "
                           f"{((self.nb_row / self.row_num) * duration) - duration + 1:.0f}s remaining ")
 
+    def escape_dot_comma(self, s):
+        regex = r"([\d\w\t ']);([\d\w\t '])?"
+        if re.search(regex, s) is not None:
+            s = re.sub(regex, r"\1.\2", s)
+        # regex = r";([\d\w\t '])" # Never happened
+        # if re.search(regex, s) is not None:
+        #     s = re.sub(regex, r"\1", s)
+        return s
+
     def strip_double_quotes_writer(self, path: str, out_path: str, encoding="utf8"):
         print(f"Loading {path}")
         with open(path, encoding=encoding) as f:
             print(f"Creating {out_path}")
             with open(out_path, "w", encoding=encoding) as out:
                 for row in f:
-                    row = row.replace("matriçage ; métallurgie", "matriçage, métallurgie")
-                    row = row.replace("Créole haïtien; haïtien", "haïtien")
-                    row = row.replace("BAT I ;", "BAT I, ")
-                    row = row.replace("BÂTIMENT H ; LOT 409 ;", "BÂTIMENT H, LOT 409,")
+                    row = self.escape_dot_comma(row)
+                    # row = row.replace("matriçage ; métallurgie", "matriçage, métallurgie")
+                    # row = row.replace("Créole haïtien; haïtien", "haïtien")
+                    # row = row.replace("BAT I ;", "BAT I, ")
+                    # row = row.replace("BÂTIMENT H ; LOT 409 ;", "BÂTIMENT H, LOT 409,")
                     row = row.replace('"', "")
                     out.write(row)
 

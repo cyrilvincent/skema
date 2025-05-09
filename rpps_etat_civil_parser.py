@@ -6,6 +6,7 @@ import argparse
 import time
 import art
 import config
+import datetime
 
 
 class RPPSEtatCivilParser(RPPSExerciceProParser):
@@ -31,9 +32,10 @@ class RPPSEtatCivilParser(RPPSExerciceProParser):
             e.nom = row["Nom de famille"]
             e.nom_norm = self.normalize_string(e.nom)
             e.prenoms = row["Prénoms"]
-            e.prenom_norm =  self.normalize_string(e.prenoms.split("'")[0] if "'" in e.prenoms else e.prenoms)
+            e.prenom_norm = self.normalize_string(e.prenoms.split("'")[0] if "'" in e.prenoms else e.prenoms)
             e.date_naissance = self.get_nullable_date(row["Date de naissance"])
             e.lieu_naissance = self.get_nullable(row["Lieu de naissance"])
+            # try:
             e.date_deces = self.get_nullable_date(row["Date de décès"])
             e.date_effet = self.get_nullable_date(row["Date d'effet de l'état-civil"])
             e.code_commune = self.get_nullable(row["Code commune de naissance"])

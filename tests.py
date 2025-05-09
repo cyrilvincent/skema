@@ -1,6 +1,10 @@
 import datetime
+import re
 from unittest import TestCase
 from sqlalchemy.orm import joinedload
+
+import base_parser
+import rpps_etat_civil_parser
 from etalab_parser import EtalabParser
 from ps_change_key import PSChangeKey
 from ps_parser import PSParser
@@ -937,3 +941,9 @@ class ICIPTests(TestCase):
         self.assertEqual(2.313346, e.lon)
         self.assertEqual(0, e.type_precision)
         self.assertEqual(0.93, e.precision)
+
+    def test_re_quote(self):
+        p = rpps_etat_civil_parser.RPPSEtatCivilParser(None)
+        row = '"toto";"titi";"1;x";"A;x";"A ;x";"A; x";"A;";";A";"END";\n"A";"B";'
+        row = p.escape_dot_comma(row)
+        self.assertEqual('"toto";"titi";"1,x";"A,x";"A ,x";"A, x";"A,";"A";"END";\n"A";"B";', row)

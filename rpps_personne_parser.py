@@ -59,7 +59,6 @@ class RPPSPersonneParser(BaseParser):
         self.strip_double_quotes_writer(path, out_path, encoding)
         super().load(out_path, delimiter, encoding, header)
 
-
     def parse_row(self, row):
         e = self.mapper(row)
         if e.inpp in self.entities:

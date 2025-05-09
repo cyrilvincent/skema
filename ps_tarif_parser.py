@@ -65,7 +65,7 @@ class PSTarifParser(PSParser):
         print(f"{self.nb_ram:.0f} objects in cache")
 
     def load_cache_tarif(self):
-        print("Making cache level 3, need a lot of RAM (>= 32Gb)")
+        print("Making cache level 3, need a lot of RAM (>= 128GB)")
         ds_back = self.datesource_back()
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
@@ -215,8 +215,8 @@ if __name__ == '__main__':
     print(f"Dept >95 tarif: {psp.nb_out_dept} ({psp.nb_tarif + psp.nb_existing_entity + psp.nb_out_dept})")
     print(f"Nb warning: {psp.nb_warning}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # data/ps/pediatres-small-00-00.csv -e
     # data/ps/ps-tarifs-small-00-00.csv -e

@@ -75,7 +75,7 @@ class RPPSCoordActiviteParser(RPPSCoordPersonneParser):
                 try:
                     e.date_maj = self.get_nullable_date(row["Date de fin (coord. activité)"])
                 except:
-                    e.date_maj = datetime.date(1970,1,1)
+                    e.date_maj = datetime.date(1970, 1, 1)
                 e.cp = self.get_nullable(row["Code commune (coord. activité)"])
                 e.code_commune = self.get_nullable(row["Libellé commune (coord. activité)"])
                 e.commune = self.get_nullable(row["Code pays (coord. activité)"])

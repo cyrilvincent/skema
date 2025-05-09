@@ -578,7 +578,7 @@ if __name__ == '__main__':
     print(f"Matching INPP: {psp.nb_inpps}/{psp.nb_unique_ps}: {(psp.nb_inpps / psp.nb_unique_ps) * 100:.0f}%")
     print(f"Matched rules: {psp.rules}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # Avant de refaire tourner valider vider la table ps_merge
