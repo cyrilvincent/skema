@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
-    Table, Index, Date
+    Table, Index, Date, DateTime
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
 from typing import Optional, List
@@ -678,10 +678,11 @@ class Personne(Base):
     # backref coord_personnes
 
     def equals(self, other):
-        return self.inpp == other.inpp and self.nom == other.nom and self.civilite == other.civilite \
+        return (self.inpp == other.inpp and self.nom == other.nom and self.prenom == other.prenom \
+            and self.civilite == other.civilite \
             and self.nature == other.nature and self.code_nationalite == other.code_nationalite \
             and self.date_acquisition_nationalite == other.date_acquisition_nationalite \
-            and self.date_effet == other.date_effet and self.date_maj == other.date_maj
+            and self.date_effet == other.date_effet and self.date_maj == other.date_maj)
 
     def __repr__(self):
         return f"{self.id} {self.nom} {self.prenom}"
@@ -1181,3 +1182,36 @@ class Lieu(Base):
 
     def equals(self, other):
         return self.lieu == other.lieu
+
+
+class File(Base):
+    __tablename__ = "file"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False, unique=True)
+    zip_name = Column(String(255), nullable=False, unique=True)
+    category = Column(String(50), nullable=False)
+    url = Column(String(1024), nullable=False, unique=True)
+    path = Column(String(50), nullable=False)
+    full_name = Column(String(255), nullable=False, unique=True)
+    date = Column(Date, nullable=False)
+    online_date = Column(DateTime)
+    download_date = Column(DateTime)
+    md5 = Column(String(50))
+    dezip_date = Column(DateTime)
+    import_start_date = Column(DateTime)
+    import_end_date = Column(DateTime)
+    log_date = Column(DateTime)
+    log = Column(String(1024))
+
+    __table_args__ = ({"schema": "downloader"},)
+
+    def __init__(self, name, path, category):
+        super().__init__()
+        self.zip_name = self.name = name
+        self.path = path
+        self.full_name = self.path + name
+        self.category = category
+
+    def __repr__(self):
+        return f"{self.id} {self.name}"

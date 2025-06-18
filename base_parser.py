@@ -190,7 +190,7 @@ class BaseParser(metaclass=ABCMeta):
             s = re.sub(regex, r"\1.\2", s)
         # regex = r";([\d\w\t '])" # Never happened
         # if re.search(regex, s) is not None:
-        #     s = re.sub(regex, r"\1", s)
+        #     s = re.sub(regex, r".\1", s)
         return s
 
     def strip_double_quotes_writer(self, path: str, out_path: str, encoding="utf8"):

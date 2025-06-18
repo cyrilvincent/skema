@@ -5,6 +5,8 @@ config.py
 **/data/**
 **/chromedriver_win32/**
 *.zip
+.venv
+/data/adresse
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

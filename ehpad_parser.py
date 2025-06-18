@@ -1,4 +1,5 @@
 import argparse
+import argparse
 from typing import Optional
 
 import art

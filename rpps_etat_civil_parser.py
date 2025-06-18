@@ -35,7 +35,6 @@ class RPPSEtatCivilParser(RPPSExerciceProParser):
             e.prenom_norm = self.normalize_string(e.prenoms.split("'")[0] if "'" in e.prenoms else e.prenoms)
             e.date_naissance = self.get_nullable_date(row["Date de naissance"])
             e.lieu_naissance = self.get_nullable(row["Lieu de naissance"])
-            # try:
             e.date_deces = self.get_nullable_date(row["Date de décès"])
             e.date_effet = self.get_nullable_date(row["Date d'effet de l'état-civil"])
             e.code_commune = self.get_nullable(row["Code commune de naissance"])
@@ -97,14 +96,14 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     rpp = RPPSEtatCivilParser(context)
     rpp.load(args.path, delimiter=';', encoding="UTF-8", header=True)
     print(f"New etat civil: {rpp.nb_new_entity}")
     print(f"Nb etat civil update: {rpp.nb_update_entity}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {rpp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/rpps/EtatCivil_small.csv

@@ -3,7 +3,7 @@ art
 pandas==2.0.0
 numpy==1.26.0
 sqlalchemy==1.4.29
-psycopg2==2.9.6
+psycopg2~=2.9.10
 openpyxl
 xlrd
 pyproj==3.6.1

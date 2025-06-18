@@ -40,8 +40,12 @@ class RPPSPersonneParser(BaseParser):
         return e
 
     def update(self, e: Personne):
-        self.entities[e.inpp].nom = e.nom
-        self.entities[e.inpp].civilite = e.civilite
+        if len(e.nom) > 0:
+            self.entities[e.inpp].nom = e.nom
+        if len(e.prenom) > 0:
+            self.entities[e.inpp].prenom = e.prenom
+        if len(e.civilite) > 0:
+            self.entities[e.inpp].civilite = e.civilite
         if e.nature is not None:
             self.entities[e.inpp].nature = e.nature
         if e.code_nationalite is not None:
@@ -87,14 +91,14 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     rpp = RPPSPersonneParser(context)
     rpp.load(args.path, delimiter=';', encoding="UTF-8", header=True)
     print(f"New personne: {rpp.nb_new_entity}")
     print(f"Nb personne update: {rpp.nb_update_entity}")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {rpp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/rpps/Personne_small.csv -e
