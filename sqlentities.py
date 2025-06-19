@@ -1191,10 +1191,12 @@ class File(Base):
     name = Column(String(255), nullable=False, unique=True)
     zip_name = Column(String(255), nullable=False, unique=True)
     category = Column(String(50), nullable=False)
-    url = Column(String(1024), nullable=False, unique=True)
+    url = Column(String(1024), nullable=False)
     path = Column(String(50), nullable=False)
     full_name = Column(String(255), nullable=False, unique=True)
     date = Column(Date, nullable=False)
+    frequency = Column(String(1), nullable=False)
+    download_mode = Column(String(10), nullable=False)
     online_date = Column(DateTime)
     download_date = Column(DateTime)
     md5 = Column(String(50))
@@ -1206,12 +1208,14 @@ class File(Base):
 
     __table_args__ = ({"schema": "downloader"},)
 
-    def __init__(self, name, path, category):
+    def __init__(self, name, path, category, frequency, mode):
         super().__init__()
         self.zip_name = self.name = name
         self.path = path
         self.full_name = self.path + name
         self.category = category
+        self.frequency = frequency
+        self.download_mode = mode
 
     def __repr__(self):
         return f"{self.id} {self.name}"

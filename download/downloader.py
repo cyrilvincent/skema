@@ -6,25 +6,39 @@ import urllib.error
 import hashlib
 import zipfile
 import gzip
+import abc
 from sqlentities import File
 from sqlalchemy import select
 
 
-class BaseDownloader:
+class BaseDownloader(metaclass=abc.ABCMeta):
 
-    def __init__(self, context, echo=False, fake_download=False, no_commit=False, force_download=False):
+    def __init__(self, context, echo=False, fake_download=False, no_commit=False, force_download=False, no_parsing=False):
         self.url = ""
         self.context = context
         self.echo = echo
         self.fake_download = fake_download
         self.no_commit = no_commit
         self.force_download = force_download
+        self.no_parsing = no_parsing
         self.html = ""
         self.rows: list[str] = []
         self.nb_new_file = 0
         self.download_path = ""
         self.download_zip_path = ""
         self.category = ""
+        self.frequency = "Y"
+        self.download_mode = "AUTO"
+        self.files: dict[str, File] = {}
+
+    def make_cache(self):
+        print("Making cache")
+
+    def get_file(self, name: str) -> File:
+        if name in self.files:
+            return self.files[name]
+        file = File(name, self.download_zip_path, self.category, self.frequency, self.download_mode)
+        return file
 
     def test(self):
         print(f"Open {self.url}")
@@ -82,6 +96,8 @@ class BaseDownloader:
         if self.fake_download:
             file.download_date = datetime.datetime.now()
             file.date = datetime.date.today()
+            if file.online_date is None:
+                file.online_date = datetime.datetime.now()
         else:
             try:
                 file.online_date = datetime.datetime.now()
@@ -120,9 +136,9 @@ class BaseDownloader:
     def downloads(self):
         self.test()
 
-    def parses(self):
+    def load(self):
         print("Parsing")
-        files: list[File] = self.context.session.query(File).filter(File.dezip_date.is_(None))
-        # /!\ Vérif unicode
+
+
 
 

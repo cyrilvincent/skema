@@ -6,6 +6,8 @@ import unidecode
 import time
 import os
 
+time0 = time.perf_counter()
+
 
 class AdresseParser:
 

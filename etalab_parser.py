@@ -24,6 +24,7 @@ class EtalabParser(BaseParser):
             .options(joinedload(Etablissement.date_sources)).all()
         for e in l:
             self.entities[e.nofinesset] = e
+            self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
 
     def parse_date(self, path):
@@ -38,21 +39,26 @@ class EtalabParser(BaseParser):
         e = Etablissement()
         try:
             e.nofinesset = row["nofinesset"]
+            if e.nofinesset == "040001513":
+                pass
             e.nofinessej = row["nofinessej"]
             e.rs = row["rs"]
             e.rslongue = row["rslongue"]
             e.complrs = self.get_nullable(row["complrs"])
             e.mft = self.get_nullable(row["mft"])
-            e.sph = self.get_nullable_int(row["sph"])
-            e.categetab = self.get_nullable_int(row["categetab"])
-            e.categretab = self.get_nullable_int(row["categretab"])
+            try:
+                e.sph = self.get_nullable_int(row["sph"])
+                e.categetab = self.get_nullable_int(row["categetab"])
+                e.categretab = self.get_nullable_int(row["categretab"])
+            except:
+                pass
             e.telephone = self.get_nullable(row["telephone"])
             e.telecopie = self.get_nullable(row["telecopie"])
-            e.siret = self.get_nullable(row["siret"])
+            e.siret = self.get_nullable(row["siret"], 15)
             e.dateautor = self.get_nullable(row["dateautor"])
             e.dateouvert = self.get_nullable(row["dateouvert"])
             e.datemaj = self.get_nullable(row["datemaj"])
-            e.cog = self.get_nullable(row["cog"]) if "cog" in row else None
+            e.cog = self.get_nullable(row["cog"], 5) if "cog" in row else None
             e.codeape = self.get_nullable(row["codeape"]) if "codeape" in row else None
         except Exception as ex:
             print(f"ERROR Etablissement row {self.row_num} {e}\n{ex}\n{row}")
@@ -84,6 +90,8 @@ class EtalabParser(BaseParser):
             d = row["departement"]
             if d == '.':
                 d = row["nofinesset"][:2]
+            elif not d[0].isnumeric():
+                d = row["libdepartement"]
             a.dept = self.depts[d]
             a.commune = row["libelle_routage"].strip()
         except Exception as ex:
@@ -161,11 +169,11 @@ class EtalabParser(BaseParser):
 
     def parse_row(self, row):
         dept = self.get_dept_from_cp(row["codepostal"])
-        if dept in self.depts_int:
+        if dept is not None and dept in self.depts_int:
             e = self.mapper(row)
             if e.nofinesset in self.entities:
                 same = e.equals(self.entities[e.nofinesset])
-                if not same:
+                if not same and self.date_source.annee > 23:
                     self.pseudo_clone(e, self.entities[e.nofinesset])
                     self.nb_update_entity += 1
                 e = self.entities[e.nofinesset]

@@ -71,7 +71,7 @@ class BaseParser(metaclass=ABCMeta):
             print("ERROR: file must have date like this: file_YY-MM.csv")
             quit(1)
 
-    def get_dept_from_cp(self, cp):
+    def get_dept_from_cp(self, cp) -> int | None:
         cp = str(cp)
         if len(cp) == 4:
             cp = "0" + cp
@@ -80,7 +80,9 @@ class BaseParser(metaclass=ABCMeta):
             dept = cp[:3]
             if dept == "200":
                 dept = "201"
-        return int(dept)
+        if dept.isnumeric():
+            return int(dept)
+        return None
 
     def check_date(self, path):
         self.parse_date(path)
@@ -92,8 +94,8 @@ class BaseParser(metaclass=ABCMeta):
         else:
             self.date_source = db_date
 
-    def get_nullable(self, v):
-        return None if v == "" else v
+    def get_nullable(self, v, size=65536):
+        return None if v == "" else v[:size]
 
     def get_nullable_int(self, v):
         return None if v == "" else int(v)
