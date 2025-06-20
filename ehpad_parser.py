@@ -1,13 +1,16 @@
 import argparse
 import argparse
 from typing import Optional
-
 import art
 import config
+import numpy as np
+print(np.__version__)
 import pandas
 import os
 from sqlalchemy import create_engine
 from sqlentities import Context, DateSource
+
+
 
 
 class EhpadParser:
@@ -43,8 +46,7 @@ class EhpadParser:
         self.check_date(path)
         df = pandas.read_csv(path, delimiter=";", na_values=["\\0", "\\N", ""], encoding="ANSI", decimal=",")
         df.columns = df.columns.str.strip().str.lower()
-        if __name__ == '__main__':
-            df["datesource_id"] = self.yy * 100 + self.mm
+        df["datesource_id"] = self.yy * 100 + self.mm
         print(df)
         engine = create_engine(config.connection_string, echo=False)
         with engine.begin() as connection:
@@ -71,8 +73,8 @@ if __name__ == '__main__':
     parser.add_argument("path", help="Path")
     args = parser.parse_args()
     p = EhpadParser()
-    p.load(args.path)
-    # p.scan("data/ehpad/")
+    # p.load(args.path)
+    p.scan("data/ehpad/")
     # data/ehpad/cnsa-export-prix-ehpad-2018-brute.csv
     # 32444 => 18945
     # select * from ehpad where "finessEt" = '010002228'

@@ -1,9 +1,10 @@
 unidecode
 art
 pandas==2.0.0
-numpy==1.26.0
+numpy==1.26.4
 sqlalchemy==1.4.29
 psycopg2~=2.9.10
 openpyxl
 xlrd
 pyproj==3.6.1
+BeautifulSoup4

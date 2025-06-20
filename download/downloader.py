@@ -7,6 +7,9 @@ import hashlib
 import zipfile
 import gzip
 import abc
+
+from bs4 import BeautifulSoup
+
 from sqlentities import File
 from sqlalchemy import select
 
@@ -22,6 +25,7 @@ class BaseDownloader(metaclass=abc.ABCMeta):
         self.force_download = force_download
         self.no_parsing = no_parsing
         self.html = ""
+        self.soup = None
         self.rows: list[str] = []
         self.nb_new_file = 0
         self.download_path = ""
@@ -34,7 +38,7 @@ class BaseDownloader(metaclass=abc.ABCMeta):
     def make_cache(self):
         print("Making cache")
 
-    def get_file(self, name: str) -> File:
+    def get_file_by_name(self, name: str) -> File:
         if name in self.files:
             return self.files[name]
         file = File(name, self.download_zip_path, self.category, self.frequency, self.download_mode)
@@ -51,6 +55,12 @@ class BaseDownloader(metaclass=abc.ABCMeta):
             print(f"WARNING URL Error: {ex}")
             quit(1)
 
+    def get_html(self):
+        print(f"Reading {self.url}")
+        with urllib.request.urlopen(self.url) as response:
+            self.html = response.read()
+            self.soup = BeautifulSoup(self.html, features="html.parser")
+
     def get_file_by_id(self, id: int) -> File | None:
         return self.context.session.get(File, id)
 
@@ -62,6 +72,16 @@ class BaseDownloader(metaclass=abc.ABCMeta):
         days = int((end_date - start_date).days)
         for n in range(days):
             yield start_date + datetime.timedelta(n)
+
+    def monthrange(self, start_year_month: int, end_year_month: int):
+        year_month = start_year_month
+        while year_month < end_year_month:
+            yield year_month
+            year_month += 1
+            month = int(str(year_month)[-2:])
+            year = int(str(year_month)[:2])
+            if month == 13:
+                year_month = (year + 1) * 100 + 1
 
     def deptrange(self):
         for d in range(1, 97):
@@ -90,8 +110,14 @@ class BaseDownloader(metaclass=abc.ABCMeta):
             with zipfile.ZipFile(path+file, 'r') as zip:
                 zip.extractall(self.download_path)
 
-    def download(self, file: File):
-        file.url = self.url + file.zip_name
+    def download_file(self, url: str, path: str):
+        with urllib.request.urlopen(url) as response:
+            content = response.read()
+            with open(path, "wb") as f:
+                f.write(content)
+
+    def download(self, file: File, url: str | None):
+        file.url = self.url + file.zip_name if url is None else url
         print(f"Downloading {file.url} to {self.download_zip_path}")
         if self.fake_download:
             file.download_date = datetime.datetime.now()
@@ -105,12 +131,9 @@ class BaseDownloader(metaclass=abc.ABCMeta):
                 file.dezip_date = None
                 file.import_end_date = None
                 file.import_start_date = None
-                with urllib.request.urlopen(file.url) as response:
-                    content = response.read()
-                    with open(file.full_name, "wb") as f:
-                        f.write(content)
-                    file.download_date = datetime.datetime.now()
-                    self.nb_new_file += 1
+                self.download_file(file.url, file.full_name)
+                file.download_date = datetime.datetime.now()
+                self.nb_new_file += 1
             except Exception as ex:
                 print(f"WARNING download Error: {ex}")
                 file.log_date = datetime.datetime.now()

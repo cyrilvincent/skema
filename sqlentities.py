@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
     Table, Index, Date, DateTime
@@ -1216,6 +1218,7 @@ class File(Base):
         self.category = category
         self.frequency = frequency
         self.download_mode = mode
+        self.online_date = datetime.datetime.now()
 
     def __repr__(self):
         return f"{self.id} {self.name}"

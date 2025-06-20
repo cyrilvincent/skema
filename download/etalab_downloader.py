@@ -24,7 +24,7 @@ class EtalabDownloader(BaseDownloader):
         self.download_zip_path = self.download_path
         self.category = "Etalab"
         self.frequency = "D"
-        self.download_mode = "MAN_ZIP"
+        self.download_mode = "MANUALLY"
         self.make_cache()
         self.parser = EtalabParser(context)
 
@@ -64,7 +64,7 @@ class EtalabDownloader(BaseDownloader):
         super().load()
         for item in os.listdir(self.download_path):
             if item.endswith(".csv") and item.startswith("etalab_stock_et_"):
-                file = self.get_file(item)
+                file = self.get_file_by_name(item)
                 file.url = self.url
                 file.date = datetime.date(int(item[-12:-8]), 12, 31)
                 if file.online_date is None:
@@ -105,6 +105,6 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = EtalabDownloader(context, args.echo, True, args.no_commit, True, args.no_parsing)
-    # d.dezips()
+    d.dezips()
     d.load()
     print(f"Nb new files: {d.nb_new_file}")

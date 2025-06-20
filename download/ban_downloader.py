@@ -32,9 +32,9 @@ class BANDownloader(BaseDownloader):
     def downloads(self):
         super().downloads()
         for dept in self.deptrange():
-            file = self.get_file(f"adresses-{dept}.csv.gz")
+            file = self.get_file_by_name(f"adresses-{dept}.csv.gz")
             self.download_and_dezip(file, "gz")
-            file = self.get_file(f"lieux-dits-{dept}-beta.csv.gz")
+            file = self.get_file_by_name(f"lieux-dits-{dept}-beta.csv.gz")
             self.download_and_dezip(file, "gz")
 
     def load(self):
