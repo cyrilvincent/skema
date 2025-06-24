@@ -1,3 +1,17 @@
 BAN : Automatique, mensuel
 Etalab : Annuel, déposer le zip dans data/etalab depuis https://www.data.gouv.fr/fr/datasets/finess-extraction-du-fichier-des-etablissements/
 Ehpad : Automatique, mensuel
+Ps_libreacces :
+    le 2 du mois
+    python diplome_parser.py data/ps_libreacces/PS_LibreAccess_Dipl_AutExerc_202112000000.txt
+    python diplome_parser.py -s data/ps_libreacces/PS_LibreAccess_SavoirFaire_202112000000.txt
+    python personne_activite_parser.py data/ps_libreacces/PS_LibreAcess_Personne_Activite_202112000000.txt
+RPPS : TODO
+    Personne
+    Structures
+    Exercice professionnel
+    Activité
+ps : TODO
+BAN_matcher : TODO
+OSM_matcher : TODO
+score_matcher : TODO

@@ -5,7 +5,7 @@ import time
 
 import art
 import config
-from download.downloader import BaseDownloader
+from downloader.base_downloader import BaseDownloader
 from sqlentities import Context, File, BAN
 from BAN_parser import AdresseParser
 
@@ -24,7 +24,7 @@ class BANDownloader(BaseDownloader):
         self.parser = AdresseParser()
 
     def make_cache(self):
-        super().make_cache()
+        print("Make cache")
         l: list[File] = self.context.session.query(File).filter(File.category == "BAN").all()
         for e in l:
             self.files[e.zip_name] = e

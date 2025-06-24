@@ -5,7 +5,7 @@ import time
 
 import art
 import config
-from download.downloader import BaseDownloader
+from downloader.base_downloader import BaseDownloader
 from etalab_parser import EtalabParser
 from sqlentities import Context, File, BAN
 from BAN_parser import AdresseParser
@@ -27,11 +27,6 @@ class EtalabDownloader(BaseDownloader):
         self.download_mode = "MANUALLY"
         self.make_cache()
         self.parser = EtalabParser(context)
-
-    def make_cache(self):
-        l: list[File] = self.context.session.query(File).filter(File.category == "Etalab").all()
-        for e in l:
-            self.files[e.name] = e
 
     def dezips(self):
         year = datetime.date.year

@@ -33,10 +33,14 @@ class BaseDownloader(metaclass=abc.ABCMeta):
         self.category = ""
         self.frequency = "Y"
         self.download_mode = "AUTO"
+        self.parser = None
         self.files: dict[str, File] = {}
 
     def make_cache(self):
         print("Making cache")
+        l: list[File] = self.context.session.query(File).filter(File.category == self.category).all()
+        for e in l:
+            self.files[e.name] = e
 
     def get_file_by_name(self, name: str) -> File:
         if name in self.files:
@@ -116,7 +120,7 @@ class BaseDownloader(metaclass=abc.ABCMeta):
             with open(path, "wb") as f:
                 f.write(content)
 
-    def download(self, file: File, url: str | None):
+    def download(self, file: File, url: str | None = None):
         file.url = self.url + file.zip_name if url is None else url
         print(f"Downloading {file.url} to {self.download_zip_path}")
         if self.fake_download:

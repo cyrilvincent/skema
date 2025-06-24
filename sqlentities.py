@@ -1191,7 +1191,7 @@ class File(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True)
-    zip_name = Column(String(255), nullable=False, unique=True)
+    zip_name = Column(String(255), nullable=False)
     category = Column(String(50), nullable=False)
     url = Column(String(1024), nullable=False)
     path = Column(String(50), nullable=False)

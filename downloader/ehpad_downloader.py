@@ -9,7 +9,7 @@ import art
 from sqlalchemy import create_engine
 
 import config
-from download.downloader import BaseDownloader
+from downloader.base_downloader import BaseDownloader
 from ehpad_parser import EhpadParser
 from sqlentities import Context, File, BAN
 from bs4 import BeautifulSoup
@@ -29,12 +29,6 @@ class EphadDownloader(BaseDownloader):
         self.download_mode = "AUTO"
         self.make_cache()
         self.parser = EhpadParser()
-
-    def make_cache(self):
-        super().make_cache()
-        l: list[File] = self.context.session.query(File).filter(File.category == "Ehpad").all()
-        for e in l:
-            self.files[e.name] = e
 
     def scrap_guid(self, name: str) -> str | None:
         node = self.soup.find("div", {'text': name})

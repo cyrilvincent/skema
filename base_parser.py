@@ -163,7 +163,7 @@ class BaseParser(metaclass=ABCMeta):
         lon, lat = transformer.transform(x, y)
         return lon, lat
 
-    def load(self, path: str, delimiter=';', encoding="utf8", header=False):
+    def load(self, path: str, delimiter=';', encoding="utf8", header=False, quotechar="\""):
         print(f"Loading {path}")
         self.path = path
         self.check_date(path)
@@ -172,7 +172,7 @@ class BaseParser(metaclass=ABCMeta):
         duration_cache = time.perf_counter() - time0
         with open(path, encoding=encoding) as f:
             if header:
-                reader = csv.DictReader(f, delimiter=delimiter, quotechar="|")
+                reader = csv.DictReader(f, delimiter=delimiter, quotechar=quotechar)
             else:
                 reader = csv.reader(f, delimiter=delimiter)
             for row in reader:

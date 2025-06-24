@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, Diplome, INPPDiplome
+from sqlentities import Context, Diplome, INPPDiplome, DateSource
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -26,6 +26,15 @@ class DiplomeParser(BaseParser):
         for d in l:
             self.diplomes[d.key] = d
 
+    def parse_date(self, path):
+        try:
+            yy = int(path[-14:-12])
+            mm = int(path[-12:-10])
+            self.date_source = DateSource(annee=yy, mois=mm)
+        except IndexError:
+            print("ERROR: file must have date like this: file_YY-MM.csv")
+            quit(1)
+
     def mapper(self, row) -> INPPDiplome:
         i = INPPDiplome()
         try:
@@ -40,6 +49,8 @@ class DiplomeParser(BaseParser):
         try:
             d.is_savoir_faire = False
             d.code_type_diplome = row["Code type diplôme obtenu"]
+            if d.code_type_diplome == "AUT614":
+                pass
             d.libelle_type_diplome = row["Libellé type diplôme obtenu"]
             d.code_diplome = row["Code diplôme obtenu"]
             d.libelle_diplome = row["Libellé diplôme obtenu"]
@@ -79,6 +90,9 @@ class DiplomeParser(BaseParser):
             self.context.session.add(e)
         self.context.session.commit()
 
+    def load(self, path: str):
+        super().load(path, delimiter='|', encoding="UTF-8", header=True)
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -97,7 +111,7 @@ if __name__ == '__main__':
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mb")
     psp = DiplomeParser(context, args.savoir)
-    psp.load(args.path, delimiter='|', encoding="UTF-8", header=True)
+    psp.load(args.path)
     print(f"New INPP-Diplome: {psp.nb_new_entity}")
     print(f"New diplome: {psp.nb_new_diplome}")
     new_db_size = context.db_size()
@@ -107,3 +121,6 @@ if __name__ == '__main__':
 
     # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202211130507.txt
     # data/ps_libreacces/PS_LibreAcces_SavoirFaire_202211130507.txt -s
+    # data/ps_libreacces/PS_LibreAcces_Dipl_AutExerc_202506210923.txt
+
+    # {"Type d'identifiant PP": '8', 'Identifiant PP': '10006164171', 'Identification nationale PP': '810006164171', "Nom d'exercice": 'PODEVIN', "Prénom d'exercice": 'EMMANUEL', 'Code type diplôme obtenu': 'DE', 'Libellé type diplôme obtenu': "Diplôme d'Etat français ", 'Code diplôme obtenu': 'DE09', 'Libellé diplôme obtenu': "Diplôme d'Etat français d'Infirmier", 'Code type autorisation': 'A', 'Libellé type autorisation': 'B', 'Code discipline autorisation': 'C', 'Libellé discipline autorisation': 'D', '': 'E'}

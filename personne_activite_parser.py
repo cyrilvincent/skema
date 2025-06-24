@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, DateSource
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -38,8 +38,14 @@ class PersonneActiviteParser(BaseParser):
         for a in l:
             self.pa_adresses[a.key] = a
 
-    def check_date(self, path):
-        pass
+    def parse_date(self, path):
+        try:
+            yy = int(path[-14:-12])
+            mm = int(path[-12:-10])
+            self.date_source = DateSource(annee=yy, mois=mm)
+        except IndexError:
+            print("ERROR: file must have date like this: file_YY-MM.csv")
+            quit(1)
 
     def mapper(self, row) -> PersonneActivite:
         pa = PersonneActivite()
@@ -155,6 +161,9 @@ class PersonneActiviteParser(BaseParser):
         self.add_savoir_faire(e, row)
         self.context.session.commit()
 
+    def load(self, path: str):
+        super().load(path, delimiter='|', encoding="UTF-8", header=True)
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -172,7 +181,7 @@ if __name__ == '__main__':
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mb")
     psp = PersonneActiviteParser(context)
-    psp.load(args.path, delimiter='|', encoding="UTF-8", header=True)
+    psp.load(args.path)
     print(f"New personne: {psp.nb_new_entity}")
     print(f"New adresse: {psp.nb_new_adresse}")
     new_db_size = context.db_size()
