@@ -15,6 +15,7 @@ from rpps_activite_parser import RPPSActiviteParser
 from rpps_attribution_parser import RPPSAttributionParser
 from rpps_autre_diplome_parser import RPPSAutreDiplomeParser
 from rpps_coord_activite_parser import RPPSCoordActiviteParser
+from rpps_coord_corresp_parser import RPPSCoordPersonneParser
 from rpps_coord_structure_geoloc_parser import RPPSCoordStructureGeolocParser
 from rpps_coord_structure_parser import RPPSCoordStructureParser
 from rpps_correspondance_parser import RPPSCorrespondanceParser
@@ -95,7 +96,7 @@ class RPPSDownloader(BaseDownloader):
                 elif type == "AttribPart":
                     self.parser = RPPSAttributionParser(context)
                 elif type == "CoordCorresp":
-                    self.parser = RPPSCorrespondanceParser(context)
+                    self.parser = RPPSCoordPersonneParser(context)
                 elif type == "CoordAct":
                     self.parser = RPPSCoordActiviteParser(context)
                 elif type == "CoordStruct":

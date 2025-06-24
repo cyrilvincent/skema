@@ -3,7 +3,10 @@ Etalab : Annuel, déposer le zip dans data/etalab depuis https://www.data.gouv.f
 Ehpad : Automatique, mensuel
 Ps_libreacces : Automatique, mensuel
 RPPS : A télécharger et dézipper dans data/rpps /!\ Refaire tourner 2023 avant
-ps : TODO
-BAN_matcher : TODO
-OSM_matcher : TODO
-score_matcher : TODO
+ps : Automatique, mensuel + daily
+BAN_matcher : A mettre dans le .bat
+OSM_matcher : A mettre dans le .bat
+score_matcher : A mettre dans le .bat
+TODO vérifier si bash est installé
+TODO faire daily.sh, monthly.sh
+
