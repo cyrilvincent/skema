@@ -26,7 +26,7 @@ class PersonneActiviteDownloader(BaseDownloader):
         self.category = "PsLibreAcces"
         self.frequency = "M"
         self.download_mode = "AUTO"
-        self.files2: dict[int, File] = {}
+        self.yearmonth_files: dict[int, File] = {}
         self.make_cache()
 
     def make_cache(self):
@@ -34,16 +34,16 @@ class PersonneActiviteDownloader(BaseDownloader):
         l: list[File] = (self.context.session.query(File)
                          .filter((File.category == self.category) & (File.name.endswith(".zip"))).all())
         for e in l:
-            self.files2[e.date.year * 100 + e.date.month] = e
+            self.yearmonth_files[e.date.year * 100 + e.date.month] = e
         l: list[File] = (self.context.session.query(File)
                          .filter(File.category == self.category).all())
         for e in l:
             self.files[e.name] = e
 
-    def get_file2_by_name(self, name: str) -> File:
+    def get_yearmonth_file_by_name(self, name: str) -> File:
         yearmonth = int(name[-16:-10])
-        if yearmonth in self.files2:
-            return self.files2[yearmonth]
+        if yearmonth in self.yearmonth_files:
+            return self.yearmonth_files[yearmonth]
         file = File(name, self.download_zip_path, self.category, self.frequency, self.download_mode)
         file.date = datetime.date(yearmonth // 100, yearmonth % 100, 1)
         return file
@@ -59,7 +59,7 @@ class PersonneActiviteDownloader(BaseDownloader):
         url = self.scrap_url()
         if url is not None:
             name = url.split("nomFichier=")[-1]
-            file = self.get_file2_by_name(name) # /!\ 1 fichier en genere 3 créer 4 file en tout le masterfile et les 3 files
+            file = self.get_yearmonth_file_by_name(name) # /!\ 1 fichier en genere 3 créer 4 file en tout le masterfile et les 3 files
             file.url = url
             if file.download_date is None:
                 if not self.fake_download:
@@ -118,16 +118,21 @@ class PersonneActiviteDownloader(BaseDownloader):
         super().load()
         types = ["Dipl_AutExerc", "SavoirFaire", "Personne_activite"]
         file: File | None = None
-        for zip_file in self.files2.values():
-            all_ok = True
+        for zip_file in self.yearmonth_files.values():
+            all_ok = False
             if zip_file.import_end_date is None:
                 for type in types:
                     for item in os.listdir(self.download_path):
                         yearmonth = zip_file.date.year * 100 + zip_file.date.month
                         if item.endswith(".txt") and item.startswith(f"PS_LibreAcces_{type}_{yearmonth}"):  # Ne fonctionne pas pour un zip du 1er du mois
+                            all_ok = True
                             try:
                                 file = self.get_file_by_name(item)
                                 self.load_file_from_type(zip_file, file, type)
+                                if file is not None and not self.no_commit:
+                                    if file.id is not None:
+                                        self.context.session.add(file)
+                                    self.context.session.commit()
                             except Exception as ex:
                                 print(f"Error for parsing {type}")
                                 all_ok = False
@@ -139,10 +144,9 @@ class PersonneActiviteDownloader(BaseDownloader):
                                     self.context.session.commit()
                 if all_ok:
                     zip_file.import_end_date = file.import_end_date
-                if file is not None and not self.no_commit:
-                    if file.id is not None:
-                        self.context.session.add(file)
-                    self.context.session.commit()
+                    if not self.no_commit:
+                        self.context.session.commit()
+
 
 
 

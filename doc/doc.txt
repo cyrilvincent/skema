@@ -99,7 +99,7 @@ python rpps_activite_parser.py data/rpps/Extraction_RPPS_Profil4_Activite_202310
 RPPS import diplome obtenu
 Importé dans la table diplome_obtenu
 python rpps_diplome_obtenu_parser.py data/rpps/Extraction_RPPS_Profil4_DiplObt_202310250948.csv
-python rpps_lieu_parser.py data/rpps/Extraction_RPPS_Profil4_DiplObt_202310250948.csv
+python rpps_diplome_obtenu.py data/rpps/Extraction_RPPS_Profil4_DiplObt_202310250948.csv
 
 RPPS import autre diplome
 Importé dans la table autre_diplome
