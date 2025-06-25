@@ -1,19 +1,12 @@
 import argparse
 import datetime
 import os
-import time
-import urllib.request
-import urllib.parse
-import urllib.error
 import art
-from sqlalchemy import create_engine
 import config
 from diplome_parser import DiplomeParser
 from downloader.base_downloader import BaseDownloader
 from personne_activite_parser import PersonneActiviteParser
-from sqlentities import Context, File, BAN
-from bs4 import BeautifulSoup
-import re
+from sqlentities import Context, File
 
 
 class PersonneActiviteDownloader(BaseDownloader):
@@ -71,6 +64,7 @@ class PersonneActiviteDownloader(BaseDownloader):
                     self.context.session.commit()
 
     def dezips(self):
+        self.make_cache()
         files = [f for f in self.files.values() if f.dezip_date is None and f.name.endswith(".zip")]
         if len(files) > 0:
             file = files[0]
@@ -148,9 +142,6 @@ class PersonneActiviteDownloader(BaseDownloader):
                         self.context.session.commit()
 
 
-
-
-
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("PS Libre Acces Downloader")
@@ -168,8 +159,8 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = PersonneActiviteDownloader(context, args.echo, args.fake_download, args.no_commit, args.force_download, args.no_parsing)
-    # d.get_html()
-    # d.scrap()
-    # d.dezips()
+    d.get_html()
+    d.scrap()
+    d.dezips()
     d.load()
     print(f"Nb new files: {d.nb_new_file}")

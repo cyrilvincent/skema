@@ -77,6 +77,8 @@ class EphadDownloader(BaseDownloader):
                 year_month = (year - 2000) * 100 + month
                 if not self.has_ehpad_by_datesource(year_month):
                     file.import_start_date = datetime.datetime.now()
+                    if file.url is None:
+                        file.url = self.url
                     self.context.session.commit()
                     if not self.no_parsing:
                         print(f"Parse {file.name}")
@@ -108,7 +110,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = EphadDownloader(context, args.echo, args.fake_download, args.no_commit, args.force_download, args.no_parsing)
-    # d.get_html()
-    # d.scrap()
+    d.get_html()
+    d.scrap()
     d.load()
     print(f"Nb new files: {d.nb_new_file}")

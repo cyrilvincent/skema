@@ -1,16 +1,9 @@
 import argparse
 import datetime
 import os
-import time
-import urllib.request
-import urllib.parse
-import urllib.error
 import art
-from sqlalchemy import create_engine
 import config
-from diplome_parser import DiplomeParser
 from downloader.base_downloader import BaseDownloader
-from personne_activite_parser import PersonneActiviteParser
 from rpps_activite_parser import RPPSActiviteParser
 from rpps_attribution_parser import RPPSAttributionParser
 from rpps_autre_diplome_parser import RPPSAutreDiplomeParser
@@ -18,7 +11,6 @@ from rpps_coord_activite_parser import RPPSCoordActiviteParser
 from rpps_coord_corresp_parser import RPPSCoordPersonneParser
 from rpps_coord_structure_geoloc_parser import RPPSCoordStructureGeolocParser
 from rpps_coord_structure_parser import RPPSCoordStructureParser
-from rpps_correspondance_parser import RPPSCorrespondanceParser
 from rpps_diplome_obtenu_parser import RPPSDiplomeObtenuParser
 from rpps_etat_civil_parser import RPPSEtatCivilParser
 from rpps_exercice_pro_parser import RPPSExerciceProParser
@@ -27,9 +19,7 @@ from rpps_personne_parser import RPPSPersonneParser
 from rpps_reference_ae_parser import RPPSReferenceAEParser
 from rpps_savoir_faire_parser import RPPSSavoirFaireParser
 from rpps_structure_parser import RPPSStructureParser
-from sqlentities import Context, File, BAN
-from bs4 import BeautifulSoup
-import re
+from sqlentities import Context, File
 
 
 class RPPSDownloader(BaseDownloader):
@@ -134,8 +124,7 @@ class RPPSDownloader(BaseDownloader):
                                 file.log_date = datetime.datetime.now()
                                 file.log(str(ex))
                                 if not self.no_commit:
-                                    if file.id is not None:
-                                        self.context.session.add(file)
+                                    self.context.session.add(file)
                                     self.context.session.commit()
 
 

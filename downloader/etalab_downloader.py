@@ -23,7 +23,7 @@ class EtalabDownloader(BaseDownloader):
         self.download_path = "data/etalab/"
         self.download_zip_path = self.download_path
         self.category = "Etalab"
-        self.frequency = "D"
+        self.frequency = "M"
         self.download_mode = "MANUALLY"
         self.make_cache()
         self.parser = EtalabParser(context)
@@ -34,20 +34,21 @@ class EtalabDownloader(BaseDownloader):
             year = 2024
         for item in os.listdir(self.download_path):
             if item.endswith(f"-{year}.zip"):
-                name = f"etalab_stock_et_{year}1231.csv"
-                if name not in self.files:
-                    file = File(name, self.download_path, self.category, self.frequency, self.download_mode)
+                # name = f"etalab_stock_et_{year}1231.csv"
+                if item not in self.files:
+                    file = File(item, self.download_path, self.category, self.frequency, self.download_mode)
                     file.online_date = file.download_date = datetime.datetime.now()
-                    file.date = datetime.date(year, 12, 31)
+                    file.date = datetime.date(year, 1, 1)
                     file.zip_name = item
                     file.url = self.url
                     try:
-                        self.dezip(self.download_path, item)
-                        shutil.copytree(self.download_path+item[:item.rindex(".")], self.download_path, dirs_exist_ok=True)
-                        file.dezip_date = datetime.datetime.now()
-                        if not self.no_commit:
-                            self.context.session.add(file)
-                            self.context.session.commit()
+                        if file.dezip_date is None:
+                            self.dezip(self.download_path, item)
+                            shutil.copytree(self.download_path+item[:item.rindex(".")], self.download_path, dirs_exist_ok=True)
+                            file.dezip_date = datetime.datetime.now()
+                            if not self.no_commit:
+                                self.context.session.add(file)
+                                self.context.session.commit()
                     except Exception as ex:
                         print(f"Etalab error {ex}")
                         if not self.no_commit:

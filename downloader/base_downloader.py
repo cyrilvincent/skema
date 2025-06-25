@@ -162,6 +162,7 @@ class BaseDownloader(metaclass=abc.ABCMeta):
 
     def downloads(self):
         self.test()
+        self.make_cache()
 
     def load(self):
         print("Parsing")

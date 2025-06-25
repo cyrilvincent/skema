@@ -7,6 +7,30 @@
 #   \________\/     \_____\/   \________\/     \_\/
 #
 #
+#
+#
+#
+#
+# V3.2.0.Dev
+# 01/06/25
+# Downloader
+#
+# V3.1.2.Release
+# 02/05/25
+# Amélioration parsing RPPS
+#
+# V3.1.0.Release
+# 11/12/23
+# Amélioration INPP matching
+#
+# V3.0.3.RC
+# 20/11/23
+# RPPS
+#
+# V3.0.3.Release
+# 20/11/23
+# INPP matching avec ps_libreacces
+#
 # V2.0.5.Release
 # 03/03/22
 # SAE
@@ -14,7 +38,7 @@
 # V2.0.4.Release
 # 03/02/22
 # OD
-# Meilleur gestion des reparsinng
+# Meilleur gestion des reparsing
 #
 # V2.0.3.RC
 # 27/01/22
@@ -22,7 +46,6 @@
 #
 # V1.0.1.RC
 # 21/05/21
-# 0 jour
 # SanteSpecialite2PS est splitté en 2 SanteSpecialite2PS12 et SanteSpecialite2PS13
 # Correction du bug OSMRest si le cp est absent
 # Correction du bug sur MyMatcher en multi dept
