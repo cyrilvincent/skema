@@ -130,7 +130,7 @@ class AdresseParser:
                         self.set.add(e.adresse_id)
                     except Exception as ex:
                         print(f"Error row {self.numrow}: {ex}")
-        print(f"Found {self.nbfile} files and {self.nbadresse} adresses in {int(time.perf_counter() - time0)}s")
+        print(f"Found {self.nbfile} files and {self.nbadresse} addresses in {int(time.perf_counter() - time0)}s")
 
     def scan(self):
         print(f"Scan {config.adresse_path}")

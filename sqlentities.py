@@ -89,6 +89,9 @@ class Dept(Base):
 
     id = Column(Integer, primary_key=True, )
     num = Column(CHAR(2), nullable=False, unique=True)
+    name = Column(String(255))
+    region_id = Column(Integer)
+    region_name = Column(String(50))
 
     # backref: bans
 
@@ -1222,3 +1225,32 @@ class File(Base):
 
     def __repr__(self):
         return f"{self.id} {self.name}"
+
+
+class Commune(Base):
+    __tablename__ = "commune"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(CHAR(5), nullable=False, unique=True, index=True)
+    nom = Column(String(255), nullable=False)
+    nom_norm = Column(String(255), nullable=False)
+    epci_id = Column(Integer)
+    epci_nom = Column(String(255))
+    bassin_vie_id = Column(CHAR(5), nullable=False)
+    bassin_vie_nom = Column(String(50), nullable=False)
+    zone_emploi_id = Column(Integer)
+    zone_emploi_nom = Column(String(50))
+    arr_dept_id = Column(CHAR(3), nullable=False)
+    arr_dept_nom = Column(String(50), nullable=False)
+    dept: Dept = relationship("Dept")
+    dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
+    date = Column(DateTime, nullable=False)
+
+    __table_args__ = ({"schema": "iris"},)
+
+    def __init__(self):
+        super().__init__()
+        self.date = datetime.datetime.now()
+
+    def __repr__(self):
+        return f"{self.code} {self.nom}"

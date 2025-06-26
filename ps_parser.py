@@ -381,10 +381,10 @@ class PSParser(BaseParser):
                 dico2[k] = dico[k]
         if len(list(dico2.keys())) > 0:
             pa = self.match_rue_inpp_gestalt(a.rue1, dico2)
-            if p is None:
-                return pa.inpp
             if pa is None:
                 return None
+            if p is None:
+                return pa.inpp
             if self.match_specialite_pa(p, pa):
                 return pa.inpp
         return None
@@ -412,10 +412,10 @@ class PSParser(BaseParser):
             return None
         dico = self.inpps_dept[key_dept]
         pa = self.match_key_inpp_gestalt(a, dico)
-        if p is None:
-            return pa.inpp
         if pa is None:
             return None
+        if p is None:
+            return pa.inpp
         if self.match_specialite_pa(p, pa):
             return pa.inpp
         return None
@@ -505,15 +505,15 @@ class PSParser(BaseParser):
     def parse_row(self, row):
         dept = self.get_dept_from_cp(row[7])
         if dept in self.depts_int:
-            if args.trace:
-                out_file.write(",".join([str(x.strip()) for x in row]))
+            # if args.trace:
+            #     out_file.write(",".join([str(x.strip()) for x in row]))
             e = self.mapper(row)
             a = self.create_update_adresse_raw(row)
             n = self.create_update_norm(a)
             p = self.profession_mapper(row)
             inpp, rule_nb = self.match_inpp(e, p, n)
-            if args.trace:
-                out_file.write(f",{inpp},{rule_nb}\n")
+            # if args.trace:
+            #     out_file.write(f",{inpp},{rule_nb}\n")
             if inpp is not None:
                 e.key = inpp
                 e.has_inpp = True
@@ -532,8 +532,8 @@ class PSParser(BaseParser):
                 self.context.session.add(e)
             c = self.create_update_cabinet(e, row)
             c.adresse_raw = a
-            if not args.nosave:
-                self.context.session.commit()
+            # if not args.nosave:
+            #     self.context.session.commit()
         else:
             self.nb_out_dept += 1
 

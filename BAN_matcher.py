@@ -313,7 +313,7 @@ class BANMatcher:
             self.match_norm(row)
             self.total_scores.append(self.score)
             if self.row_num % 1000 == 0 or self.row_num == 10 or self.row_num == 100:
-                print(f"Found {self.row_num} adresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
+                print(f"Found {self.row_num} addresses {(self.row_num / self.total_nb_norm) * 100:.1f}% "
                       f"in {int(time.perf_counter() - time0)}s")
 
     def match(self):

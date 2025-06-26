@@ -113,6 +113,7 @@ class RPPSDownloader(BaseDownloader):
                         if yearmonth > 202502:
                             try:
                                 file = self.get_file_by_name(item)
+                                file.url = self.url
                                 file.date = datetime.date(yearmonth // 100, yearmonth % 100, 1)
                                 self.load_file_from_type(file, type)
                                 if not self.no_commit:
@@ -120,7 +121,7 @@ class RPPSDownloader(BaseDownloader):
                                         self.context.session.add(file)
                                     self.context.session.commit()
                             except Exception as ex:
-                                print(f"Error for parsing {type}")
+                                print(f"Error for parsing {type}: {ex}")
                                 file.log_date = datetime.datetime.now()
                                 file.log(str(ex))
                                 if not self.no_commit:
