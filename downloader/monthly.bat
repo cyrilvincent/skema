@@ -29,4 +29,5 @@ move %icippath%\downloader\logs\iris_matcher.log %icippath%\downloader\logs\iris
 python iris_matcher.py > %icippath%\downloader\logs\iris_matcher.log 2>&1
 move "D:\\icip\\backup\\icip.monthly.bak.1" "D:\\icip\\backup\\icip.monthly.bak.2"
 move "D:\\icip\\backup\\icip.monthly.bak" "D:\\icip\\backup\\icip.monthly.bak.1"
-D:\PostgreSQL\17\pgAdmin 4\runtime\pg_dump.exe --file "D:\\icip\\backup\\icip.monthly.bak" --host "localhost" --port "5432" --username "postgres" --no-password --format=c --large-objects --section=pre-data --section=data --section=post-data "icip"
+set PGPASSWORD=sa
+D:\PostgreSQL\17\pgAdmin 4\runtime\pg_dump.exe --file "D:\\icip\\backup\\icip.monthly.bak" --host "localhost" --port "5432" --username "postgres" --no-password --verbose --format=c --large-objects --section=pre-data --section=data --section=post-data "icip"

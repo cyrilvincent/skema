@@ -6,6 +6,7 @@ import argparse
 import art
 import config
 
+# todo /!\ J'ai ajouter un all() ligne 73 A VERIF
 
 class PSTarifParser(PSParser):
 
@@ -69,7 +70,7 @@ class PSTarifParser(PSParser):
         ds_back = self.datesource_back()
         l: List[Tarif] = self.context.session.query(Tarif) \
             .options(joinedload(Tarif.date_sources)) \
-            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id)))
+            .filter(Tarif.date_sources.any((DateSource.id >= ds_back) & (DateSource.id <= self.date_source.id))).all()
         print(f"{self.nb_ram + 1:.0f} objects in cache")
         for t in l:
             self.nb_ram += 1

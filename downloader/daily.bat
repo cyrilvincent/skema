@@ -8,4 +8,5 @@ move "D:\\icip\\backup\\icip.bak.3" "D:\\icip\\backup\\icip.bak.4"
 move "D:\\icip\\backup\\icip.bak.2" "D:\\icip\\backup\\icip.bak.3"
 move "D:\\icip\\backup\\icip.bak.1" "D:\\icip\\backup\\icip.bak.2"
 move "D:\\icip\\backup\\icip.bak" "D:\\icip\\backup\\icip.bak.1"
-D:\PostgreSQL\17\pgAdmin 4\runtime\pg_dump.exe --file "D:\\icip\\backup\\icip.bak" --host "localhost" --port "5432" --username "postgres" --no-password --format=c --large-objects --section=pre-data --section=data --section=post-data "icip"
+set PGPASSWORD=sa
+"D:\PostgreSQL\17\pgAdmin 4\runtime\pg_dump.exe" --file "D:\\icip\\backup\\icip.bak" --host "localhost" --port "5432" --username "postgres" --verbose --no-password --format=c --section=pre-data --section=data --section=post-data "icip"

@@ -1,8 +1,8 @@
 import datetime
-
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, UniqueConstraint, \
-    Table, Index, Date, DateTime
+from sqlalchemy import Integer, BigInteger, String, Float, CHAR, create_engine, Column, ForeignKey, Boolean, \
+    UniqueConstraint, \
+    Table, Index, Date, DateTime, SmallInteger
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.engine import Engine
 from typing import Optional, List
@@ -1234,6 +1234,8 @@ class Commune(Base):
     code = Column(CHAR(5), nullable=False, unique=True, index=True)
     nom = Column(String(255), nullable=False)
     nom_norm = Column(String(255), nullable=False)
+    lon = Column(Float)
+    lat = Column(Float)
     epci_id = Column(Integer)
     epci_nom = Column(String(255))
     bassin_vie_id = Column(CHAR(5), nullable=False)
@@ -1254,3 +1256,64 @@ class Commune(Base):
 
     def __repr__(self):
         return f"{self.code} {self.nom}"
+
+
+class Iris(Base):
+    __tablename__ = "iris"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(CHAR(9), nullable=False, unique=True, index=True)
+    nom = Column(String(255), nullable=False)
+    nom_norm = Column(String(255), nullable=False)
+    lon = Column(Float, nullable=False)
+    lat = Column(Float, nullable=False)
+    is_irisee = Column(Boolean, nullable=False)
+    arrondissement_code = Column(CHAR(5), nullable=False)
+    arrondissement_nom = Column(String(255), nullable=False)
+    type = Column(CHAR(1), nullable=False)
+    grd_quart_code = Column(CHAR(7))
+    grd_quart_nom = Column(String(255))
+    in_ctu = Column(Boolean, nullable=False)
+    commune: Commune = relationship("Commune", backref="iriss")
+    commune_id = Column(Integer, ForeignKey('iris.commune.id'), nullable=False, index=True)
+    date = Column(DateTime, nullable=False)
+
+    __table_args__ = ({"schema": "iris"},)
+
+    def __init__(self):
+        super().__init__()
+        self.date = datetime.datetime.now()
+
+    def __repr__(self):
+        return f"{self.code} {self.nom}"
+
+
+class CommuneMatrix(Base):
+    __tablename__ = "commune_matrix"
+
+    id = Column(BigInteger, primary_key=True)
+    code_id_low = Column(Integer, nullable=False, index=True)
+    code_id_high = Column(Integer, nullable=False, index=True)
+    od_km = Column(SmallInteger)
+    od_hc = Column(SmallInteger)
+    od_hp = Column(SmallInteger)
+    direct_km = Column(SmallInteger)
+    proximity = Column(SmallInteger)
+    route_km = Column(SmallInteger)
+    route_min = Column(SmallInteger)
+
+    __table_args__ = (UniqueConstraint('code_id_low', 'code_id_high'),
+                      Index('commune_matrix_code_low_code_high_ix', 'code_id_low', 'code_id_high'),
+                      {"schema": "iris"},)
+
+    def __init__(self, code1: int, code2: int):
+        super().__init__()
+        self.code_id_low, self.code_id_high = (code1, code2) if code1 < code2 else (code2, code1)
+
+    @property
+    def key(self):
+        return self.code_id_low, self.code_id_high
+
+    def __repr__(self):
+        return f"{self.id} {self.code_id_low} {self.code_id_high} {self.proximity} {self.direct_km}"
+
