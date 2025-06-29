@@ -1301,6 +1301,7 @@ class CommuneMatrix(Base):
     proximity = Column(SmallInteger)
     route_km = Column(SmallInteger)
     route_min = Column(SmallInteger)
+    route_hp_km = Column(SmallInteger)
 
     __table_args__ = (UniqueConstraint('code_id_low', 'code_id_high'),
                       Index('commune_matrix_code_low_code_high_ix', 'code_id_low', 'code_id_high'),
