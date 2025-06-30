@@ -1318,3 +1318,34 @@ class CommuneMatrix(Base):
     def __repr__(self):
         return f"{self.id} {self.code_id_low} {self.code_id_high} {self.proximity} {self.direct_km}"
 
+
+class IrisMatrix(Base):
+    __tablename__ = "iris_matrix"
+
+    id = Column(BigInteger, primary_key=True)
+    iris_id_from = Column(Integer, nullable=False, index=True)
+    iris_id_to = Column(Integer, nullable=False, index=True)
+    google_km = Column(SmallInteger)
+    google_hc = Column(SmallInteger)
+    google_hp = Column(SmallInteger)
+    direct_km = Column(SmallInteger)
+    proximity = Column(SmallInteger)
+    route_km = Column(SmallInteger)
+    route_min = Column(SmallInteger)
+    route_hp_min = Column(SmallInteger)
+
+    __table_args__ = (UniqueConstraint('iris_id_from', 'iris_id_to'),
+                      Index('commune_matrix_iris_id_from_to_ix', 'iris_id_from', 'iris_id_to'),
+                      {"schema": "iris"},)
+
+    def __init__(self, iris1: int, iris2: int):
+        super().__init__()
+        self.iris_id_from, self.iris_id_to = (iris1, iris2) if iris1 < iris2 else (iris2, iris1)
+
+    @property
+    def key(self):
+        return self.iris_id_from, self.iris_id_to
+
+    def __repr__(self):
+        return f"{self.id} {self.iris_id_from} {self.iris_id_to} {self.proximity} {self.direct_km}"
+
