@@ -99,9 +99,10 @@ class CommuneMatrixService:
                     dept2 = int(od.com2[:2])
                     if dept1 < 96 and dept2 < 96:
                         e = CommuneMatrix(int(od.com1), int(od.com2))
-                        e.od_km = int(round(od.km))
-                        e.od_hc = int(od.hc)
-                        e.od_hp = int(od.hp)
+                        if od.km != 9999:
+                            e.google_km = int(round(od.km))
+                            e.google_hc = int(od.hc)
+                            e.google_hp = int(od.hp)
                         self.context.session.add(e)
                         if self.nb_entity % 100000 == 0:
                             duration = time.perf_counter() - time0 + 1e-6
@@ -125,7 +126,7 @@ class CommuneMatrixService:
                     else:
                         e = self.entities[key]
                     if e.direct_km is None:
-                        if (self.all or e.od_km is not None or
+                        if (self.all or e.google_km is not None or
                                 str(e.code_id_low) in self.ban_communes or str(e.code_id_high) in self.ban_communes):
                             if e.code_id_low in self.communes and e.code_id_high in self.communes:
                                 commune1 = self.communes[e.code_id_low]
@@ -180,3 +181,15 @@ if __name__ == '__main__':
     # sqrt * 2 = 16000
     # 34518 / 34806 communes low
     # 34521 / 34806 communes high
+
+    # select distinct(iris.commune.id) from iris.iris
+    # join iris.commune on iris.iris.commune_id = iris.commune.id
+    # where is_irisee = true
+    # -- 1806
+    #
+    # SELECT iris.commune.* as c
+    # FROM iris.commune
+    # JOIN iris.iris ON iris.iris.commune_id = iris.commune.id
+    # GROUP BY iris.commune.id
+    # HAVING COUNT(iris.iris.id) > 1;
+    # -- 1806

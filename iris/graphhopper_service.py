@@ -1,21 +1,16 @@
 from threading import Thread
-from typing import Optional, Tuple
-from urllib import parse, request
-
-from sqlalchemy.orm import joinedload
-
-from sqlentities import Context, BAN, OSM, AdresseNorm, Commune, CommuneMatrix
+from urllib import request
+from sqlentities import Context, Commune, CommuneMatrix
 import argparse
 import time
 import art
 import config
-import numpy as np
-import ssl
 import urllib.request
 import urllib.parse
 import urllib.error
 import json
-import re
+import numpy as np
+
 
 time0 = time.perf_counter()
 
@@ -25,15 +20,35 @@ class GraphHopperService:
     def __init__(self, port=8989):
         self.url = f"http://localhost:{port}/route?key"
 
-    def get_json_from_lon_lat(self, lon1: float, lat1: float, lon2: float, lat2: float) -> str:
+    def get_json_from_lon_lat(self, lon1: float, lat1: float, lon2: float, lat2: float, nb_retry_to_4=0) -> str:
         dict = {"profile": "car", "alternative_route.max_paths": 1, "algorithm": "astarbi",
                 "elevation": False, "instructions": False, "details": [], "snap_preventions": [],
                 "points": [[lon1, lat1], [lon2, lat2]]}
         data = json.dumps(dict).encode("utf-8")
-        req = request.Request(self.url, data=data, headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req) as response:
-            s = response.read()
-            return s
+        try:
+            req = request.Request(self.url, data=data, headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req) as response:
+                s = response.read()
+                return s
+        except Exception as ex:
+            if nb_retry_to_4 == 0:
+                print(f"WARNING URLError n°{nb_retry_to_4 + 1}: {ex}")
+            if nb_retry_to_4 == 4:
+                raise ex
+            else:
+                time.sleep(nb_retry_to_4 * 10 + 1)
+                coef = 1
+                if nb_retry_to_4 == 1:
+                    coef = -1
+                elif nb_retry_to_4 == 2:
+                    coef = 2
+                elif nb_retry_to_4 == 3:
+                    coef = -2
+                lon1 += 0.01 * coef
+                lat1 += 0.01 * coef
+                lon2 += 0.01 * coef
+                lat2 += 0.01 * coef
+                return self.get_json_from_lon_lat(lon1, lat1, lon2, lat2, nb_retry_to_4 + 1)
 
     def get_distances_from_json(self, js: str) -> tuple[int, int] | None:
         dict = json.loads(js)
@@ -56,6 +71,8 @@ class GraphHopperService:
 
 
 class GraphHopperIrisService(Thread):
+
+    nb_error = 0
 
     def __init__(self, context, graphhopper_service: GraphHopperService,
                  num_thread: int, total_thread: int, distance_min: int, distance_max: int):
@@ -82,7 +99,7 @@ class GraphHopperIrisService(Thread):
                 return True
         return False
 
-    def get_heure_pleine(self, min: int, commune1: Commune, commune2: Commune) -> int:  # todo paris puis bordeaux, toulouse, marseille, lyon puis epci
+    def get_heure_pleine(self, min: int, commune1: Commune, commune2: Commune) -> int:
         coef = 1.0
         top5 = ["LYON", "MARSEILLE", "BORDEAUX", "NICE"]
         if "PARIS" in commune1.epci_nom.upper() and "PARIS" in commune2.epci_nom.upper():
@@ -114,16 +131,16 @@ class GraphHopperIrisService(Thread):
         if km is not None:
             duration1 = time.perf_counter() - time1
             duration0 = time.perf_counter() - time0
-            print(f"Thread {self.num_thread} {commune_matrix.id} "
-                  f"{commune_matrix.code_id_low}=>{commune_matrix.code_id_high}: {km}km {min}min "
-                  f"@{duration1:.1f}s/query {self.nb_entity + 1} rows ({(self.nb_entity / self.total) * 100:.2f}%) in "
-                  f"{int(duration0)}s")
+            if self.num_thread == 0:
+                print(f"Thread {self.num_thread} {commune_matrix.id} "
+                      f"{commune_matrix.code_id_low}=>{commune_matrix.code_id_high}: {km}km {min}min "
+                      f"@{duration1:.1f}s/query {self.nb_entity + 1} rows ({(self.nb_entity / self.total) * 100:.2f}%)"
+                      f" in {int(duration0)}s")
             commune_matrix.route_km = km
             commune_matrix.route_min = min
-            commune_matrix.route_hp_km = self.get_heure_pleine(min, commune1, commune2)
+            commune_matrix.route_hp_min = self.get_heure_pleine(min, commune1, commune2)
 
     def gh_distances(self):
-        print("Compute GraphHopper distances")
         l = self.context.session.query(CommuneMatrix).filter(
             (CommuneMatrix.route_km.is_(None)) &
             (CommuneMatrix.direct_km.isnot(None)) &
@@ -131,14 +148,43 @@ class GraphHopperIrisService(Thread):
             (CommuneMatrix.direct_km <= self.distance_max) &
             (CommuneMatrix.id % self.total_thread == self.num_thread)).all()
         self.total = len(l)
-        print(f"Found {self.total} entities")
+        print(f"Found {self.total} entities in thread {self.num_thread}")
         for e in l:
-            self.gh_distance(e)
-            self.nb_entity += 1
-            self.context.session.commit()
+            try:
+                self.gh_distance(e)
+                self.nb_entity += 1
+                self.context.session.commit()
+            except Exception as ex:
+                GraphHopperIrisService.nb_error += 1
+                print(f"Error GraphHopper n°{GraphHopperIrisService.nb_error} on {e} in thread {self.num_thread}: {ex}")
+                time.sleep(10)
 
     def run(self):
+        print(f"Starting thread {self.num_thread}")
         self.gh_distances()
+
+
+class GraphHopperLauncher:
+
+    def __init__(self, graphhopper_service: GraphHopperService, distance_min: int, distance_max: int, nb_thread=50):
+        self.service = graphhopper_service
+        self.distance_min = distance_min
+        self.distance_max = distance_max
+        self.nb_thread = nb_thread + np.random.randint(nb_thread // 10)
+        self.threads: list[GraphHopperIrisService] = []
+
+    def start(self):
+        print(f"Starting GraphHopper clients in {self.nb_thread} threads")
+        for i in range(self.nb_thread):
+            context = Context()
+            context.create(echo=args.echo, expire_on_commit=False)
+            gs = GraphHopperIrisService(context, service, num_thread=i, total_thread=self.nb_thread,
+                                        distance_min=self.distance_min, distance_max=self.distance_max)
+            gs.start()
+            time.sleep(1)
+            self.threads.append(gs)
+        for thread in self.threads:
+            thread.join()
 
 
 if __name__ == '__main__':
@@ -151,20 +197,20 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="GraphHopper Service")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     parser.add_argument("-p", "--port", help="TCP Port", type=int, default=8989)
+    parser.add_argument("-m", "--min", help="Minimum distance", type=int, default=3)
+    parser.add_argument("-d", "--max", help="Maximum distance", type=int, default=100)
+    parser.add_argument("-t", "--nb_thread", help="Number of thread", type=int, default=50)
     args = parser.parse_args()
     service = GraphHopperService(args.port)
-    total_thread = 50
-    threads = []
-    for i in range(total_thread):  # todo put this code into a launcher class
-        context = Context()
-        context.create(echo=args.echo, expire_on_commit=False)
-        gs = GraphHopperIrisService(context, service, num_thread=i, total_thread=total_thread, distance_min=5, distance_max=10)
-        gs.start()
-        threads.append(gs)
-    threads[0].join()
-    print(f"Database {threads[0].context.db_name}: {threads[0].context.db_size():.0f} Mb")
+    launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread)
+    launcher.start()
+
+    # -m 3 -d 150 -t 100 pour le serveur
 
     # >3 <100 : 22M = 506j
     # >5 <50 : 8M = 185j
     # 1M = 23j
-    # 50 thread passe facile
+    # 50 threads
+    # 1M = 11h
+    # 8M = 4j
+    # 22M = 10j

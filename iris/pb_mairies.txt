@@ -1,0 +1,13 @@
+Je travaille sur les matrices de distance
+Sur un territoire non irisé
+J’ai trouvé 2 datasets :
+•	Villes de frances (https://www.data.gouv.fr/fr/datasets/villes-de-france) qui me donne le GPS du centroid
+•	Georef-France-iris.csv qui me donne des polygonnes, je calcul ensuite le centroid et je tombe sur à peu près le même résultat
+
+Hors tu voudrais les coordonnées GPS du centre administratif (mairie, …)
+
+D’après cette discussion : https://www.data.gouv.fr/fr/datasets/villes-de-france/discussions/
+L’adresse des mairies n’est pas normalisée
+Après recherche, je ne trouve pas de dataset sur les mairies
+
+J’ai cependant le site de l’AMF https://www.amf.asso.fr/ qui permet d’obtenir l’adresse de la mairie mais ca demande un gros scraping

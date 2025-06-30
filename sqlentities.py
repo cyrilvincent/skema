@@ -1294,14 +1294,14 @@ class CommuneMatrix(Base):
     id = Column(BigInteger, primary_key=True)
     code_id_low = Column(Integer, nullable=False, index=True)
     code_id_high = Column(Integer, nullable=False, index=True)
-    od_km = Column(SmallInteger)
-    od_hc = Column(SmallInteger)
-    od_hp = Column(SmallInteger)
+    google_km = Column(SmallInteger)
+    google_hc = Column(SmallInteger)
+    google_hp = Column(SmallInteger)
     direct_km = Column(SmallInteger)
     proximity = Column(SmallInteger)
     route_km = Column(SmallInteger)
     route_min = Column(SmallInteger)
-    route_hp_km = Column(SmallInteger)
+    route_hp_min = Column(SmallInteger)
 
     __table_args__ = (UniqueConstraint('code_id_low', 'code_id_high'),
                       Index('commune_matrix_code_low_code_high_ix', 'code_id_low', 'code_id_high'),
