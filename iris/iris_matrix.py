@@ -14,9 +14,8 @@ time0 = time.perf_counter()
 
 class IrisMatrixService:
 
-    def __init__(self, context, all):
+    def __init__(self, context):
         self.context = context
-        self.all = all
         self.row_num = 0
         self.nb_ram = 0
         self.nb_entity = 0
@@ -24,7 +23,9 @@ class IrisMatrixService:
         self.entities: set[tuple[int, int]] = set()
         self.iriss: dict[int, Iris] = {}
         self.max_direct_distance = 200
-        self.nb_commit = 100000
+        self.max_lon_lat = 2
+        self.nb_commit = 10000
+        self.total = 0
 
     def make_cache(self):
         print("Making cache")
@@ -46,6 +47,13 @@ class IrisMatrixService:
             self.entities.add((e.iris_id_from, e.iris_id_to))
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
+
+    def are_rapid_near(self, lon1, lat1, lon2, lat2) -> bool:
+        lat = abs(lat1 - lat2)
+        if lat > self.max_lon_lat:
+            return False
+        lon = abs(lon1 - lon2)
+        return lon < self.max_lon_lat
 
     def compute_distance(self, lon1, lat1, lon2, lat2):
         r = 6373.0
@@ -84,11 +92,10 @@ class IrisMatrixService:
 
     def create(self):
         print("Create iris matrix")
-        total = len(self.iriss) ** 2
-        nb_pair = 0
+        self.total = len(self.iriss) ** 2
         for iris_id1 in self.iriss.keys():
             for iris_id2 in self.iriss.keys():
-                nb_pair += 1
+                self.row_num += 1
                 if iris_id1 != iris_id2:
                     if (iris_id1, iris_id2) not in self.entities:
                         e = IrisMatrix(iris_id1, iris_id2)
@@ -103,25 +110,24 @@ class IrisMatrixService:
                                         e.google_km = int(round(od.km))
                                         e.google_hc = int(od.hc)
                                         e.google_hp = int(od.hp)
-                            d = self.compute_distance(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
-                            km = int(round(d))
+                            km = 9999
+                            near = self.are_rapid_near(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
+                            if near:
+                                d = self.compute_distance(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
+                                km = int(round(d))
                             if km < self.max_direct_distance or e.google_km is not None:
-                                e.direct_km = km
-                                e.proximity = self.compute_proximity(iris1, iris2)
+                                if near:
+                                    e.direct_km = km
+                                    e.proximity = self.compute_proximity(iris1, iris2)
                                 self.context.session.add(e)
                                 self.nb_entity += 1
-                                if self.row_num % 100000 == 0:
-                                    duration = time.perf_counter() - time0 + 1e-6
-                                    print(f"Creating {self.row_num} rows {nb_pair * 100 / total:.1f}% in {int(duration)}s")
+                                if self.nb_entity % self.nb_commit == 0:
+                                    duration = time.perf_counter() - time0
+                                    print(f"Creating {self.nb_entity} rows "
+                                          f"{self.row_num * 100 / self.total:.2f}% in {int(duration)}s")
                                     self.row_num += 1
-                                    if self.row_num % self.nb_commit == 0:
-                                        self.context.session.commit()
+                                    self.context.session.commit()
         self.context.session.commit()
-
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -136,17 +142,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
-    ims = IrisMatrixService(context, args.all)
+    ims = IrisMatrixService(context)
     print(f"Database {ims.context.db_name}: {ims.context.db_size():.0f} MB")
     ims.make_cache()
     ims.create()
     print(f"Parse {ims.nb_entity} entities in {time.perf_counter() - time0:.0f} s")
-
-    # 62 Million of pair / 605 Million
-    # 61.6 Million of pairs with direct_km
-    # sqrt * 2 = 16000
-    # 34518 / 34806 communes low
-    # 34521 / 34806 communes high
 
     # select distinct(iris.commune.id) from iris.iris
     # join iris.commune on iris.iris.commune_id = iris.commune.id
@@ -159,3 +159,7 @@ if __name__ == '__main__':
     # GROUP BY iris.commune.id
     # HAVING COUNT(iris.iris.id) > 1;
     # -- 1806
+
+    # nbrow with google_km in commune_matrix = 8156576 23%
+    # nbrow wih google_km 14.6M 3.7%
+    # total 393M

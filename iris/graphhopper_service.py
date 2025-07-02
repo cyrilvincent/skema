@@ -1,6 +1,6 @@
 from threading import Thread
 from urllib import request
-from sqlentities import Context, Commune, CommuneMatrix
+from sqlentities import Context, Commune, CommuneMatrix, Iris, IrisMatrix
 import argparse
 import time
 import art
@@ -92,6 +92,9 @@ class GraphHopperIrisService(Thread):
     def get_commune_by_code(self, code: str) -> Commune:
         return self.context.session.query(Commune.code == code).one()
 
+    def get_iris_by_id(self, id: int) -> Iris:
+        return self.context.session.get(Iris, id)
+
     def any_in(self, l: list[str], s: str) -> bool:
         s = s.upper()
         for value in l:
@@ -123,7 +126,14 @@ class GraphHopperIrisService(Thread):
             return km, min
         return None, None
 
-    def gh_distance(self, commune_matrix: CommuneMatrix):
+    def gh_distance_from_iriss(self, iris1: Iris, iris2: Iris) -> tuple[int | None, int | None]:
+        if iris1.lon is not None and iris2.lon is not None:
+            js = self.service.get_json_from_lon_lat(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
+            km, min = self.service.get_distances_from_json(js)
+            return km, min
+        return None, None
+
+    def gh_distance_for_commune(self, commune_matrix: CommuneMatrix):
         commune1 = self.get_commune_by_id(commune_matrix.code_id_low)
         commune2 = self.get_commune_by_id(commune_matrix.code_id_high)
         time1 = time.perf_counter()
@@ -140,7 +150,35 @@ class GraphHopperIrisService(Thread):
             commune_matrix.route_min = min
             commune_matrix.route_hp_min = self.get_heure_pleine(min, commune1, commune2)
 
-    def gh_distances(self):
+    def gh_distance_for_iris(self, iris_matrix: IrisMatrix):
+        iris1 = self.get_iris_by_id(iris_matrix.iris_id_from)
+        iris2 = self.get_iris_by_id(iris_matrix.iris_id_to)
+        time1 = time.perf_counter()
+        if iris_matrix.google_km is not None:
+            iris_matrix.route_km = iris_matrix.google_km
+            iris_matrix.route_min = int(iris_matrix.google_hc * 1.05)
+            if iris1.commune is None or iris2.commune is None:  # todo a virer
+                print("ERROR 2")
+                quit(2)
+            iris_matrix.route_hp_min = self.get_heure_pleine(iris_matrix.google_hc, iris1.commune, iris2.commune)
+        else:
+            km, min = self.gh_distance_from_iriss(iris1, iris2)
+            if km is not None:
+                duration1 = time.perf_counter() - time1
+                duration0 = time.perf_counter() - time0
+                if self.num_thread == 0:
+                    print(f"Thread {self.num_thread} {iris_matrix.id} "
+                          f"{iris_matrix.iris_id_from}=>{iris_matrix.iris_id_to}: {km}km {min}min "
+                          f"@{duration1:.1f}s/query {self.nb_entity + 1} rows ({(self.nb_entity / self.total) * 100:.2f}%)"
+                          f" in {int(duration0)}s")
+                iris_matrix.route_km = km
+                iris_matrix.route_min = min
+                if iris1.commune is None or iris2.commune is None:  # todo a virer
+                    print("ERROR 1")
+                    quit(1)
+                iris_matrix.route_hp_min = self.get_heure_pleine(min, iris1.commune, iris2.commune)
+
+    def gh_distances_for_communes(self):
         l = self.context.session.query(CommuneMatrix).filter(
             (CommuneMatrix.route_km.is_(None)) &
             (CommuneMatrix.direct_km.isnot(None)) &
@@ -151,7 +189,7 @@ class GraphHopperIrisService(Thread):
         print(f"Found {self.total} entities in thread {self.num_thread}")
         for e in l:
             try:
-                self.gh_distance(e)
+                self.gh_distance_for_commune(e)
                 self.nb_entity += 1
                 self.context.session.commit()
             except Exception as ex:
@@ -159,9 +197,28 @@ class GraphHopperIrisService(Thread):
                 print(f"Error GraphHopper n°{GraphHopperIrisService.nb_error} on {e} in thread {self.num_thread}: {ex}")
                 time.sleep(10)
 
+    def gh_distances_for_iriss(self):
+        l = self.context.session.query(IrisMatrix).filter(
+            (IrisMatrix.route_km.is_(None)) &
+            (IrisMatrix.direct_km.isnot(None)) &
+            (IrisMatrix.direct_km >= self.distance_min) &
+            (IrisMatrix.direct_km <= self.distance_max) &
+            (IrisMatrix.id % self.total_thread == self.num_thread)).all()
+        self.total = len(l)
+        print(f"Found {self.total} entities in thread {self.num_thread}")
+        for e in l:
+            try:
+                self.gh_distance_for_iris(e)
+                self.nb_entity += 1
+                self.context.session.commit()
+            except Exception as ex:
+                GraphHopperIrisService.nb_error += 1
+                print(f"Error GraphHopper n°{GraphHopperIrisService.nb_error} on {e} in thread {self.num_thread}: {ex}")
+                time.sleep(5)
+
     def run(self):
         print(f"Starting thread {self.num_thread}")
-        self.gh_distances()
+        self.gh_distances_for_iriss()
 
 
 class GraphHopperLauncher:
@@ -170,7 +227,7 @@ class GraphHopperLauncher:
         self.service = graphhopper_service
         self.distance_min = distance_min
         self.distance_max = distance_max
-        self.nb_thread = nb_thread + np.random.randint(nb_thread // 10)
+        self.nb_thread = nb_thread + np.random.randint(max(1, nb_thread // 10))
         self.threads: list[GraphHopperIrisService] = []
 
     def start(self):
@@ -181,7 +238,7 @@ class GraphHopperLauncher:
             gs = GraphHopperIrisService(context, service, num_thread=i, total_thread=self.nb_thread,
                                         distance_min=self.distance_min, distance_max=self.distance_max)
             gs.start()
-            time.sleep(1)
+            time.sleep(10)
             self.threads.append(gs)
         for thread in self.threads:
             thread.join()
@@ -204,6 +261,8 @@ if __name__ == '__main__':
     service = GraphHopperService(args.port)
     launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread)
     launcher.start()
+
+    # -m 5 -d 5 -t 1
 
     # -m 3 -d 150 -t 100 pour le serveur
 

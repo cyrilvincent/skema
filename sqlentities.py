@@ -1338,9 +1338,10 @@ class IrisMatrix(Base):
                       Index('commune_matrix_iris_id_from_to_ix', 'iris_id_from', 'iris_id_to'),
                       {"schema": "iris"},)
 
-    def __init__(self, iris1: int, iris2: int):
+    def __init__(self, iris_id_from: int, iris_id_to: int):
         super().__init__()
-        self.iris_id_from, self.iris_id_to = (iris1, iris2) if iris1 < iris2 else (iris2, iris1)
+        self.iris_id_from = iris_id_from
+        self.iris_id_to = iris_id_to
 
     @property
     def key(self):

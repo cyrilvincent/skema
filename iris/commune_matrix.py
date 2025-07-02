@@ -193,3 +193,6 @@ if __name__ == '__main__':
     # GROUP BY iris.commune.id
     # HAVING COUNT(iris.iris.id) > 1;
     # -- 1806
+
+    # nb_row without google_km = 53798988 87%
+    # nbrow with google_km = 8156576 23%
