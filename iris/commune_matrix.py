@@ -100,9 +100,9 @@ class CommuneMatrixService:
                     if dept1 < 96 and dept2 < 96:
                         e = CommuneMatrix(int(od.com1), int(od.com2))
                         if od.km != 9999:
-                            e.google_km = int(round(od.km))
-                            e.google_hc = int(od.hc)
-                            e.google_hp = int(od.hp)
+                            e.od_km = int(round(od.km))
+                            e.od_hc = int(od.hc)
+                            e.od_hp = int(od.hp)
                         self.context.session.add(e)
                         if self.nb_entity % 100000 == 0:
                             duration = time.perf_counter() - time0 + 1e-6
@@ -126,7 +126,7 @@ class CommuneMatrixService:
                     else:
                         e = self.entities[key]
                     if e.direct_km is None:
-                        if (self.all or e.google_km is not None or
+                        if (self.all or e.od_km is not None or
                                 str(e.code_id_low) in self.ban_communes or str(e.code_id_high) in self.ban_communes):
                             if e.code_id_low in self.communes and e.code_id_high in self.communes:
                                 commune1 = self.communes[e.code_id_low]

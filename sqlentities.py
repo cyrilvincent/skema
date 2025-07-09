@@ -1247,6 +1247,14 @@ class Commune(Base):
     dept: Dept = relationship("Dept")
     dept_id = Column(Integer, ForeignKey('dept.id'), nullable=False, index=True)
     date = Column(DateTime, nullable=False)
+    type = Column(String(5))
+    parent = Column(CHAR(5))
+    date_debut = Column(Date)
+    date_fin = Column(Date)
+    old_type = Column(String(5))
+    old_nom = Column(String(255))
+    old_nom_norm = Column(String(255))
+    old_date_fin = Column(Date)
 
     __table_args__ = ({"schema": "iris"},)
 
@@ -1294,9 +1302,9 @@ class CommuneMatrix(Base):
     id = Column(BigInteger, primary_key=True)
     code_id_low = Column(Integer, nullable=False, index=True)
     code_id_high = Column(Integer, nullable=False, index=True)
-    google_km = Column(SmallInteger)
-    google_hc = Column(SmallInteger)
-    google_hp = Column(SmallInteger)
+    od_km = Column(SmallInteger)
+    od_hc = Column(SmallInteger)
+    od_hp = Column(SmallInteger)
     direct_km = Column(SmallInteger)
     proximity = Column(SmallInteger)
     route_km = Column(SmallInteger)
@@ -1316,7 +1324,7 @@ class CommuneMatrix(Base):
         return self.code_id_low, self.code_id_high
 
     def __repr__(self):
-        return f"{self.id} {self.code_id_low} {self.code_id_high} {self.proximity} {self.direct_km}"
+        return f"{self.id} {self.code_id_low}=>{self.code_id_high} {self.direct_km}km"
 
 
 class IrisMatrix(Base):
@@ -1325,9 +1333,9 @@ class IrisMatrix(Base):
     id = Column(BigInteger, primary_key=True)
     iris_id_from = Column(Integer, nullable=False, index=True)
     iris_id_to = Column(Integer, nullable=False, index=True)
-    google_km = Column(SmallInteger)
-    google_hc = Column(SmallInteger)
-    google_hp = Column(SmallInteger)
+    od_km = Column(SmallInteger)
+    od_hc = Column(SmallInteger)
+    od_hp = Column(SmallInteger)
     direct_km = Column(SmallInteger)
     proximity = Column(SmallInteger)
     route_km = Column(SmallInteger)
@@ -1348,5 +1356,5 @@ class IrisMatrix(Base):
         return self.iris_id_from, self.iris_id_to
 
     def __repr__(self):
-        return f"{self.id} {self.iris_id_from} {self.iris_id_to} {self.proximity} {self.direct_km}"
+        return f"{self.id} {self.iris_id_from}=>{self.iris_id_to} {self.direct_km}km"
 

@@ -31,12 +31,12 @@ class GraphHopperService:
                 s = response.read()
                 return s
         except Exception as ex:
-            if nb_retry_to_4 == 0:
-                print(f"WARNING URLError n°{nb_retry_to_4 + 1}: {ex}")
+            # if nb_retry_to_4 == 0:
+            #     print(f"WARNING URLError n°{nb_retry_to_4 + 1}: {ex}")
             if nb_retry_to_4 == 4:
                 raise ex
             else:
-                time.sleep(nb_retry_to_4 * 10 + 1)
+                time.sleep(nb_retry_to_4 * 1 + 1)
                 coef = 1
                 if nb_retry_to_4 == 1:
                     coef = -1
@@ -72,8 +72,6 @@ class GraphHopperService:
 
 class GraphHopperIrisService(Thread):
 
-    nb_error = 0
-
     def __init__(self, context, graphhopper_service: GraphHopperService,
                  num_thread: int, total_thread: int, distance_min: int, distance_max: int):
         super().__init__()
@@ -85,6 +83,7 @@ class GraphHopperIrisService(Thread):
         self.distance_max = distance_max
         self.nb_entity = 0
         self.total = 0
+        self.nb_error = 0
 
     def get_commune_by_id(self, id: int) -> Commune:
         return self.context.session.get(Commune, id)
@@ -96,24 +95,27 @@ class GraphHopperIrisService(Thread):
         return self.context.session.get(Iris, id)
 
     def any_in(self, l: list[str], s: str) -> bool:
-        s = s.upper()
         for value in l:
             if value in s:
                 return True
         return False
 
-    def get_heure_pleine(self, min: int, commune1: Commune, commune2: Commune) -> int:
+    def get_hp(self, min: int, commune1: Commune, commune2: Commune) -> int:
         coef = 1.0
         top5 = ["LYON", "MARSEILLE", "BORDEAUX", "NICE"]
-        if "PARIS" in commune1.epci_nom.upper() and "PARIS" in commune2.epci_nom.upper():
+        s1 = "" if commune1.epci_nom is None else commune1.epci_nom.upper()
+        s2 = "" if commune2.epci_nom is None else commune2.epci_nom.upper()
+        if "PARIS" in s1 and "PARIS" in s2:
             coef = 1.7
-        if "PARIS" in commune1.epci_nom.upper() or "PARIS" in commune2.epci_nom.upper():
+        elif "PARIS" in s1 or "PARIS" in s2:
             coef = 1.5
-        elif self.any_in(top5, commune1.epci_nom) and self.any_in(top5, commune2.epci_nom):
+        elif self.any_in(top5, s1) and self.any_in(top5, s2):
             coef = 1.4
-        elif self.any_in(top5, commune1.epci_nom) or self.any_in(top5, commune2.epci_nom):
+        elif self.any_in(top5, s1) or self.any_in(top5, s2):
             coef = 1.3
-        elif len(commune1.iriss) > 4 or len(commune2.iriss) > 4:
+        elif len(commune1.iriss) > 9 and len(commune2.iriss) > 9:
+            coef = 1.25
+        elif len(commune1.iriss) > 9 or len(commune2.iriss) > 9:
             coef = 1.2
         elif len(commune1.iriss) > 1 or len(commune2.iriss) > 1:
             coef = 1.1
@@ -148,19 +150,16 @@ class GraphHopperIrisService(Thread):
                       f" in {int(duration0)}s")
             commune_matrix.route_km = km
             commune_matrix.route_min = min
-            commune_matrix.route_hp_min = self.get_heure_pleine(min, commune1, commune2)
+            commune_matrix.route_hp_min = self.get_hp(min, commune1, commune2)
 
     def gh_distance_for_iris(self, iris_matrix: IrisMatrix):
         iris1 = self.get_iris_by_id(iris_matrix.iris_id_from)
         iris2 = self.get_iris_by_id(iris_matrix.iris_id_to)
         time1 = time.perf_counter()
-        if iris_matrix.google_km is not None:
-            iris_matrix.route_km = iris_matrix.google_km
-            iris_matrix.route_min = int(iris_matrix.google_hc * 1.05)
-            if iris1.commune is None or iris2.commune is None:  # todo a virer
-                print("ERROR 2")
-                quit(2)
-            iris_matrix.route_hp_min = self.get_heure_pleine(iris_matrix.google_hc, iris1.commune, iris2.commune)
+        if iris_matrix.od_km is not None:
+            iris_matrix.route_km = iris_matrix.od_km
+            iris_matrix.route_min = iris_matrix.od_hc
+            iris_matrix.route_hp_min = iris_matrix.od_hp
         else:
             km, min = self.gh_distance_from_iriss(iris1, iris2)
             if km is not None:
@@ -173,10 +172,7 @@ class GraphHopperIrisService(Thread):
                           f" in {int(duration0)}s")
                 iris_matrix.route_km = km
                 iris_matrix.route_min = min
-                if iris1.commune is None or iris2.commune is None:  # todo a virer
-                    print("ERROR 1")
-                    quit(1)
-                iris_matrix.route_hp_min = self.get_heure_pleine(min, iris1.commune, iris2.commune)
+                iris_matrix.route_hp_min = self.get_hp(min, iris1.commune, iris2.commune)
 
     def gh_distances_for_communes(self):
         l = self.context.session.query(CommuneMatrix).filter(
@@ -193,12 +189,12 @@ class GraphHopperIrisService(Thread):
                 self.nb_entity += 1
                 self.context.session.commit()
             except Exception as ex:
-                GraphHopperIrisService.nb_error += 1
-                print(f"Error GraphHopper n°{GraphHopperIrisService.nb_error} on {e} in thread {self.num_thread}: {ex}")
-                time.sleep(10)
+                self.nb_error += 1
+                print(f"Error GraphHopper n°{self.num_thread}.{self.nb_error} on {e}: {ex}")
+                time.sleep(5)
 
     def gh_distances_for_iriss(self):
-        l = self.context.session.query(IrisMatrix).filter(
+        l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
             (IrisMatrix.route_km.is_(None)) &
             (IrisMatrix.direct_km.isnot(None)) &
             (IrisMatrix.direct_km >= self.distance_min) &
@@ -208,12 +204,14 @@ class GraphHopperIrisService(Thread):
         print(f"Found {self.total} entities in thread {self.num_thread}")
         for e in l:
             try:
-                self.gh_distance_for_iris(e)
                 self.nb_entity += 1
+                if (e.iris_id_from > 2000000000 > e.iris_id_to) or (e.iris_id_from < 2000000000 < e.iris_id_to):
+                    continue  # Corse
+                self.gh_distance_for_iris(e)
                 self.context.session.commit()
             except Exception as ex:
-                GraphHopperIrisService.nb_error += 1
-                print(f"Error GraphHopper n°{GraphHopperIrisService.nb_error} on {e} in thread {self.num_thread}: {ex}")
+                self.nb_error += 1
+                print(f"Error GraphHopper n°{self.num_thread}.{self.nb_error} on {e}: {ex}")
                 time.sleep(5)
 
     def run(self):
@@ -223,22 +221,24 @@ class GraphHopperIrisService(Thread):
 
 class GraphHopperLauncher:
 
-    def __init__(self, graphhopper_service: GraphHopperService, distance_min: int, distance_max: int, nb_thread=50):
+    def __init__(self, graphhopper_service: GraphHopperService,
+                 distance_min: int, distance_max: int, nb_thread=50, sleep=10):
         self.service = graphhopper_service
         self.distance_min = distance_min
         self.distance_max = distance_max
-        self.nb_thread = nb_thread + np.random.randint(max(1, nb_thread // 10))
+        self.nb_thread = nb_thread  # + np.random.randint(max(1, nb_thread // 10))
         self.threads: list[GraphHopperIrisService] = []
+        self.sleep = sleep
 
     def start(self):
-        print(f"Starting GraphHopper clients in {self.nb_thread} threads")
+        print(f"Starting GraphHopper clients with {self.nb_thread} threads")
         for i in range(self.nb_thread):
             context = Context()
             context.create(echo=args.echo, expire_on_commit=False)
             gs = GraphHopperIrisService(context, service, num_thread=i, total_thread=self.nb_thread,
                                         distance_min=self.distance_min, distance_max=self.distance_max)
             gs.start()
-            time.sleep(10)
+            time.sleep(self.sleep)
             self.threads.append(gs)
         for thread in self.threads:
             thread.join()
@@ -257,9 +257,10 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--min", help="Minimum distance", type=int, default=3)
     parser.add_argument("-d", "--max", help="Maximum distance", type=int, default=100)
     parser.add_argument("-t", "--nb_thread", help="Number of thread", type=int, default=50)
+    parser.add_argument("-s", "--thread_sleep", help="Sleeping between 2 threads", type=int, default=10)
     args = parser.parse_args()
     service = GraphHopperService(args.port)
-    launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread)
+    launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread, args.thread_sleep)
     launcher.start()
 
     # -m 5 -d 5 -t 1
@@ -273,3 +274,11 @@ if __name__ == '__main__':
     # 1M = 11h
     # 8M = 4j
     # 22M = 10j
+
+    # iris : 805070000
+    # iris : 2023660000 2B
+
+    # ca bug bcp à marseille select * from iris.iris_matrix
+    # where route_km - direct_km > 200
+    # and od_km is null
+    # refaire passer google 130540101 132070301 faire une verif si route_km > direct_km + 500 ?

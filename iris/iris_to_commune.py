@@ -72,7 +72,7 @@ class IrisToCommuneTransferer:
                     self.iris_to_commune(iris2, commune2)
                 else:
                     iris2 = commune2.iriss[0]
-                iris_matrix = self.get_iris_matrix_by_ids(iris1, iris2)
+                iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
                 if iris_matrix.route_km is not None:
                     self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
                     self.context.session.commit()

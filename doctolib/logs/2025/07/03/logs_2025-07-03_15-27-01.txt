@@ -1,0 +1,979 @@
+2025-07-03 15:27:01,829 - INFO: Logging Started
+2025-07-03 15:27:01,829 - DEBUG: scrapper init
+2025-07-03 15:27:02,601 - DEBUG: wrapper created for : browser.new_context()
+2025-07-03 15:27:02,601 - DEBUG: wrapper created for : browser.new_page()
+2025-07-03 15:27:02,616 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:27:02,806 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:27:02,806 - INFO: Scraper Entered
+2025-07-03 15:27:02,806 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json
+2025-07-03 15:27:04,203 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=2
+2025-07-03 15:27:04,690 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=3
+2025-07-03 15:27:05,257 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=4
+2025-07-03 15:27:05,783 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=5
+2025-07-03 15:27:06,306 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=6
+2025-07-03 15:27:06,874 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=7
+2025-07-03 15:27:07,431 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=8
+2025-07-03 15:27:07,928 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=9
+2025-07-03 15:27:08,459 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=10
+2025-07-03 15:27:08,933 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=11
+2025-07-03 15:27:09,941 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble.json?page=12
+2025-07-03 15:27:11,093 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontaine/nadia-monges
+2025-07-03 15:27:11,093 - INFO: try 0...
+2025-07-03 15:27:11,093 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontaine/nadia-monges.json
+2025-07-03 15:27:11,535 - INFO: Success !
+2025-07-03 15:27:11,535 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/lucile-grasset
+2025-07-03 15:27:11,535 - INFO: try 0...
+2025-07-03 15:27:11,535 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/lucile-grasset.json
+2025-07-03 15:27:11,992 - INFO: Success !
+2025-07-03 15:27:11,992 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voreppe/joseph-balmand
+2025-07-03 15:27:11,992 - INFO: try 0...
+2025-07-03 15:27:11,992 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voreppe/joseph-balmand.json
+2025-07-03 15:27:12,404 - INFO: Success !
+2025-07-03 15:27:12,404 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voiron/pierre-bandolin
+2025-07-03 15:27:12,404 - INFO: try 0...
+2025-07-03 15:27:12,404 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voiron/pierre-bandolin.json
+2025-07-03 15:27:12,853 - INFO: Success !
+2025-07-03 15:27:12,853 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/laboratoire/voiron/teleconsultation-biogroup
+2025-07-03 15:27:12,853 - INFO: try 0...
+2025-07-03 15:27:12,853 - INFO: Going to site : https://www.doctolib.fr/laboratoire/voiron/teleconsultation-biogroup.json
+2025-07-03 15:27:13,211 - INFO: Success !
+2025-07-03 15:27:13,211 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/marches/clement-betrancourt
+2025-07-03 15:27:13,211 - INFO: try 0...
+2025-07-03 15:27:13,211 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/marches/clement-betrancourt.json
+2025-07-03 15:27:13,631 - INFO: Success !
+2025-07-03 15:27:13,631 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/loic-healy
+2025-07-03 15:27:13,631 - INFO: try 0...
+2025-07-03 15:27:13,631 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/loic-healy.json
+2025-07-03 15:27:13,971 - INFO: Success !
+2025-07-03 15:27:13,971 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/clementine-masson
+2025-07-03 15:27:13,971 - INFO: try 0...
+2025-07-03 15:27:13,971 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/clementine-masson.json
+2025-07-03 15:27:14,434 - INFO: Success !
+2025-07-03 15:27:14,434 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-cheylas/lionel-vandevenne
+2025-07-03 15:27:14,434 - INFO: try 0...
+2025-07-03 15:27:14,434 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-cheylas/lionel-vandevenne.json
+2025-07-03 15:27:14,829 - INFO: Success !
+2025-07-03 15:27:14,829 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-versoud/josephine-lemaitre
+2025-07-03 15:27:14,829 - INFO: try 0...
+2025-07-03 15:27:14,829 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-versoud/josephine-lemaitre.json
+2025-07-03 15:27:15,486 - INFO: Success !
+2025-07-03 15:27:15,486 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/damien-compois
+2025-07-03 15:27:15,486 - INFO: try 0...
+2025-07-03 15:27:15,486 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/damien-compois.json
+2025-07-03 15:27:15,958 - INFO: Success !
+2025-07-03 15:27:15,959 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/voiron/la-pharmacie-voiron
+2025-07-03 15:27:15,959 - INFO: try 0...
+2025-07-03 15:27:15,959 - INFO: Going to site : https://www.doctolib.fr/pharmacie/voiron/la-pharmacie-voiron.json
+2025-07-03 15:27:16,334 - INFO: Success !
+2025-07-03 15:27:16,334 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/bertrand-faitg
+2025-07-03 15:27:16,334 - INFO: try 0...
+2025-07-03 15:27:16,334 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/bertrand-faitg.json
+2025-07-03 15:27:16,710 - INFO: Success !
+2025-07-03 15:27:16,710 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-egreve/pharmacie-de-predieu
+2025-07-03 15:27:16,711 - INFO: try 0...
+2025-07-03 15:27:16,711 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-egreve/pharmacie-de-predieu.json
+2025-07-03 15:27:17,140 - INFO: Success !
+2025-07-03 15:27:17,140 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voiron/romain-schihin
+2025-07-03 15:27:17,141 - INFO: try 0...
+2025-07-03 15:27:17,141 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voiron/romain-schihin.json
+2025-07-03 15:27:17,556 - INFO: Success !
+2025-07-03 15:27:17,556 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/voiron/pharmacie-du-colombier-voiron-voiron
+2025-07-03 15:27:17,556 - INFO: try 0...
+2025-07-03 15:27:17,556 - INFO: Going to site : https://www.doctolib.fr/pharmacie/voiron/pharmacie-du-colombier-voiron-voiron.json
+2025-07-03 15:27:17,901 - INFO: Success !
+2025-07-03 15:27:17,909 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/laurent-biboulet
+2025-07-03 15:27:17,909 - INFO: try 0...
+2025-07-03 15:27:17,909 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/laurent-biboulet.json
+2025-07-03 15:27:18,431 - INFO: Success !
+2025-07-03 15:27:18,431 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/sassenage/pharmacie-lapierre
+2025-07-03 15:27:18,431 - INFO: try 0...
+2025-07-03 15:27:18,431 - INFO: Going to site : https://www.doctolib.fr/pharmacie/sassenage/pharmacie-lapierre.json
+2025-07-03 15:27:18,767 - INFO: Success !
+2025-07-03 15:27:18,767 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/celine-boyoud-ghidossi-grenoble
+2025-07-03 15:27:18,767 - INFO: try 0...
+2025-07-03 15:27:18,767 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/celine-boyoud-ghidossi-grenoble.json
+2025-07-03 15:27:19,174 - INFO: Success !
+2025-07-03 15:27:19,174 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontaine/charlotte-depalle
+2025-07-03 15:27:19,174 - INFO: try 0...
+2025-07-03 15:27:19,174 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontaine/charlotte-depalle.json
+2025-07-03 15:27:19,651 - INFO: Success !
+2025-07-03 15:27:19,651 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/suleiman-dahshan
+2025-07-03 15:27:19,651 - INFO: try 0...
+2025-07-03 15:27:19,652 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/suleiman-dahshan.json
+2025-07-03 15:27:20,091 - INFO: Success !
+2025-07-03 15:27:20,091 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/marlene-kosacki
+2025-07-03 15:27:20,091 - INFO: try 0...
+2025-07-03 15:27:20,091 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/marlene-kosacki.json
+2025-07-03 15:27:20,499 - INFO: Success !
+2025-07-03 15:27:20,499 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/sophie-cazaban
+2025-07-03 15:27:20,500 - INFO: try 0...
+2025-07-03 15:27:20,500 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/sophie-cazaban.json
+2025-07-03 15:27:20,879 - INFO: Success !
+2025-07-03 15:27:20,880 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/nicolas-meyer-grenoble
+2025-07-03 15:27:20,880 - INFO: try 0...
+2025-07-03 15:27:20,880 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/nicolas-meyer-grenoble.json
+2025-07-03 15:27:21,339 - INFO: Success !
+2025-07-03 15:27:21,340 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/lans-en-vercors/guillemette-chatanay-bourguignon
+2025-07-03 15:27:21,340 - INFO: try 0...
+2025-07-03 15:27:21,340 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/lans-en-vercors/guillemette-chatanay-bourguignon.json
+2025-07-03 15:27:21,807 - INFO: Success !
+2025-07-03 15:27:21,808 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/bernin/laurence-braillon
+2025-07-03 15:27:21,808 - INFO: try 0...
+2025-07-03 15:27:21,808 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/bernin/laurence-braillon.json
+2025-07-03 15:27:22,199 - INFO: Success !
+2025-07-03 15:27:22,199 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-malherbe-perrot-grenoble
+2025-07-03 15:27:22,199 - INFO: try 0...
+2025-07-03 15:27:22,199 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-malherbe-perrot-grenoble.json
+2025-07-03 15:27:22,540 - INFO: Success !
+2025-07-03 15:27:22,541 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/sassenage/pietro-la-marca
+2025-07-03 15:27:22,541 - INFO: try 0...
+2025-07-03 15:27:22,541 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/sassenage/pietro-la-marca.json
+2025-07-03 15:27:22,974 - INFO: Success !
+2025-07-03 15:27:22,974 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/brie-et-angonnes/aurelie-leibold
+2025-07-03 15:27:22,974 - INFO: try 0...
+2025-07-03 15:27:22,974 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/brie-et-angonnes/aurelie-leibold.json
+2025-07-03 15:27:23,362 - INFO: Success !
+2025-07-03 15:27:23,362 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/camille-rohan
+2025-07-03 15:27:23,362 - INFO: try 0...
+2025-07-03 15:27:23,362 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/camille-rohan.json
+2025-07-03 15:27:23,803 - INFO: Success !
+2025-07-03 15:27:23,803 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/crolles/corinne-amouroux-richalet
+2025-07-03 15:27:23,803 - INFO: try 0...
+2025-07-03 15:27:23,803 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/crolles/corinne-amouroux-richalet.json
+2025-07-03 15:27:24,268 - INFO: Success !
+2025-07-03 15:27:24,268 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/la-tronche/perard-alain
+2025-07-03 15:27:24,268 - INFO: try 0...
+2025-07-03 15:27:24,268 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/la-tronche/perard-alain.json
+2025-07-03 15:27:24,722 - INFO: Success !
+2025-07-03 15:27:24,723 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/violaine-le-floch
+2025-07-03 15:27:24,724 - INFO: try 0...
+2025-07-03 15:27:24,724 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/violaine-le-floch.json
+2025-07-03 15:27:25,177 - INFO: Success !
+2025-07-03 15:27:25,178 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/echirolles/coline-nicolotto
+2025-07-03 15:27:25,178 - INFO: try 0...
+2025-07-03 15:27:25,178 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/echirolles/coline-nicolotto.json
+2025-07-03 15:27:25,571 - INFO: Success !
+2025-07-03 15:27:25,571 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/nathalie-carriere-meylan
+2025-07-03 15:27:25,571 - INFO: try 0...
+2025-07-03 15:27:25,571 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/nathalie-carriere-meylan.json
+2025-07-03 15:27:26,024 - INFO: Success !
+2025-07-03 15:27:26,024 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/laura-tardy-malaval
+2025-07-03 15:27:26,024 - INFO: try 0...
+2025-07-03 15:27:26,024 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/laura-tardy-malaval.json
+2025-07-03 15:27:26,461 - INFO: Success !
+2025-07-03 15:27:26,461 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-la-mauve-grenoble
+2025-07-03 15:27:26,461 - INFO: try 0...
+2025-07-03 15:27:26,461 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-la-mauve-grenoble.json
+2025-07-03 15:27:26,753 - INFO: Success !
+2025-07-03 15:27:26,753 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/antoine-manos
+2025-07-03 15:27:26,753 - INFO: try 0...
+2025-07-03 15:27:26,753 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/antoine-manos.json
+2025-07-03 15:27:27,178 - INFO: Success !
+2025-07-03 15:27:27,178 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tullins/sylvie-montanari
+2025-07-03 15:27:27,178 - INFO: try 0...
+2025-07-03 15:27:27,178 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tullins/sylvie-montanari.json
+2025-07-03 15:27:27,569 - INFO: Success !
+2025-07-03 15:27:27,569 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/bruno-munger
+2025-07-03 15:27:27,569 - INFO: try 0...
+2025-07-03 15:27:27,569 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/bruno-munger.json
+2025-07-03 15:27:27,946 - INFO: Success !
+2025-07-03 15:27:27,947 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/doreen-saul
+2025-07-03 15:27:27,947 - INFO: try 0...
+2025-07-03 15:27:27,947 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/doreen-saul.json
+2025-07-03 15:27:28,402 - INFO: Success !
+2025-07-03 15:27:28,402 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-daudet
+2025-07-03 15:27:28,402 - INFO: try 0...
+2025-07-03 15:27:28,402 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-daudet.json
+2025-07-03 15:27:28,779 - INFO: Success !
+2025-07-03 15:27:28,779 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-touvet/celine-klein-liabot
+2025-07-03 15:27:28,779 - INFO: try 0...
+2025-07-03 15:27:28,779 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-touvet/celine-klein-liabot.json
+2025-07-03 15:27:29,185 - INFO: Success !
+2025-07-03 15:27:29,185 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/sassenage/sylvie-lamaison
+2025-07-03 15:27:29,185 - INFO: try 0...
+2025-07-03 15:27:29,185 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/sassenage/sylvie-lamaison.json
+2025-07-03 15:27:29,557 - INFO: Success !
+2025-07-03 15:27:29,558 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/aline-bernardon
+2025-07-03 15:27:29,558 - INFO: try 0...
+2025-07-03 15:27:29,558 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/aline-bernardon.json
+2025-07-03 15:27:29,967 - INFO: Success !
+2025-07-03 15:27:29,967 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/bernin/olivier-jallades
+2025-07-03 15:27:29,967 - INFO: try 0...
+2025-07-03 15:27:29,967 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/bernin/olivier-jallades.json
+2025-07-03 15:27:30,426 - INFO: Success !
+2025-07-03 15:27:30,426 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/eybens/pharmacie-des-ruires-eybens
+2025-07-03 15:27:30,426 - INFO: try 0...
+2025-07-03 15:27:30,426 - INFO: Going to site : https://www.doctolib.fr/pharmacie/eybens/pharmacie-des-ruires-eybens.json
+2025-07-03 15:27:30,775 - INFO: Success !
+2025-07-03 15:27:30,775 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/la-tronche/olivier-peretto
+2025-07-03 15:27:30,775 - INFO: try 0...
+2025-07-03 15:27:30,775 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/la-tronche/olivier-peretto.json
+2025-07-03 15:27:31,205 - INFO: Success !
+2025-07-03 15:27:31,205 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/virginie-broussoux
+2025-07-03 15:27:31,205 - INFO: try 0...
+2025-07-03 15:27:31,205 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/virginie-broussoux.json
+2025-07-03 15:27:31,667 - INFO: Success !
+2025-07-03 15:27:31,668 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-l-etoile-41f5115a-9219-433c-86d9-a19e3c0f461e
+2025-07-03 15:27:31,668 - INFO: try 0...
+2025-07-03 15:27:31,668 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-l-etoile-41f5115a-9219-433c-86d9-a19e3c0f461e.json
+2025-07-03 15:27:32,140 - INFO: Success !
+2025-07-03 15:27:32,140 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/sandrine-briot-valette
+2025-07-03 15:27:32,140 - INFO: try 0...
+2025-07-03 15:27:32,140 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/sandrine-briot-valette.json
+2025-07-03 15:27:32,642 - INFO: Success !
+2025-07-03 15:27:32,642 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/clement-cadoux
+2025-07-03 15:27:32,642 - INFO: try 0...
+2025-07-03 15:27:32,642 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/clement-cadoux.json
+2025-07-03 15:27:33,071 - INFO: Success !
+2025-07-03 15:27:33,071 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/vaulnaveys-le-haut/pharmacie-des-vaulnaveys-vaulnaveys-le-haut
+2025-07-03 15:27:33,071 - INFO: try 0...
+2025-07-03 15:27:33,071 - INFO: Going to site : https://www.doctolib.fr/pharmacie/vaulnaveys-le-haut/pharmacie-des-vaulnaveys-vaulnaveys-le-haut.json
+2025-07-03 15:27:33,406 - INFO: Success !
+2025-07-03 15:27:33,406 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-cheylas/laetitia-maillet
+2025-07-03 15:27:33,406 - INFO: try 0...
+2025-07-03 15:27:33,406 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-cheylas/laetitia-maillet.json
+2025-07-03 15:27:33,818 - INFO: Success !
+2025-07-03 15:27:33,818 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/grenoble/centre-de-sante-arlequin
+2025-07-03 15:27:33,818 - INFO: try 0...
+2025-07-03 15:27:33,818 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/grenoble/centre-de-sante-arlequin.json
+2025-07-03 15:27:34,248 - INFO: Success !
+2025-07-03 15:27:34,262 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul
+2025-07-03 15:27:34,262 - INFO: try 0...
+2025-07-03 15:27:34,262 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:34,683 - INFO: Failure.
+2025-07-03 15:27:34,683 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:27:34,704 - INFO: HTML saved
+2025-07-03 15:27:34,704 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:27:34,704 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:27:34,712 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:27:34,712 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:27:34,720 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:27:34,839 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:27:34,839 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:27:34,839 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:36,325 - INFO: Browser Context renewed
+2025-07-03 15:27:36,326 - INFO: try 1...
+2025-07-03 15:27:36,326 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:36,791 - INFO: Failure.
+2025-07-03 15:27:36,791 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:27:36,796 - INFO: HTML saved
+2025-07-03 15:27:36,796 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:27:36,796 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:27:36,801 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:27:36,801 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:27:36,808 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:27:36,920 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:27:36,920 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:27:36,920 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:37,378 - INFO: Browser Context renewed
+2025-07-03 15:27:37,378 - INFO: try 2...
+2025-07-03 15:27:37,378 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:37,863 - INFO: Failure.
+2025-07-03 15:27:37,863 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:27:37,867 - INFO: HTML saved
+2025-07-03 15:27:37,868 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:27:37,868 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:27:37,874 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:27:37,874 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:27:37,880 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:27:37,996 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:27:37,996 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:27:37,996 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/dominique-knauer-nicoul.json
+2025-07-03 15:27:38,489 - INFO: Browser Context renewed
+2025-07-03 15:27:38,489 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/crolles/pharmacie-de-la-dent-de-crolles
+2025-07-03 15:27:38,489 - INFO: try 0...
+2025-07-03 15:27:38,489 - INFO: Going to site : https://www.doctolib.fr/pharmacie/crolles/pharmacie-de-la-dent-de-crolles.json
+2025-07-03 15:27:38,842 - INFO: Success !
+2025-07-03 15:27:38,842 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-versoud/aurelia-meneau
+2025-07-03 15:27:38,842 - INFO: try 0...
+2025-07-03 15:27:38,842 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-versoud/aurelia-meneau.json
+2025-07-03 15:27:39,280 - INFO: Success !
+2025-07-03 15:27:39,280 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/adrien-di-nola
+2025-07-03 15:27:39,280 - INFO: try 0...
+2025-07-03 15:27:39,280 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/adrien-di-nola.json
+2025-07-03 15:27:39,816 - INFO: Success !
+2025-07-03 15:27:39,816 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontaine/stefania-ciucu
+2025-07-03 15:27:39,816 - INFO: try 0...
+2025-07-03 15:27:39,816 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontaine/stefania-ciucu.json
+2025-07-03 15:27:40,234 - INFO: Success !
+2025-07-03 15:27:40,234 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecine-morphologique-et-anti-age/saint-martin-d-uriage/christine-rose-picot
+2025-07-03 15:27:40,234 - INFO: try 0...
+2025-07-03 15:27:40,234 - INFO: Going to site : https://www.doctolib.fr/medecine-morphologique-et-anti-age/saint-martin-d-uriage/christine-rose-picot.json
+2025-07-03 15:27:40,651 - INFO: Success !
+2025-07-03 15:27:40,651 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-touvet/clemence-luthi
+2025-07-03 15:27:40,651 - INFO: try 0...
+2025-07-03 15:27:40,651 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-touvet/clemence-luthi.json
+2025-07-03 15:27:41,076 - INFO: Success !
+2025-07-03 15:27:41,082 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/delphine-martin
+2025-07-03 15:27:41,082 - INFO: try 0...
+2025-07-03 15:27:41,082 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/delphine-martin.json
+2025-07-03 15:27:41,611 - INFO: Success !
+2025-07-03 15:27:41,612 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voiron/nathalie-collin-aubry
+2025-07-03 15:27:41,612 - INFO: try 0...
+2025-07-03 15:27:41,612 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voiron/nathalie-collin-aubry.json
+2025-07-03 15:27:42,023 - INFO: Success !
+2025-07-03 15:27:42,023 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-albert-1er
+2025-07-03 15:27:42,023 - INFO: try 0...
+2025-07-03 15:27:42,023 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-albert-1er.json
+2025-07-03 15:27:42,343 - INFO: Success !
+2025-07-03 15:27:42,344 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/echirolles/grande-pharmacie-d-echirolles
+2025-07-03 15:27:42,344 - INFO: try 0...
+2025-07-03 15:27:42,344 - INFO: Going to site : https://www.doctolib.fr/pharmacie/echirolles/grande-pharmacie-d-echirolles.json
+2025-07-03 15:27:42,699 - INFO: Success !
+2025-07-03 15:27:42,699 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/chloe-pilod-poisat
+2025-07-03 15:27:42,699 - INFO: try 0...
+2025-07-03 15:27:42,699 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/chloe-pilod-poisat.json
+2025-07-03 15:27:43,068 - INFO: Success !
+2025-07-03 15:27:43,068 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/audrey-lebelhomme
+2025-07-03 15:27:43,068 - INFO: try 0...
+2025-07-03 15:27:43,068 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/audrey-lebelhomme.json
+2025-07-03 15:27:43,526 - INFO: Success !
+2025-07-03 15:27:43,526 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/marie-anne-montel
+2025-07-03 15:27:43,526 - INFO: try 0...
+2025-07-03 15:27:43,526 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/marie-anne-montel.json
+2025-07-03 15:27:43,946 - INFO: Success !
+2025-07-03 15:27:43,946 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/christine-guerry-meylan
+2025-07-03 15:27:43,946 - INFO: try 0...
+2025-07-03 15:27:43,946 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/christine-guerry-meylan.json
+2025-07-03 15:27:44,392 - INFO: Success !
+2025-07-03 15:27:44,392 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/seyssins/noelia-brechet
+2025-07-03 15:27:44,392 - INFO: try 0...
+2025-07-03 15:27:44,392 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/seyssins/noelia-brechet.json
+2025-07-03 15:27:44,830 - INFO: Success !
+2025-07-03 15:27:44,830 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/sassenage/dominique-godet
+2025-07-03 15:27:44,830 - INFO: try 0...
+2025-07-03 15:27:44,830 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/sassenage/dominique-godet.json
+2025-07-03 15:27:45,241 - INFO: Success !
+2025-07-03 15:27:45,242 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/margaux-courtiade
+2025-07-03 15:27:45,242 - INFO: try 0...
+2025-07-03 15:27:45,242 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/margaux-courtiade.json
+2025-07-03 15:27:45,638 - INFO: Success !
+2025-07-03 15:27:45,638 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/jarrie/maiha-blanckemane
+2025-07-03 15:27:45,638 - INFO: try 0...
+2025-07-03 15:27:45,638 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/jarrie/maiha-blanckemane.json
+2025-07-03 15:27:45,988 - INFO: Success !
+2025-07-03 15:27:45,988 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/albane-visentin
+2025-07-03 15:27:45,988 - INFO: try 0...
+2025-07-03 15:27:45,988 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/albane-visentin.json
+2025-07-03 15:27:46,369 - INFO: Success !
+2025-07-03 15:27:46,369 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/la-buisse/mpharmacie
+2025-07-03 15:27:46,369 - INFO: try 0...
+2025-07-03 15:27:46,369 - INFO: Going to site : https://www.doctolib.fr/pharmacie/la-buisse/mpharmacie.json
+2025-07-03 15:27:46,716 - INFO: Success !
+2025-07-03 15:27:46,716 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-geants
+2025-07-03 15:27:46,716 - INFO: try 0...
+2025-07-03 15:27:46,716 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-geants.json
+2025-07-03 15:27:47,170 - INFO: Success !
+2025-07-03 15:27:47,171 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/grenoble/centre-de-sante-presqu-ile-de-grenoble
+2025-07-03 15:27:47,171 - INFO: try 0...
+2025-07-03 15:27:47,171 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/grenoble/centre-de-sante-presqu-ile-de-grenoble.json
+2025-07-03 15:27:47,679 - INFO: Success !
+2025-07-03 15:27:47,680 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/lauranne-coignard
+2025-07-03 15:27:47,680 - INFO: try 0...
+2025-07-03 15:27:47,680 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/lauranne-coignard.json
+2025-07-03 15:27:48,141 - INFO: Success !
+2025-07-03 15:27:48,141 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-gua/maud-hertl-le-gua
+2025-07-03 15:27:48,141 - INFO: try 0...
+2025-07-03 15:27:48,141 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-gua/maud-hertl-le-gua.json
+2025-07-03 15:27:48,501 - INFO: Success !
+2025-07-03 15:27:48,502 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/vanessa-bruyere
+2025-07-03 15:27:48,502 - INFO: try 0...
+2025-07-03 15:27:48,502 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/vanessa-bruyere.json
+2025-07-03 15:27:48,891 - INFO: Success !
+2025-07-03 15:27:48,891 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/nassima-benabed-67ada3a4-ab98-40bd-8434-863a6e5b0bc7
+2025-07-03 15:27:48,892 - INFO: try 0...
+2025-07-03 15:27:48,892 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/nassima-benabed-67ada3a4-ab98-40bd-8434-863a6e5b0bc7.json
+2025-07-03 15:27:49,476 - INFO: Success !
+2025-07-03 15:27:49,476 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/aulde-payerne
+2025-07-03 15:27:49,476 - INFO: try 0...
+2025-07-03 15:27:49,476 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/aulde-payerne.json
+2025-07-03 15:27:49,896 - INFO: Success !
+2025-07-03 15:27:49,896 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/corenc/marine-degoue
+2025-07-03 15:27:49,898 - INFO: try 0...
+2025-07-03 15:27:49,898 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/corenc/marine-degoue.json
+2025-07-03 15:27:50,355 - INFO: Success !
+2025-07-03 15:27:50,355 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vizille/farouk-bendamene
+2025-07-03 15:27:50,355 - INFO: try 0...
+2025-07-03 15:27:50,355 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vizille/farouk-bendamene.json
+2025-07-03 15:27:50,858 - INFO: Success !
+2025-07-03 15:27:50,858 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/philippe-stivalet
+2025-07-03 15:27:50,858 - INFO: try 0...
+2025-07-03 15:27:50,858 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/philippe-stivalet.json
+2025-07-03 15:27:51,284 - INFO: Success !
+2025-07-03 15:27:51,284 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/aurelie-staquet-penant
+2025-07-03 15:27:51,284 - INFO: try 0...
+2025-07-03 15:27:51,284 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/aurelie-staquet-penant.json
+2025-07-03 15:27:51,714 - INFO: Success !
+2025-07-03 15:27:51,714 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/echirolles/pharmacie-grand-place
+2025-07-03 15:27:51,714 - INFO: try 0...
+2025-07-03 15:27:51,714 - INFO: Going to site : https://www.doctolib.fr/pharmacie/echirolles/pharmacie-grand-place.json
+2025-07-03 15:27:52,046 - INFO: Success !
+2025-07-03 15:27:52,046 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/nicolas-selce
+2025-07-03 15:27:52,046 - INFO: try 0...
+2025-07-03 15:27:52,046 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/nicolas-selce.json
+2025-07-03 15:27:52,474 - INFO: Success !
+2025-07-03 15:27:52,474 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voiron/edmond-baffert
+2025-07-03 15:27:52,474 - INFO: try 0...
+2025-07-03 15:27:52,474 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voiron/edmond-baffert.json
+2025-07-03 15:27:52,841 - INFO: Success !
+2025-07-03 15:27:52,841 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/echirolles/vincent-gros
+2025-07-03 15:27:52,841 - INFO: try 0...
+2025-07-03 15:27:52,841 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/echirolles/vincent-gros.json
+2025-07-03 15:27:53,274 - INFO: Success !
+2025-07-03 15:27:53,274 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/domene/pharmacie-centrale-domene
+2025-07-03 15:27:53,274 - INFO: try 0...
+2025-07-03 15:27:53,274 - INFO: Going to site : https://www.doctolib.fr/pharmacie/domene/pharmacie-centrale-domene.json
+2025-07-03 15:27:53,617 - INFO: Success !
+2025-07-03 15:27:53,618 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-laurent-du-pont/bernard-romangin
+2025-07-03 15:27:53,618 - INFO: try 0...
+2025-07-03 15:27:53,618 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-laurent-du-pont/bernard-romangin.json
+2025-07-03 15:27:54,027 - INFO: Success !
+2025-07-03 15:27:54,028 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vinay/isabelle-dargaisse-dereu
+2025-07-03 15:27:54,028 - INFO: try 0...
+2025-07-03 15:27:54,028 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vinay/isabelle-dargaisse-dereu.json
+2025-07-03 15:27:54,417 - INFO: Success !
+2025-07-03 15:27:54,417 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/claire-soave
+2025-07-03 15:27:54,417 - INFO: try 0...
+2025-07-03 15:27:54,417 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/claire-soave.json
+2025-07-03 15:27:54,878 - INFO: Success !
+2025-07-03 15:27:54,878 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/nathalie-beauvais-vuillot-poisat
+2025-07-03 15:27:54,878 - INFO: try 0...
+2025-07-03 15:27:54,878 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/nathalie-beauvais-vuillot-poisat.json
+2025-07-03 15:27:55,251 - INFO: Success !
+2025-07-03 15:27:55,252 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/renage/florence-pasquier
+2025-07-03 15:27:55,252 - INFO: try 0...
+2025-07-03 15:27:55,252 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/renage/florence-pasquier.json
+2025-07-03 15:27:55,626 - INFO: Success !
+2025-07-03 15:27:55,627 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/jean-yves-le-calvez
+2025-07-03 15:27:55,627 - INFO: try 0...
+2025-07-03 15:27:55,627 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/jean-yves-le-calvez.json
+2025-07-03 15:27:55,991 - INFO: Success !
+2025-07-03 15:27:55,991 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/chirens/felicie-lorin
+2025-07-03 15:27:55,991 - INFO: try 0...
+2025-07-03 15:27:55,991 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/chirens/felicie-lorin.json
+2025-07-03 15:27:56,409 - INFO: Success !
+2025-07-03 15:27:56,410 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vif/nicolas-d-ornellas
+2025-07-03 15:27:56,410 - INFO: try 0...
+2025-07-03 15:27:56,410 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vif/nicolas-d-ornellas.json
+2025-07-03 15:27:56,812 - INFO: Success !
+2025-07-03 15:27:56,812 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/jerome-giraudon
+2025-07-03 15:27:56,813 - INFO: try 0...
+2025-07-03 15:27:56,813 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/jerome-giraudon.json
+2025-07-03 15:27:57,221 - INFO: Success !
+2025-07-03 15:27:57,221 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/maria-carmen-tiribentea
+2025-07-03 15:27:57,221 - INFO: try 0...
+2025-07-03 15:27:57,222 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/maria-carmen-tiribentea.json
+2025-07-03 15:27:57,756 - INFO: Success !
+2025-07-03 15:27:57,756 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-l-esplanade
+2025-07-03 15:27:57,756 - INFO: try 0...
+2025-07-03 15:27:57,756 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-de-l-esplanade.json
+2025-07-03 15:27:58,071 - INFO: Success !
+2025-07-03 15:27:58,071 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-vaccinations-internationales/saint-martin-d-heres/centre-de-vaccinations-internationales-isba-sante-prevention-grenoble
+2025-07-03 15:27:58,071 - INFO: try 0...
+2025-07-03 15:27:58,071 - INFO: Going to site : https://www.doctolib.fr/centre-de-vaccinations-internationales/saint-martin-d-heres/centre-de-vaccinations-internationales-isba-sante-prevention-grenoble.json
+2025-07-03 15:27:58,391 - INFO: Success !
+2025-07-03 15:27:58,391 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/nicolas-manzini
+2025-07-03 15:27:58,391 - INFO: try 0...
+2025-07-03 15:27:58,391 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/nicolas-manzini.json
+2025-07-03 15:27:58,772 - INFO: Success !
+2025-07-03 15:27:58,772 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/delphine-dubost-tencin
+2025-07-03 15:27:58,772 - INFO: try 0...
+2025-07-03 15:27:58,772 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/delphine-dubost-tencin.json
+2025-07-03 15:27:59,144 - INFO: Success !
+2025-07-03 15:27:59,144 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-pierre-d-entremont/thomas-fieux
+2025-07-03 15:27:59,144 - INFO: try 0...
+2025-07-03 15:27:59,144 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-pierre-d-entremont/thomas-fieux.json
+2025-07-03 15:27:59,628 - INFO: Success !
+2025-07-03 15:27:59,629 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-le-vinoux/julie-dohon
+2025-07-03 15:27:59,629 - INFO: try 0...
+2025-07-03 15:27:59,629 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-le-vinoux/julie-dohon.json
+2025-07-03 15:28:00,057 - INFO: Success !
+2025-07-03 15:28:00,057 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vaulnaveys-le-haut/diane-martin
+2025-07-03 15:28:00,058 - INFO: try 0...
+2025-07-03 15:28:00,058 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vaulnaveys-le-haut/diane-martin.json
+2025-07-03 15:28:00,459 - INFO: Success !
+2025-07-03 15:28:00,459 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vif/antoine-daubree
+2025-07-03 15:28:00,459 - INFO: try 0...
+2025-07-03 15:28:00,459 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vif/antoine-daubree.json
+2025-07-03 15:28:00,907 - INFO: Success !
+2025-07-03 15:28:00,907 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/seyssinet-pariset/christelle-delcourt-seyssinet-pariset
+2025-07-03 15:28:00,907 - INFO: try 0...
+2025-07-03 15:28:00,907 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/seyssinet-pariset/christelle-delcourt-seyssinet-pariset.json
+2025-07-03 15:28:01,351 - INFO: Success !
+2025-07-03 15:28:01,351 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/echirolles/olivier-jouet-pastre
+2025-07-03 15:28:01,351 - INFO: try 0...
+2025-07-03 15:28:01,351 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/echirolles/olivier-jouet-pastre.json
+2025-07-03 15:28:01,773 - INFO: Success !
+2025-07-03 15:28:01,773 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/voiron/grande-pharmacie-de-la-gare-voiron
+2025-07-03 15:28:01,773 - INFO: try 0...
+2025-07-03 15:28:01,773 - INFO: Going to site : https://www.doctolib.fr/pharmacie/voiron/grande-pharmacie-de-la-gare-voiron.json
+2025-07-03 15:28:02,218 - INFO: Success !
+2025-07-03 15:28:02,218 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/bernin/manon-brunello
+2025-07-03 15:28:02,218 - INFO: try 0...
+2025-07-03 15:28:02,218 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/bernin/manon-brunello.json
+2025-07-03 15:28:02,617 - INFO: Success !
+2025-07-03 15:28:02,617 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/clemence-vincent-moirans
+2025-07-03 15:28:02,617 - INFO: try 0...
+2025-07-03 15:28:02,617 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/clemence-vincent-moirans.json
+2025-07-03 15:28:03,104 - INFO: Success !
+2025-07-03 15:28:03,104 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/claude-chaltiel
+2025-07-03 15:28:03,104 - INFO: try 0...
+2025-07-03 15:28:03,104 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/claude-chaltiel.json
+2025-07-03 15:28:03,504 - INFO: Success !
+2025-07-03 15:28:03,504 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontaine/said-noureddine-fontaine
+2025-07-03 15:28:03,504 - INFO: try 0...
+2025-07-03 15:28:03,504 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontaine/said-noureddine-fontaine.json
+2025-07-03 15:28:03,885 - INFO: Success !
+2025-07-03 15:28:03,886 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/plateau-des-petites-roches/marine-dazin
+2025-07-03 15:28:03,886 - INFO: try 0...
+2025-07-03 15:28:03,886 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/plateau-des-petites-roches/marine-dazin.json
+2025-07-03 15:28:04,413 - INFO: Success !
+2025-07-03 15:28:04,413 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/michael-levy-grenoble
+2025-07-03 15:28:04,413 - INFO: try 0...
+2025-07-03 15:28:04,413 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/michael-levy-grenoble.json
+2025-07-03 15:28:04,842 - INFO: Success !
+2025-07-03 15:28:04,842 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/villard-bonnot/claire-payen-girard
+2025-07-03 15:28:04,842 - INFO: try 0...
+2025-07-03 15:28:04,842 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/villard-bonnot/claire-payen-girard.json
+2025-07-03 15:28:05,235 - INFO: Success !
+2025-07-03 15:28:05,235 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vizille/ophelie-braisaz
+2025-07-03 15:28:05,235 - INFO: try 0...
+2025-07-03 15:28:05,235 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vizille/ophelie-braisaz.json
+2025-07-03 15:28:05,650 - INFO: Success !
+2025-07-03 15:28:05,650 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-martin-d-uriage/pharmacie-de-l-ancolie
+2025-07-03 15:28:05,651 - INFO: try 0...
+2025-07-03 15:28:05,651 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-martin-d-uriage/pharmacie-de-l-ancolie.json
+2025-07-03 15:28:05,998 - INFO: Success !
+2025-07-03 15:28:05,998 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/vizille/des-alpes
+2025-07-03 15:28:05,998 - INFO: try 0...
+2025-07-03 15:28:05,999 - INFO: Going to site : https://www.doctolib.fr/pharmacie/vizille/des-alpes.json
+2025-07-03 15:28:06,437 - INFO: Success !
+2025-07-03 15:28:06,437 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/la-tronche/olivier-guerain
+2025-07-03 15:28:06,437 - INFO: try 0...
+2025-07-03 15:28:06,437 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/la-tronche/olivier-guerain.json
+2025-07-03 15:28:06,909 - INFO: Success !
+2025-07-03 15:28:06,909 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/jarrie/claire-delepoulle
+2025-07-03 15:28:06,909 - INFO: try 0...
+2025-07-03 15:28:06,910 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/jarrie/claire-delepoulle.json
+2025-07-03 15:28:07,336 - INFO: Success !
+2025-07-03 15:28:07,337 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-ismier/pharmacie-de-la-fontaine-amelie
+2025-07-03 15:28:07,337 - INFO: try 0...
+2025-07-03 15:28:07,337 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-ismier/pharmacie-de-la-fontaine-amelie.json
+2025-07-03 15:28:07,696 - INFO: Success !
+2025-07-03 15:28:07,696 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/mathieu-camuset
+2025-07-03 15:28:07,696 - INFO: try 0...
+2025-07-03 15:28:07,696 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/mathieu-camuset.json
+2025-07-03 15:28:08,474 - INFO: Success !
+2025-07-03 15:28:08,474 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/voiron/jean-luc-kalifa
+2025-07-03 15:28:08,474 - INFO: try 0...
+2025-07-03 15:28:08,474 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/voiron/jean-luc-kalifa.json
+2025-07-03 15:28:08,830 - INFO: Success !
+2025-07-03 15:28:08,830 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/acupuncteur/meylan/catherine-hui-bon-hoa
+2025-07-03 15:28:08,830 - INFO: try 0...
+2025-07-03 15:28:08,831 - INFO: Going to site : https://www.doctolib.fr/acupuncteur/meylan/catherine-hui-bon-hoa.json
+2025-07-03 15:28:09,294 - INFO: Success !
+2025-07-03 15:28:09,294 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-specialiste-en-medecine-generale/brie-et-angonnes/amelie-prudhomme
+2025-07-03 15:28:09,294 - INFO: try 0...
+2025-07-03 15:28:09,294 - INFO: Going to site : https://www.doctolib.fr/medecin-specialiste-en-medecine-generale/brie-et-angonnes/amelie-prudhomme.json
+2025-07-03 15:28:09,796 - INFO: Success !
+2025-07-03 15:28:09,796 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/poisat/pharmacie-de-poisat
+2025-07-03 15:28:09,796 - INFO: try 0...
+2025-07-03 15:28:09,796 - INFO: Going to site : https://www.doctolib.fr/pharmacie/poisat/pharmacie-de-poisat.json
+2025-07-03 15:28:10,127 - INFO: Success !
+2025-07-03 15:28:10,127 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/seyssinet-pariset/pharmacie-de-catane-seyssinet-pariset
+2025-07-03 15:28:10,127 - INFO: try 0...
+2025-07-03 15:28:10,127 - INFO: Going to site : https://www.doctolib.fr/pharmacie/seyssinet-pariset/pharmacie-de-catane-seyssinet-pariset.json
+2025-07-03 15:28:10,553 - INFO: Success !
+2025-07-03 15:28:10,553 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/entre-deux-guiers/pharmacie-entre-deux-guiers-entre-deux-guiers
+2025-07-03 15:28:10,553 - INFO: try 0...
+2025-07-03 15:28:10,553 - INFO: Going to site : https://www.doctolib.fr/pharmacie/entre-deux-guiers/pharmacie-entre-deux-guiers-entre-deux-guiers.json
+2025-07-03 15:28:10,931 - INFO: Success !
+2025-07-03 15:28:10,931 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/echirolles/judith-faure
+2025-07-03 15:28:10,931 - INFO: try 0...
+2025-07-03 15:28:10,931 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/echirolles/judith-faure.json
+2025-07-03 15:28:11,333 - INFO: Success !
+2025-07-03 15:28:11,333 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/plateau-des-petites-roches/marie-regad
+2025-07-03 15:28:11,334 - INFO: try 0...
+2025-07-03 15:28:11,334 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/plateau-des-petites-roches/marie-regad.json
+2025-07-03 15:28:11,822 - INFO: Success !
+2025-07-03 15:28:11,822 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/seyssins/emilia-debaty
+2025-07-03 15:28:11,822 - INFO: try 0...
+2025-07-03 15:28:11,822 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/seyssins/emilia-debaty.json
+2025-07-03 15:28:12,228 - INFO: Success !
+2025-07-03 15:28:12,229 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/la-tronche/gaelle-nicolas
+2025-07-03 15:28:12,229 - INFO: try 0...
+2025-07-03 15:28:12,229 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/la-tronche/gaelle-nicolas.json
+2025-07-03 15:28:12,814 - INFO: Success !
+2025-07-03 15:28:12,814 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/olivier-triquet
+2025-07-03 15:28:12,814 - INFO: try 0...
+2025-07-03 15:28:12,814 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/montbonnot-saint-martin/olivier-triquet.json
+2025-07-03 15:28:13,292 - INFO: Success !
+2025-07-03 15:28:13,292 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/laura-hyerle
+2025-07-03 15:28:13,292 - INFO: try 0...
+2025-07-03 15:28:13,292 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/laura-hyerle.json
+2025-07-03 15:28:13,717 - INFO: Success !
+2025-07-03 15:28:13,718 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontaine/ahcene-kerboua
+2025-07-03 15:28:13,718 - INFO: try 0...
+2025-07-03 15:28:13,718 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontaine/ahcene-kerboua.json
+2025-07-03 15:28:14,193 - INFO: Success !
+2025-07-03 15:28:14,193 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/elise-dal-soglio
+2025-07-03 15:28:14,193 - INFO: try 0...
+2025-07-03 15:28:14,193 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/elise-dal-soglio.json
+2025-07-03 15:28:14,602 - INFO: Success !
+2025-07-03 15:28:14,602 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/seyssins/pharmacie-du-village-seyssins
+2025-07-03 15:28:14,602 - INFO: try 0...
+2025-07-03 15:28:14,602 - INFO: Going to site : https://www.doctolib.fr/pharmacie/seyssins/pharmacie-du-village-seyssins.json
+2025-07-03 15:28:14,993 - INFO: Success !
+2025-07-03 15:28:14,994 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/poisat/maud-arpin
+2025-07-03 15:28:14,994 - INFO: try 0...
+2025-07-03 15:28:14,994 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/poisat/maud-arpin.json
+2025-07-03 15:28:15,364 - INFO: Success !
+2025-07-03 15:28:15,364 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/julian-marsac
+2025-07-03 15:28:15,364 - INFO: try 0...
+2025-07-03 15:28:15,364 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/julian-marsac.json
+2025-07-03 15:28:15,849 - INFO: Success !
+2025-07-03 15:28:15,850 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-gabriel-peri
+2025-07-03 15:28:15,850 - INFO: try 0...
+2025-07-03 15:28:15,850 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-gabriel-peri.json
+2025-07-03 15:28:16,150 - INFO: Success !
+2025-07-03 15:28:16,150 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/corenc/delphine-etienne
+2025-07-03 15:28:16,150 - INFO: try 0...
+2025-07-03 15:28:16,150 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/corenc/delphine-etienne.json
+2025-07-03 15:28:16,720 - INFO: Success !
+2025-07-03 15:28:16,720 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-du-vercors-alexandra-ponthieu
+2025-07-03 15:28:16,720 - INFO: try 0...
+2025-07-03 15:28:16,721 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-du-vercors-alexandra-ponthieu.json
+2025-07-03 15:28:17,115 - INFO: Success !
+2025-07-03 15:28:17,115 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/meylan/pharmacie-du-haut-meylan
+2025-07-03 15:28:17,115 - INFO: try 0...
+2025-07-03 15:28:17,115 - INFO: Going to site : https://www.doctolib.fr/pharmacie/meylan/pharmacie-du-haut-meylan.json
+2025-07-03 15:28:17,463 - INFO: Success !
+2025-07-03 15:28:17,463 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/la-tronche/thierry-chevalier-la-tronche
+2025-07-03 15:28:17,463 - INFO: try 0...
+2025-07-03 15:28:17,463 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/la-tronche/thierry-chevalier-la-tronche.json
+2025-07-03 15:28:17,856 - INFO: Success !
+2025-07-03 15:28:17,856 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/villard-bonnot/laure-pajean
+2025-07-03 15:28:17,856 - INFO: try 0...
+2025-07-03 15:28:17,856 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/villard-bonnot/laure-pajean.json
+2025-07-03 15:28:18,274 - INFO: Success !
+2025-07-03 15:28:18,274 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble
+2025-07-03 15:28:18,274 - INFO: try 0...
+2025-07-03 15:28:18,274 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:18,577 - INFO: Failure.
+2025-07-03 15:28:18,577 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:18,582 - INFO: HTML saved
+2025-07-03 15:28:18,582 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:18,582 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:18,589 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:18,589 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:18,595 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:18,712 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:18,712 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:18,712 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:19,751 - INFO: Browser Context renewed
+2025-07-03 15:28:19,752 - INFO: try 1...
+2025-07-03 15:28:19,752 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:20,115 - INFO: Failure.
+2025-07-03 15:28:20,115 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:20,124 - INFO: HTML saved
+2025-07-03 15:28:20,124 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:20,124 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:20,131 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:20,131 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:20,138 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:20,239 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:20,239 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:20,239 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:20,654 - INFO: Browser Context renewed
+2025-07-03 15:28:20,654 - INFO: try 2...
+2025-07-03 15:28:20,654 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:20,995 - INFO: Failure.
+2025-07-03 15:28:20,995 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:20,999 - INFO: HTML saved
+2025-07-03 15:28:20,999 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:20,999 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:21,006 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:21,006 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:21,013 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:21,141 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:21,141 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:21,142 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/centre-medical-doctora-grenoble.json
+2025-07-03 15:28:21,647 - INFO: Browser Context renewed
+2025-07-03 15:28:21,647 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/marine-valesch-saint-martin-d-uriage
+2025-07-03 15:28:21,647 - INFO: try 0...
+2025-07-03 15:28:21,647 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-uriage/marine-valesch-saint-martin-d-uriage.json
+2025-07-03 15:28:22,060 - INFO: Success !
+2025-07-03 15:28:22,060 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-abbaye
+2025-07-03 15:28:22,060 - INFO: try 0...
+2025-07-03 15:28:22,060 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-abbaye.json
+2025-07-03 15:28:22,389 - INFO: Success !
+2025-07-03 15:28:22,389 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/biviers/claire-portal
+2025-07-03 15:28:22,389 - INFO: try 0...
+2025-07-03 15:28:22,389 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/biviers/claire-portal.json
+2025-07-03 15:28:22,777 - INFO: Success !
+2025-07-03 15:28:22,777 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-jean-de-moirans/pharmacie-saint-jeannaise
+2025-07-03 15:28:22,777 - INFO: try 0...
+2025-07-03 15:28:22,777 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-jean-de-moirans/pharmacie-saint-jeannaise.json
+2025-07-03 15:28:23,134 - INFO: Success !
+2025-07-03 15:28:23,134 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/elisabeth-ract-madoux
+2025-07-03 15:28:23,134 - INFO: try 0...
+2025-07-03 15:28:23,134 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/elisabeth-ract-madoux.json
+2025-07-03 15:28:23,597 - INFO: Success !
+2025-07-03 15:28:23,597 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/lola-daudel
+2025-07-03 15:28:23,597 - INFO: try 0...
+2025-07-03 15:28:23,597 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/lola-daudel.json
+2025-07-03 15:28:24,036 - INFO: Success !
+2025-07-03 15:28:24,037 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/claire-ageron-blanc
+2025-07-03 15:28:24,037 - INFO: try 0...
+2025-07-03 15:28:24,037 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/claire-ageron-blanc.json
+2025-07-03 15:28:24,506 - INFO: Success !
+2025-07-03 15:28:24,506 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-de-la-croix-rouge-saint-martin-d-heres
+2025-07-03 15:28:24,506 - INFO: try 0...
+2025-07-03 15:28:24,506 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-martin-d-heres/pharmacie-de-la-croix-rouge-saint-martin-d-heres.json
+2025-07-03 15:28:24,932 - INFO: Success !
+2025-07-03 15:28:24,932 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/brie-et-angonnes/william-enkaoua
+2025-07-03 15:28:24,932 - INFO: try 0...
+2025-07-03 15:28:24,932 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/brie-et-angonnes/william-enkaoua.json
+2025-07-03 15:28:25,353 - INFO: Success !
+2025-07-03 15:28:25,353 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vizille/delphine-mortas
+2025-07-03 15:28:25,353 - INFO: try 0...
+2025-07-03 15:28:25,353 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vizille/delphine-mortas.json
+2025-07-03 15:28:25,820 - INFO: Success !
+2025-07-03 15:28:25,820 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-brunet-associes
+2025-07-03 15:28:25,820 - INFO: try 0...
+2025-07-03 15:28:25,820 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-brunet-associes.json
+2025-07-03 15:28:26,166 - INFO: Success !
+2025-07-03 15:28:26,167 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8
+2025-07-03 15:28:26,167 - INFO: try 0...
+2025-07-03 15:28:26,167 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:26,481 - INFO: Failure.
+2025-07-03 15:28:26,481 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:26,486 - INFO: HTML saved
+2025-07-03 15:28:26,486 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:26,486 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:26,493 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:26,493 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:26,500 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:26,612 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:26,612 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:26,612 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:27,025 - INFO: Browser Context renewed
+2025-07-03 15:28:27,025 - INFO: try 1...
+2025-07-03 15:28:27,025 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:27,376 - INFO: Failure.
+2025-07-03 15:28:27,376 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:27,381 - INFO: HTML saved
+2025-07-03 15:28:27,381 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:27,381 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:27,388 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:27,388 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:27,397 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:27,508 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:27,508 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:27,508 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:27,972 - INFO: Browser Context renewed
+2025-07-03 15:28:27,972 - INFO: try 2...
+2025-07-03 15:28:27,972 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:28,451 - INFO: Failure.
+2025-07-03 15:28:28,451 - ERROR: 0
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 281, in find_doc_infos
+    day = week_days[day_open_hours["day"]]
+          ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 0
+2025-07-03 15:28:28,456 - INFO: HTML saved
+2025-07-03 15:28:28,456 - DEBUG: renew_context : current_url = self.page.url
+2025-07-03 15:28:28,456 - DEBUG: renew_context : self.bs_context = self.browser.new_context()
+2025-07-03 15:28:28,461 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:28:28,462 - DEBUG: renew_context : self.page.close()
+2025-07-03 15:28:28,469 - DEBUG: renew_context : self.page = self.bs_context.new_page()
+2025-07-03 15:28:28,575 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:28:28,575 - DEBUG: renew_context : self.page.goto(current_url)
+2025-07-03 15:28:28,575 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-de-l-hotel-de-ville-1bdd95fc-fac4-477d-a5d4-a8d2ca329fc8.json
+2025-07-03 15:28:28,988 - INFO: Browser Context renewed
+2025-07-03 15:28:28,989 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/corenc/pharmacie-de-corenc
+2025-07-03 15:28:28,989 - INFO: try 0...
+2025-07-03 15:28:28,989 - INFO: Going to site : https://www.doctolib.fr/pharmacie/corenc/pharmacie-de-corenc.json
+2025-07-03 15:28:29,324 - INFO: Success !
+2025-07-03 15:28:29,324 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vif/gautier-courtois
+2025-07-03 15:28:29,324 - INFO: try 0...
+2025-07-03 15:28:29,324 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vif/gautier-courtois.json
+2025-07-03 15:28:29,734 - INFO: Success !
+2025-07-03 15:28:29,734 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/meylan/charline-rabouan
+2025-07-03 15:28:29,734 - INFO: try 0...
+2025-07-03 15:28:29,736 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/meylan/charline-rabouan.json
+2025-07-03 15:28:30,192 - INFO: Success !
+2025-07-03 15:28:30,193 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/gerard-nallet
+2025-07-03 15:28:30,193 - INFO: try 0...
+2025-07-03 15:28:30,193 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-vincent-de-mercuze/gerard-nallet.json
+2025-07-03 15:28:30,624 - INFO: Success !
+2025-07-03 15:28:30,624 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/bernin/claire-sejourne-bernin
+2025-07-03 15:28:30,624 - INFO: try 0...
+2025-07-03 15:28:30,624 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/bernin/claire-sejourne-bernin.json
+2025-07-03 15:28:31,037 - INFO: Success !
+2025-07-03 15:28:31,037 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/yoann-doudeau
+2025-07-03 15:28:31,037 - INFO: try 0...
+2025-07-03 15:28:31,037 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/fontanil-cornillon/yoann-doudeau.json
+2025-07-03 15:28:31,474 - INFO: Success !
+2025-07-03 15:28:31,474 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tullins/jean-louis-ghez
+2025-07-03 15:28:31,474 - INFO: try 0...
+2025-07-03 15:28:31,474 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tullins/jean-louis-ghez.json
+2025-07-03 15:28:31,974 - INFO: Success !
+2025-07-03 15:28:31,974 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/juliette-etoo
+2025-07-03 15:28:31,974 - INFO: try 0...
+2025-07-03 15:28:31,974 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/juliette-etoo.json
+2025-07-03 15:28:32,355 - INFO: Success !
+2025-07-03 15:28:32,355 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/varces-allieres-et-risset/virginie-feral
+2025-07-03 15:28:32,355 - INFO: try 0...
+2025-07-03 15:28:32,355 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/varces-allieres-et-risset/virginie-feral.json
+2025-07-03 15:28:32,811 - INFO: Success !
+2025-07-03 15:28:32,811 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/cabinet-medical/grenoble/medsoins-7-7-grenoble
+2025-07-03 15:28:32,811 - INFO: try 0...
+2025-07-03 15:28:32,811 - INFO: Going to site : https://www.doctolib.fr/cabinet-medical/grenoble/medsoins-7-7-grenoble.json
+2025-07-03 15:28:33,256 - INFO: Success !
+2025-07-03 15:28:33,256 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/moirans/sarah-herzberger
+2025-07-03 15:28:33,256 - INFO: try 0...
+2025-07-03 15:28:33,256 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/moirans/sarah-herzberger.json
+2025-07-03 15:28:33,706 - INFO: Success !
+2025-07-03 15:28:33,706 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/st-martin-d-heres/frederic-cosnier
+2025-07-03 15:28:33,706 - INFO: try 0...
+2025-07-03 15:28:33,707 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/st-martin-d-heres/frederic-cosnier.json
+2025-07-03 15:28:34,300 - INFO: Success !
+2025-07-03 15:28:34,300 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/florian-zahnd-tencin
+2025-07-03 15:28:34,300 - INFO: try 0...
+2025-07-03 15:28:34,300 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/florian-zahnd-tencin.json
+2025-07-03 15:28:34,729 - INFO: Success !
+2025-07-03 15:28:34,729 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/saint-egreve/pharmacie-de-la-monta
+2025-07-03 15:28:34,729 - INFO: try 0...
+2025-07-03 15:28:34,729 - INFO: Going to site : https://www.doctolib.fr/pharmacie/saint-egreve/pharmacie-de-la-monta.json
+2025-07-03 15:28:35,159 - INFO: Success !
+2025-07-03 15:28:35,159 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-hilaire-du-touvet/valentine-barenton
+2025-07-03 15:28:35,159 - INFO: try 0...
+2025-07-03 15:28:35,159 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-hilaire-du-touvet/valentine-barenton.json
+2025-07-03 15:28:35,728 - INFO: Success !
+2025-07-03 15:28:35,729 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/villard-bonnot/pharmacie-cuzin
+2025-07-03 15:28:35,729 - INFO: try 0...
+2025-07-03 15:28:35,729 - INFO: Going to site : https://www.doctolib.fr/pharmacie/villard-bonnot/pharmacie-cuzin.json
+2025-07-03 15:28:36,099 - INFO: Success !
+2025-07-03 15:28:36,099 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-des-deux-cours
+2025-07-03 15:28:36,099 - INFO: try 0...
+2025-07-03 15:28:36,099 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-des-deux-cours.json
+2025-07-03 15:28:36,457 - INFO: Success !
+2025-07-03 15:28:36,457 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-versoud/raphaelle-plazy
+2025-07-03 15:28:36,457 - INFO: try 0...
+2025-07-03 15:28:36,457 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-versoud/raphaelle-plazy.json
+2025-07-03 15:28:36,869 - INFO: Success !
+2025-07-03 15:28:36,869 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-des-arts-hellopharmacie
+2025-07-03 15:28:36,870 - INFO: try 0...
+2025-07-03 15:28:36,870 - INFO: Going to site : https://www.doctolib.fr/pharmacie/grenoble/pharmacie-des-arts-hellopharmacie.json
+2025-07-03 15:28:37,206 - INFO: Success !
+2025-07-03 15:28:37,206 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/vif/davy-benhamou
+2025-07-03 15:28:37,206 - INFO: try 0...
+2025-07-03 15:28:37,206 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/vif/davy-benhamou.json
+2025-07-03 15:28:37,625 - INFO: Success !
+2025-07-03 15:28:37,625 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/alice-huguet
+2025-07-03 15:28:37,625 - INFO: try 0...
+2025-07-03 15:28:37,625 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/alice-huguet.json
+2025-07-03 15:28:38,068 - INFO: Success !
+2025-07-03 15:28:38,068 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/jarrie/olivier-peudon
+2025-07-03 15:28:38,068 - INFO: try 0...
+2025-07-03 15:28:38,068 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/jarrie/olivier-peudon.json
+2025-07-03 15:28:38,428 - INFO: Success !
+2025-07-03 15:28:38,428 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/helene-saintraymond
+2025-07-03 15:28:38,428 - INFO: try 0...
+2025-07-03 15:28:38,428 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-pont-de-claix/helene-saintraymond.json
+2025-07-03 15:28:38,840 - INFO: Success !
+2025-07-03 15:28:38,840 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-nazaire/helene-beaumont
+2025-07-03 15:28:38,841 - INFO: try 0...
+2025-07-03 15:28:38,841 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-nazaire/helene-beaumont.json
+2025-07-03 15:28:39,244 - INFO: Success !
+2025-07-03 15:28:39,244 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/jennyfer-malnou
+2025-07-03 15:28:39,244 - INFO: try 0...
+2025-07-03 15:28:39,244 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/jennyfer-malnou.json
+2025-07-03 15:28:39,741 - INFO: Success !
+2025-07-03 15:28:39,741 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/tencin/magali-caillis
+2025-07-03 15:28:39,741 - INFO: try 0...
+2025-07-03 15:28:39,741 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/tencin/magali-caillis.json
+2025-07-03 15:28:40,171 - INFO: Success !
+2025-07-03 15:28:40,171 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/echirolles/pharmacie-zola
+2025-07-03 15:28:40,171 - INFO: try 0...
+2025-07-03 15:28:40,171 - INFO: Going to site : https://www.doctolib.fr/pharmacie/echirolles/pharmacie-zola.json
+2025-07-03 15:28:40,640 - INFO: Success !
+2025-07-03 15:28:40,640 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/saint-egreve/kersante-saint-egreve
+2025-07-03 15:28:40,640 - INFO: try 0...
+2025-07-03 15:28:40,640 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/saint-egreve/kersante-saint-egreve.json
+2025-07-03 15:28:40,956 - INFO: Success !
+2025-07-03 15:28:40,956 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/le-versoud/florent-viguerie
+2025-07-03 15:28:40,956 - INFO: try 0...
+2025-07-03 15:28:40,956 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/le-versoud/florent-viguerie.json
+2025-07-03 15:28:41,429 - INFO: Success !
+2025-07-03 15:28:41,429 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/seyssins/therese-carrier
+2025-07-03 15:28:41,429 - INFO: try 0...
+2025-07-03 15:28:41,429 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/seyssins/therese-carrier.json
+2025-07-03 15:28:41,845 - INFO: Success !
+2025-07-03 15:28:41,845 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/damien-maurin
+2025-07-03 15:28:41,845 - INFO: try 0...
+2025-07-03 15:28:41,845 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/saint-martin-d-heres/damien-maurin.json
+2025-07-03 15:28:42,260 - INFO: Success !
+2025-07-03 15:28:42,261 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-duverney-joux
+2025-07-03 15:28:42,261 - INFO: try 0...
+2025-07-03 15:28:42,261 - INFO: Going to site : https://www.doctolib.fr/pharmacie/fontaine/pharmacie-duverney-joux.json
+2025-07-03 15:28:42,627 - INFO: Success !
+2025-07-03 15:28:42,627 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-mistral
+2025-07-03 15:28:42,627 - INFO: try 0...
+2025-07-03 15:28:42,627 - INFO: Going to site : https://www.doctolib.fr/centre-de-sante/grenoble/centres-de-sante-mistral.json
+2025-07-03 15:28:42,953 - INFO: Success !
+2025-07-03 15:28:42,953 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/corenc/anne-laure-dufour
+2025-07-03 15:28:42,953 - INFO: try 0...
+2025-07-03 15:28:42,953 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/corenc/anne-laure-dufour.json
+2025-07-03 15:28:43,410 - INFO: Success !
+2025-07-03 15:28:43,410 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/grenoble/bruno-dolidon
+2025-07-03 15:28:43,410 - INFO: try 0...
+2025-07-03 15:28:43,411 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/grenoble/bruno-dolidon.json
+2025-07-03 15:28:43,826 - INFO: Success !
+2025-07-03 15:28:43,826 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/medecin-generaliste/lyon/cornelia-ciudin
+2025-07-03 15:28:43,826 - INFO: try 0...
+2025-07-03 15:28:43,826 - INFO: Going to site : https://www.doctolib.fr/medecin-generaliste/lyon/cornelia-ciudin.json
+2025-07-03 15:28:44,332 - INFO: Success !
+2025-07-03 15:28:44,863 - INFO: Scraper Exited
+2025-07-03 15:28:44,863 - INFO: Program Finished

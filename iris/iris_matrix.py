@@ -107,15 +107,15 @@ class IrisMatrixService:
                                 if od_key in self.ods:
                                     od = self.ods[od_key]
                                     if od.km != 9999:
-                                        e.google_km = int(round(od.km))
-                                        e.google_hc = int(od.hc)
-                                        e.google_hp = int(od.hp)
+                                        e.od_km = int(round(od.km))
+                                        e.od_hc = int(od.hc)
+                                        e.od_hp = int(od.hp)
                             km = 9999
                             near = self.are_rapid_near(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
                             if near:
                                 d = self.compute_distance(iris1.lon, iris1.lat, iris2.lon, iris2.lat)
                                 km = int(round(d))
-                            if km < self.max_direct_distance or e.google_km is not None:
+                            if km < self.max_direct_distance or e.od_km is not None:
                                 if near:
                                     e.direct_km = km
                                     e.proximity = self.compute_proximity(iris1, iris2)
@@ -163,3 +163,5 @@ if __name__ == '__main__':
     # nbrow with google_km in commune_matrix = 8156576 23%
     # nbrow wih google_km 14.6M 3.7%
     # total 393M
+
+    # Gérer les regroupements de communes : par ex AUTRANS

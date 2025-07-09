@@ -1,0 +1,31 @@
+2025-07-03 15:30:55,537 - INFO: Logging Started
+2025-07-03 15:30:55,537 - DEBUG: scrapper init
+2025-07-03 15:30:56,198 - DEBUG: wrapper created for : browser.new_context()
+2025-07-03 15:30:56,198 - DEBUG: wrapper created for : browser.new_page()
+2025-07-03 15:30:56,209 - DEBUG: wrapper created for : bs_context.new_page()
+2025-07-03 15:30:56,374 - DEBUG: wrapper created for : page.goto()
+2025-07-03 15:30:56,374 - INFO: Scraper Entered
+2025-07-03 15:30:56,374 - INFO: Going to site : https://www.doctolib.fr/dermatologue/grenoble.json
+2025-07-03 15:30:58,022 - INFO: Going to site : https://www.doctolib.fr/dermatologue/grenoble.json?page=2
+2025-07-03 15:30:58,381 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/dermatologue/voiron/elsa-cuchet
+2025-07-03 15:30:58,381 - INFO: try 0...
+2025-07-03 15:30:58,381 - INFO: Going to site : https://www.doctolib.fr/dermatologue/voiron/elsa-cuchet.json
+2025-07-03 15:30:58,813 - INFO: Success !
+2025-07-03 15:30:58,813 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/dermatologue/grenoble/pierre-tsan
+2025-07-03 15:30:58,813 - INFO: try 0...
+2025-07-03 15:30:58,813 - INFO: Going to site : https://www.doctolib.fr/dermatologue/grenoble/pierre-tsan.json
+2025-07-03 15:30:59,247 - INFO: Success !
+2025-07-03 15:30:59,247 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/dermatologue/crolles/marie-charavin-cocuzza
+2025-07-03 15:30:59,247 - INFO: try 0...
+2025-07-03 15:30:59,247 - INFO: Going to site : https://www.doctolib.fr/dermatologue/crolles/marie-charavin-cocuzza.json
+2025-07-03 15:30:59,601 - INFO: Success !
+2025-07-03 15:30:59,602 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/dermatologue/meylan/amelie-neron
+2025-07-03 15:30:59,602 - INFO: try 0...
+2025-07-03 15:30:59,602 - INFO: Going to site : https://www.doctolib.fr/dermatologue/meylan/amelie-neron.json
+2025-07-03 15:30:59,995 - INFO: Success !
+2025-07-03 15:30:59,995 - INFO: find_doc_infos, doc_url : https://www.doctolib.fr/dermatologue/crolles/celine-thurot-guillou
+2025-07-03 15:30:59,995 - INFO: try 0...
+2025-07-03 15:30:59,995 - INFO: Going to site : https://www.doctolib.fr/dermatologue/crolles/celine-thurot-guillou.json
+2025-07-03 15:31:00,377 - INFO: Success !
+2025-07-03 15:31:00,694 - INFO: Scraper Exited
+2025-07-03 15:31:00,694 - INFO: Program Finished
