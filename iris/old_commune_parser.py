@@ -2,13 +2,14 @@ import csv
 import datetime
 
 from sqlalchemy.orm import joinedload
+
+from OSM_matcher import OSMMatcher
 from sqlentities import Context, Cabinet, PS, AdresseRaw, PSCabinetDateSource, Profession, Dept, Commune, Iris
 from base_parser import BaseParser
 import argparse
 import art
 import config
 import numpy as np
-
 
 
 class OldVCommuneParser(BaseParser):
@@ -58,42 +59,31 @@ class OldVCommuneParser(BaseParser):
         if dept_num in self.depts:
             commune = self.mapper(row)
             if commune.code not in self.communes:  # Old commune with new id
-                dept = self.depts[dept_num]
-                commune.dept = dept
-                if commune.parent is not None and commune.parent in self.communes:  # Must be present
-                    parent: Commune = self.communes[commune.parent]
-                    commune.lon = parent.lon
-                    commune.lat = parent.lat
-                    commune.epci_id = parent.epci_id
-                    commune.epci_nom = parent.epci_nom
-                    commune.bassin_vie_id = parent.bassin_vie_id
-                    commune.bassin_vie_nom = parent.bassin_vie_nom
-                    commune.zone_emploi_id = parent.zone_emploi_id
-                    commune.zone_emploi_nom = parent.zone_emploi_nom
-                    commune.arr_dept_id = parent.arr_dept_id
-                    commune.arr_dept_nom = parent.arr_dept_nom
-                else:
-                    print(f"Cas anormal 99 {commune}")
-                    quit(99)
-                self.communes[commune.code] = commune
-                self.context.session.add(commune)
-                # self.context.session.commit()
-                self.nb_new_commune += 1
+                print(f"Cas anormal 99 {commune}")
+                quit(99)
             else:  # Old commune with same id
-                old_commune = commune
-                if old_commune.type == "COM" and old_commune.parent is not None:
+                if commune.type == "COM" and commune.parent is not None:
                     print(f"Cas anormal 98 {commune}")
                     quit(98)
-                if old_commune.type != "COM" and old_commune.parent is None:
+                if commune.type != "COM" and commune.parent is None:
                     print(f"Cas anormal 97 {commune}")
                     quit(97)
-                if old_commune.type != "COM" and old_commune.parent is not None:
-                    commune = self.communes[old_commune.code]
-                    commune.old_type = old_commune.type
-                    commune.old_nom = old_commune.nom
-                    commune.old_nom_norm = old_commune.nom_norm
-                    # self.context.session.commit()
-                    self.nb_update_commune += 1
+                if commune.type != "COM" and commune.parent is not None:
+                    parent = self.communes[commune.parent]
+                    commune = self.communes[commune.code]
+                    if commune.date_fin is not None:
+                        commune.lon = parent.lon
+                        commune.lat = parent.lat
+                        commune.epci_id = parent.epci_id
+                        commune.epci_nom = parent.epci_nom
+                        commune.bassin_vie_id = parent.bassin_vie_id
+                        commune.bassin_vie_nom = parent.bassin_vie_nom
+                        commune.zone_emploi_id = parent.zone_emploi_id
+                        commune.zone_emploi_nom = parent.zone_emploi_nom
+                        commune.arr_dept_id = parent.arr_dept_id
+                        commune.arr_dept_nom = parent.arr_dept_nom
+                        self.context.session.commit()
+                        self.nb_update_commune += 1
 
 
 class OldVCommuneDepuis1943Parser(OldVCommuneParser):
@@ -153,6 +143,27 @@ class OldVCommuneDepuis1943Parser(OldVCommuneParser):
                     self.nb_update_commune += 1
 
 
+class OldCommuneOSM:
+
+    def __init__(self, context):
+        self.osm = OSMMatcher()
+        self.context = context
+
+    def match(self):
+        l: list[Commune] = self.context.session.query(Commune).filter(Commune.lon.is_(None)).all()
+        for commune in l:
+            osm = self.osm.get_osm_from_adresse(None, None, commune.nom_norm, None)
+            if osm is not None:
+                print(f"{commune.nom} => ({osm.lon},{osm.lat})")
+                commune.lon = osm.lon
+                commune.lat = osm.lat
+                self.context.session.commit()
+            else:
+                print(f"{commune.nom} => None")
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -169,16 +180,17 @@ if __name__ == '__main__':
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} MB")
-    ocd1943p = OldVCommuneDepuis1943Parser(context)
-    ocd1943p.load("data/iris/cog_ensemble_2025_csv/v_commune_depuis_1943.csv", delimiter=",", encoding="utf8",
-                  header=True, quotechar='"')
-    print(f"New commune: {ocd1943p.nb_new_commune}")
-    print(f"Update commune: {ocd1943p.nb_update_commune}")
+    # ocd1943p = OldVCommuneDepuis1943Parser(context)
+    # ocd1943p.load("data/iris/cog_ensemble_2025_csv/v_commune_depuis_1943.csv", delimiter=",", encoding="utf8",
+    #               header=True, quotechar='"')
+    # print(f"New commune: {ocd1943p.nb_new_commune}")
+    # print(f"Update commune: {ocd1943p.nb_update_commune}")
     # ovcp = OldVCommuneParser(context)
     # ovcp.load("data/iris/cog_ensemble_2025_csv/v_commune_2025.csv", delimiter=",", encoding="utf8", header=True,
     #           quotechar='"')
-    # print(f"New commune: {ovcp.nb_new_commune}")
     # print(f"Update commune: {ovcp.nb_update_commune}")
+    oco = OldCommuneOSM(context)
+    oco.match()
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")

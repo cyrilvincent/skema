@@ -71,12 +71,12 @@ class CommuneMatrixService:
         return lon < self.max_lon_lat
 
     def compute_proximity(self, com1: Commune, com2: Commune) -> int:
-        if com1.arr_dept_id == com2.arr_dept_id:
+        if com1.arr_dept_id == com2.arr_dept_id and com1.arr_dept_id != "":
             return 3
         if com1.zone_emploi_id is not None and com2.zone_emploi_id is not None:
             if com1.zone_emploi_id == com2.zone_emploi_id:
                 return 4
-        if com1.bassin_vie_id == com2.bassin_vie_id:
+        if com1.bassin_vie_id == com2.bassin_vie_id and com1.bassin_vie_id != "":
             return 5
         if com1.epci_id is not None and com2.epci_id is not None and com1.epci_id == com2.epci_id:
             return 6
