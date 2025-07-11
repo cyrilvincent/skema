@@ -26,12 +26,12 @@ class CommuneMatrixService:
         self.ban_communes: set[int] = set()
         self.max_direct_distance = 200
         self.max_lon_lat = 2.0
-        self.nb_commit = 100000
 
     def make_cache(self):
         print("Making cache")
         self.ods = {}
-        l: List[Commune] = self.context.session.query(Commune).options(joinedload(Commune.dept)).all()
+        l: List[Commune] = (self.context.session.query(Commune).options(joinedload(Commune.dept))
+                            .filter(Commune.lon.isnot(None)).all())
         for e in l:
             self.communes[e.id] = e
             self.nb_ram += 1
@@ -104,21 +104,20 @@ class CommuneMatrixService:
                             e.od_hc = int(od.hc)
                             e.od_hp = int(od.hp)
                         self.context.session.add(e)
-                        if self.nb_entity % 100000 == 0:
+                        if self.nb_entity % 10000 == 0:
                             duration = time.perf_counter() - time0 + 1e-6
                             print(f"Creating {self.nb_entity} entities in {int(duration)}s")
                         self.nb_entity += 1
-                        if self.nb_entity % self.nb_commit == 0:
+                        if self.nb_entity % 10000 == 0:
                             self.context.session.commit()
         self.context.session.commit()
 
     def compute_distances(self):
         print("Compute distances")
         total = len(self.communes) ** 2
-        nb_pair = 0
         for com1 in self.communes.keys():
             for com2 in self.communes.keys():
-                nb_pair += 1
+                self.row_num += 1
                 if com1 != com2:
                     key = (com1, com2) if com1 < com2 else (com2, com1)
                     if key not in self.entities:
@@ -141,12 +140,9 @@ class CommuneMatrixService:
                                         if e.id is None:
                                             self.context.session.add(e)
                                             self.nb_entity += 1
-                                        if self.row_num % 100000 == 0:
-                                            duration = time.perf_counter() - time0 + 1e-6
-                                            print(f"Reading {self.row_num} entities {nb_pair * 100 / total:.1f}% in {int(duration)}s")
-                                        self.row_num += 1
-                                        if self.row_num % self.nb_commit == 0:
-                                            self.context.session.commit()
+            duration = time.perf_counter() - time0
+            print(f"Reading {self.nb_entity} entities {self.row_num * 100 / total:.1f}% in {int(duration)}s")
+            self.context.session.commit()
         self.context.session.commit()
 
 
@@ -175,6 +171,8 @@ if __name__ == '__main__':
     cms.make_cache()
     cms.compute_distances()
     print(f"Parse {cms.nb_entity} entities in {time.perf_counter() - time0:.0f} s")
+
+    # -all on server
 
     # 62 Million of pair / 605 Million
     # 61.6 Million of pairs with direct_km

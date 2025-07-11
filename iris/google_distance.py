@@ -49,4 +49,6 @@ if __name__ == '__main__':
     km, min = service.get_distance_from_js(js)
     print(km, min)
 
+    # todo gérer l'heure : options departure_time 9999-12-31T23:59:59 /!\ UTC si rien n'est indiqué alors temps moyen
+
     # 5$ / 10000

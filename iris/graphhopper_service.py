@@ -1,5 +1,7 @@
 from threading import Thread
 from urllib import request
+
+from OSM_matcher import OSMMatcher
 from sqlentities import Context, Commune, CommuneMatrix, Iris, IrisMatrix
 import argparse
 import time
@@ -73,7 +75,7 @@ class GraphHopperService:
 class GraphHopperIrisService(Thread):
 
     def __init__(self, context, graphhopper_service: GraphHopperService,
-                 num_thread: int, total_thread: int, distance_min: int, distance_max: int):
+                 num_thread: int, total_thread: int, distance_min: int, distance_max: int, with_osm=False):
         super().__init__()
         self.context = context
         self.service = graphhopper_service
@@ -84,6 +86,10 @@ class GraphHopperIrisService(Thread):
         self.nb_entity = 0
         self.total = 0
         self.nb_error = 0
+        self.with_osm = with_osm
+        self.max_difference = 400
+        if with_osm:
+            self.osm_matcher = OSMMatcher(ban_echo=True)
 
     def get_commune_by_id(self, id: int) -> Commune:
         return self.context.session.get(Commune, id)
@@ -135,6 +141,23 @@ class GraphHopperIrisService(Thread):
             return km, min
         return None, None
 
+    def gh_osm_distance_from_iriss(self, iris1: Iris, iris2: Iris) -> tuple[int | None, int | None]:
+        if len(iris1.commune.iriss) == 1:
+            osm1 = self.osm_matcher.get_osm_from_adresse(None, None, iris1.commune.nom_norm, None)
+        else:
+            osm1 = self.osm_matcher.get_osm_from_query(f"{iris1.nom_norm} {iris1.commune.nom_norm}")
+        if osm1.lon is None:
+            return None, None
+        if len(iris2.commune.iriss) == 1:
+            osm2 = self.osm_matcher.get_osm_from_adresse(None, None, iris2.commune.nom_norm, None)
+        else:
+            osm2 = self.osm_matcher.get_osm_from_query(f"{iris2.nom_norm} {iris2.commune.nom_norm}")
+        if osm2.lon is None:
+            return None, None
+        js = self.service.get_json_from_lon_lat(osm1.lon, osm1.lat, osm2.lon, osm2.lat)
+        km, min = self.service.get_distances_from_json(js)
+        return km, min
+
     def gh_distance_for_commune(self, commune_matrix: CommuneMatrix):
         commune1 = self.get_commune_by_id(commune_matrix.code_id_low)
         commune2 = self.get_commune_by_id(commune_matrix.code_id_high)
@@ -161,26 +184,31 @@ class GraphHopperIrisService(Thread):
             iris_matrix.route_min = iris_matrix.od_hc
             iris_matrix.route_hp_min = iris_matrix.od_hp
         else:
-            km, min = self.gh_distance_from_iriss(iris1, iris2)
+            if self.with_osm:
+                km, min = self.gh_osm_distance_from_iriss(iris1, iris2)
+                if iris_matrix.route_km is not None and km >= iris_matrix.route_km:
+                    km = None
+            else:
+                km, min = self.gh_distance_from_iriss(iris1, iris2)
             if km is not None:
                 duration1 = time.perf_counter() - time1
                 duration0 = time.perf_counter() - time0
                 if self.num_thread == 0:
                     print(f"Thread {self.num_thread} {iris_matrix.id} "
                           f"{iris_matrix.iris_id_from}=>{iris_matrix.iris_id_to}: {km}km {min}min "
-                          f"@{duration1:.1f}s/query {self.nb_entity + 1} rows ({(self.nb_entity / self.total) * 100:.2f}%)"
-                          f" in {int(duration0)}s")
+                          f"@{duration1:.1f}s/query {self.nb_entity + 1} rows"
+                          f" ({(self.nb_entity / self.total) * 100:.2f}%) in {int(duration0)}s")
                 iris_matrix.route_km = km
                 iris_matrix.route_min = min
                 iris_matrix.route_hp_min = self.get_hp(min, iris1.commune, iris2.commune)
 
     def gh_distances_for_communes(self):
         l = self.context.session.query(CommuneMatrix).filter(
-            (CommuneMatrix.route_km.is_(None)) &
-            (CommuneMatrix.direct_km.isnot(None)) &
-            (CommuneMatrix.direct_km >= self.distance_min) &
-            (CommuneMatrix.direct_km <= self.distance_max) &
-            (CommuneMatrix.id % self.total_thread == self.num_thread)).all()
+                (CommuneMatrix.route_km.is_(None)) &
+                (CommuneMatrix.direct_km.isnot(None)) &
+                (CommuneMatrix.direct_km >= self.distance_min) &
+                (CommuneMatrix.direct_km <= self.distance_max) &
+                (CommuneMatrix.id % self.total_thread == self.num_thread)).all()
         self.total = len(l)
         print(f"Found {self.total} entities in thread {self.num_thread}")
         for e in l:
@@ -191,15 +219,24 @@ class GraphHopperIrisService(Thread):
             except Exception as ex:
                 self.nb_error += 1
                 print(f"Error GraphHopper n°{self.num_thread}.{self.nb_error} on {e}: {ex}")
-                time.sleep(5)
+                time.sleep(1)
 
     def gh_distances_for_iriss(self):
-        l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
-            (IrisMatrix.route_km.is_(None)) &
-            (IrisMatrix.direct_km.isnot(None)) &
-            (IrisMatrix.direct_km >= self.distance_min) &
-            (IrisMatrix.direct_km <= self.distance_max) &
-            (IrisMatrix.id % self.total_thread == self.num_thread)).all()
+        if self.with_osm:
+            print("Starting GraphHopper service with OSM")
+            l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
+                (IrisMatrix.direct_km.isnot(None)) &
+                (IrisMatrix.direct_km >= self.distance_min) &
+                (IrisMatrix.direct_km <= self.distance_max) &
+                ((IrisMatrix.route_km.is_(None)) |
+                 ((IrisMatrix.route_km - IrisMatrix.direct_km) > self.max_difference))).all()
+        else:
+            l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
+                (IrisMatrix.direct_km.isnot(None)) &
+                (IrisMatrix.direct_km >= self.distance_min) &
+                (IrisMatrix.direct_km <= self.distance_max) &
+                (IrisMatrix.route_km.is_(None)) &
+                (IrisMatrix.id % self.total_thread == self.num_thread)).all()
         self.total = len(l)
         print(f"Found {self.total} entities in thread {self.num_thread}")
         for e in l:
@@ -212,11 +249,12 @@ class GraphHopperIrisService(Thread):
             except Exception as ex:
                 self.nb_error += 1
                 print(f"Error GraphHopper n°{self.num_thread}.{self.nb_error} on {e}: {ex}")
-                time.sleep(5)
+                time.sleep(1)
 
     def run(self):
-        print(f"Starting thread {self.num_thread}")
+        print(f"Starting thread {self.num_thread}/{self.total_thread}")
         self.gh_distances_for_iriss()
+        print(f"Ending thread {self.num_thread}/{self.total_thread}")
 
 
 class GraphHopperLauncher:
@@ -226,7 +264,7 @@ class GraphHopperLauncher:
         self.service = graphhopper_service
         self.distance_min = distance_min
         self.distance_max = distance_max
-        self.nb_thread = nb_thread  # + np.random.randint(max(1, nb_thread // 10))
+        self.nb_thread = nb_thread
         self.threads: list[GraphHopperIrisService] = []
         self.sleep = sleep
 
@@ -234,14 +272,20 @@ class GraphHopperLauncher:
         print(f"Starting GraphHopper clients with {self.nb_thread} threads")
         for i in range(self.nb_thread):
             context = Context()
-            context.create(echo=args.echo, expire_on_commit=False)
+            context.create(echo=False, expire_on_commit=False)
             gs = GraphHopperIrisService(context, service, num_thread=i, total_thread=self.nb_thread,
                                         distance_min=self.distance_min, distance_max=self.distance_max)
             gs.start()
-            time.sleep(self.sleep)
             self.threads.append(gs)
+            time.sleep(self.sleep)
+        print(f"All {self.nb_thread} threads started")
         for thread in self.threads:
             thread.join()
+        print("All threads closed")
+
+    # todo pour les manquants : Google
+    # 1 OSM + GraphHopper : à tester
+    # 2 Google
 
 
 if __name__ == '__main__':
@@ -258,22 +302,19 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--max", help="Maximum distance", type=int, default=100)
     parser.add_argument("-t", "--nb_thread", help="Number of thread", type=int, default=50)
     parser.add_argument("-s", "--thread_sleep", help="Sleeping between 2 threads", type=int, default=10)
+    parser.add_argument("-o", "--with_osm", help="Use OSM", action="store_true")
     args = parser.parse_args()
     service = GraphHopperService(args.port)
-    launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread, args.thread_sleep)
-    launcher.start()
+    if args.with_osm:
+        context = Context()
+        context.create(echo=args.echo, expire_on_commit=False)
+        gs = GraphHopperIrisService(context, service, 0, 1, args.min, args.max, True)
+        gs.gh_distances_for_iriss()
+    else:
+        launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread, args.thread_sleep)
+        launcher.start()
 
-    # -m 5 -d 5 -t 1
-
-    # -m 3 -d 150 -t 100 pour le serveur
-
-    # >3 <100 : 22M = 506j
-    # >5 <50 : 8M = 185j
-    # 1M = 23j
-    # 50 threads
-    # 1M = 11h
-    # 8M = 4j
-    # 22M = 10j
+    # -m 3 -d 150 -t 400 pour le serveur
 
     # iris : 805070000
     # iris : 2023660000 2B

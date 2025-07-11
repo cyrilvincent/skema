@@ -72,18 +72,20 @@ class OldVCommuneParser(BaseParser):
                     parent = self.communes[commune.parent]
                     commune = self.communes[commune.code]
                     if commune.date_fin is not None:
-                        commune.lon = parent.lon
-                        commune.lat = parent.lat
-                        commune.epci_id = parent.epci_id
-                        commune.epci_nom = parent.epci_nom
-                        commune.bassin_vie_id = parent.bassin_vie_id
-                        commune.bassin_vie_nom = parent.bassin_vie_nom
-                        commune.zone_emploi_id = parent.zone_emploi_id
-                        commune.zone_emploi_nom = parent.zone_emploi_nom
-                        commune.arr_dept_id = parent.arr_dept_id
-                        commune.arr_dept_nom = parent.arr_dept_nom
-                        self.context.session.commit()
-                        self.nb_update_commune += 1
+                        if commune.parent is None:
+                            commune.lon = parent.lon
+                            commune.lat = parent.lat
+                            commune.epci_id = parent.epci_id
+                            commune.epci_nom = parent.epci_nom
+                            commune.bassin_vie_id = parent.bassin_vie_id
+                            commune.bassin_vie_nom = parent.bassin_vie_nom
+                            commune.zone_emploi_id = parent.zone_emploi_id
+                            commune.zone_emploi_nom = parent.zone_emploi_nom
+                            commune.arr_dept_id = parent.arr_dept_id
+                            commune.arr_dept_nom = parent.arr_dept_nom
+                            commune.parent = parent.code
+                            self.context.session.commit()
+                            self.nb_update_commune += 1
 
 
 class OldVCommuneDepuis1943Parser(OldVCommuneParser):
@@ -154,12 +156,12 @@ class OldCommuneOSM:
         for commune in l:
             osm = self.osm.get_osm_from_adresse(None, None, commune.nom_norm, None)
             if osm is not None:
-                print(f"{commune.nom} => ({osm.lon},{osm.lat})")
+                print(f"{commune.nom_norm} => ({osm.lon},{osm.lat})")
                 commune.lon = osm.lon
                 commune.lat = osm.lat
                 self.context.session.commit()
             else:
-                print(f"{commune.nom} => None")
+                print(f"{commune.nom_norm} => None")
 
 
 
@@ -185,12 +187,12 @@ if __name__ == '__main__':
     #               header=True, quotechar='"')
     # print(f"New commune: {ocd1943p.nb_new_commune}")
     # print(f"Update commune: {ocd1943p.nb_update_commune}")
-    # ovcp = OldVCommuneParser(context)
-    # ovcp.load("data/iris/cog_ensemble_2025_csv/v_commune_2025.csv", delimiter=",", encoding="utf8", header=True,
-    #           quotechar='"')
-    # print(f"Update commune: {ovcp.nb_update_commune}")
-    oco = OldCommuneOSM(context)
-    oco.match()
+    ovcp = OldVCommuneParser(context)
+    ovcp.load("data/iris/cog_ensemble_2025_csv/v_commune_2025.csv", delimiter=",", encoding="utf8", header=True,
+              quotechar='"')
+    print(f"Update commune: {ovcp.nb_update_commune}")
+    # oco = OldCommuneOSM(context)
+    # oco.match()
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")

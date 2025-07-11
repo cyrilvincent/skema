@@ -125,7 +125,6 @@ class IrisMatrixService:
                                     duration = time.perf_counter() - time0
                                     print(f"Creating {self.nb_entity} rows "
                                           f"{self.row_num * 100 / self.total:.2f}% in {int(duration)}s")
-                                    self.row_num += 1
                                     self.context.session.commit()
         self.context.session.commit()
 

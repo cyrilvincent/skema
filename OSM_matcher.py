@@ -69,7 +69,6 @@ class OSMMatcher:
     def get_osm_from_adresse(self, numero: Optional[int], rue: Optional[str],
                              commune: Optional[str], cp: Optional[int]) -> Optional[OSM]:
         url = self.uri
-        osm = OSM()
         if rue is not None:
             if numero is None:
                 url += f"&street={urllib.parse.quote(rue)}"
@@ -82,7 +81,17 @@ class OSMMatcher:
         if cp is not None:
             url += f"&postalcode={cp}"
         js = self.get_json_from_url(url)
+        return self.get_osm_from_json(js)
+
+    def get_osm_from_query(self, q: str) -> Optional[OSM]:
+        url = self.uri
+        url += f"&q={urllib.parse.quote(q)}"
+        js = self.get_json_from_url(url)
+        return self.get_osm_from_json(js)
+
+    def get_osm_from_json(self, js: dict) -> OSM | None:
         if len(js) > 0:
+            osm = OSM()
             try:
                 osm.lat = float(js[0]["lat"])
                 osm.lon = float(js[0]["lon"])
@@ -142,9 +151,6 @@ class OSMMatcher:
             if osm.adresse.count(",") >= 7:
                 return osm, 0.6
             return osm, 0.5
-        # osm = self.get_osm_from_adresse(None, None, row.commune, None)
-        # if osm is not None:
-        #     return osm, 0.5
         return None, 0
 
     def match(self):

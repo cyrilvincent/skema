@@ -36,7 +36,7 @@ class IrisToCommuneTransferer:
             commune.lon = iris.lon
             commune.lat = iris.lat
 
-    def found_mairie(self, commune: Commune) -> Iris | None:
+    def find_mairie(self, commune: Commune) -> Iris | None:
         for iris in commune.iriss:
             if "MAIRIE" in iris.nom_norm or "HOTEL DE VILLE" in iris.nom_norm:
                 return iris
@@ -54,7 +54,9 @@ class IrisToCommuneTransferer:
             self.nb_entity += 1
             commune1 = self.get_commune_by_id(commune_matrix.code_id_low)
             commune2 = self.get_commune_by_id(commune_matrix.code_id_high)
-            if len(commune1.iriss) == 1 and len(commune2.iriss) == 1:
+            if len(commune1.iriss) == 0 or len(commune2.iriss) == 0:
+                continue
+            elif len(commune1.iriss) == 1 and len(commune2.iriss) == 1:
                 iris_id1 = commune1.iriss[0].id
                 iris_id2 = commune2.iriss[0].id
                 iris_matrix = self.get_iris_matrix_by_ids(iris_id1, iris_id2)
@@ -62,12 +64,12 @@ class IrisToCommuneTransferer:
                     self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
                     self.context.session.commit()
             else:
-                iris1 = self.found_mairie(commune1)
+                iris1 = self.find_mairie(commune1)
                 if iris1 is not None:
                     self.iris_to_commune(iris1, commune1)
                 else:
                     iris1 = commune1.iriss[0]
-                iris2 = self.found_mairie(commune2)
+                iris2 = self.find_mairie(commune2)
                 if iris2 is not None:
                     self.iris_to_commune(iris2, commune2)
                 else:
