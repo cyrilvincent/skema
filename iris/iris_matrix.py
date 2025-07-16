@@ -55,7 +55,7 @@ class IrisMatrixService:
         lon = abs(lon1 - lon2)
         return lon < self.max_lon_lat
 
-    def compute_distance(self, lon1, lat1, lon2, lat2):
+    def compute_distance(self, lon1: float, lat1: float, lon2: float, lat2: float) -> float:
         r = 6373.0
         lat1 = math.radians(lat1)
         lon1 = math.radians(lon1)

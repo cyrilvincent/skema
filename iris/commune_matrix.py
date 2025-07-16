@@ -50,7 +50,7 @@ class CommuneMatrixService:
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
 
-    def compute_distance(self, lon1, lat1, lon2, lat2):
+    def compute_distance(self, lon1: float, lat1: float, lon2: float, lat2: float) -> float:
         r = 6373.0
         lat1 = math.radians(lat1)
         lon1 = math.radians(lon1)

@@ -4,6 +4,7 @@ import datetime
 from sqlalchemy.orm import joinedload
 
 from OSM_matcher import OSMMatcher
+from iris.commune_matrix import CommuneMatrixService
 from sqlentities import Context, Cabinet, PS, AdresseRaw, PSCabinetDateSource, Profession, Dept, Commune, Iris
 from base_parser import BaseParser
 import argparse

@@ -28,15 +28,15 @@ class Context:
         if create_all:
             Base.metadata.create_all(self.engine)
 
-    def create_session(self, expire_on_commit=True):
+    def create_session(self, expire_on_commit=False):
         Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False, expire_on_commit=expire_on_commit)
         self.session = Session()
 
-    def get_session(self, expire_on_commit=True):
+    def get_session(self, expire_on_commit=False):
         Session = sessionmaker(bind=self.engine, autocommit=False, autoflush=False, expire_on_commit=expire_on_commit)
         return Session()
 
-    def create(self, echo=False, create_all=True, expire_on_commit=True):
+    def create(self, echo=False, create_all=True, expire_on_commit=False):
         self.create_engine(echo, create_all)
         self.create_session(expire_on_commit)
 

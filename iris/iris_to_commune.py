@@ -1,5 +1,7 @@
 import time
 from sqlalchemy.orm import joinedload
+
+from iris.commune_matrix import CommuneMatrixService
 from sqlentities import Context, Commune, Iris, IrisMatrix, CommuneMatrix
 import argparse
 import art
@@ -16,6 +18,7 @@ class IrisToCommuneTransferer:
         self.distance_max = distance_max
         self.nb_entity = 0
         self.total = 0
+        self.commune_matrix_service = CommuneMatrixService(context, False)
 
     def get_commune_by_id(self, id: int) -> Commune:
         return self.context.session.get(Commune, id)
@@ -36,11 +39,53 @@ class IrisToCommuneTransferer:
             commune.lon = iris.lon
             commune.lat = iris.lat
 
+    def get_nearset_iris(self, commune: Commune) -> Iris | None:
+        dist_min = 999
+        iris_min = None
+        for iris in commune.iriss:
+            d = self.commune_matrix_service.compute_distance(commune.lon, commune.lat, iris.lon, iris.lat)
+            if d < 0.1:
+                return iris
+            if d < dist_min:
+                dist_min = d
+                iris_min = iris
+        if dist_min < 0.75:
+            return iris_min
+
     def find_mairie(self, commune: Commune) -> Iris | None:
         for iris in commune.iriss:
             if "MAIRIE" in iris.nom_norm or "HOTEL DE VILLE" in iris.nom_norm:
                 return iris
         return None
+
+    def transfer_not_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
+        iris1 = commune1.iriss[0]
+        iris2 = commune2.iriss[0]
+        iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
+        if iris_matrix.route_km is not None:
+            self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
+            self.context.session.commit()
+
+    def transfer_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
+        iris1 = commune1.iriss[0]
+        if len(commune1.iriss) > 1:
+            iris1 = self.find_mairie(commune1)
+            if iris1 is not None:
+                self.iris_to_commune(iris1, commune1)
+            else:
+                iris1 = self.get_nearset_iris(commune1)
+        iris2 = commune2.iriss[0]
+        if len(commune2.iriss) > 1:
+            iris2 = self.find_mairie(commune2)
+            if iris2 is not None:
+                self.iris_to_commune(iris2, commune2)
+            else:
+                iris2 = self.get_nearset_iris(commune2)
+        if iris1 is not None and iris2 is not None:
+            iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
+            if iris_matrix.route_km is not None:
+                self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
+                self.context.session.commit()
 
     def transfer(self):
         print("Transfer")
@@ -57,27 +102,9 @@ class IrisToCommuneTransferer:
             if len(commune1.iriss) == 0 or len(commune2.iriss) == 0:
                 continue
             elif len(commune1.iriss) == 1 and len(commune2.iriss) == 1:
-                iris_id1 = commune1.iriss[0].id
-                iris_id2 = commune2.iriss[0].id
-                iris_matrix = self.get_iris_matrix_by_ids(iris_id1, iris_id2)
-                if iris_matrix.route_km is not None:
-                    self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
-                    self.context.session.commit()
+                self.transfer_not_irised(commune1, commune2, commune_matrix)
             else:
-                iris1 = self.find_mairie(commune1)
-                if iris1 is not None:
-                    self.iris_to_commune(iris1, commune1)
-                else:
-                    iris1 = commune1.iriss[0]
-                iris2 = self.find_mairie(commune2)
-                if iris2 is not None:
-                    self.iris_to_commune(iris2, commune2)
-                else:
-                    iris2 = commune2.iriss[0]
-                iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
-                if iris_matrix.route_km is not None:
-                    self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
-                    self.context.session.commit()
+                self.transfer_irised(commune1, commune2, commune_matrix)
             if self.nb_entity % 10000:
                 duration = time.perf_counter() - time0
                 print(f"Commited {self.nb_entity} ({(self.nb_entity / self.total) * 100:.2f} rows in {duration}s")

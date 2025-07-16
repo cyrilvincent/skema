@@ -2,7 +2,7 @@ from threading import Thread
 from urllib import request
 
 from OSM_matcher import OSMMatcher
-from sqlentities import Context, Commune, CommuneMatrix, Iris, IrisMatrix
+from sqlentities import Context, Commune, CommuneMatrix, Iris, IrisMatrix, OSM
 import argparse
 import time
 import art
@@ -87,9 +87,9 @@ class GraphHopperIrisService(Thread):
         self.total = 0
         self.nb_error = 0
         self.with_osm = with_osm
-        self.max_difference = 400
         if with_osm:
             self.osm_matcher = OSMMatcher(ban_echo=True)
+            self.iris_lon_lats: dict[id, OSM] = {}
 
     def get_commune_by_id(self, id: int) -> Commune:
         return self.context.session.get(Commune, id)
@@ -142,16 +142,22 @@ class GraphHopperIrisService(Thread):
         return None, None
 
     def gh_osm_distance_from_iriss(self, iris1: Iris, iris2: Iris) -> tuple[int | None, int | None]:
-        if len(iris1.commune.iriss) == 1:
-            osm1 = self.osm_matcher.get_osm_from_adresse(None, None, iris1.commune.nom_norm, None)
-        else:
-            osm1 = self.osm_matcher.get_osm_from_query(f"{iris1.nom_norm} {iris1.commune.nom_norm}")
+        if iris1.id not in self.iris_lon_lats:
+            if len(iris1.commune.iriss) == 1:
+                osm1 = self.osm_matcher.get_osm_from_adresse(None, None, iris1.commune.nom_norm, None)
+            else:
+                osm1 = self.osm_matcher.get_osm_from_query(f"{iris1.nom_norm} {iris1.commune.nom_norm}")
+            self.iris_lon_lats[iris1.id] = osm1
+        osm1 = self.iris_lon_lats[iris1.id]
         if osm1.lon is None:
             return None, None
-        if len(iris2.commune.iriss) == 1:
-            osm2 = self.osm_matcher.get_osm_from_adresse(None, None, iris2.commune.nom_norm, None)
-        else:
-            osm2 = self.osm_matcher.get_osm_from_query(f"{iris2.nom_norm} {iris2.commune.nom_norm}")
+        if iris2.id not in self.iris_lon_lats:
+            if len(iris2.commune.iriss) == 1:
+                osm2 = self.osm_matcher.get_osm_from_adresse(None, None, iris2.commune.nom_norm, None)
+            else:
+                osm2 = self.osm_matcher.get_osm_from_query(f"{iris2.nom_norm} {iris2.commune.nom_norm}")
+            self.iris_lon_lats[iris2.id] = osm2
+        osm2 = self.iris_lon_lats[iris2.id]
         if osm2.lon is None:
             return None, None
         js = self.service.get_json_from_lon_lat(osm1.lon, osm1.lat, osm2.lon, osm2.lat)
@@ -186,7 +192,7 @@ class GraphHopperIrisService(Thread):
         else:
             if self.with_osm:
                 km, min = self.gh_osm_distance_from_iriss(iris1, iris2)
-                if iris_matrix.route_km is not None and km >= iris_matrix.route_km:
+                if (iris_matrix.route_km is not None and km >= iris_matrix.route_km) or km > 4 * iris_matrix.direct_km:
                     km = None
             else:
                 km, min = self.gh_distance_from_iriss(iris1, iris2)
@@ -222,16 +228,7 @@ class GraphHopperIrisService(Thread):
                 time.sleep(1)
 
     def gh_distances_for_iriss(self):
-        if self.with_osm:
-            print("Starting GraphHopper service with OSM")
-            l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
-                (IrisMatrix.direct_km.isnot(None)) &
-                (IrisMatrix.direct_km >= self.distance_min) &
-                (IrisMatrix.direct_km <= self.distance_max) &
-                ((IrisMatrix.route_km.is_(None)) |
-                 ((IrisMatrix.route_km - IrisMatrix.direct_km) > self.max_difference))).all()
-        else:
-            l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
+        l: list[IrisMatrix] = self.context.session.query(IrisMatrix).filter(
                 (IrisMatrix.direct_km.isnot(None)) &
                 (IrisMatrix.direct_km >= self.distance_min) &
                 (IrisMatrix.direct_km <= self.distance_max) &
@@ -278,10 +275,10 @@ class GraphHopperLauncher:
             gs.start()
             self.threads.append(gs)
             time.sleep(self.sleep)
-        print(f"All {self.nb_thread} threads started")
+        print(f"All {self.nb_thread} threads are started")
         for thread in self.threads:
             thread.join()
-        print("All threads closed")
+        print("All threads are closed")
 
     # todo pour les manquants : Google
     # 1 OSM + GraphHopper : à tester
@@ -309,7 +306,7 @@ if __name__ == '__main__':
         context = Context()
         context.create(echo=args.echo, expire_on_commit=False)
         gs = GraphHopperIrisService(context, service, 0, 1, args.min, args.max, True)
-        gs.gh_distances_for_iriss()
+        gs.run()
     else:
         launcher = GraphHopperLauncher(service, args.min, args.max, args.nb_thread, args.thread_sleep)
         launcher.start()
