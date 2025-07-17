@@ -36,7 +36,7 @@ class GenericFinessParser:
         print(f"Load {path}")
         name = self.get_name_from_file(file)
         df = self.read_csv(path)
-        df.columns= df.columns.str.strip().str.lower()
+        df.columns = df.columns.str.strip().str.lower()
         self.context.create_engine()
         with context.engine.begin() as connection:
             df.to_sql(name, connection, schema=schema, if_exists="replace", index_label='id')
