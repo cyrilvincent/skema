@@ -72,7 +72,7 @@ df['un'] = df['unique']
 
 # Comptages globaux
 df['NB_total'] = df.groupby('dep')['ps_id'].transform('nunique')
-mask_s2 = (df['convention'].isin([2, 3])) | ((df['convention'] == 1) & (df['optioncontratdaccèsauxsoins'] is True))
+mask_s2 = (df['convention'].isin([2, 3])) | ((df['convention'] == 1) & (df['optioncontratdaccèsauxsoins']))
 df['NB2_total'] = df[mask_s2].groupby('dep')['ps_id'].transform('nunique')
 df['c'] = 1
 df['NB_Ftotal'] = df.groupby('c')['ps_id'].transform('nunique')
@@ -86,7 +86,7 @@ df = df[df['codeccamdelacte'].str.contains("CNP", na=False)]
 
 # Moyenne par groupe
 df['mp'] = df.groupby(['b', 'convention', 'codeccamdelacte'])['montantgénéralementconstaté'].transform('mean')
-df.loc[(df['convention'] == 1) & (df['optioncontratdaccèsauxsoins'] == "false"), 'mp'] = 50.2
+df.loc[(df['convention'] == 1) & (df['optioncontratdaccèsauxsoins'] is False), 'mp'] = 50.2
 
 # Nettoyage des doublons
 df = df.drop_duplicates(subset=['b', 'convention', 'codeccamdelacte'])
