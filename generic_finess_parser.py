@@ -41,6 +41,7 @@ class GenericFinessParser:
         with context.engine.begin() as connection:
             df.to_sql(name, connection, schema=schema, if_exists="replace", index_label='id')
 
+
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Generic Finess Parser")
