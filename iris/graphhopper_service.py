@@ -87,6 +87,7 @@ class GraphHopperIrisService(Thread):
         self.total = 0
         self.nb_error = 0
         self.with_osm = with_osm
+        self.iles = [502180101, 830690125, 830690123, 830690124, 170040000, 654650000, 851130102, 851130101, 220160000]
         if with_osm:
             self.osm_matcher = OSMMatcher(ban_echo=True)
             self.iris_lon_lats: dict[id, OSM] = {}
@@ -142,6 +143,9 @@ class GraphHopperIrisService(Thread):
         return None, None
 
     def gh_osm_distance_from_iriss(self, iris1: Iris, iris2: Iris) -> tuple[int | None, int | None]:
+        # D'abord chercher les group by iris having count > 10 sans route_km si ca se trouve il y en a peu
+        # Puis faire un OSM que sur l'IRIS
+        # Car ici tu fais un OSM sur le couple et ce n'est pas bon
         if iris1.id not in self.iris_lon_lats:
             if len(iris1.commune.iriss) == 1:
                 osm1 = self.osm_matcher.get_osm_from_adresse(None, None, iris1.commune.nom_norm, None)
@@ -192,7 +196,8 @@ class GraphHopperIrisService(Thread):
         else:
             if self.with_osm:
                 km, min = self.gh_osm_distance_from_iriss(iris1, iris2)
-                if (iris_matrix.route_km is not None and km >= iris_matrix.route_km) or km > 4 * iris_matrix.direct_km:
+                if ((iris_matrix.route_km is not None and km >= iris_matrix.route_km)
+                        or km > 4 * iris_matrix.direct_km):
                     km = None
             else:
                 km, min = self.gh_distance_from_iriss(iris1, iris2)
@@ -278,11 +283,10 @@ class GraphHopperLauncher:
         print(f"All {self.nb_thread} threads are started")
         for thread in self.threads:
             thread.join()
-        print("All threads are closed")
+        print(f"All {self.nb_thread} threads are closed for {self.distance_min}km to {self.distance_max}km")
 
-    # todo pour les manquants : Google
-    # 1 OSM + GraphHopper : à tester
-    # 2 Google
+    # todo 1 OSM + GraphHopper : à tester
+    # todo 2 Google
 
 
 if __name__ == '__main__':
