@@ -1,6 +1,6 @@
 ///anest////
 
-import delimited "C:\Users\benjamin.montmartin\Desktop\Etude UFC 2023\Part III\anest.csv", clear
+import delimited "C:\Users\conta\git-CVC\Skema\git-skema\data\depassement\anest.csv", clear
 rename genre gender
 rename prenom prénom
 rename code codeccamdelacte

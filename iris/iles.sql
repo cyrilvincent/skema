@@ -43,7 +43,7 @@ or iris_id_to in (502180101, 830690125, 830690123, 830690124, 170040000, 6546500
 select * from iris.iris_matrix where direct_km is null
 
 update iris.iris_matrix
-set route_km = od_km, route_min = od_hc, route_hp_min = od_hp + 1, direct_km=999, proximity = 9
+set route_km = od_km, route_min = od_hc, route_hp_min = od_hp + 1, direct_km=999, proximity = 10
 where direct_km is null and od_km is not null and route_km is null
 
 -- ne doit pas arriver
