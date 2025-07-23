@@ -265,8 +265,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     ds = DepassementPsychiatre(1)
     ds.process("data/depassement/psychiatres.csv", acte="CNP")
-    # da = DepassementAnest(2)
-    # da.process("data/depassement/anest.csv", acte="CS")
+    da = DepassementAnest(2)
+    da.process("data/depassement/anest.csv", acte="CS")
 
 
 
