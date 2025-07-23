@@ -141,6 +141,7 @@ df["NB2_total"].unique()
 
 
 
+
 # In[12]:
 
 
@@ -402,6 +403,8 @@ print("cX0_F", df["c10_F"].unique(), df["c25_F"].unique(), df["c50_F"].unique(),
 print("rX0_F", df["r10_F"].unique(), df["r25_F"].unique(), df["r50_F"].unique(), df["r100_F"].unique())
 
 
+
+
 # ****dépassement moyen par département (uniquement les acteurs  faisant du dépassement)
 
 # In[40]:
@@ -484,6 +487,7 @@ df = df.drop(["gender","nom","prénom","naturedexercice","convention","optioncon
 df
 
 
+nb2 = df[df["dep"]==85]["NB2"]
 # In[50]:
 
 

@@ -96,7 +96,7 @@ class DepassementService:
         self.df = self.df.sort_values(by=['b', "convention", "codeccamdelacte", "date_source_id"])
         self.df['mp'] = self.df.groupby(['b', 'convention', 'codeccamdelacte'])['montantgénéralementconstaté'].transform('mean')
         print(f"Convention unique ps_id {self.df["ps_id"].nunique()}")
-        # self.df = self.df.sort_values(by='convention') # A causé un bug de fou les tris sont importants pour les drop_duplicates
+        self.df = self.df.sort_values(by='convention')
 
     def filter_acte2(self):
         print("Filter acte 2")
@@ -112,7 +112,7 @@ class DepassementService:
         self.df['prixmoyen'] = self.df.groupby(['b', 'convention'])['mp'].transform('max')
         self.df = self.df.drop_duplicates(subset=['b', 'convention'])
         print(f"group by: {self.df.groupby('convention')["ps_id"].nunique()}")
-        # self.df = self.df.drop_duplicates(subset=['b']) # Semble inutile revérifier pour psy
+        self.df = self.df.drop_duplicates(subset=['b']) # Semble inutile revérifier pour psy
         print(f"mp==0 {len(self.df[self.df["mp"] == 0])}")
         self.df['prixmoyen'] = self.df['prixmoyen'].replace(0, self.tarif_s1)
         print(f"After prix moyen: {len(self.df)} rows")
@@ -220,9 +220,6 @@ class DepassementPsychiatre(DepassementService):
     def __init__(self, study_id: int):
         super().__init__(study_id)
 
-    def filter_acte2(self):
-        self.df = self.df[(self.df['codeccamdelacte'] == "CNP") | (self.df['codeccamdelacte'] == "CNP+MPC+MCS")]
-
     def override_tarif_s1(self):
         super().override_tarif_s1()
         self.df.loc[
@@ -248,7 +245,6 @@ class DepassementAnest(DepassementService):
     # Le pire est que depassement_anest.py fonctionne !! J'ai vérifié ligne à ligne sans succès
     # Le pb se passe lors du drop_duplicates(subset=['b', 'convention', 'codeccamdelacte']) où j'ai une ligne en moins
     # 78	0	-1.0	0.0	0	0.0	0.4	-0.1	0	0.0	1.5	0.0	0.0	0.0	0.0
-    # J'ai trouvé c'est à cause d'un tri => les tris sont importants lors des drop_duplicates
 
 
 
@@ -263,10 +259,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Depassement Service")
     parser.add_argument("-p", "--path", help="CSV Path if not SQL")
     args = parser.parse_args()
-    ds = DepassementPsychiatre(1)
-    ds.process("data/depassement/psychiatres.csv", acte="CNP")
-    # da = DepassementAnest(2)
-    # da.process("data/depassement/anest.csv", acte="CS")
+    # ds = DepassementPsychiatre(1)
+    # ds.process("data/depassement/psychiatres.csv", acte="CNP")
+    da = DepassementAnest(2)
+    da.process("data/depassement/anest.csv", acte="CS")
 
 
 
