@@ -27,10 +27,10 @@ df_study
 # In[3]:
 
 
-profession_type = 2 # df_study.iloc[0]["profession_type"]
-datesource_min = 2301 # df_study.iloc[0]["datesource_min"]
-datesource_max = 2312 # df_study.iloc[0]["datesource_max"]
-tarif_s1 = 30 # df_study.iloc[0]["tarif_s1"]
+profession_type = df_study.iloc[0]["profession_type"]
+datesource_min = df_study.iloc[0]["datesource_min"]
+datesource_max = df_study.iloc[0]["datesource_max"]
+tarif_s1 = df_study.iloc[0]["tarif_s1"]
 profession_type, datesource_min, datesource_max, tarif_s1
 
 
@@ -183,27 +183,27 @@ nb_not_1 = len(df) - nb_ccc_1 # 16349
 nb = len(df[(df["ccc"] != 1) & (df["ccc"] != -1)]["ps_id"].unique()) # 57
 nb_ccc_1, nb_not_1, nb
 
-***SINDIHEBURA ONESIME (pas de prb poste en clinique ou OPTAM=non)
-**EL KINANI	SALIMA (pas de prb changement de contrat au cours du temps)
-**SOUBIE	FLORENCE (pas de prb poste en clinique ou OPTAM=non)
-***DE PONTBRIAND	ULRIKA (pas de prb changement de contrat au cours du temps)
-***JOMAA STEPHANE (pas de prb poste en clinique ou OPTAM=non)
-***ASSATHIANY	REMY (pas de prb changement de contrat au cours du temps)
-***NOUJAIM LABBE	PAULINE (pas de prb changement de contrat au cours du temps+ changement adresse)
-***FRANCOIS	PATRICK (pas de prb changement de contrat au cours du temps)
-***CARLIER	LAURE (pas de prb poste en clinique ou OPTAM=oui)
-***FUCHS	MICHAEL (pas de prb changement de contrat au cours du temps+ changement adresse)
-***BAZIN	JEANNE  (pas de prb erreur de saisie)
-***JERNITE ASSIA (gros prb car il existe Mohamed ASSIA à la même adresse)
-replace gender="F" if nom=="JERNITE" & optioncontratdaccèsauxsoins=="false"
-replace ps_id=ps_id+1000000 if nom=="JERNITE" & optioncontratdaccèsauxsoins=="false"
-replace prénom="MOHAMED" if nom=="JERNITE" & optioncontratdaccèsauxsoins=="true"
-***NATHAN	NOEMIE (pas de prb changement de contrat au cours du temps)
-***SIDI DANIEL (pas de prb mais double affiliation inexplicable- optam à privilégier)
-***MOULA MAMOUDJY	NAFISSA (pas de prb changement de contrat au cours du temps)
-***BASSEL ALI (pas de prb changement de statut au cours du temps)
-***YVON CORALIE ( pas de prb poste en clinique ou OPTAM=non)
-***SISSAOUI	SAMIRA (pas de prb changement de statut au cours du temps)
+# ***SINDIHEBURA ONESIME (pas de prb poste en clinique ou OPTAM=non)
+# **EL KINANI	SALIMA (pas de prb changement de contrat au cours du temps)
+# **SOUBIE	FLORENCE (pas de prb poste en clinique ou OPTAM=non)
+# ***DE PONTBRIAND	ULRIKA (pas de prb changement de contrat au cours du temps)
+# ***JOMAA STEPHANE (pas de prb poste en clinique ou OPTAM=non)
+# ***ASSATHIANY	REMY (pas de prb changement de contrat au cours du temps)
+# ***NOUJAIM LABBE	PAULINE (pas de prb changement de contrat au cours du temps+ changement adresse)
+# ***FRANCOIS	PATRICK (pas de prb changement de contrat au cours du temps)
+# ***CARLIER	LAURE (pas de prb poste en clinique ou OPTAM=oui)
+# ***FUCHS	MICHAEL (pas de prb changement de contrat au cours du temps+ changement adresse)
+# ***BAZIN	JEANNE  (pas de prb erreur de saisie)
+# ***JERNITE ASSIA (gros prb car il existe Mohamed ASSIA à la même adresse)
+# replace gender="F" if nom=="JERNITE" & optioncontratdaccèsauxsoins=="false"
+# replace ps_id=ps_id+1000000 if nom=="JERNITE" & optioncontratdaccèsauxsoins=="false"
+# replace prénom="MOHAMED" if nom=="JERNITE" & optioncontratdaccèsauxsoins=="true"
+# ***NATHAN	NOEMIE (pas de prb changement de contrat au cours du temps)
+# ***SIDI DANIEL (pas de prb mais double affiliation inexplicable- optam à privilégier)
+# ***MOULA MAMOUDJY	NAFISSA (pas de prb changement de contrat au cours du temps)
+# ***BASSEL ALI (pas de prb changement de statut au cours du temps)
+# ***YVON CORALIE ( pas de prb poste en clinique ou OPTAM=non)
+# ***SISSAOUI	SAMIRA (pas de prb changement de statut au cours du temps)
 # In[17]:
 
 
@@ -266,7 +266,7 @@ df.groupby('convention')["ps_id"].nunique() #1023 1669
 df = df.sort_values(by=['b',"convention", "codeccamdelacte", "date_source_id"])
 df['mp'] = df.groupby(['b', 'convention', 'codeccamdelacte'])['montantgénéralementconstaté'].transform('mean')
 df["mp"].unique()
-df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
+
 
 
 # In[25]:
@@ -280,7 +280,6 @@ len(df[(df['codeccamdelacte'] == "CS_+MEP+NFP") & (df['convention'] == 1) & (df[
 
 
 df.loc[(df['codeccamdelacte'] == "CS_+MEP+NFP") & (df['convention'] == 1) & (df['optioncontratdaccèsauxsoins'] == False), 'mp'] = tarif_s1
-df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 
 
 # ****on élimine les duplications ps-adresse convention acte puis on sélectionne le prix le plus élevé d'un acte de consultation (discard tarif opposable des secteurs 2)
@@ -293,7 +292,6 @@ df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 # Reste 3242
 df = df.drop_duplicates(subset=['b', 'convention', 'codeccamdelacte'])
 df
-df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 
 
 # In[28]:
@@ -302,7 +300,6 @@ df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 df['prixmoyen'] = df.groupby(['b', 'convention'])['mp'].transform('max')
 pd.set_option('display.max_rows', 100)
 df.head(20)
-df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 
 
 # In[29]:
@@ -311,8 +308,7 @@ df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
 # Reste 2810
 df = df.drop_duplicates(subset=['b', 'convention'])
 df
-df[(df["dep"]==3) & (df["nom"]=="NOUNOU")].head(100)
-# df_backup = df.copy()
+
 
 
 # In[30]:
@@ -541,7 +537,7 @@ df.head(10)
 # In[54]:
 
 
-df2 = pd.read_csv("../data/depassement/Rendus_PartIII/dépassements_anest.csv")
+df2 = pd.read_csv("../data/depassement/Rendus_PartIII/dépassement_anest.csv")
 df2.head(10)
 
 
