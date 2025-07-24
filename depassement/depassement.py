@@ -15,6 +15,7 @@ class DepassementService:
         self.datesource_min = 0
         self.datesource_max = 0
         self.tarif_s1 = 0
+        self.acte = ""
 
     def depassement_study(self):
         print(f"Search study {self.study_id}")
@@ -25,7 +26,6 @@ class DepassementService:
         self.datesource_max = df_study.iloc[0]["datesource_max"]
         self.tarif_s1 = df_study.iloc[0]["tarif_s1"]
         print(f"Found {self.profession_type} between {self.datesource_min}-{self.datesource_max} for tarif_s1 {self.tarif_s1}€")
-
 
     def load(self, path: str = None):
         if path is not None:
@@ -84,12 +84,12 @@ class DepassementService:
     def correction_nb(self):
         print("Correction nb")
 
-    def filter_acte(self, acte="CNP"):
-        print(f"Filter by {acte}")
-        self.df = self.df[self.df['codeccamdelacte'].str.contains(acte)]
+    def filter_acte(self):
+        print(f"Filter by {self.acte}")
+        self.df = self.df[self.df['codeccamdelacte'].str.contains(self.acte)]
         self.mask_s2 = (self.df['convention'].isin([2, 3])) | ((self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins']))
-        print(f"Nb {acte}: {len(self.df)}")
-        print(f"Tab {acte}")
+        print(f"Nb {self.acte}: {len(self.df)}")
+        print(f"Tab {self.acte}")
         print(self.df["codeccamdelacte"].value_counts(normalize=True))
         self.df = self.df.sort_values(by='convention')
         self.df.groupby('convention')["ps_id"].nunique()
@@ -101,12 +101,14 @@ class DepassementService:
     def filter_acte2(self):
         print("Filter acte 2")
 
-
     def override_tarif_s1(self):
         print(f"Override tarif s1 by {self.tarif_s1}")
 
-
     def prix_moyen(self):
+        # Bug stata il faudrait refaire ce tri à chaque fois
+        # J'en ai parlé à Benjamin le 24/7
+        # Pour moi il faut l'activer mais ca change certains résultats
+        # self.df = self.df.sort_values(by=['b', "convention", "codeccamdelacte", "optioncontratdaccèsauxsoins", "date_source_id"], ascending=[True, True, True, False, True])
         self.df = self.df.drop_duplicates(subset=['b', 'convention', 'codeccamdelacte'])
         print(f"Prix moyen for {len(self.df)} rows")
         self.df['prixmoyen'] = self.df.groupby(['b', 'convention'])['mp'].transform('max')
@@ -171,7 +173,6 @@ class DepassementService:
                       "un", "mp", "prixmoyen", "exessr", "c10", "c25", "c50", "c75", "c100"], axis=1)
         print(f"Nb dep: {len(self.df)}")
 
-
     def last_row(self):
         print("Last row")
         df_to_duplicate = self.df[self.df['dep'] == 75].copy()
@@ -201,13 +202,13 @@ class DepassementService:
     def save(self):
         self.df.to_csv(f"data/depassement/out/out_{self.profession_type}.csv", index=False)
 
-    def process(self, path=None, acte="CNP"): #todo à changer pour anest
+    def process(self, path=None):
         self.depassement_study()
         self.load(path)
         self.rename()
         self.manage_nb()
         self.correction_nb()
-        self.filter_acte(acte)
+        self.filter_acte()
         self.filter_acte2()
         self.override_tarif_s1()
         self.prix_moyen()
@@ -215,10 +216,12 @@ class DepassementService:
         self.last_row()
         self.save()
 
+
 class DepassementPsychiatre(DepassementService):
 
     def __init__(self, study_id: int):
         super().__init__(study_id)
+        self.acte = "CNP"
 
     def filter_acte2(self):
         self.df = self.df[(self.df['codeccamdelacte'] == "CNP") | (self.df['codeccamdelacte'] == "CNP+MPC+MCS")]
@@ -229,10 +232,12 @@ class DepassementPsychiatre(DepassementService):
             (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
         # /!\ is False ne fonctionne pas en Pandas
 
+
 class DepassementAnest(DepassementService):
 
     def __init__(self, study_id: int):
         super().__init__(study_id)
+        self.acte = "CS"
 
     def correction_nb(self):
         self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins'] == False), 'gender'] = "F"
@@ -251,8 +256,6 @@ class DepassementAnest(DepassementService):
     # J'ai trouvé c'est à cause d'un tri => les tris sont importants lors des drop_duplicates
 
 
-
-
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Depassement Service")
@@ -264,9 +267,9 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--path", help="CSV Path if not SQL")
     args = parser.parse_args()
     ds = DepassementPsychiatre(1)
-    ds.process("data/depassement/psychiatres.csv", acte="CNP")
+    ds.process("data/depassement/psychiatres.csv")
     da = DepassementAnest(2)
-    da.process("data/depassement/anest.csv", acte="CS")
+    da.process("data/depassement/anest.csv")
 
 
 
