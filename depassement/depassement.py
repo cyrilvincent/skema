@@ -252,7 +252,7 @@ class DepassementAnest(DepassementService):
 
     def override_tarif_s1(self):
         super().override_tarif_s1()
-        # self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+        self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
 
     # Bug pour le dep=85 j'ai cherché pendant 2h sans succès, j'ai un NB2=9 au lieu de 10 et je ne sais pas pourquoi
     # Le pire est que depassement_anest.py fonctionne !! J'ai vérifié ligne à ligne sans succès
@@ -280,6 +280,20 @@ class DepassementCardiologue(DepassementService):
         print(f"prixmoyen", self.df['prixmoyen'].unique())
 
 
+class DepassementDermatologue(DepassementService):
+
+    def __init__(self, study_id: int):
+        super().__init__(study_id)
+        self.acte = "CS"
+
+    def filter_acte2(self):
+        self.df = self.df[(self.df['codeccamdelacte'] == "CS_") | (self.df['codeccamdelacte'] == "CS_+MPC") | (self.df['codeccamdelacte'] == "CS_+MPC+MCS")]
+
+    def override_tarif_s1(self):
+        super().override_tarif_s1()
+        self.df.loc[
+            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -295,9 +309,10 @@ if __name__ == '__main__':
     # ds.process("data/depassement/psychiatres.csv")
     # da = DepassementAnest(2)
     # da.process("data/depassement/anest.csv")
-    dc = DepassementCardiologue(3)
-    dc.process("data/depassement/cardiologues.csv")
-    # Bug à débuguer en stata + jupyter
+    # dc = DepassementCardiologue(3)
+    # dc.process("data/depassement/cardiologues.csv")
+    dd = DepassementDermatologue(4)
+    dd.process("data/depassement/dermatologue.csv") # ok
 
 
 
