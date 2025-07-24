@@ -112,6 +112,7 @@ class DepassementService:
         self.df = self.df.drop_duplicates(subset=['b', 'convention', 'codeccamdelacte'])
         print(f"Prix moyen for {len(self.df)} rows")
         self.df['prixmoyen'] = self.df.groupby(['b', 'convention'])['mp'].transform('max')
+        # print(f"prixmoyen", self.df['prixmoyen'].unique())
         self.df = self.df.drop_duplicates(subset=['b', 'convention'])
         print(f"group by: {self.df.groupby('convention')["ps_id"].nunique()}")
         # self.df = self.df.drop_duplicates(subset=['b']) # Semble inutile revérifier pour psy
@@ -119,6 +120,9 @@ class DepassementService:
         self.df['prixmoyen'] = self.df['prixmoyen'].replace(0, self.tarif_s1)
         print(f"After prix moyen: {len(self.df)} rows")
         print(f"ps_id unique after prix moyen: {self.df.groupby('convention')["ps_id"].nunique()}")
+
+    def prix_moyen_correction(self):
+        print("Prix moyen correction")
 
     def departement(self):
         print("By departement")
@@ -155,7 +159,7 @@ class DepassementService:
         self.df['PFS2'] = self.df[self.mask_s2]['prixmoyen'].mean()
         print(f"PFS2: {self.df["PFS2"].unique()}")
         self.df['PrixMoyen'] = self.df.groupby('dep')['prixmoyen'].transform('mean')
-        # print(f"PrixMoyen: {self.df["PrixMoyen"].unique()}")
+        print(f"PrixMoyen: {self.df["PrixMoyen"].unique()}")
         self.df['PrixMoyenS2'] = self.df[self.mask_s2].groupby('dep')['prixmoyen'].transform('mean')
         self.df['depmoyen'] = ((self.df['PrixMoyen'] - self.tarif_s1) / self.tarif_s1) * 100
         self.df["depmoyen_F"] = ((self.df['PF'] - self.tarif_s1) / self.tarif_s1) * 100
@@ -212,6 +216,7 @@ class DepassementService:
         self.filter_acte2()
         self.override_tarif_s1()
         self.prix_moyen()
+        self.prix_moyen_correction()
         self.departement()
         self.last_row()
         self.save()
@@ -247,13 +252,33 @@ class DepassementAnest(DepassementService):
 
     def override_tarif_s1(self):
         super().override_tarif_s1()
-        self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+        # self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
 
     # Bug pour le dep=85 j'ai cherché pendant 2h sans succès, j'ai un NB2=9 au lieu de 10 et je ne sais pas pourquoi
     # Le pire est que depassement_anest.py fonctionne !! J'ai vérifié ligne à ligne sans succès
     # Le pb se passe lors du drop_duplicates(subset=['b', 'convention', 'codeccamdelacte']) où j'ai une ligne en moins
     # 78	0	-1.0	0.0	0	0.0	0.4	-0.1	0	0.0	1.5	0.0	0.0	0.0	0.0
     # J'ai trouvé c'est à cause d'un tri => les tris sont importants lors des drop_duplicates
+
+class DepassementCardiologue(DepassementService):
+
+    def __init__(self, study_id: int):
+        super().__init__(study_id)
+        self.acte = "CS"
+
+    def filter_acte2(self):
+        self.df = self.df[(self.df['codeccamdelacte'] == "CSC") | (self.df['codeccamdelacte'] == "CSC+MCC")]
+
+    def override_tarif_s1(self):
+        super().override_tarif_s1()
+        self.df.loc[
+            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+
+    def prix_moyen_correction(self):
+        super().prix_moyen_correction()
+        self.df.loc[self.df['prixmoyen'] < self.tarif_s1, 'prixmoyen'] = self.tarif_s1
+        print(f"prixmoyen", self.df['prixmoyen'].unique())
+
 
 
 if __name__ == '__main__':
@@ -266,10 +291,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Depassement Service")
     parser.add_argument("-p", "--path", help="CSV Path if not SQL")
     args = parser.parse_args()
-    ds = DepassementPsychiatre(1)
-    ds.process("data/depassement/psychiatres.csv")
-    da = DepassementAnest(2)
-    da.process("data/depassement/anest.csv")
+    # ds = DepassementPsychiatre(1)
+    # ds.process("data/depassement/psychiatres.csv")
+    # da = DepassementAnest(2)
+    # da.process("data/depassement/anest.csv")
+    dc = DepassementCardiologue(3)
+    dc.process("data/depassement/cardiologues.csv")
+    # Bug à débuguer en stata + jupyter
 
 
 

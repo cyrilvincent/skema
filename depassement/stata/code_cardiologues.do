@@ -1,6 +1,6 @@
 ///cardiologues////
 
-import delimited "C:\Users\benjamin.montmartin\Desktop\Etude UFC 2023\Part III\cardiologues.csv", clear
+import delimited "C:\Users\conta\git-CVC\Skema\git-skema\data\depassement\cardiologues.csv", clear
 rename genre gender
 rename prenom prénom
 rename code codeccamdelacte
