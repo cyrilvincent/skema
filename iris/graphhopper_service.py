@@ -287,6 +287,7 @@ class GraphHopperLauncher:
 
     # todo 1 OSM + GraphHopper : à tester
     # todo 2 Google
+    # todo 0 update sql pour corse vs non corse
 
 
 if __name__ == '__main__':

@@ -48,3 +48,13 @@ where direct_km is null and od_km is not null and route_km is null
 
 -- ne doit pas arriver
 select * from iris.iris_matrix where direct_km is null and od_km is null
+
+-- corse vs non corse
+-- todo faire un select avant pour vérifier que ca marche
+update iris.iris_matrix
+set route_km = direct_km * 2, route_min = 720 + direct_km * 2, route_hp_min = 1000 + direct_km * 2
+where iris_id_from > 2000000000 and iris_id_to < 2000000000
+
+update iris.iris_matrix
+set route_km = direct_km * 2, route_min = 600 + direct_km * 2, route_hp_min = 720 + direct_km * 2
+where iris_id_from < 2000000000 and iris_id_to > 2000000000
