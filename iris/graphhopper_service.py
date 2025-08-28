@@ -45,7 +45,7 @@ class GraphHopperService:
                 elif nb_retry_to_4 == 2:
                     coef = 2
                 elif nb_retry_to_4 == 3:
-                    coef = -2
+                    coef = -2.5
                 lon1 += 0.01 * coef
                 lat1 += 0.01 * coef
                 lon2 += 0.01 * coef

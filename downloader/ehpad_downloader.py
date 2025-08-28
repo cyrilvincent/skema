@@ -1,19 +1,13 @@
 import argparse
 import datetime
 import os
-import time
-import urllib.request
-import urllib.parse
-import urllib.error
 import art
 from sqlalchemy import create_engine
 
 import config
 from downloader.base_downloader import BaseDownloader
 from ehpad_parser import EhpadParser
-from sqlentities import Context, File, BAN
-from bs4 import BeautifulSoup
-import re
+from sqlentities import Context
 
 
 class EphadDownloader(BaseDownloader):

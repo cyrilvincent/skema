@@ -314,5 +314,9 @@ if __name__ == '__main__':
     dd = DepassementDermatologue(4)
     dd.process("data/depassement/dermatologue.csv") # ok
 
+    # Remonter les méthodes le + haut possible
+    # Mettres les codes en param
+
+
 
 

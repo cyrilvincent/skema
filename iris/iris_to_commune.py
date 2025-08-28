@@ -61,6 +61,7 @@ class IrisToCommuneTransferer:
     def transfer_not_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
         iris1 = commune1.iriss[0]
         iris2 = commune2.iriss[0]
+        # todo Prendre le ratio od hp/hc et l'appliquer, à faire en sql ?
         iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
         if iris_matrix.route_km is not None:
             self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
@@ -68,8 +69,9 @@ class IrisToCommuneTransferer:
 
     def transfer_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
         iris1 = commune1.iriss[0]
+        # todo Prendre le ratio od hp/hc et l'appliquer
         if len(commune1.iriss) > 1:
-            iris1 = self.find_mairie(commune1)
+            iris1 = self.find_mairie(commune1) # todo A virer prendre le plus proche
             if iris1 is not None:
                 self.iris_to_commune(iris1, commune1)
             else:

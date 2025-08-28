@@ -39,22 +39,21 @@ or iris_id_to in (502180101, 830690125, 830690123, 830690124, 170040000, 6546500
 
 -- les non iles ont étés corrigées à la main
 
--- od > 200km TODO
-select * from iris.iris_matrix where direct_km is null
-
-update iris.iris_matrix
-set route_km = od_km, route_min = od_hc, route_hp_min = od_hp + 1, direct_km=999, proximity = 10
-where direct_km is null and od_km is not null and route_km is null
-
 -- ne doit pas arriver
 select * from iris.iris_matrix where direct_km is null and od_km is null
 
 -- corse vs non corse
--- todo faire un select avant pour vérifier que ca marche
 update iris.iris_matrix
 set route_km = direct_km * 2, route_min = 720 + direct_km * 2, route_hp_min = 1000 + direct_km * 2
 where iris_id_from > 2000000000 and iris_id_to < 2000000000
+and route_km is null
 
 update iris.iris_matrix
-set route_km = direct_km * 2, route_min = 600 + direct_km * 2, route_hp_min = 720 + direct_km * 2
+set route_km = direct_km * 2, route_min = 720 + direct_km * 2, route_hp_min = 1000 + direct_km * 2
 where iris_id_from < 2000000000 and iris_id_to > 2000000000
+and route_km is null
+
+-- les derniers récalcitrants (26)
+update iris.iris_matrix
+set route_km = direct_km * 2, route_min = direct_km * 3, route_hp_min = 1 + direct_km * 3
+where route_km is null and direct_km is not null
