@@ -1276,6 +1276,7 @@ class Iris(Base):
     lon = Column(Float, nullable=False)
     lat = Column(Float, nullable=False)
     is_irisee = Column(Boolean, nullable=False)
+    is_main = Column(Boolean)
     arrondissement_code = Column(CHAR(5), nullable=False)
     arrondissement_nom = Column(String(255), nullable=False)
     type = Column(CHAR(1), nullable=False)

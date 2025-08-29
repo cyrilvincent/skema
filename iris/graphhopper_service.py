@@ -126,6 +126,18 @@ class GraphHopperIrisService(Thread):
             coef = 1.2
         elif len(commune1.iriss) > 1 or len(commune2.iriss) > 1:
             coef = 1.1
+        # avg coef == 31%, od coef = 5%
+        # D'après chatgpt c'est 100% en ville et 20 à 40% sur les grands axes, 0% ailleurs
+        # to modifiy
+        # update iris.iris_matrix
+        # set route_hp_min = ((((route_hp_min::float / route_min::float) - 1) / 2) + 1) * route_min
+        # where route_min is not null
+        # and route_min > 2
+        # and route_hp_min - route_min > 5
+        # and route_min < 120
+        # and route_km < 200
+        # and od_hc is null
+        # and id = 1242624
         return int(min * coef) + 1
 
     def gh_distance_from_communes(self, commune1: Commune, commune2: Commune) -> tuple[int | None, int | None]:

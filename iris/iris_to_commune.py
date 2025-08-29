@@ -1,4 +1,7 @@
 import time
+
+from sqlalchemy import any_
+from sqlalchemy.dialects.postgresql import Any
 from sqlalchemy.orm import joinedload
 
 from iris.commune_matrix import CommuneMatrixService
@@ -13,7 +16,7 @@ time0 = time.perf_counter()
 
 class IrisToCommuneTransferer:
 
-    def __init__(self, context, distance_max=100):
+    def __init__(self, context, distance_max):
         self.context = context
         self.distance_max = distance_max
         self.nb_entity = 0
@@ -33,11 +36,11 @@ class IrisToCommuneTransferer:
         commune_matrix.route_min = iris_matrix.route_min
         commune_matrix.route_hp_min = iris_matrix.route_hp_min
 
-    def iris_to_commune(self, iris: Iris, commune: Commune):
-        delta = abs(commune.lon - iris.lon) + abs(commune.lat - iris.lat)
-        if delta > 0.001:
-            commune.lon = iris.lon
-            commune.lat = iris.lat
+    # def iris_to_commune(self, iris: Iris, commune: Commune):
+    #     delta = abs(commune.lon - iris.lon) + abs(commune.lat - iris.lat)
+    #     if delta > 0.001:
+    #         commune.lon = iris.lon
+    #         commune.lat = iris.lat
 
     def get_nearset_iris(self, commune: Commune) -> Iris | None:
         dist_min = 999
@@ -49,19 +52,19 @@ class IrisToCommuneTransferer:
             if d < dist_min:
                 dist_min = d
                 iris_min = iris
-        if dist_min < 0.75:
-            return iris_min
+        return iris_min
 
-    def find_mairie(self, commune: Commune) -> Iris | None:
-        for iris in commune.iriss:
-            if "MAIRIE" in iris.nom_norm or "HOTEL DE VILLE" in iris.nom_norm:
-                return iris
-        return None
+
+    # def find_mairie(self, commune: Commune) -> Iris | None:
+    #     for iris in commune.iriss:
+    #         if "MAIRIE" in iris.nom_norm or "HOTEL DE VILLE" in iris.nom_norm:
+    #             return iris
+    #     return None
 
     def transfer_not_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
         iris1 = commune1.iriss[0]
         iris2 = commune2.iriss[0]
-        # todo Prendre le ratio od hp/hc et l'appliquer, à faire en sql ?
+        # todo Avant tout effacer les route_* sql
         iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
         if iris_matrix.route_km is not None:
             self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
@@ -69,7 +72,6 @@ class IrisToCommuneTransferer:
 
     def transfer_irised(self, commune1: Commune, commune2: Commune, commune_matrix: CommuneMatrix):
         iris1 = commune1.iriss[0]
-        # todo Prendre le ratio od hp/hc et l'appliquer
         if len(commune1.iriss) > 1:
             iris1 = self.find_mairie(commune1) # todo A virer prendre le plus proche
             if iris1 is not None:
@@ -107,9 +109,31 @@ class IrisToCommuneTransferer:
                 self.transfer_not_irised(commune1, commune2, commune_matrix)
             else:
                 self.transfer_irised(commune1, commune2, commune_matrix)
-            if self.nb_entity % 10000:
+            if self.nb_entity % 1000 or self.nb_entity == self.total:
                 duration = time.perf_counter() - time0
-                print(f"Commited {self.nb_entity} ({(self.nb_entity / self.total) * 100:.2f} rows in {duration}s")
+                print(f"Commited {self.nb_entity} ({(self.nb_entity / self.total) * 100:.1f} rows in {duration}s")
+                self.context.session.commit()
+
+    def compute_iris_mains(self):
+        print("Compute Iris mains")
+        l: list[Commune] = (self.context.session.query(Commune).options(joinedload(Commune.iriss))
+                            .filter(Commune.iriss.any(Iris.is_main.is_(None)))).all()
+        self.total = len(l)
+        print(f"Found {self.total} rows")
+        for commune in l:
+            self.nb_entity += 1
+            if len(commune.iriss) == 1:
+                commune.iriss[0].is_main = True
+            elif len(commune.iriss) > 1:
+                for iris in commune.iriss:
+                    iris.is_main = False
+                iris = self.get_nearset_iris(commune)
+                iris.is_main = True
+            if self.nb_entity % 1000 == 0 or self.nb_entity == self.total:
+                duration = time.perf_counter() - time0
+                print(f"Commited {self.nb_entity} rows ({(self.nb_entity / self.total) * 100:.1f}%) in {int(duration)}s")
+                self.context.session.commit()
+
 
 
 if __name__ == '__main__':
@@ -121,11 +145,12 @@ if __name__ == '__main__':
     print()
     parser = argparse.ArgumentParser(description="IRIS to Commune Transfer")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
-    parser.add_argument("-d", "--distance_max", help="Distance max", type=int, default=100)
+    parser.add_argument("-d", "--distance_max", help="Distance max", type=int, default=999)
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} MB")
     ict = IrisToCommuneTransferer(context, args.distance_max)
-    ict.transfer()
+    ict.compute_iris_mains()
+    # ict.transfer()
