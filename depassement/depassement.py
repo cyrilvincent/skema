@@ -6,7 +6,7 @@ import numpy as np
 
 class DepassementService:
 
-    def __init__(self, study_id: int):
+    def __init__(self, study_id: int, acte: str, acte2s: list[str], is_prix_moyen_correction=False, is_correct_bug_optam=False):
         self.df: pd.DataFrame = pd.DataFrame()
         self.mask_s2 = None
         self.study_id = study_id
@@ -15,7 +15,10 @@ class DepassementService:
         self.datesource_min = 0
         self.datesource_max = 0
         self.tarif_s1 = 0
-        self.acte = ""
+        self.acte = acte
+        self.acte2s = acte2s
+        self.is_prix_moyen_correction = is_prix_moyen_correction
+        self.is_correct_bug_optam = is_correct_bug_optam
 
     def depassement_study(self):
         print(f"Search study {self.study_id}")
@@ -96,33 +99,39 @@ class DepassementService:
         self.df = self.df.sort_values(by=['b', "convention", "codeccamdelacte", "date_source_id"])
         self.df['mp'] = self.df.groupby(['b', 'convention', 'codeccamdelacte'])['montantgénéralementconstaté'].transform('mean')
         print(f"Convention unique ps_id {self.df["ps_id"].nunique()}")
-        # self.df = self.df.sort_values(by='convention') # A causé un bug de fou les tris sont importants pour les drop_duplicates
 
     def filter_acte2(self):
         print("Filter acte 2")
+        if len(self.acte2s) > 0:
+            self.df = self.df[self.df['codeccamdelacte'].isin(self.acte2s)]
 
     def override_tarif_s1(self):
         print(f"Override tarif s1 by {self.tarif_s1}")
+        self.df.loc[
+            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+        # /!\ is False ne fonctionne pas en Pandas
 
     def prix_moyen(self):
-        # Bug stata il faudrait refaire ce tri à chaque fois
-        # J'en ai parlé à Benjamin le 24/7
-        # Pour moi il faut l'activer mais ca change certains résultats
-        # self.df = self.df.sort_values(by=['b', "convention", "codeccamdelacte", "optioncontratdaccèsauxsoins", "date_source_id"], ascending=[True, True, True, False, True])
+        if self.is_correct_bug_optam:
+            self.df = self.df.sort_values(by=['b', "convention", "codeccamdelacte", "optioncontratdaccèsauxsoins", "date_source_id"], ascending=[True, True, True, False, True])
         self.df = self.df.drop_duplicates(subset=['b', 'convention', 'codeccamdelacte'])
         print(f"Prix moyen for {len(self.df)} rows")
         self.df['prixmoyen'] = self.df.groupby(['b', 'convention'])['mp'].transform('max')
         # print(f"prixmoyen", self.df['prixmoyen'].unique())
         self.df = self.df.drop_duplicates(subset=['b', 'convention'])
         print(f"group by: {self.df.groupby('convention')["ps_id"].nunique()}")
-        # self.df = self.df.drop_duplicates(subset=['b']) # Semble inutile revérifier pour psy
+        # self.df = self.df.drop_duplicates(subset=['b']) # Inutile
         print(f"mp==0 {len(self.df[self.df["mp"] == 0])}")
         self.df['prixmoyen'] = self.df['prixmoyen'].replace(0, self.tarif_s1)
         print(f"After prix moyen: {len(self.df)} rows")
         print(f"ps_id unique after prix moyen: {self.df.groupby('convention')["ps_id"].nunique()}")
 
     def prix_moyen_correction(self):
-        print("Prix moyen correction")
+        if self.is_prix_moyen_correction:
+            print("Prix moyen correction")
+            self.df.loc[self.df['prixmoyen'] < self.tarif_s1, 'prixmoyen'] = self.tarif_s1
+            print(f"prixmoyen", self.df['prixmoyen'].unique())
+
 
     def departement(self):
         print("By departement")
@@ -224,35 +233,33 @@ class DepassementService:
 
 class DepassementPsychiatre(DepassementService):
 
-    def __init__(self, study_id: int):
-        super().__init__(study_id)
-        self.acte = "CNP"
+    def __init__(self, study_id: int, acte="CNP", acte2s=["CNP", "CNP+MPC+MCS"]):
+        super().__init__(study_id, acte, acte2s)
 
-    def filter_acte2(self):
-        self.df = self.df[(self.df['codeccamdelacte'] == "CNP") | (self.df['codeccamdelacte'] == "CNP+MPC+MCS")]
+    # def filter_acte2(self):
+    #     self.df = self.df[(self.df['codeccamdelacte'] == "CNP") | (self.df['codeccamdelacte'] == "CNP+MPC+MCS")]
 
-    def override_tarif_s1(self):
-        super().override_tarif_s1()
-        self.df.loc[
-            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
-        # /!\ is False ne fonctionne pas en Pandas
+    # def override_tarif_s1(self):
+    #     super().override_tarif_s1()
+    #     self.df.loc[
+    #         (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+
 
 
 class DepassementAnest(DepassementService):
 
-    def __init__(self, study_id: int):
-        super().__init__(study_id)
-        self.acte = "CS"
+    def __init__(self, study_id: int, acte="CS", acte2s=[]):
+        super().__init__(study_id, acte, acte2s)
 
-    def correction_nb(self):
-        self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins'] == False), 'gender'] = "F"
-        self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins'] == False), 'ps_id'] += 1000000
-        self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins']), 'prénom'] = "MOHAMED"
+    # def correction_nb(self):
+    #     self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins'] == False), 'gender'] = "F"
+    #     self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins'] == False), 'ps_id'] += 1000000
+    #     self.df.loc[(self.df['nom'] == "JERNITE") & (self.df['optioncontratdaccèsauxsoins']), 'prénom'] = "MOHAMED"
 
 
-    def override_tarif_s1(self):
-        super().override_tarif_s1()
-        self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+    # def override_tarif_s1(self):
+    #     super().override_tarif_s1()
+    #     self.df.loc[(self.df['codeccamdelacte'] == "CS_+MEP+NFP") & (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
 
     # Bug pour le dep=85 j'ai cherché pendant 2h sans succès, j'ai un NB2=9 au lieu de 10 et je ne sais pas pourquoi
     # Le pire est que depassement_anest.py fonctionne !! J'ai vérifié ligne à ligne sans succès
@@ -262,37 +269,49 @@ class DepassementAnest(DepassementService):
 
 class DepassementCardiologue(DepassementService):
 
-    def __init__(self, study_id: int):
-        super().__init__(study_id)
-        self.acte = "CS"
+    def __init__(self, study_id: int, acte="CS", acte2s=["CSC", "CSC+MCC"]):
+        super().__init__(study_id, acte, acte2s, is_prix_moyen_correction=True)
 
-    def filter_acte2(self):
-        self.df = self.df[(self.df['codeccamdelacte'] == "CSC") | (self.df['codeccamdelacte'] == "CSC+MCC")]
+    # def filter_acte2(self):
+    #     # self.df = self.df[(self.df['codeccamdelacte'] == "CSC") | (self.df['codeccamdelacte'] == "CSC+MCC")]
 
-    def override_tarif_s1(self):
-        super().override_tarif_s1()
-        self.df.loc[
-            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
 
-    def prix_moyen_correction(self):
-        super().prix_moyen_correction()
-        self.df.loc[self.df['prixmoyen'] < self.tarif_s1, 'prixmoyen'] = self.tarif_s1
-        print(f"prixmoyen", self.df['prixmoyen'].unique())
+    # def override_tarif_s1(self):
+    #     super().override_tarif_s1()
+    #     self.df.loc[
+    #         (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+
+    # def prix_moyen_correction(self):
+    #     super().prix_moyen_correction()
+    #     self.df.loc[self.df['prixmoyen'] < self.tarif_s1, 'prixmoyen'] = self.tarif_s1
+    #     print(f"prixmoyen", self.df['prixmoyen'].unique())
 
 
 class DepassementDermatologue(DepassementService):
 
-    def __init__(self, study_id: int):
-        super().__init__(study_id)
-        self.acte = "CS"
+    def __init__(self, study_id: int, acte="CS", acte2s=["CS_", "CS_+MPC", "CS_+MPC+MCS"]):
+        super().__init__(study_id, acte, acte2s)
 
-    def filter_acte2(self):
-        self.df = self.df[(self.df['codeccamdelacte'] == "CS_") | (self.df['codeccamdelacte'] == "CS_+MPC") | (self.df['codeccamdelacte'] == "CS_+MPC+MCS")]
+    # def filter_acte2(self):
+    #     # self.df = self.df[(self.df['codeccamdelacte'] == "CS_") | (self.df['codeccamdelacte'] == "CS_+MPC") | (self.df['codeccamdelacte'] == "CS_+MPC+MCS")]
+    #     self.df = self.df[self.df['codeccamdelacte'].isin(self.acte2s)]
 
-    def override_tarif_s1(self):
-        super().override_tarif_s1()
-        self.df.loc[
-            (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+    # def override_tarif_s1(self):
+    #     super().override_tarif_s1()
+    #     self.df.loc[
+    #         (self.df['convention'] == 1) & (self.df['optioncontratdaccèsauxsoins'] == False), 'mp'] = self.tarif_s1
+
+
+class DepassementGastro(DepassementService):
+
+    def __init__(self, study_id: int, acte="CS", acte2s=["CS_", "CS_+MPC", "CS_+MPC+MCS"]):
+        super().__init__(study_id, acte, acte2s, is_prix_moyen_correction=True)
+
+
+class DepassementGyneco(DepassementService):
+
+    def __init__(self, study_id: int, acte="CS", acte2s=["CS_", "CS_+MPC", "CS_+MPC+MCS", "CS_+MGM", "CS_+MGM+MCS"]):
+        super().__init__(study_id, acte, acte2s, is_correct_bug_optam=True)
 
 
 if __name__ == '__main__':
@@ -311,11 +330,15 @@ if __name__ == '__main__':
     # da.process("data/depassement/anest.csv")
     # dc = DepassementCardiologue(3)
     # dc.process("data/depassement/cardiologues.csv")
-    dd = DepassementDermatologue(4)
-    dd.process("data/depassement/dermatologue.csv") # ok
+    # dd = DepassementDermatologue(4)
+    # dd.process("data/depassement/dermatologue.csv") # ok
+    # dg = DepassementGastro(5)
+    # dg.process("data/depassement/gastro.csv")
+    dc = DepassementGyneco(6)
+    dc.process("data/depassement/gyne.csv")
 
-    # Remonter les méthodes le + haut possible
-    # Mettres les codes en param
+
+
 
 
 

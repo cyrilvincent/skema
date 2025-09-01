@@ -14,16 +14,15 @@ time0 = time.perf_counter()
 
 class CommuneMatrixService:
 
-    def __init__(self, context, all):
+    def __init__(self, context):
         self.context = context
-        self.all = all
         self.row_num = 0
         self.nb_ram = 0
         self.nb_entity = 0
         self.ods: dict[tuple[str, str], OD] = {}
         self.entities: dict[tuple[int, int], CommuneMatrix] = {}
         self.communes: dict[int, Commune] = {}
-        self.ban_communes: set[int] = set()
+        # self.ban_communes: set[int] = set()
         self.max_direct_distance = 200
         self.max_lon_lat = 2.0
 
@@ -38,11 +37,11 @@ class CommuneMatrixService:
         print(f"{self.nb_ram} objects in cache")
         l: List[AdresseNorm] = (self.context.session.query(AdresseNorm).options(joinedload(AdresseNorm.ban))
                                 .filter(AdresseNorm.ban_id.isnot(None)).all())
-        for e in l:
-            if e.ban.code_insee not in self.ban_communes:
-                self.ban_communes.add(e.ban.code_insee)
-                self.nb_ram += 1
-        print(f"{self.nb_ram} objects in cache")
+        # for e in l:
+        #     if e.ban.code_insee not in self.ban_communes:
+        #         self.ban_communes.add(e.ban.code_insee)
+        #         self.nb_ram += 1
+        # print(f"{self.nb_ram} objects in cache")
         l: List[CommuneMatrix] = self.context.session.query(CommuneMatrix).all()
         print(f"{self.nb_ram + 1} objects in cache")
         for e in l:
@@ -125,31 +124,22 @@ class CommuneMatrixService:
                     else:
                         e = self.entities[key]
                     if e.direct_km is None:
-                        if (self.all or e.od_km is not None or
-                                str(e.code_id_low) in self.ban_communes or str(e.code_id_high) in self.ban_communes):
-                            if e.code_id_low in self.communes and e.code_id_high in self.communes:
-                                commune1 = self.communes[e.code_id_low]
-                                commune2 = self.communes[e.code_id_high]
-                                if self.are_rapid_near(commune1.lon, commune1.lat, commune2.lon, commune2.lat):
-                                    d = self.compute_distance(commune1.lon, commune1.lat, commune2.lon, commune2.lat)
-                                    km = int(round(d))
-                                    if km < self.max_direct_distance:
-                                        e.direct_km = km
-                                        e.proximity = self.compute_proximity(commune1, commune2)
-                                        self.entities[key] = e
-                                        if e.id is None:
-                                            self.context.session.add(e)
-                                            self.nb_entity += 1
+                        if e.code_id_low in self.communes and e.code_id_high in self.communes:
+                            commune1 = self.communes[e.code_id_low]
+                            commune2 = self.communes[e.code_id_high]
+                            if self.are_rapid_near(commune1.lon, commune1.lat, commune2.lon, commune2.lat):
+                                d = self.compute_distance(commune1.lon, commune1.lat, commune2.lon, commune2.lat)
+                                km = int(round(d))
+                                if km < self.max_direct_distance:
+                                    e.direct_km = km
+                                    e.proximity = self.compute_proximity(commune1, commune2)
+                                    self.entities[key] = e
+                                    if e.id is None:
+                                        self.context.session.add(e)
+                                        self.nb_entity += 1
             duration = time.perf_counter() - time0
             print(f"Reading {self.nb_entity} entities {self.row_num * 100 / total:.1f}% in {int(duration)}s")
             self.context.session.commit()
-        self.context.session.commit()
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -161,18 +151,15 @@ if __name__ == '__main__':
     print()
     parser = argparse.ArgumentParser(description="Commune Matrix Service")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
-    parser.add_argument("-a", "--all", help="All pairs", action="store_true")
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
-    cms = CommuneMatrixService(context, args.all)
+    cms = CommuneMatrixService(context)
     print(f"Database {cms.context.db_name}: {cms.context.db_size():.0f} MB")
     # cms.create_from_od()
     cms.make_cache()
     cms.compute_distances()
     print(f"Parse {cms.nb_entity} entities in {time.perf_counter() - time0:.0f} s")
-
-    # -all on server
 
     # 62 Million of pair / 605 Million
     # 61.6 Million of pairs with direct_km
