@@ -1,8 +1,8 @@
 ///dentiste////
 
-import delimited "C:\Users\benjamin.montmartin\Desktop\Etude UFC 2023\Part III\dentistes.csv", clear
+import delimited "C:\Users\conta\git-CVC\Skema\git-skema\data\depassement\dentistes.csv", clear
 
-import delimited "C:\Users\benjamin.montmartin\Desktop\Etude UFC 2023\Part III\d2.csv", clear
+import delimited "C:\Users\conta\git-CVC\Skema\git-skema\data\depassement\d2.csv", clear
 rename genre gender
 rename prenom prénom
 rename code codeccamdelacte
@@ -72,6 +72,43 @@ by b convention: egen mp=mean(montantgénéralementconstaté) if codeccamdelacte
 by b convention: egen mp2=mean(montantgénéralementconstaté) if codeccamdelacte=="HBLD6340"
 by b convention: egen mp3=mean(montantgénéralementconstaté) if codeccamdelacte=="HBLD7340"
 
+/// Correction Cyril // Save dentiste_debug
+by b convention: egen temp=max(mp)
+drop mp
+rename temp mp
+by b convention: egen temp=max(mp2)
+drop mp2
+rename temp mp2
+by b convention: egen temp=max(mp3)
+drop mp3
+rename temp mp3
+
+// Correction Cyril 2
+unique ps_id if codeccamdelacte=="HBLD4910", by(dep convention) gen(NB)
+sort dep convention
+by dep convention: egen temp=mean(NB)
+drop NB
+rename temp NB
+unique ps_id if codeccamdelacte=="HBLD6340", by(dep convention) gen(NB2)
+by dep convention: egen temp=mean(NB2)
+drop NB2
+rename temp NB2
+unique ps_id if codeccamdelacte=="HBLD7340", by(dep convention) gen(NB3)
+by dep convention: egen temp=mean(NB3)
+drop NB3
+rename temp NB3
+unique ps_id if codeccamdelacte=="HBLD4910", by(c) gen(NB_F)
+egen temp=mean(NB_F)
+drop NB_F
+rename temp NB_F
+unique ps_id if codeccamdelacte=="HBLD6340", by(c) gen(NB2_F)
+egen temp=mean(NB2_F)
+drop NB2_F
+rename temp NB2_F
+unique ps_id if codeccamdelacte=="HBLD7340", by(c) gen(NB3_F)
+egen temp=mean(NB3_F)
+drop NB3_F
+rename temp NB3_F
 
 duplicates drop b convention, force
 sort b convention
@@ -87,37 +124,39 @@ distinct ps_id if convention==3
 
 duplicates drop b, force
 
-////Prix OK ////
+////Prix OK //// Cyril : sauvegardé dans dentiste_prix_ok
 
+// Mis en commentaire par Cyril
+//sort dep
+//unique ps_id if codeccamdelacte=="HBLD4910", by(dep) gen(NB)
+//by dep: egen NB2=mean(NB)
+//replace NB2=0 if NB2==.
+//drop NB
+//rename NB2 NB
+//unique ps_id if codeccamdelacte=="HBLD4910", by(c) gen(NB_F)
+//egen NBB_F=mean(NB_F)
+//drop NB_F
+//rename NBB_F NB_F
+//unique ps_id if codeccamdelacte=="HBLD6340", by(dep) gen(NB2)
+//by dep: egen NB22=mean(NB2)
+//replace NB22=0 if NB22==.
+//drop NB2
+//rename NB22 NB2
+//unique ps_id if codeccamdelacte=="HBLD6340", by(c) gen(NB2_F)
+//egen NBB2_F=mean(NB2_F)
+//drop NB2_F
+//rename NBB2_F NB2_F
+//unique ps_id if codeccamdelacte=="HBLD7340", by(dep) gen(NB3)
+//by dep: egen NB32=mean(NB3)
+//replace NB32=0 if NB32==.
+//drop NB3
+//rename NB32 NB3
+//unique ps_id if codeccamdelacte=="HBLD7340", by(c) gen(NB3_F)
+//egen NBB3_F=mean(NB3_F)
+//drop NB3_F
+//rename NBB3_F NB3_F
 
-sort dep
-unique ps_id if codeccamdelacte=="HBLD4910", by(dep) gen(NB)
-by dep: egen NB2=mean(NB)
-replace NB2=0 if NB2==.
-drop NB
-rename NB2 NB
-unique ps_id if codeccamdelacte=="HBLD4910", by(c) gen(NB_F)
-egen NBB_F=mean(NB_F)
-drop NB_F
-rename NBB_F NB_F
-unique ps_id if codeccamdelacte=="HBLD6340", by(dep) gen(NB2)
-by dep: egen NB22=mean(NB2)
-replace NB22=0 if NB22==.
-drop NB2
-rename NB22 NB2
-unique ps_id if codeccamdelacte=="HBLD6340", by(c) gen(NB2_F)
-egen NBB2_F=mean(NB2_F)
-drop NB2_F
-rename NBB2_F NB2_F
-unique ps_id if codeccamdelacte=="HBLD7340", by(dep) gen(NB3)
-by dep: egen NB32=mean(NB3)
-replace NB32=0 if NB32==.
-drop NB3
-rename NB32 NB3
-unique ps_id if codeccamdelacte=="HBLD7340", by(c) gen(NB3_F)
-egen NBB3_F=mean(NB3_F)
-drop NB3_F
-rename NBB3_F NB3_F
+// Save dentiste_prix_ok
 
 gen exessr=((prixmoyen-120)/120)*100
 gen exessr2=((prixmoyen2-120)/120)*100

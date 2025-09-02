@@ -3,10 +3,11 @@ import art
 import pandas as pd
 import config
 import numpy as np
+import psycopg2
 
 class DepassementService:
 
-    def __init__(self, study_id: int, acte: str, acte2s: list[str], is_prix_moyen_correction=False, is_correct_bug_optam=False):
+    def __init__(self, study_id: int, acte: str, acte2s: list[str] | None, is_prix_moyen_correction=False, is_correct_bug_optam=False):
         self.df: pd.DataFrame = pd.DataFrame()
         self.mask_s2 = None
         self.study_id = study_id
@@ -17,8 +18,8 @@ class DepassementService:
         self.tarif_s1 = 0
         self.acte = acte
         self.acte2s = acte2s
-        self.is_prix_moyen_correction = is_prix_moyen_correction
-        self.is_correct_bug_optam = is_correct_bug_optam
+        self.is_prix_moyen_correction = is_prix_moyen_correction # A généraliser sauf dentiste
+        self.is_correct_bug_optam = is_correct_bug_optam # A généraliser
 
     def depassement_study(self):
         print(f"Search study {self.study_id}")
@@ -36,8 +37,16 @@ class DepassementService:
             self.df = pd.read_csv(path, low_memory=False)
             print(f"Nb rows: {len(self.df)}")
         else:
-            #sql
-            pass
+            sql = f"""select p.*, t.*, tds.date_source_id, b.id as adresse_id, an.cp as cp, ar.dept_id as dept_id, b.code_insee from ps p
+            join tarif t on t.ps_id = p.id
+            join tarif_date_source tds on tds.tarif_id = t.id
+            join cabinet c on t.cabinet_id = c.id
+            join adresse_raw ar on c.adresse_raw_id = ar.id
+            join adresse_norm an on ar.adresse_norm_id = an.id
+            join ban b on an.ban_id = b.id
+            join profession_type pt on pt.profession = '{self.profession_type}' and t.profession_id = pt.profession_id
+            where tds.date_source_id >= {self.datesource_min} and  tds.date_source_id <= {self.datesource_max}"""
+            self.df = pd.read_sql(sql, config.connection_string)
 
     def rename(self):
         self.df.rename(columns={
@@ -102,7 +111,7 @@ class DepassementService:
 
     def filter_acte2(self):
         print("Filter acte 2")
-        if len(self.acte2s) > 0:
+        if self.acte2s is not None:
             self.df = self.df[self.df['codeccamdelacte'].isin(self.acte2s)]
 
     def override_tarif_s1(self):
@@ -214,6 +223,21 @@ class DepassementService:
 
     def save(self):
         self.df.to_csv(f"data/depassement/out/out_{self.profession_type}.csv", index=False)
+        # A mettre en prod
+        # self.df.to_csv(
+        #     f"data/depassement/out/depassement_{self.profession_type}_{self.datesource_min}_{self.datesource_max}_{self.tarif_s1}_{self.study_id}.csv",
+        #     index=False)
+
+    def commit(self):
+        conn = psycopg2.connect(config.connection_string)
+        sql = f"delete from depassement where depassement_study_id={self.study_id}"
+        with conn.cursor() as cur:
+            cur.execute(sql)
+        conn.commit()
+        conn.close()
+        self.df["depassement_study_id"] = self.study_id
+        self.df.to_sql("depassement", config.connection_string, if_exists="append", index=False)
+        print("Commited")
 
     def process(self, path=None):
         self.depassement_study()
@@ -229,6 +253,7 @@ class DepassementService:
         self.departement()
         self.last_row()
         self.save()
+        self.commit()
 
 
 class DepassementPsychiatre(DepassementService):
@@ -248,7 +273,7 @@ class DepassementPsychiatre(DepassementService):
 
 class DepassementAnest(DepassementService):
 
-    def __init__(self, study_id: int, acte="CS", acte2s=[]):
+    def __init__(self, study_id: int, acte="CS", acte2s=None):
         super().__init__(study_id, acte, acte2s)
 
     # def correction_nb(self):
@@ -314,6 +339,30 @@ class DepassementGyneco(DepassementService):
         super().__init__(study_id, acte, acte2s, is_correct_bug_optam=True)
 
 
+class DepassementOphtalmo(DepassementService):
+
+    def __init__(self, study_id: int, acte="CS", acte2s=["CS_", "CS_+MPC", "CS_+MPC+MCS"]):
+        super().__init__(study_id, acte, acte2s)
+
+
+class DepassementPediatre(DepassementService):
+
+    def __init__(self, study_id: int, acte="CS", acte2s=["CS_+MEP+NFP", "CS_+NFP"]):
+        super().__init__(study_id, acte, acte2s)
+
+
+class DepassementRadio(DepassementService):
+
+    def __init__(self, study_id: int, acte="ZBQK0020", acte2s=None):
+        super().__init__(study_id, acte, acte2s, is_prix_moyen_correction=True)
+
+
+class DepassementDentiste(DepassementService):
+
+    def __init__(self, study_id: int, acte="HBLD4910", acte2s=None):
+        super().__init__(study_id, acte, acte2s)
+
+
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Depassement Service")
@@ -334,8 +383,18 @@ if __name__ == '__main__':
     # dd.process("data/depassement/dermatologue.csv") # ok
     # dg = DepassementGastro(5)
     # dg.process("data/depassement/gastro.csv")
-    dc = DepassementGyneco(6)
-    dc.process("data/depassement/gyne.csv")
+    # dc = DepassementGyneco(6)
+    # dc.process("data/depassement/gyne.csv")
+    do = DepassementOphtalmo(7)
+    do.process("data/depassement/ophtal.csv")
+    dp = DepassementPediatre(8)
+    dp.process("data/depassement/pediatres.csv")
+    # dr = DepassementRadio(9)
+    # # dr.process("data/depassement/radiologistes.csv")
+    # dd = DepassementDentiste(10)
+    # dd.process("data/depassement/d2.csv")
+
+
 
 
 
