@@ -169,9 +169,11 @@ egen PF=mean(prixmoyen)
 egen PF2=mean(prixmoyen2)
 egen PF3=mean(prixmoyen3)
 
+sort dep
 by dep: egen PrixMoyen =mean(prixmoyen)
 by dep: egen PrixMoyen2 =mean(prixmoyen2)
 by dep: egen PrixMoyen3 =mean(prixmoyen3)
+// Cyril au 02/09 soir
 
 by dep: gen depmoyen=[(PrixMoyen-120)/120]*100
 by dep: gen depmoyen2=[(PrixMoyen2-120)/120]*100

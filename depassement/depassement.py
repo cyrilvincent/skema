@@ -359,8 +359,135 @@ class DepassementRadio(DepassementService):
 
 class DepassementDentiste(DepassementService):
 
-    def __init__(self, study_id: int, acte="HBLD4910", acte2s=None):
-        super().__init__(study_id, acte, acte2s)
+    def __init__(self, study_id: int, actes=["HBLD4910", "HBLD6340", "HBLD7340"]):
+        super().__init__(study_id, "", None)
+        self.actes = actes
+        self.numerotation: list[str] = []
+        for i in range(len(self.actes)):
+            if i == 0:
+                self.numerotation.append("")
+            else:
+                self.numerotation.append(str(i+1))
+
+    def manage_nb(self):
+        print("Manage unique and NB")
+        pd.options.mode.copy_on_write = True
+        self.df['b'] = self.df['ps_id'].astype(str) + "_" + self.df['adresse_id'].astype(str)
+        self.df = self.df.sort_values(by='ps_id')
+        self.df['unique'] = self.df.groupby('ps_id')['adresse_id'].transform('nunique')
+        self.df['un'] = self.df['unique']
+        self.df['NB_total'] = self.df.groupby('dep')['ps_id'].transform('nunique')
+        self.df = self.df.sort_values(by='dep')
+        self.df['c'] = 1
+        self.df['NB_Ftotal'] = self.df.groupby('c')['ps_id'].transform('nunique')
+        self.df['weight'] = self.df['un'].map({1: 1, 2: 0.5, 3: 0.33, 4: 0.25, 5: 0.2}).fillna(0)
+        self.df = self.df[self.df['codeccamdelacte'].isin(self.actes)]
+        self.df = self.df[self.df["montantgénéralementconstaté"] != 0]
+        self.df = self.df.sort_values(by=['b', "convention", "date_source_id"])
+        for n, acte in zip(self.numerotation, self.actes):
+            self.df[f"mp{n}"] = np.nan
+            mask = self.df["codeccamdelacte"] == acte
+            self.df.loc[mask, f"mp{n}"] = self.df[mask].groupby(["b", "convention"])["montantgénéralementconstaté"].transform("mean")
+            self.df[f"mp{n}"] = self.df.groupby(['b', 'convention'])[f"mp{n}"].transform('max')
+            self.df[f"NB{n}"] = np.nan
+            mask = self.df["codeccamdelacte"] == acte
+            self.df.loc[mask, f"NB{n}"] = self.df[mask].groupby(["dep", "convention"])["ps_id"].transform("nunique")
+            self.df[f"NB{n}"] = self.df.groupby(['dep', "convention"])[f"NB{n}"].transform('mean')
+            self.df[f"NB{n}_F"] = np.nan
+            mask = self.df["codeccamdelacte"] == acte
+            self.df.loc[mask,f"NB{n}_F"] = self.df[mask].groupby(["c"])["ps_id"].transform("nunique")
+            self.df[f"NB{n}_F"] = self.df.groupby(["c"])[f"NB{n}_F"].transform('mean')
+        self.df = self.df.sort_values(by=['dep', "convention"])
+
+    def filter_acte(self):
+        pass
+
+    def prix_moyen(self):
+        self.df = self.df.drop_duplicates(subset=['b', 'convention'])  # 20279 ok
+        self.df = self.df.sort_values(by=['b', "convention"])
+        for n in self.numerotation:
+            self.df[f"prixmoyen{n}"] = self.df[f"mp{n}"]
+
+
+    def departement(self):
+        print("By departement")
+        self.df = self.df.drop_duplicates(subset=['b'])  # 20279 ok
+        for n in self.numerotation:
+            self.df[f'exessr{n}'] = ((self.df[f'prixmoyen{n}'] - self.tarif_s1) / self.tarif_s1) * 100
+            self.df[f'PF{n}'] = self.df[f'prixmoyen{n}'].mean()
+            self.df[f'PrixMoyen{n}'] = self.df.groupby('dep')[f'prixmoyen{n}'].transform('mean')
+            self.df[f'depmoyen{n}'] = ((self.df[f'PrixMoyen{n}'] - self.tarif_s1) / self.tarif_s1) * 100
+            self.df[f"depmoyen_F{n}"] = ((self.df[f'PF{n}'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['exessr'] = ((self.df['prixmoyen'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['exessr2'] = ((self.df['prixmoyen2'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['exessr3'] = ((self.df['prixmoyen3'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['PF'] = self.df['prixmoyen'].mean()
+        # self.df['PF2'] = self.df['prixmoyen2'].mean()
+        # self.df['PF3'] = self.df['prixmoyen3'].mean()
+        # self.df['PrixMoyen'] = self.df.groupby('dep')['prixmoyen'].transform('mean')
+        # self.df['PrixMoyen2'] = self.df.groupby('dep')['prixmoyen2'].transform('mean')
+        # self.df['PrixMoyen3'] = self.df.groupby('dep')['prixmoyen3'].transform('mean')
+        # self.df['depmoyen'] = ((self.df['PrixMoyen'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['depmoyen2'] = ((self.df['PrixMoyen2'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df['depmoyen3'] = ((self.df['PrixMoyen3'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df["depmoyen_F"] = ((self.df['PF'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df["depmoyen_F2"] = ((self.df['PF2'] - self.tarif_s1) / self.tarif_s1) * 100
+        # self.df["depmoyen_F3"] = ((self.df['PF3'] - self.tarif_s1) / self.tarif_s1) * 100
+        self.df = self.df.sort_values(by=['dep', 'depmoyen'], ascending=[True, False])
+        self.df = self.df.drop_duplicates(subset=['dep'])
+        self.df = self.df.drop(["gender", "nom", "prénom", "naturedexercice", "convention", "optioncontratdaccèsauxsoins",
+                      "codeccamdelacte", "ps_id", "montantgénéralementconstaté", "borneinférieuredumontant",
+                      "bornesupérieuredumontant", "date_source_id", "adresse_id", "matchcp", "codeinsee", "b", "unique",
+                      "un", "weight"], axis=1)
+        # self.df = self.df.drop(["gender", "nom", "prénom", "naturedexercice", "convention", "optioncontratdaccèsauxsoins",
+        #               "codeccamdelacte", "ps_id", "montantgénéralementconstaté", "borneinférieuredumontant",
+        #               "bornesupérieuredumontant", "date_source_id", "adresse_id", "matchcp", "codeinsee", "b", "unique",
+        #               "un", "weight", "mp", "mp2", "mp3", "prixmoyen", "prixmoyen2", "prixmoyen3", "exessr", "exessr2",
+        #               "exessr3"], axis=1)
+        for n in self.numerotation:
+            self.df = self.df.drop([f"mp{n}", f"prixmoyen{n}", f"exessr{n}"], axis=1)
+        print(f"Nb dep: {len(self.df)}")
+
+
+    def last_row(self):
+        print("Last row")
+        df_to_duplicate = self.df[self.df['dep'] == 75].copy()
+        df_to_duplicate['dup'] = 1  # marquer les duplications
+        self.df['dup'] = 0
+        self.df = pd.concat([self.df, df_to_duplicate], ignore_index=True)
+        self.df.loc[self.df["dup"] == 1, "dep"] = 0
+        self.df.loc[self.df["dup"] == 1, "NB_total"] = self.df.loc[self.df["dup"] == 1]["NB_Ftotal"]
+        for n in self.numerotation:
+            self.df.loc[self.df["dup"] == 1, f"NB{n}"] = self.df.loc[self.df["dup"] == 1][f"NB{n}_F"]
+            self.df.loc[self.df["dup"] == 1, f"PrixMoyen{n}"] = self.df.loc[self.df["dup"] == 1][f"PF{n}"]
+            self.df.loc[self.df["dup"] == 1, f"depmoyen{n}"] = self.df.loc[self.df["dup"] == 1][f"depmoyen_F{n}"]
+        # self.df.loc[self.df["dup"] == 1, "NB2"] = self.df.loc[self.df["dup"] == 1]["NB2_F"]
+        # self.df.loc[self.df["dup"] == 1, "NB3"] = self.df.loc[self.df["dup"] == 1]["NB3_F"]
+        # self.df.loc[self.df["dup"] == 1, "PrixMoyen"] = self.df.loc[self.df["dup"] == 1]["PF"]
+        # self.df.loc[self.df["dup"] == 1, "PrixMoyen2"] = self.df.loc[self.df["dup"] == 1]["PF2"]
+        # self.df.loc[self.df["dup"] == 1, "PrixMoyen3"] = self.df.loc[self.df["dup"] == 1]["PF3"]
+        # self.df.loc[self.df["dup"] == 1, "depmoyen"] = self.df.loc[self.df["dup"] == 1]["depmoyen_F"]
+        # self.df.loc[self.df["dup"] == 1, "depmoyen2"] = self.df.loc[self.df["dup"] == 1]["depmoyen_F2"]
+        # self.df.loc[self.df["dup"] == 1, "depmoyen3"] = self.df.loc[self.df["dup"] == 1]["depmoyen_F3"]
+        self.df = self.df.drop(["NB_Ftotal", "dup", "c"], axis=1)
+        for n in self.numerotation:
+            self.df = self.df.drop([f"NB{n}_F", f"PF{n}", f"depmoyen_F{n}"], axis=1)
+        self.df = self.df.reset_index(drop=True)
+
+    def commit(self):
+        print("Commiting")
+        try:
+            conn = psycopg2.connect(config.connection_string)
+            sql = f"delete from depassement_multiacte where depassement_study_id={self.study_id}"
+            with conn.cursor() as cur:
+                cur.execute(sql)
+            conn.commit()
+            conn.close()
+        except:
+            pass
+        self.df["depassement_study_id"] = self.study_id
+        self.df.to_sql("depassement_multiacte", config.connection_string, if_exists="append", index=False) # LA &ère fois sur le serveur mettre index=id
+        print("Commited")
 
 
 if __name__ == '__main__':
@@ -385,14 +512,17 @@ if __name__ == '__main__':
     # dg.process("data/depassement/gastro.csv")
     # dc = DepassementGyneco(6)
     # dc.process("data/depassement/gyne.csv")
-    do = DepassementOphtalmo(7)
-    do.process("data/depassement/ophtal.csv")
-    dp = DepassementPediatre(8)
-    dp.process("data/depassement/pediatres.csv")
+    # do = DepassementOphtalmo(7)
+    # do.process("data/depassement/ophtal.csv")
+    # dp = DepassementPediatre(8)
+    # dp.process("data/depassement/pediatres.csv")
     # dr = DepassementRadio(9)
-    # # dr.process("data/depassement/radiologistes.csv")
-    # dd = DepassementDentiste(10)
-    # dd.process("data/depassement/d2.csv")
+    # dr.process("data/depassement/radiologistes.csv")
+    dd = DepassementDentiste(10)
+    dd.process("data/depassement/d2.csv")
+    # todo tester dentiste en sql
+    # todo ajouter acte acte2s et actes dans la bd
+    # todo créer automatiquement la study via sqlalchemy
 
 
 
