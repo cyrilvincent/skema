@@ -4,6 +4,7 @@ import pandas as pd
 import config
 import numpy as np
 import psycopg2
+import json
 
 class DepassementService:
 
@@ -18,18 +19,43 @@ class DepassementService:
         self.tarif_s1 = 0
         self.acte = acte
         self.acte2s = acte2s
+        self.actes = None
         self.is_prix_moyen_correction = is_prix_moyen_correction # A généraliser sauf dentiste
         self.is_correct_bug_optam = is_correct_bug_optam # A généraliser
 
     def depassement_study(self):
         print(f"Search study {self.study_id}")
         sql = f"select * from depassement_study where id={self.study_id}"
-        df_study = pd.read_sql(sql, config.connection_string)
-        self.profession_type = df_study.iloc[0]["profession_type"]
-        self.datesource_min = df_study.iloc[0]["datesource_min"]
-        self.datesource_max = df_study.iloc[0]["datesource_max"]
-        self.tarif_s1 = df_study.iloc[0]["tarif_s1"]
+        self.df_study = pd.read_sql(sql, config.connection_string)
+        self.profession_type = self.df_study.iloc[0]["profession_type"]
+        self.datesource_min = self.df_study.iloc[0]["datesource_min"]
+        self.datesource_max = self.df_study.iloc[0]["datesource_max"]
+        self.tarif_s1 = self.df_study.iloc[0]["tarif_s1"]
         print(f"Found {self.profession_type} between {self.datesource_min}-{self.datesource_max} for tarif_s1 {self.tarif_s1}€")
+
+    def get_or_add_depassement(self, profession_type: str, datesource_min: int, datesource_max: int, tarif_s1: float,
+                               acte: str | None, acte2s: list | None, actes: list | None):
+        self.profession_type = profession_type
+        self.datesource_min = datesource_min
+        self.datesource_max = datesource_max
+        self.tarif_s1 = tarif_s1
+        self.acte = acte
+        self.acte2s = json.dumps(acte2s) if actes is not None else None
+        self.actes = json.dumps(actes) if actes is not None else None
+        sql = f"""select * from deplassement_study
+        profession_type='{profession_type}' and date_source_min={datesource_min} and date_source_max={datesource_max},
+        and tarif_s1={tarif_s1} and {"acte='"+str(self.acte)+"'" if self.acte is not None else "acte is null"}
+        and {"acte2s='"+str(self.acte2s)+"'" if self.acte2s is not None else "acte2s is null"}
+        and {"actes='"+str(self.actes)+"'" if self.actes is not None else "actes is null"}"""
+        self.df_study = pd.read_sql(sql, config.connection_string)
+        if len(self.df_study) == 0:
+            print("No study found, create it")
+            pass # add
+        else:
+            self.study_id = self.df_study.iloc[0]["study_id"]
+            print(f"Found study with id={self.study_id}")
+
+
 
     def load(self, path: str = None):
         if path is not None:
@@ -37,6 +63,7 @@ class DepassementService:
             self.df = pd.read_csv(path, low_memory=False)
             print(f"Nb rows: {len(self.df)}")
         else:
+            print("Querying")
             sql = f"""select p.*, t.*, tds.date_source_id, b.id as adresse_id, an.cp as cp, ar.dept_id as dept_id, b.code_insee from ps p
             join tarif t on t.ps_id = p.id
             join tarif_date_source tds on tds.tarif_id = t.id
@@ -47,6 +74,7 @@ class DepassementService:
             join profession_type pt on pt.profession = '{self.profession_type}' and t.profession_id = pt.profession_id
             where tds.date_source_id >= {self.datesource_min} and  tds.date_source_id <= {self.datesource_max}"""
             self.df = pd.read_sql(sql, config.connection_string)
+            print(f"Found {len(self.df)} rows")
 
     def rename(self):
         self.df.rename(columns={
@@ -520,7 +548,8 @@ if __name__ == '__main__':
     # dr.process("data/depassement/radiologistes.csv")
     dd = DepassementDentiste(10)
     dd.process("data/depassement/d2.csv")
-    # todo tester dentiste en sql
+    # dd.process()
+    # todo tester dentiste en sql (sur serveur uniquement car pas les data en local)
     # todo ajouter acte acte2s et actes dans la bd
     # todo créer automatiquement la study via sqlalchemy
 
