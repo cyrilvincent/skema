@@ -1,2 +1,6 @@
-pyproj 3.5.0 -> 3.7.1
-BaseParser convert_lambert93_lon_lat
+Projet1 = trouver tarif_s1 automatiquement par profession_type
+Projet2 = scraper opendiamir + https://www.assurance-maladie.ameli.fr/etudes-et-donnees/open-damir-depenses-sante-interregimes
+          + parser
+          + downloader
+Projet 3 = parser PopIris
+Projet 4 = apl

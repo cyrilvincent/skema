@@ -57,3 +57,15 @@ and route_km is null
 update iris.iris_matrix
 set route_km = direct_km * 2, route_min = direct_km * 3, route_hp_min = 1 + direct_km * 3
 where route_km is null and direct_km is not null
+
+-- Gérer les iles de commune comme 22016
+update iris.commune_matrix
+set route_km = direct_km * 2, route_min = 60 + direct_km * 2, route_hp_min = 120 + direct_km * 2
+where (code_id_low in (22016, 17004)
+or code_id_high in (22016, 17004))
+and route_km is null
+
+-- les derniers récalcitrants (41)
+update iris.commune_matrix
+set route_km = direct_km * 2, route_min = direct_km * 3, route_hp_min = 1 + direct_km * 3
+where route_km is null and direct_km is not null

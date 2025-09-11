@@ -108,7 +108,7 @@ class IrisToCommuneTransferer:
                 iris2 = self.get_iris_id_from_commune_old_id(commune_matrix.code_id_high)
 
             if iris1 is not None and iris2 is not None:
-                # iris_matrix = self.get_iris_matrix_by_ids(iris1.id, iris2.id)
+
                 iris_matrix = self.get_iris_matrix_by_ids(iris1, iris2)
                 if iris_matrix is not None and iris_matrix.route_km is not None:
                     self.iris_matrix_to_commune_matrix(iris_matrix, commune_matrix)
