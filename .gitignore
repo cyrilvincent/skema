@@ -188,6 +188,7 @@ testem.log
 Thumbs.db
 
 gpl/Etude 06/*.dta
+gpl/Etude 06/**/*.dta
 gpl/Etude 06/centroids IRIS/**
 
 
