@@ -1,0 +1,30 @@
+D'abord dans depassement essayer de trouver chaque mois le tarif_s1 par simple requête SQL, attention les tarif des convention=1 sont == 0
+
+APL = Etude 06 = Accessibilité Potentiel Localisé
+Bien lire les commentaires
+Doc dans Rendus
+OpenDamir ? https://www.assurance-maladie.ameli.fr/etudes-et-donnees/open-damir-depenses-sante-interregimes
+Population par age
+pd.read_stata
+generaliste06_2022-45M.do = 45 minutes
+Etude06.do semble juste créer une matric de distance et la nettoyer, semble non utile
+generaliste06 issus de generaliste.sql
+popIRIS.dta = iris + population documenté dans pop iris semble être le fichier pop iris/pop_IRIS_06.xlsx
+gen WexpGP=exp(-0.08*TIME) = metric remplace le tableau page 7 de APL.PDF et donne la courbe page 8
+Les P19* sont les populations en 2019 provient de pop_iris.dta à mettre de la BD : lien demandé à Benj
+Les poids de la ligne 51 sont liés à opendamir, doc demandé à benj car il faut mettre la bd opendamir dans la bd, représente la proportion de l'age de la population par acte
+nbgpiris2022.dta = nb de general practic (généraliste) documenté ligne 29
+Dans bibliographie indicative de apl06.pdf va voir les documents IRDES
+Calculer APL pour tous les iris de france / année / profession_type y'a une pondération à changer par profession_type on t il le même code profession dans opendiamir et rpps ou ps
+APL = Accessibilite Potentielle Localisee
+
+2 sous projets
+OpenDamir
+PopIris
+
+Il a mis 2-3j
+
+
+
+
+
