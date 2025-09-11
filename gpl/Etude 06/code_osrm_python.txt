@@ -1,0 +1,39 @@
+import pandas as pd
+import requests
+import json
+
+# Define the API endpoint
+endpoint = 'http://router.project-osrm.org/route/v1/driving/'
+
+# Define the parameters to be passed in the API request
+params = {'steps': 'false', 'geometries': 'geojson', 'overview': 'full'}
+
+# Read the Excel file
+df = pd.read_excel('Corr1.xlsx')
+
+# Create an empty list to store the results
+results = []
+
+# Loop over each row in the DataFrame
+for i, row in df.iterrows():
+    # Extract the start coordinates and city name
+    start = str(row['longitude']) + ',' + str(row['latitude'])
+    origin = row['city']
+    origin_id = row['ID']
+    for j, other_row in df.iterrows():
+        if i != j:
+            end = str(other_row['longitude']) + ',' + str(other_row['latitude'])
+            destination = other_row['city']
+            destination_id = other_row['ID']
+            response = requests.get(endpoint + start + ';' + end, params=params)
+            data = json.loads(response.content)
+            distance = data['routes'][0]['distance'] / 1000.0 # distance in kilometers
+            duration = data['routes'][0]['duration'] / 60.0 # duration in minutes
+            results.append({'ID': row['ID'], 'Longitude': row['longitude'], 'Latitude': row['latitude'],
+                            'Origin': origin, 'Destination': destination, 'Origin ID': origin_id,
+                            'Destination ID': destination_id, 'Distance (km)': distance,
+                            'Duration (min)': duration})
+
+# Write the results to a CSV file
+df_results = pd.DataFrame(results)
+df_results.to_csv('output.csv', index=False)
