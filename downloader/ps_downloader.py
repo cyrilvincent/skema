@@ -1,21 +1,12 @@
 import argparse
 import datetime
 import os
-import time
-import urllib.request
-import urllib.parse
-import urllib.error
 import art
-from sqlalchemy import create_engine
 import config
-from diplome_parser import DiplomeParser
 from downloader.base_downloader import BaseDownloader
-from personne_activite_parser import PersonneActiviteParser
 from ps_parser import PSParser
 from ps_tarif_parser import PSTarifParser
 from sqlentities import Context, File, BAN
-from bs4 import BeautifulSoup
-import re
 
 
 class PSDownloader(BaseDownloader):
@@ -60,13 +51,29 @@ class PSDownloader(BaseDownloader):
                                 self.context.session.commit()
                             context = Context()
                             context.create(echo=self.echo, expire_on_commit=False)
+                            db_size = context.db_size()
+                            print(f"Database {context.db_name}: {db_size:.0f} Mb")
                             self.parser = PSParser(context)
                             if not self.no_parsing:
                                 self.parser.load(file.full_name, encoding=None)
+                                print(f"New PS: {self.parser.nb_new_entity}")
+                                print(f"Existing PS: {self.parser.nb_existing_entity} ({self.parser.nb_new_entity + self.parser.nb_existing_entity})")
+                                print(f"Dept >95 PS: {self.parser.nb_out_dept} ({self.parser.nb_new_entity + self.parser.nb_existing_entity + self.parser.nb_out_dept})")
+                                print(f"New cabinet: {self.parser.nb_cabinet}")
+                                print(f"New adresse: {self.parser.nb_new_adresse}")
+                                print(f"New adresse normalized: {self.parser.nb_new_norm}")
+                                print(f"Matching INPP: {self.parser.nb_inpps}/{self.parser.nb_unique_ps}: {(self.parser.nb_inpps / self.parser.nb_unique_ps) * 100:.0f}%")
+                                print(f"Matched rules: {self.parser.rules}")
                                 context = Context()
                                 context.create(echo=self.echo, expire_on_commit=False)
                                 self.parser = PSTarifParser(context)
                                 self.parser.load(file.full_name, encoding=None)
+                                print(f"New tarif: {self.parser.nb_tarif}")
+                                print(f"Existing tarif: {self.parser.nb_existing_entity} ({self.parser.nb_tarif + self.parser.nb_existing_entity})")
+                                print(f"Nb warning: {self.parser.nb_warning}")
+                                new_db_size = context.db_size()
+                                print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+                                print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
                             file.import_end_date = datetime.datetime.now()
                             if not self.no_commit:
                                 self.context.session.commit()

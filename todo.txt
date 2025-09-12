@@ -1,6 +1,14 @@
-Projet1 = trouver tarif_s1 automatiquement par profession_type
-Projet2 = scraper opendiamir + https://www.assurance-maladie.ameli.fr/etudes-et-donnees/open-damir-depenses-sante-interregimes
-          + parser
-          + downloader
-Projet 3 = parser PopIris
+Projet 1 = trouver tarif_s1 automatiquement par profession_type,
+            automatiser depassement par mois,
+            migrer les profession_type avec des int et non des str et adapter le code
+            faire : specialite -* specialite_profession *- profession puis effacer + tard profession_type en sqlalchemy serait cool
+Projet 2 = parser PopIris
+Projet 3 = Parser opendiamir + downloader
 Projet 4 = apl
+Projet 5 = scraper https://www.keskeces.com # Pas de REST, possède un RPPS, facile à parser l'autre site mablouseblanche.fr n'affiche pas le RPPS
+Projet 6 = scraper https://www.sante.fr # Possède un REST à vérifier RPPS ok
+Projet 7 = Realouer à postériori ps.key en fonction des 2 nouvelles sources de data + rpps, parfois il y aura une fusion
+Projet 8 = Dataviz APL Jupyter
+Projet 9 = Proto Angular + Dataviz
+Projet 10 = Doctolib scraper
+

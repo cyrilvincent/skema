@@ -82,6 +82,7 @@ class Context:
 # structure 1-* activite *-1 code_profession *-* profession
 #                        1-* coord
 #           1-* coord
+# specialite *-* profession
 
 
 class Dept(Base):
@@ -246,15 +247,18 @@ personne_activite_diplome = Table('personne_activite_diplome', Base.metadata,
                                      )
 
 profession_diplome = Table('profession_diplome', Base.metadata,
-                                     Column('profession_id', ForeignKey('profession.id'),
-                                            primary_key=True),
+                                     Column('profession_id', ForeignKey('profession.id'), primary_key=True),
                                      Column('diplome_id', ForeignKey('diplome.id'), primary_key=True)
                                      )
 
 profession_code_profession = Table('profession_code_profession', Base.metadata,
-                                     Column('profession_id', ForeignKey('profession.id'),
-                                            primary_key=True),
+                                     Column('profession_id', ForeignKey('profession.id'), primary_key=True),
                                      Column('code_profession_id', ForeignKey('code_profession.id'), primary_key=True)
+                                     )
+
+specialite_profession = Table('specialite_profession', Base.metadata,
+                                     Column('profession_id', ForeignKey('profession.id'), primary_key=True),
+                                     Column('specialite_id', ForeignKey('specialite.id'), primary_key=True)
                                      )
 
 class DateSource(Base):
@@ -1358,4 +1362,16 @@ class IrisMatrix(Base):
 
     def __repr__(self):
         return f"{self.id} {self.iris_id_from}=>{self.iris_id_to} {self.direct_km}km"
+
+
+class Specialite(Base):
+    __tablename__ = "specialite"
+
+    id = Column(BigInteger, primary_key=True)
+    label = Column(String(20), nullable=False)
+    label_long = Column(String(50))
+    professions: list[Profession] = relationship("Profession", secondary=specialite_profession)
+
+    def __repr__(self):
+        return f"{self.id} {self.label}"
 

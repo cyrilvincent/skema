@@ -1,0 +1,4 @@
+Il y a 12 fichiers à télécharger par année. On peut démarrer en 2020 pour la collecte.
+J'ai retrouvé mon exemple de calcul des pondérations pour 4 professions de médecine (généralistes, pédiatres, ophtalmo et gynéco) pour 2021. Tu trouveras l'ensemble des éléments sous dropbox dossier DAMIR.
+Tu trouveras les 12 fichiers de 2021 ainsi qu'un do.file contenant les filtres opérés sur les 4 professions pour avoir le nombre de consultations par tranche d'age. N'hésite pas s'il y a des éléments qui ne te paraissent pas clairs. J'ai vérifié et le code d'identification des professions est différents de celui des codes ps. En revanche tu as un fichier à télécharger sur la page web qui décrit toutes les variables et te donne les codes de correspondance professions.
+Tu as aussi un fichier excel sur lequel j'ai effectué par profession le calcul des pondérations.

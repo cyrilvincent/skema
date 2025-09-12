@@ -73,6 +73,8 @@ class DepassementService:
             join ban b on an.ban_id = b.id
             join profession_type pt on pt.profession = '{self.profession_type}' and t.profession_id = pt.profession_id
             where tds.date_source_id >= {self.datesource_min} and  tds.date_source_id <= {self.datesource_max}"""
+            # todo ajouter acte like '{acte}%' pour tous sauf dentiste
+            # todo virer join adresse_raw, adresse_norm et ban
             self.df = pd.read_sql(sql, config.connection_string)
             print(f"Found {len(self.df)} rows")
 
@@ -408,7 +410,7 @@ class DepassementDentiste(DepassementService):
         self.df = self.df.sort_values(by='dep')
         self.df['c'] = 1
         self.df['NB_Ftotal'] = self.df.groupby('c')['ps_id'].transform('nunique')
-        self.df['weight'] = self.df['un'].map({1: 1, 2: 0.5, 3: 0.33, 4: 0.25, 5: 0.2}).fillna(0)
+        self.df['weight'] = self.df['un'].map({1: 1, 2: 0.5, 3: 0.3333, 4: 0.25, 5: 0.2}).fillna(0) # Jamais utilisé
         self.df = self.df[self.df['codeccamdelacte'].isin(self.actes)]
         self.df = self.df[self.df["montantgénéralementconstaté"] != 0]
         self.df = self.df.sort_values(by=['b', "convention", "date_source_id"])

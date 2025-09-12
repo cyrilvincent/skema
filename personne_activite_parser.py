@@ -51,7 +51,8 @@ class PersonneActiviteParser(BaseParser):
         pa = PersonneActivite()
         try:
             pa.inpp = row["Identification nationale PP"]
-            pa.nom = self.normalize_string(row["Nom d'exercice"])
+            if len(row["Nom d'exercice"]) > 0:
+                pa.nom = self.normalize_string(row["Nom d'exercice"])
             pa.prenom = self.normalize_string(row["Prénom d'exercice"])
         except Exception as ex:
             print(f"ERROR PersonneActivite row {self.row_num} {pa}\n{ex}\n{row}")

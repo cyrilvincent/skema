@@ -1,0 +1,7 @@
+Sur les données de population à l'IRIS: il faut les télécharger directement depuis le site de l'INSEE:
+
+voici le lien par ex pour le recensement de la population de 2022 à l'IRIS: https://www.insee.fr/fr/statistiques/7704076
+
+Il faut bien que le nom du fichier téléchargé soit du type: base-ic-evol-struct-pop-year_csv
+
+Pour l'instant la dernière mouture est 2021 je crois (2022 devrait être dispo le mois prochain) donc il faudrait télécharger depuis 2017 je pense.
