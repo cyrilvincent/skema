@@ -208,7 +208,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     psp = PSTarifParser(context)
     psp.load(args.path, encoding=None)
     print(f"New tarif: {psp.nb_tarif}")

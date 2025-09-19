@@ -533,7 +533,7 @@ class PSParser(BaseParser):
             c = self.create_update_cabinet(e, row)
             c.adresse_raw = a
             # if not args.nosave:
-            #     self.context.session.commit()
+            self.context.session.commit()
         else:
             self.nb_out_dept += 1
 
@@ -554,7 +554,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     out_file = None
     if args.trace:
         out_file = open("data/ps/out/out.csv", "w")
@@ -573,7 +573,7 @@ if __name__ == '__main__':
     print(f"Matched rules: {psp.rules}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # Avant de refaire tourner valider vider la table ps_merge
 
