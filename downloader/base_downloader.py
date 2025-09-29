@@ -108,7 +108,9 @@ class BaseDownloader(metaclass=abc.ABCMeta):
         print(f"Dezip {path+file} to {self.download_path}")
         if file.split(".")[-1] == "gz":
             with gzip.open(path+file, "rb") as f:
-                with open(path+file.replace(".gz", ""), "wb") as out:
+                name = path + file.replace(".gz", "")
+                name = name.replace(".tar", "")
+                with open(name, "wb") as out:
                     out.write(f.read())
         else:
             with zipfile.ZipFile(path+file, 'r') as zip:
