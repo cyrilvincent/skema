@@ -1,4 +1,4 @@
-cd "C:\Users\benjamin.montmartin\Desktop\Etude 06"
+cd "C:\Users\benjamin.montmartin\Desktop\Etude 06" // cd "C:\Users\conta\git-CVC\Skema\git-skema\apl\Etude 06"
 use Gene06.dta, clear
 ///Base de données extraite de la plateforme à partir de la commande SQL Généralistes avec "duplicates drop id lat lon, force"
 distinct id
