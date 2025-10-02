@@ -53,7 +53,7 @@ class BaseParser(metaclass=ABCMeta):
         for a in l:
             self.adresse_norms[a.key] = a
             self.adresse_norms_id[int(a.id)] = a
-            self.nb_ram += 1
+            self.nb_ram += 2
         print(f"{self.nb_ram} objects in cache")
 
     def test_file(self, path, encoding="utf8"):

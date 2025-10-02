@@ -61,7 +61,7 @@ class Context:
 #              -1 cabinet
 # etab -1 adresse_raw
 #      *-* date_source
-# personne_activite *-* pa_adresse
+# personne_activite *-* pa_adresse -1 adresse_norm
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
 # personne 1-* exercice_pro *-1 code_profession *-* profession
@@ -536,6 +536,9 @@ class PAAdresse(Base):
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
                                                               secondary=personne_activite_pa_adresse,
                                                               backref="pa_adresses")
+    adresse_norm: AdresseNorm = relationship("AdresseNorm")
+    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
+
 
     __table_args__ = (UniqueConstraint('numero', 'rue', 'cp', 'commune'),)
 

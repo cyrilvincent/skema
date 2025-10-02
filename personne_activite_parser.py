@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, DateSource
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, DateSource, AdresseNorm
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -23,20 +23,27 @@ class PersonneActiviteParser(BaseParser):
         for d in l:
             self.depts[d.num] = d
             self.depts_int[d.id] = d
+            self.nb_ram += 2
         l = self.context.session.query(CodeProfession).all()
         for c in l:
             self.code_professions[c.id] = c
-        l = self.context.session.query(Diplome).filter(Diplome.is_savoir_faire == True)
+            self.nb_ram += 1
+        l = self.context.session.query(Diplome).filter(Diplome.is_savoir_faire == True)  # Ne pas mettre is True
         for s in l:
             self.savoir_faires[s.key] = s
+            self.nb_ram += 1
         l: List[PersonneActivite] = self.context.session.query(PersonneActivite)\
             .options(joinedload(PersonneActivite.diplomes)).options(joinedload(PersonneActivite.code_professions)).all()
         for e in l:
             self.entities[e.inpp] = e
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
         l: List[PAAdresse] = self.context.session.query(PAAdresse)\
             .options(joinedload(PAAdresse.personne_activites)).all()
         for a in l:
             self.pa_adresses[a.key] = a
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
 
     def parse_date(self, path):
         try:
@@ -166,6 +173,49 @@ class PersonneActiviteParser(BaseParser):
         super().load(path, delimiter='|', encoding="UTF-8", header=True)
 
 
+class PersonneActiviteAdresseMapper(BaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.adresse_norms: Dict[Tuple[int, str, int, str], AdresseNorm] = {}
+
+    def load_cache(self):
+        print("Making cache")
+        l: list[AdresseNorm] = self.context.session.query(AdresseNorm).all()
+        for a in l:
+            # a.numero, a.rue, a.cp, a.commune
+            key = a.numero, a.rue1, a.cp, a.commune
+            self.adresse_norms[key] = a
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
+
+    def parse_row(self, row):
+        pass
+
+    def mapper(self, row):
+        pass
+
+    def map(self):
+        l: List[PAAdresse] = self.context.session.query(PAAdresse).filter(PAAdresse.adresse_norm_id.is_(None)).all()
+        print(f"Found {len(l)} adresses to map")
+        for a in l:
+            key = a.numero, a.rue, a.cp, a.commune
+            if key not in self.adresse_norms:
+                norm = AdresseNorm()
+                norm.numero = a.numero
+                norm.rue1 = a.rue
+                norm.cp = a.cp
+                norm.commune = a.commune
+                norm.dept = a.dept
+                self.adresse_norms[key] = norm
+                self.nb_new_entity += 1
+            a.adresse_norm = self.adresse_norms[key]
+            self.nb_row += 1
+            self.context.session.commit()
+            if self.nb_row % 10000 == 0:
+                print(f"Map {self.nb_row} adresses and created {self.nb_new_entity} normalized adresses")
+
+
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Personne Activite Parser")
@@ -176,18 +226,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Personne Activite Parser")
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
+    parser.add_argument("-m", "--map", help="Mapper only", action="store_true")
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     psp = PersonneActiviteParser(context)
-    psp.load(args.path)
-    print(f"New personne: {psp.nb_new_entity}")
-    print(f"New adresse: {psp.nb_new_adresse}")
+    if not args.map:
+        psp.load(args.path)
+        print(f"New personne: {psp.nb_new_entity}")
+        print(f"New adresse: {psp.nb_new_adresse}")
+    paam = PersonneActiviteAdresseMapper(context)
+    paam.load_cache()
+    paam.map()
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_small.txt -e
