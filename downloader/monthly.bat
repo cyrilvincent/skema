@@ -27,6 +27,10 @@ move %icippath%\downloader\logs\score_matcher.log %icippath%\downloader\logs\sco
 python score_matcher.py > %icippath%\downloader\logs\score_matcher.log 2>&1
 move %icippath%\downloader\logs\iris_matcher.log %icippath%\downloader\logs\iris_matcher.1
 python iris_matcher.py > %icippath%\downloader\logs\iris_matcher.log 2>&1
+move %icippath%\downloader\logs\damir.2 %icippath%\downloader\logs\damir.3
+move %icippath%\downloader\logs\damir.1 %icippath%\downloader\logs\damir.2
+move %icippath%\downloader\logs\damir.log %icippath%\downloader\logs\damir.1
+python -m downloader.damir_downloader > %icippath%\downloader\logs\damir.log 2>&1
 move "D:\\icip\\backup\\icip.monthly.bak.1" "D:\\icip\\backup\\icip.monthly.bak.2"
 move "D:\\icip\\backup\\icip.monthly.bak" "D:\\icip\\backup\\icip.monthly.bak.1"
 set PGPASSWORD=sa

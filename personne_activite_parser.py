@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 from sqlalchemy.orm import joinedload
-from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, DateSource, AdresseNorm
+from sqlentities import Context, PersonneActivite, PAAdresse, Dept, CodeProfession, Diplome, DateSource, AdresseNorm, \
+    PAAdresseNormDateSource
 from base_parser import BaseParser, time0
 import argparse
 import time
@@ -16,6 +17,9 @@ class PersonneActiviteParser(BaseParser):
         self.code_professions: Dict[int, CodeProfession] = {}
         self.savoir_faires: Dict[str, Diplome] = {}
         self.nb_new_adresse = 0
+        self.nb_new_adresse_norm = 0
+        self.adresse_norms: Dict[Tuple[int, str, int, str], AdresseNorm] = {}
+        self.pa_adresse_norm_date_sources: Dict[Tuple[int, int, int], PAAdresseNormDateSource] = {}
 
     def load_cache(self):
         print("Making cache")
@@ -32,8 +36,11 @@ class PersonneActiviteParser(BaseParser):
         for s in l:
             self.savoir_faires[s.key] = s
             self.nb_ram += 1
-        l: List[PersonneActivite] = self.context.session.query(PersonneActivite)\
-            .options(joinedload(PersonneActivite.diplomes)).options(joinedload(PersonneActivite.code_professions)).all()
+        print(f"{self.nb_ram} objects in cache")
+        l: List[PersonneActivite] = (self.context.session.query(PersonneActivite)
+                                     .options(joinedload(PersonneActivite.diplomes))
+                                     .options(joinedload(PersonneActivite.code_professions))
+                                     .all())
         for e in l:
             self.entities[e.inpp] = e
             self.nb_ram += 1
@@ -42,6 +49,18 @@ class PersonneActiviteParser(BaseParser):
             .options(joinedload(PAAdresse.personne_activites)).all()
         for a in l:
             self.pa_adresses[a.key] = a
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
+        l: list[PAAdresseNormDateSource] = self.context.session.query(PAAdresseNormDateSource).all()
+        for a in l:
+            self.pa_adresse_norm_date_sources[a.key] = a
+            self.nb_ram += 1
+        print(f"{self.nb_ram} objects in cache")
+        l: list[AdresseNorm] = self.context.session.query(AdresseNorm).all()
+        for a in l:
+            # a.numero, a.rue, a.cp, a.commune
+            key = a.numero, a.rue1, a.cp, a.commune
+            self.adresse_norms[key] = a
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
 
@@ -139,6 +158,7 @@ class PersonneActiviteParser(BaseParser):
             keys = [a.key for a in e.pa_adresses]
             if a.key not in keys:
                 e.pa_adresses.append(a)
+            self.create_update_adresse_norm(e, a)
 
     def create_update_code_profession(self, e: PersonneActivite, row):
         c = self.code_profession_mapper(row)
@@ -149,6 +169,32 @@ class PersonneActiviteParser(BaseParser):
                 self.code_professions[c.id] = c
             if c not in e.code_professions:
                 e.code_professions.append(c)
+
+    def create_update_adresse_norm(self, e: PersonneActivite, a: PAAdresse):
+        key = a.numero, a.rue, a.cp, a.commune
+        if key not in self.adresse_norms:
+            norm = AdresseNorm()
+            norm.numero = a.numero
+            norm.rue1 = a.rue
+            norm.cp = a.cp
+            norm.commune = a.commune
+            norm.dept = a.dept
+            self.adresse_norms[key] = norm
+            self.nb_new_adresse_norm += 1
+            pa_norm_datesource = PAAdresseNormDateSource()
+            pa_norm_datesource.adresse_norm = norm
+            pa_norm_datesource.date_source = self.date_source
+            e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
+        else:
+            norm = self.adresse_norms[key]
+            key = e.id, norm.id, self.date_source.id
+            if key not in self.pa_adresse_norm_date_sources or e.id == 0:
+                pa_norm_datesource = PAAdresseNormDateSource()
+                pa_norm_datesource.adresse_norm = norm
+                pa_norm_datesource.date_source = self.date_source
+                e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
+                if e.id != 0:
+                    self.pa_adresse_norm_date_sources[key] = pa_norm_datesource
 
     def add_savoir_faire(self, e: PersonneActivite, row):
         s = self.savoir_faire_mapper(row)
@@ -173,49 +219,6 @@ class PersonneActiviteParser(BaseParser):
         super().load(path, delimiter='|', encoding="UTF-8", header=True)
 
 
-class PersonneActiviteAdresseMapper(BaseParser):
-
-    def __init__(self, context):
-        super().__init__(context)
-        self.adresse_norms: Dict[Tuple[int, str, int, str], AdresseNorm] = {}
-
-    def load_cache(self):
-        print("Making cache")
-        l: list[AdresseNorm] = self.context.session.query(AdresseNorm).all()
-        for a in l:
-            # a.numero, a.rue, a.cp, a.commune
-            key = a.numero, a.rue1, a.cp, a.commune
-            self.adresse_norms[key] = a
-            self.nb_ram += 1
-        print(f"{self.nb_ram} objects in cache")
-
-    def parse_row(self, row):
-        pass
-
-    def mapper(self, row):
-        pass
-
-    def map(self):
-        l: List[PAAdresse] = self.context.session.query(PAAdresse).filter(PAAdresse.adresse_norm_id.is_(None)).all()
-        print(f"Found {len(l)} adresses to map")
-        for a in l:
-            key = a.numero, a.rue, a.cp, a.commune
-            if key not in self.adresse_norms:
-                norm = AdresseNorm()
-                norm.numero = a.numero
-                norm.rue1 = a.rue
-                norm.cp = a.cp
-                norm.commune = a.commune
-                norm.dept = a.dept
-                self.adresse_norms[key] = norm
-                self.nb_new_entity += 1
-            a.adresse_norm = self.adresse_norms[key]
-            self.nb_row += 1
-            self.context.session.commit()
-            if self.nb_row % 10000 == 0:
-                print(f"Map {self.nb_row} adresses and created {self.nb_new_entity} normalized adresses")
-
-
 if __name__ == '__main__':
     art.tprint(config.name, "big")
     print("Personne Activite Parser")
@@ -226,24 +229,20 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Personne Activite Parser")
     parser.add_argument("path", help="Path")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
-    parser.add_argument("-m", "--map", help="Mapper only", action="store_true")
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} MB")
     psp = PersonneActiviteParser(context)
-    if not args.map:
-        psp.load(args.path)
-        print(f"New personne: {psp.nb_new_entity}")
-        print(f"New adresse: {psp.nb_new_adresse}")
-    paam = PersonneActiviteAdresseMapper(context)
-    paam.load_cache()
-    paam.map()
+    psp.load(args.path)
+    print(f"New personne: {psp.nb_new_entity}")
+    print(f"New adresse: {psp.nb_new_adresse}")
+    print(f"New adresse norm: {psp.nb_new_adresse_norm}")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_small.txt -e
-    # data/ps_libreacces/PS_LibreAcces_Personne_activite_202112020908.txt
+    # data/ps_libreacces/PS_LibreAcces_Personne_activite_202010071006.txt

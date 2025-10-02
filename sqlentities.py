@@ -61,9 +61,11 @@ class Context:
 #              -1 cabinet
 # etab -1 adresse_raw
 #      *-* date_source
-# personne_activite *-* pa_adresse -1 adresse_norm
+# personne_activite *-* pa_adresse
 #                   *-* code_profession *-* profession
 #                   *-* diplome *-* profession
+#                   1-* pa_adresse_norm_date_source *-1 data_source
+#                                                   *-1 adresse_norm
 # personne 1-* exercice_pro *-1 code_profession *-* profession
 #                           1-*(1) reference_ae
 #                           1-*(1) savoir_faire_obtenu *-1 diplome
@@ -536,8 +538,6 @@ class PAAdresse(Base):
     personne_activites: List[PersonneActivite] = relationship("PersonneActivite",
                                                               secondary=personne_activite_pa_adresse,
                                                               backref="pa_adresses")
-    adresse_norm: AdresseNorm = relationship("AdresseNorm")
-    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
 
 
     __table_args__ = (UniqueConstraint('numero', 'rue', 'cp', 'commune'),)
@@ -548,6 +548,27 @@ class PAAdresse(Base):
 
     def __repr__(self):
         return f"{self.id} {self.numero} {self.rue} {self.cp} {self.commune}"
+
+
+class PAAdresseNormDateSource(Base):
+    __tablename__ = "pa_adresse_norm_date_source"
+    id = Column(Integer, primary_key=True)
+    personne_activite: PersonneActivite = relationship("PersonneActivite", backref="pa_adresse_norm_date_sources")
+    personne_activite_id = Column(Integer, ForeignKey('personne_activite.id'), nullable=False)
+    adresse_norm: AdresseNorm = relationship("AdresseNorm")
+    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'), nullable=False)
+    date_source: DateSource = relationship("DateSource")
+    date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False, index=True)
+
+    __table_args__ = (UniqueConstraint('personne_activite_id', 'adresse_norm_id', 'date_source_id'),)
+
+    @property
+    def key(self):
+        return self.personne_activite_id, self.adresse_norm_id, self.date_source_id
+
+    def __repr__(self):
+        return f"{self.id} {self.personne_activite_id} {self.adresse_norm_id} {self.date_source_id}"
+
 
 
 class Diplome(Base):

@@ -1,6 +1,6 @@
 Projet 1 = automatiser depassement par mois,
-Projet 2 = Parser opendamir + downloader
-Projet 3 = ps_libre_access datesource + peut être pa_cabinet_datesource en gardant l'ancienne table pour matching inpp
+Projet 2 = Parser opendamir + downloader (verif downloader)
+Projet 3 = ps_libre_access datesource (verif downloader)
 Projet 4 = apl
 Projet 5 = scraper https://www.keskeces.com # Pas de REST, possède un RPPS, facile à parser l'autre site mablouseblanche.fr n'affiche pas le RPPS
 Projet 6 = scraper https://www.sante.fr # Possède un REST à vérifier RPPS ok
