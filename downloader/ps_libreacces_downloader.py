@@ -5,7 +5,7 @@ import art
 import config
 from diplome_parser import DiplomeParser
 from downloader.base_downloader import BaseDownloader
-from personne_activite_parser import PersonneActiviteParser, PersonneActiviteAdresseMapper
+from personne_activite_parser import PersonneActiviteParser
 from sqlentities import Context, File
 
 

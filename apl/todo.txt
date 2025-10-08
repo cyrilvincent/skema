@@ -1,0 +1,33 @@
+Ratios DAMIR
+AGE_BEN_SNDS
+
+select age_ben_snds, count(*)/37658818::float from damir
+where flx_ann_moi=2401
+group by age_ben_snds
+
+A faire par PSP_SPE_SNDS
+
+
+0	0.115
+20	0.099
+30	0.107
+40	0.110
+50	0.132
+60	0.151
+70	0.152
+80	0.131
+99	0.001
+
+Remarques
+Python = J'obtiens exactement les mêmes résultats sur 06 en généraliste
+J'ai fais les 30km inter departement résultats en augmentation median + 1
+J'ai rendu le code paramétrable (specialite, dept, distance max, année, source=ps,pa,rpps)
+ETP non fait dans les .do (cf doc), du coup PS quasi obligatoire, jointure PA PS possible mais n'apporte rien
+P20 ne se suivent pas : P19_POP0002 P19_POP0305 P19_POP0610 P19_POP1117 P19_POP1824 P19_POP2539 P19_POP4559 P19_POP6074 P19_POP75P, replace
+Ratio des P20_POP* à refaire
+PS_libreacces trop de médecin qui n'exercent pas en libéral
+RPPS : manque des médecins
+Calcul des ETP avec des quantiles dates de 2010 (4252 median), j'ai juste pu recalculer la moyenne 3167, comment faire mieux ?
+DAMIR je sais calculer le nb de tranche d'age par pratique AGE_BEN_SNDS / PSP_SPE_SNDS, puis le ratio
+Comme je connais la répartition des tranches d'age en france grâce à pop_iris je sais déterminer la surreprésentation (règle de 3) à faire car ce n'est pas les mêmes tranches
+Voir drees/etl.py

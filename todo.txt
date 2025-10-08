@@ -1,11 +1,10 @@
 Projet 1 = automatiser depassement par mois,
-Projet 2 = Parser opendamir + downloader (verif downloader)
-Projet 3 = ps_libre_access datesource (verif downloader)
-Projet 4 = apl
-Projet 5 = scraper https://www.keskeces.com # Pas de REST, possède un RPPS, facile à parser l'autre site mablouseblanche.fr n'affiche pas le RPPS
-Projet 6 = scraper https://www.sante.fr # Possède un REST à vérifier RPPS ok
+Projet 2 = Parser opendamir
+Projet 3 = ps_libre_access (verif downloader) + faire ban_matcher + osm + score + iris
+Projet 4 = apl + automatiser
+Projet 5 = Scraper https://www.keskeces.com # Pas de REST, possède un RPPS, facile à parser l'autre site mablouseblanche.fr n'affiche pas le RPPS
+Projet 6 = Scraper https://www.sante.fr # Possède un REST à vérifier RPPS ok
 Projet 7 = Realouer à postériori ps.key en fonction des 2 nouvelles sources de data + rpps, parfois il y aura une fusion
 Projet 8 = Dataviz APL Jupyter
 Projet 9 = Proto Angular + Dataviz
 Projet 10 = Doctolib scraper
-

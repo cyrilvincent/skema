@@ -51,7 +51,9 @@ class PersonneActiviteParser(BaseParser):
             self.pa_adresses[a.key] = a
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
-        l: list[PAAdresseNormDateSource] = self.context.session.query(PAAdresseNormDateSource).all()
+        l: list[PAAdresseNormDateSource] = (self.context.session.query(PAAdresseNormDateSource)
+                                            .filter(PAAdresseNormDateSource.date_source_id == self.date_source.id)
+                                            .all())
         for a in l:
             self.pa_adresse_norm_date_sources[a.key] = a
             self.nb_ram += 1
@@ -194,6 +196,8 @@ class PersonneActiviteParser(BaseParser):
                 pa_norm_datesource.date_source = self.date_source
                 e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
                 if e.id != 0:
+                    # Bug possible si nouveau pa, dans ce cas le rajouter dans le dico après le commit
+                    # Si new pas lors des import refaire tourner les 2 diplome_parser
                     self.pa_adresse_norm_date_sources[key] = pa_norm_datesource
 
     def add_savoir_faire(self, e: PersonneActivite, row):
@@ -201,6 +205,13 @@ class PersonneActiviteParser(BaseParser):
         if s is not None:
             if s not in e.diplomes:
                 e.diplomes.append(s)
+
+    def update_pa_adresse_norm_date_sources_cache_for_new_pa(self, e: PersonneActivite):
+        for pands in e.pa_adresse_norm_date_sources:
+            p: PAAdresseNormDateSource = pands
+            if p.key[0] != 0 and p.key[1] != 0 and p.key[2] == self.date_source.id:
+                if p.key not in self.pa_adresse_norm_date_sources:
+                    self.pa_adresse_norm_date_sources[p.key] = p
 
     def parse_row(self, row):
         e = self.mapper(row)
@@ -214,6 +225,7 @@ class PersonneActiviteParser(BaseParser):
         self.create_update_code_profession(e, row)
         self.add_savoir_faire(e, row)
         self.context.session.commit()
+        self.update_pa_adresse_norm_date_sources_cache_for_new_pa(e)
 
     def load(self, path: str):
         super().load(path, delimiter='|', encoding="UTF-8", header=True)
