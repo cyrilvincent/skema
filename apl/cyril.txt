@@ -1,0 +1,12 @@
+Méthodologie
+Importer pop_iris_20.csv manuellement via dbeaver dans iris.pop_iris
+Exécuter damir_age_stats.sql qui créé la table iris.damir_age_stats
+Exécuter overrepresentation.ipynb qui maj la table iris.overrepresenttion
+Pour l'instant apl.ipynb
+
+apl_gene_2022* sont obsoletes
+*export.sql est obsolete
+demo_pop.ipynb est obsolete
+*copilot.py est obsolete
+tarif_stats.ipynb est obsolete
+Je me sers encore de od_06_sql_rename.csv en local car je n'ai pas les data
