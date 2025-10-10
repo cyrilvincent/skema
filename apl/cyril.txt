@@ -1,5 +1,5 @@
 Méthodologie
-Importer pop_iris_20.csv manuellement via dbeaver dans iris.pop_iris
+Importer base-ic-evol-struct-pop-20YY.CSV depuis pop_iris_parser
 Exécuter damir_age_stats.sql qui créé la table iris.damir_age_stats
 Exécuter overrepresentation.ipynb qui maj la table iris.overrepresenttion
 Pour l'instant apl.ipynb

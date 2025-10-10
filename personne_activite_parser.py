@@ -81,7 +81,9 @@ class PersonneActiviteParser(BaseParser):
             pa.inpp = row["Identification nationale PP"]
             if len(row["Nom d'exercice"]) > 0:
                 pa.nom = self.normalize_string(row["Nom d'exercice"])
-            pa.prenom = self.normalize_string(row["Prénom d'exercice"])
+            if len(row["Prénom d'exercice"]) > 0:
+                pa.prenom = self.normalize_string(row["Prénom d'exercice"])
+            pa.code_mode_exercice = self.get_nullable(row["Code mode exercice"])
         except Exception as ex:
             print(f"ERROR PersonneActivite row {self.row_num} {pa}\n{ex}\n{row}")
             quit(1)
@@ -216,6 +218,9 @@ class PersonneActiviteParser(BaseParser):
     def parse_row(self, row):
         e = self.mapper(row)
         if e.inpp in self.entities:
+            # column added in october 25
+            if e.code_mode_exercice is not None and e.code_mode_exercice != self.entities[e.inpp].code_mode_exercice and self.entities[e.inpp].code_mode_exercice !="L":
+                self.entities[e.inpp].code_mode_exercice = e.code_mode_exercice
             e = self.entities[e.inpp]
         else:
             self.nb_new_entity += 1
@@ -256,5 +261,6 @@ if __name__ == '__main__':
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
     print(f"Parse {psp.row_num} rows in {time.perf_counter() - time0:.0f} s")
 
-    # data/ps_libreacces/PS_LibreAcces_Personne_activite_small.txt -e
+    # data/ps_libreacces/PS_LibreAcces_Personne_activite_small_202010071006.txt -e
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_202010071006.txt
+    # PS_LibreAcces_Personne_activite_202112020908.txt

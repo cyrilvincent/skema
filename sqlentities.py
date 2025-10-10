@@ -515,6 +515,7 @@ class PersonneActivite(Base):
     inpp = Column(String(12), nullable=False, unique=True)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
+    code_mode_exercice = Column(String(1), index=True)
 
     # backref pa_adresses
     # backref code_professions
