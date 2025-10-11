@@ -1,9 +1,8 @@
 ps_libreacces reparsing
-modifier apl pour charger iris_pop en fonction des années et virer les p20_
 Faire un jupyter de stat par profession sur ps et pslibreacces et rpps surtout pour >= 2024
-Jointure specialite psp_snds
 filtrer pa par code_mode_exercice
+Jointure specialite psp_snds
 Etendre specialite aux non médecins : PSP_ACT_CAT
 HP vs HC
-Industrialiser
+Industrialiser ou France entière (dept=None)
 DataViz
