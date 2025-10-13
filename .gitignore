@@ -190,7 +190,9 @@ Thumbs.db
 apl/Etude 06/*.dta
 apl/Etude 06/**/*.dta
 apl/Etude 06/centroids IRIS/**
-apt/*.csv
+apl/*.csv
+ca/*.html
+ca/*.gpkg
 
 
 

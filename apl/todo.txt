@@ -1,8 +1,8 @@
-ps_libreacces reparsing
-Faire un jupyter de stat par profession sur ps et pslibreacces et rpps surtout pour >= 2024
+Faire un jupyter de stats : sur serveur et save en bd : Stoppé à Ophtalmo non inclus
+Damir refaire les stats en gérant les variables flt_act_qte et mnt, voir forum : https://www.data.gouv.fr/datasets/open-damir-base-complete-sur-les-depenses-dassurance-maladie-interregimes/discussions
 filtrer pa par code_mode_exercice
 Jointure specialite psp_snds
-Etendre specialite aux non médecins : PSP_ACT_CAT
+Etendre specialite aux non médecins : PSP_ACT_CAT + Cf apl/ameli/infirmiers
 HP vs HC
 Industrialiser ou France entière (dept=None)
 DataViz

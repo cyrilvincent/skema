@@ -1,0 +1,4 @@
+dataviz geopmap iris plotly
+évolution des pharmacies sur la ville de nice (représenter par des points) en utilisant la base FINESS (10/15 dernières années)
+Map statique sur la localisation des ephad (points) avec pour les iris une coloration qui mesure la population de + de 80 ans
+Map statique APL généralistes et Gynécologue en 2025
