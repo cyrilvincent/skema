@@ -1,0 +1,10 @@
+name = "ICIP"
+version = "3.2.0.Dev"
+copyright = "(c) Skema 2021 - 2025"
+adresse_path = "data/adresse"
+connection_string = "postgresql://postgres:sa@localhost/icip"
+ban_mean = 0.975
+ban_std = 0.054
+osm_nb_std = 1
+tarif_datesource_back = 3
+source_rpps_win_etab = 0.9
