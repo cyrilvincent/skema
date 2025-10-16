@@ -8,7 +8,7 @@ import json
 
 class DepassementService:
 
-    def __init__(self, study_id: int, acte: str, acte2s: list[str] | None, is_prix_moyen_correction=False, is_correct_bug_optam=False):
+    def __init__(self, study_id: int, acte: str, acte2s: list[str] | None, is_prix_moyen_correction=True, is_correct_bug_optam=True):
         self.df: pd.DataFrame = pd.DataFrame()
         self.mask_s2 = None
         self.study_id = study_id
@@ -390,7 +390,7 @@ class DepassementRadio(DepassementService):
 class DepassementDentiste(DepassementService):
 
     def __init__(self, study_id: int, actes=["HBLD4910", "HBLD6340", "HBLD7340"]):
-        super().__init__(study_id, "", None)
+        super().__init__(study_id, "", None,False,False)
         self.actes = actes
         self.numerotation: list[str] = []
         for i in range(len(self.actes)):
@@ -530,30 +530,30 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Depassement Service")
     parser.add_argument("-p", "--path", help="CSV Path if not SQL")
     args = parser.parse_args()
-    # ds = DepassementPsychiatre(1)
-    # ds.process("data/depassement/psychiatres.csv")
-    # da = DepassementAnest(2)
-    # da.process("data/depassement/anest.csv")
-    # dc = DepassementCardiologue(3)
-    # dc.process("data/depassement/cardiologues.csv")
-    # dd = DepassementDermatologue(4)
-    # dd.process("data/depassement/dermatologue.csv") # ok
-    # dg = DepassementGastro(5)
-    # dg.process("data/depassement/gastro.csv")
-    # dc = DepassementGyneco(6)
-    # dc.process("data/depassement/gyne.csv")
-    # do = DepassementOphtalmo(7)
-    # do.process("data/depassement/ophtal.csv")
-    # dp = DepassementPediatre(8)
-    # dp.process("data/depassement/pediatres.csv")
-    # dr = DepassementRadio(9)
-    # dr.process("data/depassement/radiologistes.csv")
+    ds = DepassementPsychiatre(1)
+    ds.process("data/depassement/psychiatres.csv")
+    da = DepassementAnest(2)
+    da.process("data/depassement/anest.csv")
+    dc = DepassementCardiologue(3)
+    dc.process("data/depassement/cardiologues.csv")
+    dd = DepassementDermatologue(4)
+    dd.process("data/depassement/dermatologue.csv") # ok
+    dg = DepassementGastro(5)
+    dg.process("data/depassement/gastro.csv")
+    dc = DepassementGyneco(6)
+    dc.process("data/depassement/gyne.csv")
+    do = DepassementOphtalmo(7)
+    do.process("data/depassement/ophtal.csv")
+    dp = DepassementPediatre(8)
+    dp.process("data/depassement/pediatres.csv")
+    dr = DepassementRadio(9)
+    dr.process("data/depassement/radiologistes.csv")
     dd = DepassementDentiste(10)
     dd.process("data/depassement/d2.csv")
     # dd.process()
     # todo tester dentiste en sql (sur serveur uniquement car pas les data en local)
-    # todo ajouter acte acte2s et actes dans la bd
-    # todo créer automatiquement la study via sqlalchemy
+    # todo ajouter acte acte2s et actes dans la bd pour sauvegarder les data initiales
+    # todo créer automatiquement la study via sqlalchemy ou pandas aujourd'hui elle est créée à la main
 
 
 

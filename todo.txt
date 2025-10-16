@@ -1,10 +1,10 @@
-Projet 1 = automatiser depassement par mois,
+Projet 1 = Cloturer Depassement (voir commentaires dans depassement.py),
 Projet 2 = Importer depuis 2006 https://www.insee.fr/fr/statistiques/8229323
 Projet 3 = CA
 Projet 4 = apl + automatiser
 Projet 5 = Scraper https://www.keskeces.com # Pas de REST, possède un RPPS, facile à parser l'autre site mablouseblanche.fr n'affiche pas le RPPS
 Projet 6 = Scraper https://www.sante.fr # Possède un REST à vérifier RPPS ok
 Projet 7 = Realouer à postériori ps.key en fonction des 2 nouvelles sources de data + rpps, parfois il y aura une fusion
-Projet 8 = Dataviz APL Jupyter
-Projet 9 = Proto Angular + Dataviz
-Projet 10 = Doctolib scraper
+Projet 8 = Proto Angular + Dataviz
+Projet 9 = Doctolib scraper
+Projet 10 = Site Web Depassement + APL

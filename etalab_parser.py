@@ -157,7 +157,7 @@ class EtalabParser(BaseParser):
                 a.adresse_norm = n
 
     def create_update_lon_lat(self, row, n: AdresseNorm):
-        if n.source_id is None or (n.source_id != 3 and n.source_id != 5 and n.source_id != 6):
+        if n.source_id is None or (n.score is not None and n.score < config.ban_mean):
             lon, lat = self.lon_lat_mapper(row)
             if lon is not None and lat is not None:
                 if 60 > lat > 35 and 20 > lon > -20:
@@ -220,12 +220,13 @@ if __name__ == '__main__':
     # data/etalab/etalab_xsmall_20201231.csv -e
     # data/etalab/etalab_stock_et_20201231.csv
 
-    # 186992	"010003184"	"010003176"	"PHARMACIE DU CARREFOUR"	"PHARMACIE DU CARREFOUR"			"04 74 45 22 82"	"04 74 45 14 69"	"51346803300016"	"2011-10-21"	"2012-11-26"	"2020-12-18"		98202	"01"	620	3201	"01053"	98202		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"	102482	1	102482		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"			232416	0.975	3	5.242591884922576	46.203509509817984	1	1
-    # 186992	"010003184"	"010003176"	"PHARMACIE DU CARREFOUR"	"PHARMACIE DU CARREFOUR"			"04 74 45 22 82"	"04 74 45 14 69"	"51346803300016"	"2011-10-21"	"2012-11-26"	"2020-12-18"		98202	98202		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"	102482	1	102482		"BOULEVARD CHARLES DE GAULLE"		1000	"BOURG EN BRESSE"					3	5.242591884922576	46.203509509817984	1	1
-    # FINESS diff
-    # delimitter , vs ;
-    # dept 1 vs 01
-    # tel perte du 0
-    # date - vs /
-    # mft perte du 0
-    # mauvais cog 01053 => 01344
+    # 15/10/25
+    # Exécuter ce sql après import
+    # update adresse_norm as an
+    # set an.lon=ban.lon, an.lat=ban.lat, an.source_id=2
+    # from ban
+    # where ban.id=an.ban_id
+    # and an.source_id=3
+    # and an.ban_score is not null and an.ban_score>0.99
+    # and abs(an.lon-ban.lon) + abs(an.lat-ban.lat) > 0.01
+    # and ban.lon != 0 and ban.lat != 0 --1162

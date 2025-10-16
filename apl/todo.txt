@@ -1,7 +1,7 @@
-Faire un jupyter de stats : sur serveur et save en bd : Stoppé à Ophtalmo non inclus
+Migrer specialite et specialite_profession sur serveur
+Migrer ps_stats sur serveur
 Damir refaire les stats en gérant les variables flt_act_qte et mnt, voir forum : https://www.data.gouv.fr/datasets/open-damir-base-complete-sur-les-depenses-dassurance-maladie-interregimes/discussions
-filtrer pa par code_mode_exercice
-Jointure specialite psp_snds
+filtrer pa par code_mode_exercice dans APL
 Etendre specialite aux non médecins : PSP_ACT_CAT + Cf apl/ameli/infirmiers
 HP vs HC
 Industrialiser ou France entière (dept=None)
