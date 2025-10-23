@@ -19,7 +19,7 @@ class PersonneActiviteParser(BaseParser):
         self.nb_new_adresse = 0
         self.nb_new_adresse_norm = 0
         self.adresse_norms: Dict[Tuple[int, str, int, str], AdresseNorm] = {}
-        self.pa_adresse_norm_date_sources: Dict[Tuple[int, int, int], PAAdresseNormDateSource] = {}
+        self.pa_adresse_norm_date_sources: Dict[Tuple[int, int | None, int, str], PAAdresseNormDateSource] = {}
 
     def load_cache(self):
         print("Making cache")
@@ -45,8 +45,8 @@ class PersonneActiviteParser(BaseParser):
             self.entities[e.inpp] = e
             self.nb_ram += 1
         print(f"{self.nb_ram} objects in cache")
-        l: List[PAAdresse] = self.context.session.query(PAAdresse)\
-            .options(joinedload(PAAdresse.personne_activites)).all()
+        l: List[PAAdresse] = (self.context.session.query(PAAdresse)
+                              .options(joinedload(PAAdresse.personne_activites)).all())
         for a in l:
             self.pa_adresses[a.key] = a
             self.nb_ram += 1
@@ -60,7 +60,6 @@ class PersonneActiviteParser(BaseParser):
         print(f"{self.nb_ram} objects in cache")
         l: list[AdresseNorm] = self.context.session.query(AdresseNorm).all()
         for a in l:
-            # a.numero, a.rue, a.cp, a.commune
             key = a.numero, a.rue1, a.cp, a.commune
             self.adresse_norms[key] = a
             self.nb_ram += 1
@@ -83,7 +82,6 @@ class PersonneActiviteParser(BaseParser):
                 pa.nom = self.normalize_string(row["Nom d'exercice"])
             if len(row["Prénom d'exercice"]) > 0:
                 pa.prenom = self.normalize_string(row["Prénom d'exercice"])
-            pa.code_mode_exercice = self.get_nullable(row["Code mode exercice"])
         except Exception as ex:
             print(f"ERROR PersonneActivite row {self.row_num} {pa}\n{ex}\n{row}")
             quit(1)
@@ -93,7 +91,7 @@ class PersonneActiviteParser(BaseParser):
         a = PAAdresse()
         try:
             cp = row["Code postal (coord. structure)"]
-            if cp is not None and cp.isdigit():
+            if cp is not None and cp != "" and cp.isdigit():
                 a.cp = int(cp)
             else:
                 return None
@@ -148,6 +146,16 @@ class PersonneActiviteParser(BaseParser):
             quit(6)
         return d
 
+    def create_update_code_profession(self, e: PersonneActivite, row):
+        c = self.code_profession_mapper(row)
+        if c is not None:
+            if c.id in self.code_professions:
+                c = self.code_professions[c.id]
+            else:
+                self.code_professions[c.id] = c
+            if c not in e.code_professions:
+                e.code_professions.append(c)
+
     def create_update_adresse(self, e: PersonneActivite, row):
         a = self.pa_adresse_mapper(row)
         if a is not None:
@@ -162,45 +170,43 @@ class PersonneActiviteParser(BaseParser):
             keys = [a.key for a in e.pa_adresses]
             if a.key not in keys:
                 e.pa_adresses.append(a)
-            self.create_update_adresse_norm(e, a)
+        self.create_update_adresse_norm(e, a, row)
 
-    def create_update_code_profession(self, e: PersonneActivite, row):
-        c = self.code_profession_mapper(row)
-        if c is not None:
-            if c.id in self.code_professions:
-                c = self.code_professions[c.id]
-            else:
-                self.code_professions[c.id] = c
-            if c not in e.code_professions:
-                e.code_professions.append(c)
-
-    def create_update_adresse_norm(self, e: PersonneActivite, a: PAAdresse):
-        key = a.numero, a.rue, a.cp, a.commune
-        if key not in self.adresse_norms:
-            norm = AdresseNorm()
-            norm.numero = a.numero
-            norm.rue1 = a.rue
-            norm.cp = a.cp
-            norm.commune = a.commune
-            norm.dept = a.dept
-            self.adresse_norms[key] = norm
-            self.nb_new_adresse_norm += 1
-            pa_norm_datesource = PAAdresseNormDateSource()
-            pa_norm_datesource.adresse_norm = norm
-            pa_norm_datesource.date_source = self.date_source
-            e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
-        else:
-            norm = self.adresse_norms[key]
-            key = e.id, norm.id, self.date_source.id
-            if key not in self.pa_adresse_norm_date_sources or e.id == 0:
+    def create_update_adresse_norm(self, e: PersonneActivite, a: PAAdresse | None, row):
+        code_mode_exercice = self.get_nullable(row["Code mode exercice"])
+        if a is not None:
+            key = a.numero, a.rue, a.cp, a.commune
+            if key not in self.adresse_norms:
+                norm = AdresseNorm()
+                norm.numero = a.numero
+                norm.rue1 = a.rue
+                norm.cp = a.cp
+                norm.commune = a.commune
+                norm.dept = a.dept
+                self.adresse_norms[key] = norm
+                self.nb_new_adresse_norm += 1
                 pa_norm_datesource = PAAdresseNormDateSource()
                 pa_norm_datesource.adresse_norm = norm
                 pa_norm_datesource.date_source = self.date_source
                 e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
-                if e.id != 0:
-                    # Bug possible si nouveau pa, dans ce cas le rajouter dans le dico après le commit
-                    # Si new pas lors des import refaire tourner les 2 diplome_parser
-                    self.pa_adresse_norm_date_sources[key] = pa_norm_datesource
+            else:
+                norm = self.adresse_norms[key]
+                key2 = e.id, norm.id, self.date_source.id, code_mode_exercice
+                if key2 not in self.pa_adresse_norm_date_sources or e.id == 0:
+                    pa_norm_datesource = PAAdresseNormDateSource()
+                    pa_norm_datesource.adresse_norm = norm
+                    pa_norm_datesource.date_source = self.date_source
+                    pa_norm_datesource.code_mode_exercice = code_mode_exercice
+                    e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
+                    self.pa_adresse_norm_date_sources[key2] = pa_norm_datesource
+        else:
+            key2 = e.id, None, self.date_source.id, code_mode_exercice
+            if key2 not in self.pa_adresse_norm_date_sources or e.id == 0:
+                pa_norm_datesource = PAAdresseNormDateSource()
+                pa_norm_datesource.date_source = self.date_source
+                pa_norm_datesource.code_mode_exercice = code_mode_exercice
+                e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
+                self.pa_adresse_norm_date_sources[key2] = pa_norm_datesource
 
     def add_savoir_faire(self, e: PersonneActivite, row):
         s = self.savoir_faire_mapper(row)
@@ -211,16 +217,13 @@ class PersonneActiviteParser(BaseParser):
     def update_pa_adresse_norm_date_sources_cache_for_new_pa(self, e: PersonneActivite):
         for pands in e.pa_adresse_norm_date_sources:
             p: PAAdresseNormDateSource = pands
-            if p.key[0] != 0 and p.key[1] != 0 and p.key[2] == self.date_source.id:
+            if p.key[0] != 0 and p.key[2] == self.date_source.id:
                 if p.key not in self.pa_adresse_norm_date_sources:
                     self.pa_adresse_norm_date_sources[p.key] = p
 
     def parse_row(self, row):
         e = self.mapper(row)
         if e.inpp in self.entities:
-            # column added in october 25
-            if e.code_mode_exercice is not None and e.code_mode_exercice != self.entities[e.inpp].code_mode_exercice and self.entities[e.inpp].code_mode_exercice !="L":
-                self.entities[e.inpp].code_mode_exercice = e.code_mode_exercice
             e = self.entities[e.inpp]
         else:
             self.nb_new_entity += 1
@@ -231,6 +234,7 @@ class PersonneActiviteParser(BaseParser):
         self.add_savoir_faire(e, row)
         self.context.session.commit()
         self.update_pa_adresse_norm_date_sources_cache_for_new_pa(e)
+
 
     def load(self, path: str):
         super().load(path, delimiter='|', encoding="UTF-8", header=True)

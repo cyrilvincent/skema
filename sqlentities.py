@@ -66,6 +66,8 @@ class Context:
 #                   *-* diplome *-* profession
 #                   1-* pa_adresse_norm_date_source *-1 data_source
 #                                                   *-1 adresse_norm
+#                   *-* inpp_diplome *-* diplome
+#                   1-* pa_mode_exercice_date_source *-1 date_source
 # personne 1-* exercice_pro *-1 code_profession *-* profession
 #                           1-*(1) reference_ae
 #                           1-*(1) savoir_faire_obtenu *-1 diplome
@@ -515,7 +517,7 @@ class PersonneActivite(Base):
     inpp = Column(String(12), nullable=False, unique=True)
     nom = Column(String(255), nullable=False)
     prenom = Column(String(255))
-    code_mode_exercice = Column(String(1), index=True)
+    # code_mode_exercice = Column(String(1), index=True)
 
     # backref pa_adresses
     # backref code_professions
@@ -556,20 +558,20 @@ class PAAdresseNormDateSource(Base):
     id = Column(Integer, primary_key=True)
     personne_activite: PersonneActivite = relationship("PersonneActivite", backref="pa_adresse_norm_date_sources")
     personne_activite_id = Column(Integer, ForeignKey('personne_activite.id'), nullable=False)
-    adresse_norm: AdresseNorm = relationship("AdresseNorm")
-    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'), nullable=False)
+    adresse_norm: AdresseNorm | None = relationship("AdresseNorm")
+    adresse_norm_id = Column(Integer, ForeignKey('adresse_norm.id'))
     date_source: DateSource = relationship("DateSource")
     date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False, index=True)
+    code_mode_exercice = Column(String(1))
 
-    __table_args__ = (UniqueConstraint('personne_activite_id', 'adresse_norm_id', 'date_source_id'),)
+    __table_args__ = (UniqueConstraint('personne_activite_id', 'adresse_norm_id', 'date_source_id', 'code_mode_exercice'),)
 
     @property
     def key(self):
-        return self.personne_activite_id, self.adresse_norm_id, self.date_source_id
+        return self.personne_activite_id, self.adresse_norm_id, self.date_source_id, self.code_mode_exercice
 
     def __repr__(self):
-        return f"{self.id} {self.personne_activite_id} {self.adresse_norm_id} {self.date_source_id}"
-
+        return f"{self.id} {self.personne_activite_id} {self.adresse_norm_id} {self.date_source_id} {self.code_mode_exercice}"
 
 
 class Diplome(Base):
