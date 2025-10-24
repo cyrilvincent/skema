@@ -3,6 +3,7 @@ import datetime
 import os
 import art
 import config
+from apl.ps_libreacces_raw_parser import PSLibreAccesRawParser
 from diplome_parser import DiplomeParser
 from downloader.base_downloader import BaseDownloader
 from personne_activite_parser import PersonneActiviteParser
@@ -103,6 +104,10 @@ class PersonneActiviteDownloader(BaseDownloader):
                 else:
                     self.parser = DiplomeParser(context, savoir=True)
                 self.parser.load(file.full_name)
+                if type == "Personne_activite":
+                    self.parser = PSLibreAccesRawParser(context)
+                    self.parser.load(file.full_name)
+                    self.parser.commit()
                 self.nb_new_file += 1
             file.import_end_date = datetime.datetime.now()
             if not self.no_commit:

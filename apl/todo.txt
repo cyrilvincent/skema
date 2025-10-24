@@ -1,4 +1,6 @@
-Etendre specialite aux non médecins : PSP_ACT_CAT + Cf apl/ameli/infirmiers
-Industrialiser ou France entière (dept=None) + créer apl_studi avec q25 q50 q75 min max et les params
+Change tablespace damir
+Industrialiser ou France entière + créer apl_study avec q25 q50 q75 min max et les params + refactoriser les variables des df + prendre en compte les cabinet != L
 DataViz + Changer echelle couleur sans blanc ?
+Etendre specialite aux non médecins : PSP_ACT_CAT + Cf apl/ameli/infirmiers
+Verif ps_libreacces novembre car changement de site : https://annuaire.sante.fr/web/site-pro/extractions-publiques
 
