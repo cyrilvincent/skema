@@ -34,7 +34,7 @@ where sp.specialite_id={specialite}
 and tds.date_source_id >= {year}00 and  tds.date_source_id < {year+1}00
 group by ps.id, c.id, an.id, i.id
 """
-    print(f"Quering PS for year {year} and specialite {specialite}")
+    # print(f"Quering PS for year {year} and specialite {specialite}")
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -61,8 +61,8 @@ and ds.annee={year}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id
 """
-    print(f"Quering PA for year {year} and specialite {specialite}")
-    print(sql)
+    # print(f"Quering PA for year {year} and specialite {specialite}")
+    # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -91,7 +91,7 @@ join iris.iris i on  pi.iris=i.code
 join iris.commune c on i.commune_id=c.id
 where year={yy}
 """
-    print(sql)
+    # print(f"Get pop_iris for year {yy}")
     return pd.read_sql(text(sql), config.connection_string)
 
 
@@ -105,12 +105,19 @@ union
 select iris_id_from as "iris1", iris_id_to "iris2", route_km "km", route_min "time_hc", route_hp_min "time_hp" from iris.iris_matrix
 where route_min <= {time}) order by "iris1", "iris2"
 """
-    print(sql)
+    print(f"Get iris_matrix for time {time} {time_type}")
     m = pd.read_sql(sql, config.connection_string)
     m["time"] = m[f"time_{time_type.lower()}"].copy()
     return m
 
 
+def get_iriss():
+    sql = f"""
+select i.id "iris", i.code "iris_string", i.nom "iris_label", c.dept_id "dept", c.code "code_commune", c.nom "commune_label", 20{year} "year", {specialite} "specialite" from iris.iris i
+join iris.commune c on c.id=i.commune_id
+"""
+    # print(sql)
+    return pd.read_sql(text(sql), config.connection_string)
 
 # In[2]:
 
@@ -122,29 +129,29 @@ time=30
 time_type="HC"
 # accessibilite_exp=-0.12 #0.08 pour 45
 
-
+iriss = get_iriss()
 for time in [30, 45]:
+    iris_matrix = get_iris_matrix(time, time_type)
     for time_type in ["HC", "HP"]:
+        iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
+        iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for source in ["PA", "PS"]:
-            for specialite in range(1, 21):
-                for year in range(20, 26):
+            for year in range(20, 26):
+                pop_iris = get_pop_iris(year)
+                for specialite in range(1, 21):
                     accessibilite_exp = -(75 - time) * 4 / 1500
-                    print(year, specialite, source, time, time_type, accessibilite_exp)
+                    print(f"Compute APL for year {year}, specialite {specialite} from {source} in {time}min {time_type} e={accessibilite_exp}")
 # In[84]:
 
 
-
-                    iris_matrix = get_iris_matrix(time, time_type)
-                    iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
-                    iris_matrix
 
 
 
                     # In[82]:
 
 
-                    pop_iris = get_pop_iris(year)
-                    pop_iris
+                    # pop_iris = get_pop_iris(year)
+                    # pop_iris
 
 
                     # In[7]:
@@ -159,8 +166,8 @@ for time in [30, 45]:
 
                     nb_ps = ps_df["id"].nunique()
                     nb_cabinet_ps = ps_df.groupby(["id", "lon", "lat"])
-                    print(f"Nb unique PS {nb_ps}")
-                    print(f"Nb cabinet {len(nb_cabinet_ps)}")
+                    # print(f"Nb unique PS {nb_ps}")
+                    # print(f"Nb cabinet {len(nb_cabinet_ps)}")
 
 
                     # In[10]:
@@ -318,7 +325,7 @@ for time in [30, 45]:
                     # In[34]:
 
 
-                    print(year, specialite, source)
+                    # print(year, specialite, source)
                     apl2["apl"].describe()
                     # 21-10-PA:66-57
 
@@ -376,16 +383,8 @@ for time in [30, 45]:
                     # In[37]:
 
 
-                    def get_iriss():
-                        sql = f"""
-                    select i.id "iris", i.code "iris_string", i.nom "iris_label", c.dept_id "dept", c.code "code_commune", c.nom "commune_label", 20{year} "year", {specialite} "specialite" from iris.iris i
-                    join iris.commune c on c.id=i.commune_id
-                    """
-                        print(sql)
-                        return pd.read_sql(text(sql), config.connection_string)
-
-                    iriss = get_iriss()
-                    iriss
+                    # iriss = get_iriss()
+                    # iriss
 
 
                     # In[38]:

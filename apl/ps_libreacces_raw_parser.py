@@ -48,9 +48,9 @@ class PSLibreAccesRawParser:
             conn.close()
         except:
             pass
-        print("Commiting")
+        print("Committing")
         self.df.to_sql("ps_libreacces", config.connection_string, schema="apl", chunksize=1000, if_exists="append", index=False)
-        print("Commited")
+        print("Committed")
 
 
 if __name__ == '__main__':

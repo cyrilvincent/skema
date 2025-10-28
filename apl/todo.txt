@@ -1,6 +1,7 @@
-Change tablespace damir
-Industrialiser ou France entière + créer apl_study avec q25 q50 q75 min max et les params + refactoriser les variables des df + prendre en compte les cabinet != L
-DataViz + Changer echelle couleur sans blanc ?
+Migrer 2506 en 2412 dans pa_adresse_norm_date_source & apl.ps_libreacces
+Industrialiser + prendre en compte les cabinet != L
+Copier db en local
+DataViz + Changer echelle couleur sans blanc ? https://community.plotly.com/t/dash-newbie-heatmap-custom-color-scales-per-column/74860/11
 Etendre specialite aux non médecins : PSP_ACT_CAT + Cf apl/ameli/infirmiers
 Verif ps_libreacces novembre car changement de site : https://annuaire.sante.fr/web/site-pro/extractions-publiques
 

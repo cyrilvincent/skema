@@ -60,9 +60,9 @@ class DamirParser:
             conn.close()
         except:
             pass
-        print("Commiting")
+        print("Committing")
         self.dataframe.to_sql("damir", config.connection_string, chunksize=100, if_exists="append", index=False, dtype={'etb_dcs_mco': sqlalchemy.types.CHAR(length=1)}) # index_label="id"
-        print("Commited")
+        print("Committed")
         # 7968MB pour 38758177 rows
         # 96Go par an
 

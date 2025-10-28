@@ -563,6 +563,7 @@ class PAAdresseNormDateSource(Base):
     date_source: DateSource = relationship("DateSource")
     date_source_id = Column(Integer, ForeignKey('date_source.id'), nullable=False, index=True)
     code_mode_exercice = Column(String(1))
+    code_role = Column(String(10))
 
     __table_args__ = (UniqueConstraint('personne_activite_id', 'adresse_norm_id', 'date_source_id', 'code_mode_exercice'),)
 

@@ -174,6 +174,7 @@ class PersonneActiviteParser(BaseParser):
 
     def create_update_adresse_norm(self, e: PersonneActivite, a: PAAdresse | None, row):
         code_mode_exercice = self.get_nullable(row["Code mode exercice"])
+        code_role = self.get_nullable(row["Code rôle"]) if "Code rôle" in row else None
         if a is not None:
             key = a.numero, a.rue, a.cp, a.commune
             if key not in self.adresse_norms:
@@ -188,6 +189,7 @@ class PersonneActiviteParser(BaseParser):
                 pa_norm_datesource = PAAdresseNormDateSource()
                 pa_norm_datesource.adresse_norm = norm
                 pa_norm_datesource.date_source = self.date_source
+                pa_norm_datesource.code_role = code_role
                 e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
             else:
                 norm = self.adresse_norms[key]
@@ -197,6 +199,7 @@ class PersonneActiviteParser(BaseParser):
                     pa_norm_datesource.adresse_norm = norm
                     pa_norm_datesource.date_source = self.date_source
                     pa_norm_datesource.code_mode_exercice = code_mode_exercice
+                    pa_norm_datesource.code_role = code_role
                     e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
                     self.pa_adresse_norm_date_sources[key2] = pa_norm_datesource
         else:
@@ -205,6 +208,7 @@ class PersonneActiviteParser(BaseParser):
                 pa_norm_datesource = PAAdresseNormDateSource()
                 pa_norm_datesource.date_source = self.date_source
                 pa_norm_datesource.code_mode_exercice = code_mode_exercice
+                pa_norm_datesource.code_role = code_role
                 e.pa_adresse_norm_date_sources.append(pa_norm_datesource)
                 self.pa_adresse_norm_date_sources[key2] = pa_norm_datesource
 
