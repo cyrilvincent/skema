@@ -21,7 +21,8 @@ pd.options.mode.copy_on_write = True
 
 def get_ps(year, specialite):
     sql=f"""
-select ps.id, ps.nom, ps.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat from ps
+select ps.id, ps.nom, ps.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, 'L' code_mode_exercice 
+from ps
 join tarif t on t.ps_id = ps.id
 join tarif_date_source tds on tds.tarif_id=t.id
 join cabinet c on t.cabinet_id=c.id
@@ -43,7 +44,7 @@ group by ps.id, c.id, an.id, i.id
 
 def get_pa(year, specialite):
     sql = f"""
-select pa.id, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat 
+select pa.id, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice 
 from apl.ps_libreacces ps
 join personne_activite pa on pa.inpp=ps.inpp
 join pa_adresse_norm_date_source pands on pands.personne_activite_id=pa.id and pands.date_source_id=ps.date_source_id
@@ -56,10 +57,10 @@ join adresse_norm an on an.id=pands.adresse_norm_id
 join date_source ds on ds.id=pands.date_source_id
 join iris.iris i on i.code=an.iris
 where sp.specialite_id={specialite}
-and ps.code_mode_exercice='L'
+--and ps.code_mode_exercice='L'
 and ds.annee={year}
 and pands.adresse_norm_id is not null
-group by pa.id, an.id, i.id
+group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
     # print(f"Quering PA for year {year} and specialite {specialite}")
     # print(sql)
@@ -140,7 +141,7 @@ for time in [30, 45]:
                 pop_iris = get_pop_iris(year)
                 for specialite in range(1, 21):
                     accessibilite_exp = -(75 - time) * 4 / 1500
-                    print(f"Compute APL in 20{year}, specialite {specialite} from {source} in {time}min {time_type}, e={accessibilite_exp}")
+                    print(f"Compute APL for 20{year}, specialite {specialite} from {source} in {time}min {time_type}, e={accessibilite_exp}")
 # In[84]:
 
 
@@ -173,14 +174,14 @@ for time in [30, 45]:
                     # In[10]:
 
 
-                    ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
+                    ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["code_mode_exercice"] + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
                     ps_df["nb_cabinet"] = ps_df.groupby("id")["key"].transform("nunique")
-                    ps_df["nb_cabinet"].value_counts(normalize=True)
+                    # ps_df["nb_cabinet"].value_counts(normalize=True)
 
 
                     # In[11]:
 
-
+                    ps_df = ps_df[ps_df["code_mode_exercice"] == "L"]
                     ps_df["weight"] = (1 / ps_df["nb_cabinet"]).replace(np.inf, 0)
                     ps_df["nb"] = ps_df.groupby("iris")["weight"].transform("sum")
                     ps_df.head(10)
@@ -244,16 +245,15 @@ for time in [30, 45]:
 
 
                     iris_matrix_pop_df["pop_gp"] = sum(w * iris_matrix_pop_df[c] for w, c in zip(weights, cols))
-                    if specialite == 5:
-                        iris_matrix_pop_df["pop_gp"] /= 2
                     iris_matrix_pop_df=iris_matrix_pop_df.sort_values(by='iris2')
                     # iris_matrix_pop_df.head(5)
-                    if specialite != 5:
-                        test_pop = iris_matrix_pop_df.drop_duplicates(subset=['iris2'])
-                        ratio = test_pop["pop_gp"] / (test_pop["pop"] + 1)
-                        ratio_mean = np.mean(ratio)
-                        # print(ratio_mean)
-                        iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
+                    test_pop = iris_matrix_pop_df.drop_duplicates(subset=['iris2'])
+                    ratio = test_pop["pop_gp"] / (test_pop["pop"] + 1)
+                    ratio_mean = np.mean(ratio)
+                    # print(ratio_mean)
+                    iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
+                    if specialite == 5:
+                        iris_matrix_pop_df["pop_gp"] /= 2
 
 
                     # In[22]:
@@ -423,7 +423,7 @@ for time in [30, 45]:
 
                     # In[65]:
 
-
+                    apl_final["year"]=year
                     apl_final["study_key"]=dico["key"]
                     study.to_sql("apl_study", config.connection_string, schema="apl", if_exists="append", index=False)
                     apl_final.to_sql("apl", config.connection_string, schema="apl", if_exists="append", index=False)

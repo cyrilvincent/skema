@@ -193,6 +193,7 @@ apl/Etude 06/centroids IRIS/**
 apl/*.csv
 ca/*.html
 *.gpkg
+**/out/**
 
 
 

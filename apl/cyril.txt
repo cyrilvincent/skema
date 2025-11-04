@@ -2,7 +2,9 @@ Méthodologie
 Importer base-ic-evol-struct-pop-20YY.CSV depuis pop_iris_parser
 Exécuter damir_age_stats.sql qui créé la table iris.damir_age_stats
 Exécuter overrepresentation.ipynb qui maj la table iris.overrepresenttion
-Pour l'instant apl.ipynb
+Tester sur apl.ipynb pour les départements et apl_france.ipynb pour la france
+apl_france.py qui amend les tables apl.apl_study et apl.apl
+apl_slider_dataviz.ipynb pour le dataviz
 
 apl_gene_2022* sont obsoletes
 *export.sql est obsolete
