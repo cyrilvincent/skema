@@ -25,7 +25,7 @@ class PSLibreAccesRawParser:
 
     def load(self, path):
         self.parse_date(path)
-        print("Loading")
+        print(f"Parse raw {path}")
         self.df = pd.read_csv(path, delimiter="|", low_memory=False,
                               dtype={'Identifiant PP': 'str', 'Identification nationale PP': 'str'})
         self.df["inpp"] = self.df["Identification nationale PP"]
@@ -33,15 +33,17 @@ class PSLibreAccesRawParser:
         self.df["cp"] = self.df["Code postal (coord. structure)"]
         self.df["code_diplome"] = self.df["Code savoir-faire"]
         self.df["dep"] = self.df["Code Département (structure)"]
-        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome"]]
+        self.df["code_profession"] = self.df["Code profession"]
+        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome", "code_profession"]]
         self.df["date_source_id"] = self.date_source_id
-        self.df = self.df.dropna()
+        self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
 
     def commit(self):
         print("Deleting old values")
+        table_name = "ps_libreacces_2"
         try:
             conn = psycopg2.connect(config.connection_string)
-            sql = f"delete from apl.ps_libreacces where date_source_id={self.date_source_id}"
+            sql = f"delete from apl.{table_name} where date_source_id={self.date_source_id}"
             with conn.cursor() as cur:
                 cur.execute(sql)
             conn.commit()
@@ -49,7 +51,7 @@ class PSLibreAccesRawParser:
         except:
             pass
         print("Committing")
-        self.df.to_sql("ps_libreacces", config.connection_string, schema="apl", chunksize=1000, if_exists="append", index=False)
+        self.df.to_sql(table_name, config.connection_string, schema="apl", chunksize=10000, if_exists="append", index=False)
         print("Committed")
 
 
