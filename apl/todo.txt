@@ -1,13 +1,10 @@
 Etendre specialite aux non médecins : PSP_ACT_SNDS
+    Colorbar not norm alternative
+    Tester différentes exp
+    Autoriser list communes dans dataviz
     Faire les ps_stats
     Adapter get_pa sur apl apl_france.ipynb et apl_france.py
     Tester apl.damir_age_stats_2
 Verif ps_libreacces décembre car changement de site : https://annuaire.sante.fr/web/site-pro/extractions-publiques
 
-Remarques benjamin
-Autre exemple qui me dis qu'il y a un gros souci: commune Moulinet qui a un APL très faible alors qu'elle est à côté de Sospel et Breil sur Roya qui ont un gros APL. D'ailleurs la différence d'APL entre Breil Sur Roya et Sospel interpelle aussi car elles ont gross modo le même ratio pop/médecin.
-Je continue avec mes exemples Saint-Vallier-de-Thiey a un ratio médecin/hab assez similaire à Breil Sur Roya et Sospel mais un APL trois fois plus petit que Breil Sur Roya
-Ok merci. Autre ex: Saint-Jean Cap ferrat APL assez faible (50) avec un ratio médecin/pop beaucoup plus élevé que Breil sur Roya
-
-TODO Breil sur Roya + St Jean Cap Ferrat + Sospel + Saint-Vallier-de-Thiey
 
