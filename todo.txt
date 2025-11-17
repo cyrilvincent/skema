@@ -1,4 +1,4 @@
-Projet 1 = Importer depuis 2006 https://www.insee.fr/fr/statistiques/8229323
+Projet 1 = Importer depuis 2006 https://www.insee.fr/fr/statistiques/8229323 (cf data/insee_pauvrete, mettre declare et disponible dans la même table avec un join dsur les colonne dest=_disp et source=_decl)
 Projet 2 = Parser apl/ameli et intégrer dans ps_stats
 Projet 3 = apl + automatiser
 Projet 4 = SAE + Medecine Hospitalière

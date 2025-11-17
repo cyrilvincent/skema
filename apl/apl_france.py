@@ -141,9 +141,9 @@ for time in [60]: #[30, 45, 60]:
                 pop_iris = get_pop_iris(year)
                 for specialite in [10]: #range(1, 21):
                     for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
-                        if ((time > 30 and accessibilite_exp < -0.08) or
-                                (time == 30 and accessibilite_exp > -0.06) or
-                                (time > 45 and accessibilite_exp < -0.06)):
+                        if ((time > 45 and accessibilite_exp < -0.06) or
+                                (time > 30 and accessibilite_exp < -0.08) or
+                                (time >= 30 and accessibilite_exp > -0.06)):
                             continue
 
                         # accessibilite_exp = -(75 - time) * 4 / 1500

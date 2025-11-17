@@ -1,11 +1,16 @@
 Etendre specialite aux non médecins : PSP_ACT_SNDS
-    Colorbar not norm alternative : ok communiquer à benjamin
-    Tester différentes exp : ok communiquer à benjamin, 60 en cours
-    Delta APL / 2020
-    Autoriser list communes dans dataviz
-    Faire les ps_stats
-    Adapter get_pa sur apl apl_france.ipynb et apl_france.py
-    Tester apl.damir_age_stats_2
+    Faire les ps_stats : communiquer benjamin :
+
+    Je suis en train de faire les APL pour les profession non médecin
+    En amont j'ai fais les stats sur les ps_libreacces versus ameli : ca marche très bien
+    Elles sont excellentes pour infirmier, sage-femme, kine, orthophoniste et chirugien-dentiste
+    Elles sont correctes pour podologue (3% d'erreur)
+    Elles sont très mauvaises pour pharmacien (62% d'erreur)
+    Et il n'y a rien pour les orthoptistes et les labo
+    Les autres ne sont pas dispo dans Damir
+
+    Autoriser list communes dans dataviz : ok avertir benjamin
+    Adapter get_pa sur apl apl_france.ipynb et apl_france.py + verif dataviz
 Verif ps_libreacces décembre car changement de site : https://annuaire.sante.fr/web/site-pro/extractions-publiques
 
 
