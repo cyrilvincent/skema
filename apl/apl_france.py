@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[51]:
-
-
 import pandas as pd
 import numpy as np
 import config
@@ -14,10 +8,6 @@ print(config.version)
 print(config.connection_string)
 pd.set_option('display.max_columns', None)
 pd.options.mode.copy_on_write = True
-
-
-# In[3]:
-
 
 def get_ps(year, specialite):
     sql=f"""
@@ -38,13 +28,10 @@ group by ps.id, c.id, an.id, i.id
     # print(f"Quering PS for year {year} and specialite {specialite}")
     return pd.read_sql(sql, config.connection_string)
 
-
-# In[4]:
-
-
-def get_pa(year, specialite):
-    sql = f"""
-select pa.id, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice 
+def get_pa(year, specialite, is_medecin):
+    if is_medecin:
+        sql = f"""
+select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice 
 from apl.ps_libreacces ps
 join personne_activite pa on pa.inpp=ps.inpp
 join pa_adresse_norm_date_source pands on pands.personne_activite_id=pa.id and pands.date_source_id=ps.date_source_id
@@ -62,26 +49,34 @@ and ds.annee={year}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
-    # print(f"Quering PA for year {year} and specialite {specialite}")
+    else:
+        sql = f"""
+select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice
+from apl.ps_libreacces ps
+join personne_activite pa on pa.inpp=ps.inpp
+join pa_adresse_norm_date_source pands on pands.personne_activite_id=pa.id and pands.date_source_id=ps.date_source_id
+join profession_code_profession pcp on pcp.code_profession_id=ps.code_profession
+join specialite_profession sp on sp.profession_id=pcp.profession_id
+join adresse_norm an on an.id=pands.adresse_norm_id
+join date_source ds on ds.id=pands.date_source_id
+join iris.iris i on i.code=an.iris
+where sp.specialite_id={specialite}
+--and ps.code_mode_exercice='L'
+and ds.annee={year}
+and pands.adresse_norm_id is not null
+group by pa.id, an.id, i.id, ps.code_mode_exercice
+"""
+    print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
     # print(sql)
     return pd.read_sql(sql, config.connection_string)
-
-
-# In[5]:
-
 
 def get_by_source(year, specialite, source):
     if source=="PS":
         return get_ps(year, specialite)
     elif source=="PA":
-        return get_pa(year, specialite)
+        return get_pa(year, specialite, specialite<21)
     else:
         raise ValueError(f"Bad source: {source}")
-
-
-
-# In[81]:
-
 
 def get_pop_iris(year):
     yy=min(21, year)
@@ -92,12 +87,8 @@ join iris.iris i on  pi.iris=i.code
 join iris.commune c on i.commune_id=c.id
 where year={yy}
 """
-    print(f"Get pop_iris for year {yy}")
+    # print(f"Get pop_iris for year {yy}")
     return pd.read_sql(text(sql), config.connection_string)
-
-
-# In[85]:
-
 
 def get_iris_matrix(time: int, time_type: str):
     sql = f"""
@@ -112,7 +103,7 @@ where route_min <= {time}) order by "iris1", "iris2"
     return m
 
 
-def get_iriss():
+def get_iriss(year, specialite):
     sql = f"""
 select i.id "iris", i.code "iris_string", i.nom "iris_label", c.dept_id "dept", c.code "code_commune", c.nom "commune_label", 20{year} "year", {specialite} "specialite" from iris.iris i
 join iris.commune c on c.id=i.commune_id
@@ -120,34 +111,41 @@ join iris.commune c on c.id=i.commune_id
     # print(sql)
     return pd.read_sql(text(sql), config.connection_string)
 
-# In[2]:
+def get_over(year, specialite, is_medecin):
+    yy=min(year, 24)
+    if is_medecin:
+        sql = f"""select o.* from apl.overrepresentation o
+        join specialite s on s.psp_spe_snds=o.psp_spe_snds
+        where o.year={yy}
+        and s.id={specialite}
+        """
+    else:
+        sql = f"""select o.* from apl.overrepresentation o
+        join specialite s on s.psp_act_snds=o.psp_act_snds
+        where o.year={yy}
+        and s.id={specialite}
+        """
+    over = pd.read_sql(sql, config.connection_string)
+    return over
 
-
-specialite=10
-year=21
-source="PA"
-time=30
-time_type="HC"
-# accessibilite_exp=-0.12 #0.08 pour 45
-
-iriss = get_iriss()
-for time in [60]: #[30, 45, 60]:
-    iris_matrix = get_iris_matrix(time, time_type)
+for time in [30]: #[30, 45, 60]:
     for time_type in ["HC"]: #["HC", "HP"]:
+        iris_matrix = get_iris_matrix(time, time_type)
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for source in ["PA"]: #["PA", "PS"]:
             for year in range(20, 26):
                 pop_iris = get_pop_iris(year)
-                for specialite in [10]: #range(1, 21):
-                    for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
-                        if ((time > 45 and accessibilite_exp < -0.06) or
-                                (time > 30 and accessibilite_exp < -0.08) or
-                                (time >= 30 and accessibilite_exp > -0.06)):
+                for specialite in [10]: #range(1, 28):
+                    iriss = get_iriss(year, specialite)
+                    for accessibilite_exp in [-0.12]: # [-0.12, -0.10, -0.08, -0.06, -0.04]:
+                        if ((time > 30 and accessibilite_exp < -0.08) or
+                                (time == 30 and accessibilite_exp > -0.06) or
+                                (time > 45 and accessibilite_exp < -0.06)):
                             continue
 
                         # accessibilite_exp = -(75 - time) * 4 / 1500
-                        print(f"Compute APL for 20{year}, specialite {specialite} from {source} in {time}min {time_type}, e={accessibilite_exp}")
+                        print(f"Compute APL specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
 
                         # In[82]:
 
@@ -219,28 +217,12 @@ for time in [60]: #[30, 45, 60]:
 
 
                         # In[78]:
-
-
-                        yy=min(year, 24)
-                        sql = f"""
-                        select o.* from apl.overrepresentation o
-                        join specialite s on s.psp_spe_snds=o.psp_spe_snds
-                        where o.year={yy}
-                        and s.id={specialite}
-                        """
-                        over = pd.read_sql(sql, config.connection_string)
-                        over
-
-
-                        # In[79]:
-
+                        over = get_over(year, specialite, specialite < 21)
 
                         if len(over) > 0:
-                            weights = over.values[0,2:]
+                            weights = over.values[0,3:]
                         else:
-                            weights = np.ones(len(over.columns) - 2)
-                        weights
-
+                            weights = np.ones(len(over.columns) - 3)
 
                         # In[21]:
 
@@ -402,27 +384,10 @@ for time in [60]: #[30, 45, 60]:
                         apl_final
 
 
-                        # In[39]:
 
-
-                        # d6=apl_final[apl_final["dept"]==6]
-                        # d6
-                        #
-                        #
-                        # # In[40]:
-                        #
-                        #
-                        # d6["apl"].describe()
-                        # # Ca change à cause des cabinets multi-dept
-                        #
-                        #
-                        # # In[41]:
-                        #
-                        #
-                        # apl_final.to_csv("apl_france.csv", index=False)
-
-
-                        # In[65]:
+                        sum_pop = np.sum(apl_final["pop_gp"])
+                        apl_final["meanw"] = apl_final["apl"] * apl_final["pop_gp"] * len(apl_final) / sum_pop
+                        study["meanw"] = np.mean(apl_final["meanw"])
 
                         apl_final["year"]=year
                         apl_final["study_key"]=dico["key"]
