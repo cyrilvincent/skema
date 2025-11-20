@@ -1,7 +1,6 @@
 Etendre specialite aux non médecins : PSP_ACT_SNDS
-    Autoriser list communes dans dataviz : ok avertir benjamin
-    Adapter get_pa sur apl_france.py + verif dataviz
-Verif ps_libreacces décembre car changement de site : https://annuaire.sante.fr/web/site-pro/extractions-publiques
-    https://www.data.gouv.fr/organizations/agence-du-numerique-en-sante/datasets
+    Refaire tourner apl_france.py sur 1,21 en cours
+    delete_old_apl.sql
+
 
 

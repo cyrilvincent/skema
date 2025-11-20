@@ -14,137 +14,91 @@ class PersonneActiviteDownloader(BaseDownloader):
 
     def __init__(self, context, echo=False, fake_download=False, no_commit=False, force_download=False, no_parsing=False):
         super().__init__(context, echo, fake_download, no_commit, force_download, no_parsing)
-        self.url = "https://annuaire.sante.fr/web/site-pro/extractions-publiques/"
-        self.download_path = "data/ps_libreacces/"
-        self.download_zip_path = self.download_path
+        self.url = "https://www.data.gouv.fr/datasets/annuaire-sante-extractions-des-donnees-en-libre-acces-des-professionnels-intervenant-dans-le-systeme-de-sante/"
+        self.download_path = self.download_zip_path = "data/ps_libreacces/"
         self.category = "PsLibreAcces"
         self.frequency = "M"
         self.download_mode = "AUTO"
-        self.yearmonth_files: dict[int, File] = {}
-        self.make_cache()
 
     def make_cache(self):
         print("Making cache")
-        l: list[File] = (self.context.session.query(File)
-                         .filter((File.category == self.category) & (File.name.endswith(".zip"))).all())
-        for e in l:
-            self.yearmonth_files[e.date.year * 100 + e.date.month] = e
-        l: list[File] = (self.context.session.query(File)
-                         .filter(File.category == self.category).all())
+        l: list[File] = self.context.session.query(File).filter(File.category == self.category).all()
         for e in l:
             self.files[e.name] = e
 
+
     def get_yearmonth_file_by_name(self, name: str) -> File:
-        yearmonth = int(name[-16:-10])
-        if yearmonth in self.yearmonth_files:
-            return self.yearmonth_files[yearmonth]
-        file = File(name, self.download_zip_path, self.category, self.frequency, self.download_mode)
+        yearmonth = datetime.datetime.now().year * 100 + datetime.datetime.now().month
+        if "personne" in name:
+            name = f"PS_LibreAcces_Personne_activite_{yearmonth}000000.txt"
+        elif "dipl" in name:
+            name = f"PS_LibreAcces_Dipl_AutExerc_{yearmonth}000000.txt"
+        elif "savoir" in name:
+            name = f"PS_LibreAcces_SavoirFaire_{yearmonth}000000.txt"
+        if name in self.files:
+            return self.files[name]
+        file = File(name, self.download_path, self.category, self.frequency, self.download_mode)
         file.date = datetime.date(yearmonth // 100, yearmonth % 100, 1)
         return file
 
-    def scrap_url(self) -> str | None:
-        node = self.soup.find("td", {"class": "col_4a"})
+    def scrap_url(self, file_name: str) -> str | None:
+        node = self.soup.find("div", attrs={"text": file_name})
         if node is None:
             return None
-        url = node.find("a").attrs["href"]
+        header = node.find_parent("header")
+        url = header.find("a").attrs["href"]
         return url
 
-    def scrap(self):
-        url = self.scrap_url()
+    def scrap(self, file_name: str):
+        url = self.scrap_url(file_name)
         if url is not None:
-            name = url.split("nomFichier=")[-1]
-            file = self.get_yearmonth_file_by_name(name) # /!\ 1 fichier en genere 3 créer 4 file en tout le masterfile et les 3 files
+            file = self.get_yearmonth_file_by_name(file_name)
             file.url = url
             if file.download_date is None:
                 if not self.fake_download:
                     self.download(file, file.url)
-                file.download_date = datetime.datetime.now()
+                else:
+                    file.download_date = datetime.datetime.now()
                 if not self.no_commit:
                     if file.id is None:
                         self.context.session.add(file)
                     self.context.session.commit()
 
-    def dezips(self):
-        self.make_cache()
-        files = [f for f in self.files.values() if f.dezip_date is None and f.name.endswith(".zip")]
-        if len(files) > 0:
-            file = files[0]
-            try:
-                if not self.fake_download:
-                    self.dezip(self.download_path, file.name)
-                file.dezip_date = datetime.datetime.now()
-                if not self.no_commit:
-                    self.context.session.commit()
-            except Exception as ex:
-                print(f"PSLibreAcces error {ex}")
-                if not self.no_commit:
-                    file.log_date = datetime.datetime.now()
-                    file.log = str(ex)
-                    self.context.session.commit()
+    def scraps(self):
+        files = ["ps-libreacces-dipl-autexerc.txt",
+                 "ps-libreacces-savoirfaire.txt",
+                 "ps-libreacces-personne-activite.txt"]
+        for f in files:
+            self.scrap(f)
 
-    def load_file_from_type(self, zip_file: File, file: File, type: str):
-        if file.import_end_date is None:
-            file.dezip_date = zip_file.dezip_date
-            file.date = zip_file.date
-            file.zip_name = zip_file.zip_name
-            file.url = zip_file.url
-            file.import_start_date = datetime.datetime.now()
-            zip_file.import_start_date = file.import_start_date
-            if not self.no_commit:
-                self.context.session.add(file)
-                self.context.session.commit()
-            if not self.no_parsing:
-                print(f"Parse {file.name}")
-                context = Context()
-                context.create(echo=args.echo, expire_on_commit=False)
-                if type == "Personne_activite":
-                    self.parser = PersonneActiviteParser(context)
-                elif type == "Dipl_AutExerc":
-                    self.parser = DiplomeParser(context)
-                else:
-                    self.parser = DiplomeParser(context, savoir=True)
+    def load_file(self, file: File):
+        file.import_start_date = datetime.datetime.now()
+        if not self.no_parsing:
+            print(f"Parse {file.name}")
+            context = Context()
+            context.create(echo=args.echo, expire_on_commit=False)
+            if "Persone" in file.name:
+                self.parser = PersonneActiviteParser(context)
+            elif "Dipl" in file.name:
+                self.parser = DiplomeParser(context)
+            else:
+                self.parser = DiplomeParser(context, savoir=True)
+            self.parser.load(file.full_name)
+            if "Persone" in file.name:
+                self.parser = PSLibreAccesRawParser(context)
                 self.parser.load(file.full_name)
-                if type == "Personne_activite":
-                    self.parser = PSLibreAccesRawParser(context)
-                    self.parser.load(file.full_name)
-                    self.parser.commit()
-                self.nb_new_file += 1
-            file.import_end_date = datetime.datetime.now()
-            if not self.no_commit:
-                self.context.session.commit()
+                self.parser.commit()
+            self.nb_new_file += 1
+        file.import_end_date = datetime.datetime.now()
+        if not self.no_commit:
+            self.context.session.commit()
 
     def load(self):
-        super().load()
-        types = ["Dipl_AutExerc", "SavoirFaire", "Personne_activite"]
-        file: File | None = None
-        for zip_file in self.yearmonth_files.values():
-            all_ok = False
-            if zip_file.import_end_date is None:
-                for type in types:
-                    for item in os.listdir(self.download_path):
-                        yearmonth = zip_file.date.year * 100 + zip_file.date.month
-                        if item.endswith(".txt") and item.startswith(f"PS_LibreAcces_{type}_{yearmonth}"):  # Ne fonctionne pas pour un zip du 1er du mois
-                            all_ok = True
-                            try:
-                                file = self.get_file_by_name(item)
-                                self.load_file_from_type(zip_file, file, type)
-                                if file is not None and not self.no_commit:
-                                    if file.id is not None:
-                                        self.context.session.add(file)
-                                    self.context.session.commit()
-                            except Exception as ex:
-                                print(f"Error for parsing {type}")
-                                all_ok = False
-                                file.log_date = datetime.datetime.now()
-                                file.log(str(ex))
-                                if not self.no_commit:
-                                    if file.id is not None:
-                                        self.context.session.add(file)
-                                    self.context.session.commit()
-                if all_ok:
-                    zip_file.import_end_date = file.import_end_date
-                    if not self.no_commit:
-                        self.context.session.commit()
+        self.make_cache()
+        files = sorted(self.files.values(), key=lambda f: len(f.name))
+        for file in files:
+            if file.import_end_date is None:
+                self.load_file(file)
 
 
 if __name__ == '__main__':
@@ -164,8 +118,8 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = PersonneActiviteDownloader(context, args.echo, args.fake_download, args.no_commit, args.force_download, args.no_parsing)
+    d.make_cache()
     d.get_html()
-    d.scrap()
-    d.dezips()
+    d.scraps()
     d.load()
     print(f"Nb new files: {d.nb_new_file}")
