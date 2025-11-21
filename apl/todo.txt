@@ -1,5 +1,5 @@
 Etendre specialite aux non médecins : PSP_ACT_SNDS
-    Refaire tourner apl_france.py sur 1,21 en cours
+    Gérer gériatre + sage femme
     delete_old_apl.sql
 
 

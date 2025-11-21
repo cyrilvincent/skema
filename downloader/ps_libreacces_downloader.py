@@ -77,14 +77,20 @@ class PersonneActiviteDownloader(BaseDownloader):
             print(f"Parse {file.name}")
             context = Context()
             context.create(echo=args.echo, expire_on_commit=False)
-            if "Persone" in file.name:
+            if "Personne" in file.name:
+                print("PersonneActiviteParser")
                 self.parser = PersonneActiviteParser(context)
             elif "Dipl" in file.name:
+                print("DiplomeParser")
                 self.parser = DiplomeParser(context)
-            else:
+            elif "Savoir" in file.name:
+                print("SavoirFaireParser")
                 self.parser = DiplomeParser(context, savoir=True)
+            else:
+                raise ValueError(f"Bad file name {file.name}")
             self.parser.load(file.full_name)
-            if "Persone" in file.name:
+            if "Personne" in file.name:
+                print("RawParser")
                 self.parser = PSLibreAccesRawParser(context)
                 self.parser.load(file.full_name)
                 self.parser.commit()
