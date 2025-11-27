@@ -66,7 +66,7 @@ and ds.annee={year}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
-    print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
+    # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
     # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
@@ -128,17 +128,17 @@ def get_over(year, specialite, is_medecin):
     over = pd.read_sql(sql, config.connection_string)
     return over
 
-for time in [30]: #[30, 45, 60]:
-    for time_type in ["HC"]: #["HC", "HP"]:
+for time in [30, 45, 60]: # [30, 45, 60]:
+    for time_type in ["HP"]: # ["HC", "HP"]:
         iris_matrix = get_iris_matrix(time, time_type)
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
-        for source in ["PA"]: #["PA", "PS"]:
+        for source in ["PS"]: #["PA", "PS"]:
             for year in range(20, 26):
                 pop_iris = get_pop_iris(year)
-                for specialite in [10]: #range(1, 28):
+                for specialite in [21]: #range(1, 28):
                     iriss = get_iriss(year, specialite)
-                    for accessibilite_exp in [-0.12]: # [-0.12, -0.10, -0.08, -0.06, -0.04]:
+                    for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
                         if ((time > 30 and accessibilite_exp < -0.08) or
                                 (time == 30 and accessibilite_exp > -0.06) or
                                 (time > 45 and accessibilite_exp < -0.06)):
@@ -146,16 +146,6 @@ for time in [30]: #[30, 45, 60]:
 
                         # accessibilite_exp = -(75 - time) * 4 / 1500
                         print(f"Compute APL specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
-
-                        # In[82]:
-
-
-                        # pop_iris = get_pop_iris(year)
-                        # pop_iris
-
-
-                        # In[7]:
-
 
                         ps_df = get_by_source(year, specialite, source)
                         ps_df

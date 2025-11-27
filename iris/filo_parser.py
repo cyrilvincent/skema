@@ -33,12 +33,10 @@ class FiloParser:
         pd.set_option('display.width', None)
         self.df = pd.read_csv(path, low_memory=False, sep=";", decimal=",", na_values=["", "ns", "so", "nd", "s"])
         for col in self.df.columns:
-            if self.is_dec:
-                if col.startswith("DEC_"):
-                    self.df = self.df.rename(columns={col: col[4:]})
-            else:
-                if col.startswith("DISP_"):
-                    self.df = self.df.rename(columns={col: col[5:]})
+            if self.is_dec and col.startswith("DEC_"):
+                self.df = self.df.rename(columns={col: col[4:]})
+            elif not self.is_dec and col.startswith("DISP_"):
+                self.df = self.df.rename(columns={col: col[5:]})
         for col in self.df.columns:
             if col.endswith(str(self.year)):
                 self.df = self.df.rename(columns={col: col[:-2]})
