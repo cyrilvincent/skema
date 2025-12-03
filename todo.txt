@@ -1,14 +1,7 @@
-Projet 0 = ps libreacces https://www.data.gouv.fr/organizations/agence-du-numerique-en-sante/datasets
-    Porter sur serveur
-Projet 1 = Importer depuis 2006 https://www.insee.fr/fr/statistiques/8229323
-    Pour avoir les autres années : https://www.insee.fr/fr/recherche/recherche-statistiques?q=revenus%2C%20pauvret%C3%A9%20et+niveau+de+vie+iris&debut=0&idprec=4295611&categorie=5
-    Ok pour 20 & 21
-    TODO 18 et 19
-    TODO en excel 12..17
+Projet 1 = ps libreacces https://www.data.gouv.fr/organizations/agence-du-numerique-en-sante/datasets
+    Verif download le 4
 Projet 2 = Parser apl/ameli et intégrer dans ps_stats
-Projet 3 = apl + automatiser
-    Attendre fin calcul + avertir benjamin
-Projet 4 = SAE + Medecine Hospitalière
-Projet 5 = Proto React + Dataviz
-Projet 6 = Site Web + APL + Depassement + SAE
-Projet 7 = Doctolib scraper
+Projet 3 = SAE + Medecine Hospitalière
+    En cours
+Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+Projet 5 = Doctolib scraper

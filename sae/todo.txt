@@ -1,0 +1,22 @@
+SAE
+Statistique Annuel des Etablissements
+https://drees2-sgsocialgouv.opendatasoft.com/explore/dataset/708_bases-statistiques-sae/information/
+Fichiers URGENCE
+PED=pédiatrique
+Téléchargé les fichiers 2024->2020
+Doc dans le zip
+Concatener par année
+_p = personnel
+_2 = détail
+Dataviz=Nb urgence par geoloc
+PASSU=nb passage
+dt80: >80ans
+dt18: < 18 ans
+Q2?=Fichier statistique sur l'ensemble des etablissemrnt
+Q20=effectifs par service
+SYGEN=activité generale de tous les etablissement
+Commencé par urgence puis psy
+
+
+
+

@@ -15,6 +15,7 @@ class FiloParser:
         self.df = None
         self.year = 0
         self.is_dec = False
+        self.sep = ";"
 
     def parse_year_dec(self, path: str):
         try:
@@ -31,7 +32,8 @@ class FiloParser:
         self.parse_year_dec(path)
         pd.set_option('display.max_columns', None)
         pd.set_option('display.width', None)
-        self.df = pd.read_csv(path, low_memory=False, sep=";", decimal=",", na_values=["", "ns", "so", "nd", "s"])
+        self.sep = "," if self.year == 19 and self.is_dec else ";"
+        self.df = pd.read_csv(path, low_memory=False, sep=self.sep, decimal=",", na_values=["", "ns", "so", "nd", "s"])
         for col in self.df.columns:
             if self.is_dec and col.startswith("DEC_"):
                 self.df = self.df.rename(columns={col: col[4:]})

@@ -5,5 +5,5 @@ Exécuter damir_age_stats.sql qui créé la table iris.damir_age_stats : 1x par 
 Exécuter overrepresentation.ipynb qui maj la table iris.overrepresenttion : 1x par an, modifier apl_france.py yy=min(year, 24)
 Tester sur apl.ipynb pour les départements et apl_france.ipynb pour la france
 apl_france.py qui amende les tables apl.apl_study et apl.apl
-apl_slider_dataviz.ipynb & apl_dataviz_france.ipynb pour le dataviz
+apl_slider_dataviz.ipynb & facultativement apl_dataviz_france.ipynb pour le dataviz
 

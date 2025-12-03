@@ -1,6 +1,0 @@
-Etendre specialite aux non médecins : PSP_ACT_SNDS
-    Gérer gériatre + sage femme
-    delete_old_apl.sql
-
-
-
