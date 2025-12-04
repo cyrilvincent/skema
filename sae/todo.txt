@@ -1,4 +1,2 @@
-psy parser
-dataviz urgence passu
 Q2?
 SYGEN

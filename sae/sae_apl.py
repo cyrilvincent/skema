@@ -17,7 +17,7 @@ def get_sae(year, bor):
     column = df["column"].iloc[0]
     condition = df["condition"].iloc[0]
     sql = f"""
-select e.id, ud.{column} score, e.nofinesset, e.rs, e.rslongue, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat
+select e.id, ud.{column} score, e.nofinesset, e.rs, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat
 from sae.{table} ud
 join etablissement e on e.nofinesset=ud.fi
 join adresse_raw ar on e.adresse_raw_id=ar.id
@@ -26,14 +26,13 @@ join iris.iris i on i.code=an.iris
 where ud.an={year}
 and {condition}
 """
-    # TODO tester cette requete en ajoutant les jointures petit à petit sur serveur
     print(f"Quering SAE for year {year} and bor {bor}")
-    print(sql)
+    # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
 def get_pop_iris(year):
-    yy=min(21, year)
+    yy = max(min(year - 2000, 21), 17)
     sql = f"""
 select i.id iris, pi.iris iris_string, c.code code_commune, i.type type_iris, pi.pop, pi.pop0002, pi.pop0305, pi.pop0610, pi.pop1117, pi.pop1824, pi.pop2539, pi.pop4054, pi.pop5564, pi.pop6579, pi.pop80p
 from iris.pop_iris pi
@@ -66,11 +65,12 @@ join iris.commune c on c.id=i.commune_id
     # print(sql)
     return pd.read_sql(text(sql), config.connection_string)
 
-#TEST ONLY to remove
-ps_df = get_sae(2024, 1)
+accessibilite_fn = lambda x: np.exp(accessibilite_exp * x)
+
+# get_sae(2024, 1)
 
 for time in [30]:
-    for time_type in ["HP"]:
+    for time_type in ["HC"]:
         iris_matrix = get_iris_matrix(time, time_type)
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
@@ -87,12 +87,15 @@ for time in [30]:
                     print(f"Compute APL bor {bor} in {year} in {time}min {time_type}, e={accessibilite_exp}")
                     ps_df = get_sae(year, bor)
                     ps_df["score"] = ps_df["score"].fillna(0)
+                    ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
+                    ps_df["nb_cabinet"] = ps_df.groupby("id")["key"].transform("nunique")
+                    ps_df["weight"] = (1 / ps_df["nb_cabinet"]).replace(np.inf, 0)
+                    # ps_df["nb"] = ps_df.groupby("iris")["weight"].transform("sum")
+                    ps_df["nb"] = ps_df["score"]
                     ps_df = ps_df.sort_values(by='iris')
                     ps_df2 = ps_df.drop_duplicates(subset=['iris'])
 
                     iris_matrix_pop_df = iris_matrix.merge(pop_iris, on="iris", how="left", suffixes=('', ''))
-
-                    accessibilite_fn = lambda x: np.exp(accessibilite_exp * x)
                     iris_matrix_pop_df["accessibilite_weight"] = accessibilite_fn(iris_matrix_pop_df["time"])
                     iris_matrix_pop_df.head(10)
 
@@ -140,16 +143,16 @@ for time in [30]:
                     apl3 = apl3.rename(columns={'iris1': 'iris'})
 
                     apl_final = apl3.merge(iriss, on="iris", how="left", suffixes=("", "_dest"))
-                    apl_final = apl_final[["year", "specialite", "iris", "iris_string", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "R", "wpop", "swpop", "pop_gp","pop", "iris_label", "dept", "code_commune", "commune_label"]]
+                    apl_final = apl_final[["year", "bor", "iris", "iris_string", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "R", "wpop", "swpop", "pop_gp","pop", "iris_label", "dept", "code_commune", "commune_label"]]
 
                     sum_pop = np.sum(apl_final["pop_gp"])
                     apl_final["meanw"] = apl_final["apl"] * apl_final["pop_gp"] * len(apl_final) / sum_pop
                     study["meanw"] = np.mean(apl_final["meanw"])
 
-                    apl_final["year"]=year
-                    apl_final["study_key"]=dico["key"]
-                    study.to_sql("apl_study", config.connection_string, schema="sae", if_exists="append", index=False)
-                    apl_final.to_sql("apl", config.connection_string, schema="sae", if_exists="append", index=False)
+                    apl_final["year"] = year
+                    apl_final["study_key"] = dico["key"]
+                    study.to_sql("saeapl_study", config.connection_string, schema="sae", if_exists="append", index=False)
+                    apl_final.to_sql("saeapl", config.connection_string, schema="sae", if_exists="append", index=False)
 
 
 

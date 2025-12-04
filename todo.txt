@@ -1,7 +1,5 @@
-Projet 1 = ps libreacces https://www.data.gouv.fr/organizations/agence-du-numerique-en-sante/datasets
-    Verif download le 4
-Projet 2 = Parser apl/ameli et intégrer dans ps_stats
-Projet 3 = SAE + Medecine Hospitalière
+Projet 1 = Parser apl/ameli et intégrer dans ps_stats
+Projet 2 = SAE + Medecine Hospitalière
     En cours
-Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
-Projet 5 = Doctolib scraper
+Projet 3 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+Projet 4 = Doctolib scraper

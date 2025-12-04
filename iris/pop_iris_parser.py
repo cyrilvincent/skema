@@ -33,6 +33,8 @@ class PopIrisParser:
         self.dataframe["iris_id"] = self.dataframe["iris_id"].astype(np.int32)
         self.dataframe["year"] = self.year
         self.dataframe = self.dataframe[["year", "iris_id"] + list(self.dataframe.columns[:-2])]
+        if "modif_iris" in self.dataframe.columns:
+            self.dataframe = self.dataframe.drop("modif_iris", axis=1)
 
     def load(self, path: str):
         print(f"Load {path}")
