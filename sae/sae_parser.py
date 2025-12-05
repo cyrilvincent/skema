@@ -117,6 +117,10 @@ class SAEPsyParser(SAEBaseParser):
 
     def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.suffix == "":
+            if "etp_pkt" in df.columns:
+                df["etpsal_pkt"] = df["etp_pkt"]
+            else:
+                df["etp_pkt"] = df["etpsal_pkt"]
             if "cap_had" not in df.columns:
                 df["cap_had"] = None
                 df["jou_had"] = None
@@ -143,7 +147,6 @@ class SAEPsyParser(SAEBaseParser):
             if "effpl_pkt" not in df.columns:
                 df["effpl_pkt"] = None
                 df["effpa_pkt"] = None
-                df["etp_pkt"] = None
                 df["effpl_med"] = None
                 df["effpa_med"] = None
                 df["etp_med"] = None
@@ -191,11 +194,11 @@ if __name__ == '__main__':
     context.create(echo=args.echo)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} Mb")
-    p = SAEUrgencesParser(context)
-    p.load3(args.path)
+    # p = SAEUrgencesParser(context)
+    # p.load3(args.path)
     p = SAEPsyParser(context)
-    # p.loads(args.path, "_P")
-    p.load3(args.path)
+    p.loads(args.path, "")
+    # p.load3(args.path)
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
     print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")

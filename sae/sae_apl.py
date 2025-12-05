@@ -76,7 +76,7 @@ for time in [30]:
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for year in range(2013, 2025):
             pop_iris = get_pop_iris(year)
-            for bor in [1]:
+            for bor in [4]:
                 iriss = get_iriss(year, bor)
                 for accessibilite_exp in [-0.12]:
                     if ((time > 30 and accessibilite_exp < -0.08) or
