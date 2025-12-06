@@ -33,7 +33,8 @@ class SAEBaseParser:
         print(f"Load {path}")
         df = self.read_csv(path, self.finess_col)
         df.columns = df.columns.str.strip().str.lower()
-        df = df.drop("bor", axis=1)
+        if "bor" in df.columns:
+            df = df.drop("bor", axis=1)
         if self.suffix != "":
             df = df.drop(self.finessj_col.lower(), axis=1)
             if "rs" in df.columns:
@@ -108,6 +109,12 @@ class SAEUrgencesParser(SAEBaseParser):
                 df = df.rename(columns={'etp': 'etpsal'})
         return df
 
+# select * from sae.urgence_detail ud
+# join etablissement e on e.nofinesset=ud.fi
+# join adresse_raw ar on e.adresse_raw_id=ar.id
+# join adresse_norm an on ar.adresse_norm_id=an.id
+# where ud.an=2024
+# and ud.urg='GEN'
 
 class SAEPsyParser(SAEBaseParser):
 
@@ -168,21 +175,149 @@ class SAEPsyParser(SAEBaseParser):
                     col = f"psy_{l}{i}"
                     if col not in df.columns:
                         df[col] = None
-
         return df
 
-# select * from sae.urgence_detail ud
-# join etablissement e on e.nofinesset=ud.fi
-# join adresse_raw ar on e.adresse_raw_id=ar.id
-# join adresse_norm an on ar.adresse_norm_id=an.id
-# where ud.an=2024
-# and ud.urg='GEN'
+
+class SAEQ20Parser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "Q20"
+
+    def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "cf_at" in df.columns:
+            df = df.drop(["cf_at", "cf_au"], axis=1)
+        if "etp_at" not in df.columns:
+            df["etp_at"] = 0
+            df["etp_au"] = 0
+        return df
+
+
+class SAEQ21Parser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "Q21"
+
+
+class SAEQ22Parser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "Q22"
+
+    def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "inttot" not in df.columns:
+            df["inttot"] = 0
+        return df
+
+
+class SAEQ23Parser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "Q23"
+
+
+class SAEQ24Parser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "Q24"
+
+    def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "dirsi" not in df.columns:
+            df["dirsi"] = 0
+            df["drsni"] = 0
+            df["pnmhsf"] = 0
+        return df
+
+
+class SAESygenParser(SAEBaseParser):
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.base = "SYGEN"
+
+    def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "cap_complet_gen" not in df:
+            df["cap_complet_gen"] = 0
+            df["cap_complet_inf"] = 0
+            df["cap_complet_pen"] = 0
+            df["cap_complet_tot"] = 0
+            df["nb_cattp_pen"] = 0
+            df["act_cattp_pen"] = 0
+            df["nb_cmp_gen"] = 0
+            df["nb_cmp_inf"] = 0
+            df["nb_cmp_tot"] = 0
+            df["act_cmp_gen"] = 0
+            df["act_cmp_inf"] = 0
+            df["act_cmp_tot"] = 0
+            df["sej_reanim"] = 0
+            df["etpint"] = 0
+            df["eff_sag"] = 0
+            df["eff_cad"] = 0
+            df["eff_infavecspe"] = 0
+            df["eff_infsansspe"] = 0
+            df["eff_aid"] = 0
+            df["eff_ash"] = 0
+            df["eff_psycho"] = 0
+            df["eff_reedu"] = 0
+            df["eff_sag"] = 0
+            df["eff_soins"] = 0
+            df["eff_dir"] = 0
+            df["eff_tec"] = 0
+            df["eff_tot_hors_soins"] = 0
+            df["eff_tot_pnm"] = 0
+            df["eff_dirsoi"] = 0
+            df["eff_autadm"] = 0
+            df["eff_edu"] = 0
+            df["eff_dtsoc"] = 0
+            df["eff_perspharma"] = 0
+            df["eff_perslabo"] = 0
+            df["eff_persradio"] = 0
+            df["eff_autmedtec"] = 0
+            df["eff_tec"] = 0
+            df["eff_tot_hors_soins"] = 0
+            df["eff_tot_pnm"] = 0
+            df["etp_sag"] = 0
+            df["etp_cad"] = 0
+            df["etp_infavecspe"] = 0
+            df["etp_infsansspe"] = 0
+            df["etp_aid"] = 0
+            df["etp_ash"] = 0
+            df["etp_psycho"] = 0
+            df["etp_reedu"] = 0
+            df["etp_soins"] = 0
+            df["etp_dir"] = 0
+            df["etp_dirsoi"] = 0
+            df["etp_autadm"] = 0
+            df["etp_edu"] = 0
+            df["etp_dtsoc"] = 0
+            df["etp_perspharma"] = 0
+            df["etp_perslabo"] = 0
+            df["etp_persradio"] = 0
+            df["etp_autmedtec"] = 0
+            df["etp_tec"] = 0
+            df["etp_tot_hors_soins"] = 0
+            df["etp_tot_pnm"] = 0
+        if "consult_ext" not in df.columns:
+            df["consult_ext"] = 0
+            df["fil_tpl_gen"] = 0
+            df["fil_tpl_inf"] = 0
+            df["fil_tpl_pen"] = 0
+            df["fil_tpl_tot"] = 0
+            df["inttot"] = 0
+            df["eff_dirinf"] = 0
+            df["etp_dirinf"] = 0
+            df["pharma_a19"] = 0
+        return df
 
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
-    print("SAE Urgences Parser")
-    print("===================")
+    print("SAE Parser")
+    print("==========")
     print(f"V{config.version}")
     print(config.copyright)
     print()
@@ -193,14 +328,26 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo)
     db_size = context.db_size()
-    print(f"Database {context.db_name}: {db_size:.0f} Mb")
+    print(f"Database {context.db_name}: {db_size:.0f} MB")
     # p = SAEUrgencesParser(context)
     # p.load3(args.path)
-    p = SAEPsyParser(context)
-    p.loads(args.path, "")
+    # p = SAEPsyParser(context)
+    # p.loads(args.path, "")
     # p.load3(args.path)
+    # p = SAEQ20Parser(context)
+    # p.loads(args.path, "")
+    # p = SAEQ21Parser(context)
+    # p.loads(args.path, "")
+    # p = SAEQ22Parser(context)
+    # p.loads(args.path, "")
+    # p = SAEQ23Parser(context)
+    # p.loads(args.path, "")
+    # p = SAEQ24Parser(context)
+    # p.loads(args.path, "")
+    p = SAESygenParser(context)
+    p.loads(args.path, "")
     new_db_size = context.db_size()
-    print(f"Database {context.db_name}: {new_db_size:.0f} Mb")
-    print(f"Database grows: {new_db_size - db_size:.0f} Mb ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
+    print(f"Database {context.db_name}: {new_db_size:.0f} MB")
+    print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
     # data\sae\
