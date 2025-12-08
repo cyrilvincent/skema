@@ -1,1 +1,3 @@
-benjamin annoncer : sae-apl pour urgences, puis dataviz urgence, puis dataviz psy, puis Q2? ok puis sygen variables qui devait être présente ne le sont pas et inversement
+benjamin annoncer : dataviz urgence, puis dataviz psy, puis Q2? ok puis sygen variables qui devait être présente ne le sont pas et inversement
+apl + dataviz distance urgence
+Exporter data sur plusieurs années pour slider
