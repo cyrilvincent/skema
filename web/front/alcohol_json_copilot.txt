@@ -1,0 +1,39 @@
+
+[
+  { "location": "Albania", "alcohol": 7.8 },
+  { "location": "Algeria", "alcohol": 0.7 },
+  { "location": "Andorra", "alcohol": 10.4 }
+  // ...
+]
+
+
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+<div id="myDiv" style="width: 100%; height: 600px;"></div>
+
+<script>
+  // Fonction utilitaire identique à votre CSV, appliquée aux objets JSON
+  const unpack = (rows, key) => rows.map(row => row[key]);
+
+  d3.json('data.json') // Remplacez par votre URL JSON si besoin
+    .then(rows => {
+      const data = [{
+        type: 'choropleth',
+        locationmode: 'country names',
+        locations: unpack(rows, 'location'),
+        z: unpack(rows, 'alcohol'),
+        text: unpack(rows, 'location'),
+        autocolorscale: true
+      }];
+
+      const layout = {
+        title: { text: 'Pure alcohol consumption<br>among adults (age 15+) in 2010' },
+        geo: { projection: { type: 'robinson' } }
+      };
+
+      Plotly.newPlot('myDiv', data, layout, { showLink: false });
+    })
+    .catch(err => console.error('Erreur lors du chargement du JSON :', err));
+</script>
