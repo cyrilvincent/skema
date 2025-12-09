@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plotly 3.3 — Choropleth France + Slider (sans frames)</title>
+  <!-- Plotly.js v3.3 -->
+  <script src="https://cdn.plot.ly/plotly-3.3.0.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div id="chart" style="width: 100%; height: 600px; background: transparent;"></div>
+
+  <script>
+    // --- Paramètres ---
+    const T = 20;                 // nombre d'étapes du slider
+    const locations = ['France']; // un seul pays : France
+    const text = ['France'];      // étiquette pour le hover
+    const zmin = 0, zmax = 100;   // plage de couleurs
+
+    // Valeurs aléatoires pré-calculées (une par step)
+    const vals = Array.from({ length: T }, () => +((Math.random() * (zmax - zmin)) + zmin).toFixed(1));
+
+    // Trace initial (t=0)
+    const data = [{
+      type: 'choropleth',
+      locationmode: 'country names',
+      locations: locations,      // ['France']
+      z: [vals[0]],              // une valeur pour la France
+      text: text,                // ['France']
+      colorscale: 'YlGnBu',
+      zmin: zmin,
+      zmax: zmax,
+      reversescale: false,
+      colorbar: { title: 'Valeur' }
+    }];
+
+    // Steps du slider : mise à jour des données sans frames
+    const steps = vals.map((v, idx) => ({
+      label: String(idx),
+      method: 'update',
+      args: [
+        // Met à jour le z du trace 0 (notez le tableau imbriqué [[v]])
+        { z: [[v]] },
+        // Met à jour le titre
+        { title: `Choropleth — France — valeur aléatoire (t=${idx})` }
+      ]
+    }));
+
+    // Layout : projection + aucun fond de carte
+    const layout = {
+      title: { text: 'Choropleth — France — valeur aléatoire (t=0)' },
+      margin: { t: 50, r: 20, b: 40, l: 50 },
+      geo: {
+        // Zoom sur l'Europe et ajustement aux locations
+        scope: 'europe',
+        projection: { type: 'mercator' },
+        fitbounds: 'locations',    // cadre ajusté (si supporté)
+        // ✅ Supprime tout le fond / habillage cartographique
+        showcoastlines: false,
+        showcountries: false,
+        showland: false,
+        showocean: false,
+        showlakes: false,
+        showrivers: false,
+        showframe: false,
+        bgcolor: 'rgba(0,0,0,0)'   // fond transparent
+      },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      sliders: [{
+        active: 0,
+        currentvalue: {
+          prefix: 'Étape: ',
+          xanchor: 'right',
+          font: { size: 14 }
+        },
+        transition: { duration: 0 },
+        steps
+      }]
+    };
+
+    Plotly.newPlot('chart', data, layout);
+  </script>
+</body>
+</html>

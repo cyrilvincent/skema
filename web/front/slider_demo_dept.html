@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plotly — Choropleth Départements FR (geojson) + Slider steps</title>
+  <!-- Plotly.js (version récente recommandée) -->
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <!-- d3 pour charger le GeoJSON -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div id="chart" style="width: 100%; height: 650px; background: transparent;"></div>
+
+  <script>
+    // ----------------------
+    // Paramètres de la démo
+    // ----------------------
+    const T = 20;               // nombre d'étapes du slider
+    const zmin = 0, zmax = 100; // plage de la colorbar
+
+    // GeoJSON départements (Grégoire David)
+    const GEOJSON_URL = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson";
+
+    // Génère un tableau de valeurs aléatoires (1 décimale) de même longueur que 'codes'
+    const randomValues = (codes) =>
+      codes.map(() => parseFloat((Math.random() * (zmax - zmin) + zmin).toFixed(1)));
+
+    d3.json(GEOJSON_URL).then(geojson => {
+      const features = geojson.features || [];
+      const codes = features.map(f => f.properties.code); // ex: "01", "13", "75"
+      const names = features.map(f => f.properties.nom);  // ex: "Ain", "Bouches-du-Rhône", "Paris"
+
+      // Pré-calcul des T étapes de valeurs
+      const Z_STEPS = Array.from({ length: T }, () => randomValues(codes));
+
+      // Trace initial (t=0) — choropleth NON‑Mapbox avec geojson arbitraire
+      const data = [{
+        type: 'choropleth',
+        // ⚠️ Utilisation d'un GeoJSON arbitraire :
+        geojson: geojson,
+        featureidkey: 'properties.code', // on aligne 'locations' sur properties.code
+        locations: codes,                // la liste des départements (codes)
+        z: Z_STEPS[0],                   // valeurs au step 0
+        text: names,                     // noms pour le hover
+        colorscale: 'YlOrRd',
+        zmin, zmax,
+        marker: {
+          line: { width: 0.4, color: '#666' } // un fin contour pour distinguer les départements
+        },
+        hovertemplate: '%{text}<br>Valeur: %{z:.1f}<extra></extra>'
+      }];
+
+      // Steps du slider (sans frames) : on met à jour 'z'
+      const steps = Z_STEPS.map((zVals, idx) => ({
+        label: String(idx),
+        method: 'update',
+        args: [
+          { z: [zVals] }, // met à jour Z du trace 0
+          { title: `Choropleth — Départements FR — valeur aléatoire (t=${idx})` }
+        ]
+      }));
+
+      // Layout : géo-projection (pas de tuiles), fond “nu”
+      const layout = {
+        title: { text: 'Choropleth — Départements FR — valeur aléatoire (t=0)' },
+        margin: { t: 60, r: 20, b: 20, l: 20 },
+        geo: {
+          // Ajuste l’emprise : la combinaison fitbounds + center/zoom fonctionne mieux avec un bon GeoJSON
+          fitbounds: 'locations',
+          projection: { type: 'mercator' },
+          // Désactiver toutes les couches du fond
+          showcoastlines: false,
+          showcountries: false,
+          showland: false,
+          showocean: false,
+          showlakes: false,
+          showrivers: false,
+          showframe: false,
+          bgcolor: 'rgba(0,0,0,0)' // fond transparent
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        sliders: [{
+          active: 0,
+          transition: { duration: 0 },
+          currentvalue: { prefix: 'Étape: ', xanchor: 'right', font: { size: 14 } },
+          steps
+        }]
+      };
+
+      Plotly.newPlot('chart', data, layout);
+    }).catch(err => {
+      console.error('Erreur lors du chargement du GeoJSON :', err);
+      const msg = document.createElement('pre');
+      msg.textContent = "Impossible de charger le GeoJSON des départements.\nVérifiez l’URL et la connectivité.";
+      document.body.appendChild(msg);
+    });
+  </script>
+</body>
+</html>

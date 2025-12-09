@@ -1,0 +1,14 @@
+https://github.com/plotly/plotly.js
+
+Load as a node module
+Install a ready-to-use distributed bundle
+
+npm i --save plotly.js-dist-min
+and use import or require in node.js
+
+// ES6 module
+import Plotly from 'plotly.js-dist-min'
+
+// CommonJS
+var Plotly = require('plotly.js-dist-min')
+You may also consider using plotly.js-dist if you prefer using an unminified package.

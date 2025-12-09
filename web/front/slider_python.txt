@@ -1,0 +1,117 @@
+show_label=len(gdf) < limit_show_label
+fig = go.Figure()
+l=[]
+l2=[]
+center_lat = gdf.geometry.centroid.y.mean()
+center_lon = gdf.geometry.centroid.x.mean()
+for year in years:
+    gdf_year=gdf_merged[gdf_merged["year"]==year]
+    l.append(
+        go.Choropleth(
+            visible=False,
+            geojson=geojson,
+            locations=gdf_year["fid"],
+            z=gdf_year["apl_clip" if norm_colorbar else "apl"],
+            zmin=0,
+            zmax=q90s[0] if norm_colorbar else None, # zmax=q90s[year-years[0]] if norm_colorbar else None,
+            text=gdf_year.apply(
+                lambda row: f"Commune: {row["nom_commune"]}<br>Iris: {row["code_iris"]}<br>Nom Iris: {row['nom_iris']}<br>APL 20{year}: {row['apl']:.1f}<br>Variation APL/2020: {row['delta20']*100:+.0f}%<br>{"Moyenne pondérée" if meanw_colorbar else "Médiane"} nationale APL: {(row["apl"]-q50s[year-years[0]])*100/(q50s[year-years[0]]+0.001):+.0f}% ({q50s[year-years[0]]:.1f})<br>Nb ETP: {row['nb']:.1f}<br>Population: {row['pop']:.0f}<br>Population ajustée: {row['pop_ajustee']:.0f}<br>Population alentour: {row['swpop']:.0f}<br>APL local: {row['R']:.1f} ({row['R']*100/(row['apl']+1e-5):.0f}% APL)",
+                axis=1
+            ),
+            hoverinfo="text",
+            showscale=True,
+            # colorbar={"title": f"APL 20{year}",
+            #           "tickvals": [0, q10s[year-years[0]], q25s[year-years[0]], q50s[year-years[0]], q75s[year-years[0]], q90s[year-years[0]]] if norm_colorbar else None,
+            #           "ticktext": ['0', f'{q10s[year-years[0]]:.0f} - 1er décile', f'{q25s[year-years[0]]:.0f} - 1er quartile', f'{q50s[year-years[0]]:.0f} - médiane', f'{q75s[year-years[0]]:.0f} - 3ème quartile', f'{q90s[year-years[0]]:.0f} - dernier décile'] if norm_colorbar else None,
+            #          },
+            colorbar={"title": f"APL", # 20{year}",
+                      "tickvals": [0, q10s[0], q25s[0], q50s[0], q75s[0], q90s[0]] if norm_colorbar else None,
+                      "ticktext": ['0', f'{q10s[0]:.0f} {"" if meanw_colorbar else "- 1er décile"}', f'{q25s[0]:.0f} {"" if meanw_colorbar else "- 1er quartile"}', f'{q50s[0]:.0f} - {"moyenne" if meanw_colorbar else "médiane"}', f'{q75s[0]:.0f} {"" if meanw_colorbar else "- 3ème quartile"}', f'{q90s[0]:.0f} {"" if meanw_colorbar else "- dernier décile"}'] if norm_colorbar else None,
+                     },
+            colorscale=[[0.0, "rgb(64,64,127)"],
+                        [q10s[0]*1.0/q90s[0] if norm_colorbar else 0.1, "rgb(112,112,127)"],
+                        [q25s[0]*1.0/q90s[0] if norm_colorbar else 0.25, "rgb(159,159,127)"],
+                        [q50s[0]*1.0/q90s[0] if norm_colorbar else 0.50, "rgb(255,255,127)"],
+                        [q75s[0]*1.0/q90s[0] if norm_colorbar else 0.75, "rgb(209,127,79)"],
+                        [0.90, "rgb(187,64,55)"],
+                        [0.95, "rgb(165,0,32)"],
+                        [1.0, "rgb(127,0,0)"]
+                       ]
+        ))
+    if show_label:
+        l2.append(
+            go.Scattergeo(
+                lon=gdf_year["lon"],
+                lat=gdf_year["lat"],
+                text=gdf_year["pretty"].astype(str),
+                mode="text",
+                textfont=dict(color="black", size=8),
+                hoverinfo="skip",
+                showlegend=False,
+                visible=False,
+                marker=dict(
+                        color='#99ff99',
+                        size=8,
+                        line=dict(
+                            color='#006600',
+                            width=2
+                        )
+                    ),
+            ))
+fig = go.Figure(data=l+l2)
+fig.data[-1].visible = True
+if show_label:
+    fig.data[len(l)-1].visible = True
+steps = []
+i=0
+for year in years:
+    step = dict(
+        method="update",
+        args=[{"visible": [False] * len(fig.data)},
+             ],
+        label=f"20{year}",
+    )
+    step["args"][0]["visible"][i] = True
+    if show_label:
+        step["args"][0]["visible"][i+len(l)] = True
+    steps.append(step)
+    i+=1
+
+sliders = [dict(
+    active=len(years)-1,
+    currentvalue={"prefix": "APL ", "visible":True},
+    steps=steps,
+    transition={'duration': 300, 'easing': 'cubic-in-out'},
+    pad=dict(l=0, r=0, t=0, b=10),
+    len=0.6,
+    x=0.2,
+    y=0.05,
+)]
+
+fig.update_layout(
+    sliders=sliders,
+    geo=dict(
+        projection_type="mercator",
+        center={"lat": center_lat, "lon": center_lon},
+        fitbounds="locations",
+        # center_lon=center_lon,
+        # center_lat=center_lat,
+        # lonaxis_range=(center_lon-0.1, center_lon+0.1),
+        # lataxis_range=(center_lat-0.1, center_lat+0.1),
+        showland=False,
+        showcountries=False,
+        showocean=False,
+        showlakes=False,
+        showrivers=False,
+        visible=False,
+    ),
+    title=f"APL par Iris - {spe_df.loc[specialite]["label_long"]} - {"Ville de" if len(code_commune) != 3 else "Département"} {commune_nom if len(code_commune) != 3 else code_commune[:-1]}",
+    # height=1000,
+    # width=1200,
+    height=600,
+    # width=2000,
+    autosize=False,
+    margin=dict(l=10, r=0, t=50, b=10),
+)
+
+fig.show()
