@@ -1,0 +1,178 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>France — Population par département (slider Plotly sans frames)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <!-- Turf.js pour centroïdes et surfaces -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <style>
+    #map { width: 100%; max-width: 1100px; height: 680px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+  (async function () {
+    // === Paramètres temporels : 20 ans (2006..2025) ===========
+    const endYear = 2025;
+    const years = Array.from({ length: 20 }, (_, i) => endYear - 19 + i);
+    const baselineYear = 2015; // basePop correspond à ~2015 (illustratif)
+
+    // === Chargement GeoJSON des départements ===================
+    const geojsonUrl = 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson';
+    const res = await fetch(geojsonUrl);
+    const deps = await res.json();
+
+    // Option : garder uniquement la métropole pour un zoom plus adapté
+    // deps.features = deps.features.filter(f => !/^97|98/.test(f.properties.code));
+
+    // === Population de base (exemple) =========================
+    const basePop = {
+      '01': 655000, '02': 531000, '03': 342000, '04': 166000, '05': 144000,
+      '06': 1086000, '07': 334000, '08': 270000, '09': 156000, '10': 307000,
+      '11': 380000, '12': 278000, '13': 2048000, '14': 694000, '15': 145000,
+      '16': 351000, '17': 664000, '18': 308000, '19': 227000, '21': 536000,
+      '22': 612000, '23': 115000, '24': 413000, '25': 539000, '26': 540000,
+      '27': 600000, '28': 431000, '29': 914000, '2A': 160000, '2B': 190000,
+      '30': 783000, '31': 1516000, '32': 194000, '33': 1650000, '34': 1215000,
+      '35': 1100000, '36': 220000, '37': 619000, '38': 1289000, '39': 260000,
+      '40': 420000, '41': 332000, '42': 787000, '43': 227000, '44': 1462000,
+      '45': 686000, '46': 172000, '47': 333000, '48': 77000,  '49': 822000,
+      '50': 494000, '51': 570000, '52': 171000, '53': 314000, '54': 732000,
+      '55': 184000, '56': 770000, '57': 1050000, '58': 203000, '59': 2600000,
+      '60': 825000, '61': 276000, '62': 1450000, '63': 649000, '64': 690000,
+      '65': 225000, '66': 488000, '67': 1140000, '68': 790000, '69': 1888000,
+      '70': 233000, '71': 549000, '72': 566000, '73': 447000, '74': 946000,
+      '75': 2161000, '76': 1250000, '77': 1430000, '78': 1450000, '79': 380000,
+      '80': 571000, '81': 396000, '82': 275000, '83': 1124000, '84': 570000,
+      '85': 705000, '86': 458000, '87': 370000, '88': 364000, '89': 335000,
+      '90': 140000, '91': 1310000, '92': 1610000, '93': 1620000, '94': 1390000,
+      '95': 1240000
+    };
+
+    // Génération synthétique (exemple) : +0,30%/an
+    const annualRate = 0.003;
+    const scalePop = (obj, factor) =>
+      Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, Math.round(v * factor)]));
+
+    // popByYear[year] : { codeDept: population }
+    const popByYear = {};
+    for (const y of years) {
+      const factor = Math.pow(1 + annualRate, y - baselineYear);
+      popByYear[y] = scalePop(basePop, factor);
+    }
+
+    // === Préparation géo : codes, surfaces, centroïdes =========
+    const locations = [];
+    const areasKm2 = [];
+    const centroidByCode = {};
+
+    deps.features.forEach(f => {
+      const code = f.properties.code;
+      locations.push(code);
+      areasKm2.push(turf.area(f) / 1e6);
+      const [lon, lat] = turf.centroid(f).geometry.coordinates;
+      centroidByCode[code] = { lon, lat, name: f.properties.nom };
+    });
+
+    const lats = locations.map(code => centroidByCode[code]?.lat ?? null);
+    const lons = locations.map(code => centroidByCode[code]?.lon ?? null);
+
+    // === Pré-calculs par année : densités et textes ============
+    const densitiesByYear = {};
+    const textsByYear = {};
+    for (const y of years) {
+      const pops = locations.map(code => popByYear[y][code] ?? 0);
+      densitiesByYear[y] = pops.map((p, i) => p / areasKm2[i]); // hab./km²
+      textsByYear[y] = pops.map(p => p.toLocaleString('fr-FR')); // nombre en texte
+    }
+
+    // === Etat initial : année la plus récente ==================
+    const initialYear = years[years.length - 1];
+
+    // Trace 0 : choroplèthe (densité)
+    const choropleth = {
+      type: 'choropleth',
+      geojson: deps,
+      featureidkey: 'properties.code',
+      locations: locations,
+      z: densitiesByYear[initialYear],
+      colorscale: 'YlGnBu',
+      marker: { line: { color: '#fff', width: 0.5 } },
+      colorbar: { title: { text: `Densité (hab./km²) — ${initialYear}` } },
+      hovertemplate: 'Département %{location}<br>Densité : %{z:.0f} hab./km²<extra></extra>',
+      name: 'Densité'
+    };
+
+    // Trace 1 : texte (population)
+    const scatterText = {
+      type: 'scattergeo',
+      lat: lats,
+      lon: lons,
+      text: textsByYear[initialYear],
+      mode: 'text',
+      textposition: 'middle center',
+      textfont: { family: 'Arial', size: 11, color: '#d62728' },
+      hoverinfo: 'none',
+      name: `Population ${initialYear}`
+    };
+
+    // === Slider Plotly "sans frames" via method:'update' =======
+    const sliderSteps = years.map(y => {
+      const dens = densitiesByYear[y];
+      const texts = textsByYear[y];
+      return {
+        label: String(y),
+        method: 'update',
+        // Plotly.update(gd, traceUpdate, layoutUpdate, traces)
+        args: [
+          // 1) traceUpdate : on cible *les deux* traces (0: choropleth, 1: texte)
+          //    Les props non pertinentes sont ignorées par la trace concernée.
+          {
+            z: [dens, dens],                      // 'z' utile pour la trace 0; ignoré par la trace 1
+            text: [texts, texts],                 // 'text' utile pour la trace 1; toléré par la trace 0
+            name: ['Densité', `Population ${y}`], // noms des traces (optionnel)
+            colorbar: [{ title: { text: `Densité (hab./km²) — ${y}` } }, null] // maj du titre de la colorbar (trace 0)
+          },
+          // 2) layoutUpdate : rien ici
+          {},
+          // 3) traces : indices des traces à mettre à jour
+          [0, 1]
+        ],
+        // transition instantanée (pas d'animation)
+        value: y
+      };
+    });
+
+    const layout = {
+      title: { text: 'France — Population par département', x: 0.02 },
+      geo: {
+        projection: { type: 'mercator' },
+        fitbounds: 'locations',
+        showland: true,
+        landcolor: '#f7f7f7',
+        showcountries: true,
+        countrycolor: '#999',
+        coastlinecolor: '#999'
+      },
+      margin: { l: 0, r: 0, t: 56, b: 0 },
+      sliders: [{
+        active: years.length - 1,
+        pad: { t: 40 },
+        currentvalue: { prefix: 'Année : ', font: { size: 16 } },
+        steps: sliderSteps,
+        transition: { duration: 0 } // pas d'animation
+      }]
+    };
+
+    // Rendu
+    Plotly.newPlot('map', [choropleth, scatterText], layout, { responsive: true });
+  })();
+  </script>
+</body>
+</html>

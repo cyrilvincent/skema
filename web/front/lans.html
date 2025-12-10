@@ -16,7 +16,7 @@ df=values[0]
 geojson=values[1]
 texts = df["code_iris"].map((ci, i) => `${df["nom_iris"][i]}<br>Iris: ${ci}<br>APL: ${df["apl"][i].toFixed(1)}`);
 
-var data = [{
+var geo = {
   type: "choropleth", // "chloropletmap" idem mais avec map en fond
   locations: df["fid"],
   z: df["apl"],
@@ -25,7 +25,21 @@ var data = [{
   hoverinfo: "text",
   text:texts,
   geojson: geojson
- }];
+};
+
+var scatter = {
+      type: 'scattergeo',
+      lat: df["lat"],
+      lon: df["lon"],
+      text: df["apl"].map((a, i) => `${a.toFixed(0)}`),
+      mode: 'text',
+      textposition: 'middle center',
+      textfont: { family: 'Arial', size: 12, color: '#000000' },
+      hoverinfo: 'none',
+      name: 'APL'
+    };
+
+var fig = [geo, scatter]
 
 var layout = {
 	/*map: {
@@ -52,7 +66,7 @@ var layout = {
 	//margin: {l: 0, r: 0, t: 50, b: 0}
 };
 			  
-Plotly.newPlot('myDiv', data, layout);
+Plotly.newPlot('myDiv', fig, layout);
 
 	</script>
 </body>

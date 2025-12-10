@@ -16,14 +16,26 @@ geojson=values[1];
 texts=[];
 steps=[];
 lastYear=2025;
+var showLabel=df["years"][lastYear.toString()]["fid"].length < 50;
 
 for (let year = 2020; year <= lastYear; year++) {
     df_year=df["years"][year.toString()];
-    text = df_year["code_iris"].map((ci, i) => `Commune: ${df_year["nom_commune"][i]}<br>Nom Iris: ${df_year["nom_iris"][i]}<br>Code Iris: ${ci}<br>APL ${year}: ${df_year["apl"][i].toFixed(1)}<br>Variation APL/2020: ${((df_year["apl"][i]-df["years"]["2020"]["apl"][i])*100/df["years"]["2020"]["apl"][i]).toFixed(0)}%<br>Moyenne pondérée nationale APL: ${df["meanws"][year-2020].toFixed(1)} (${df_year["apl"][i]>df["meanws"][year-2020]?'+':''}${((df_year["apl"][i]-df["meanws"][year-2020])*100/df["meanws"][year-2020]).toFixed(0)}%)<br>Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>Population: ${df_year["pop"][i].toFixed(0)}<br>Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"][i]+1e-5)).toFixed(0)}%)`);
+    text = df_year["code_iris"].map((ci, i) => `
+Commune: ${df_year["nom_commune"][i]}<br>
+Nom Iris: ${df_year["nom_iris"][i]}<br>
+Code Iris: ${ci}<br>
+APL ${year}: ${df_year["apl"][i].toFixed(1)}<br>
+Variation APL/2020: ${((df_year["apl"][i]-df["years"]["2020"]["apl"][i])*100/df["years"]["2020"]["apl"][i]).toFixed(0)}%<br>
+APL/Moyenne pondérée nationale: ${df_year["apl"][i]>df["meanws"][year-2020]?'+':''}${((df_year["apl"][i]-df["meanws"][year-2020])*100/df["meanws"][year-2020]).toFixed(0)}% (${df["meanws"][year-2020].toFixed(1)})<br>
+Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
+Population: ${df_year["pop"][i].toFixed(0)}<br>
+Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
+Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
+APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"][i]+1e-5)).toFixed(0)}%)`);
 	texts.push(text);
 }
 
-var data = [{
+var geo = {
 	  type: "choropleth",
 	  locations: df["years"][lastYear.toString()]["fid"],
 	  z: df["years"][lastYear.toString()]["apl"],
@@ -32,7 +44,7 @@ var data = [{
 	  hoverinfo: "text",
 	  text:texts[texts.length - 1],
 	  geojson: geojson,
-	  colorbar: {title: "APL", titleside: "top"},
+	  colorbar: {title: {text: "APL"}},
 	  colorscale: [[0.0, "rgb(64,64,127)"],
                         [0.1, "rgb(112,112,127)"],
                         [0.25, "rgb(159,159,127)"],
@@ -42,7 +54,22 @@ var data = [{
                         [0.95, "rgb(165,0,32)"],
                         [1.0, "rgb(127,0,0)"]
                        ]
-	 }];
+	 };
+
+var scatter = {
+      type: 'scattergeo',
+      lat: df["years"][lastYear.toString()]["lat"],
+      lon: df["years"][lastYear.toString()]["lon"],
+      text: df["years"][lastYear.toString()]["apl"].map((a, i) => `${a.toFixed(0)}`),
+      mode: 'text',
+      textposition: 'middle center',
+      textfont: { family: 'Arial', size: 12, color: '#000000' },
+      hoverinfo: 'none',
+      name: 'APL',
+      visible: showLabel,
+    };
+
+var fig = [geo, scatter]
 
 for (let year = 2020; year < 2026; year++) {
 	df_year=df["years"][year.toString()];
@@ -51,8 +78,8 @@ for (let year = 2020; year < 2026; year++) {
       method: 'update',
       args: [
         {
-        	z: [df_year["apl"]],
-        	text: [texts[year-2020]],
+        	z: [df_year["apl"], null],
+        	text: [texts[year-2020], df_year["apl"].map((a, i) => `${a.toFixed(0)}`)],
         }
       ]
     };
@@ -96,7 +123,7 @@ var layout = {
       }]
 };
 			  
-Plotly.newPlot('myDiv', data, layout);
+Plotly.newPlot('myDiv', fig, layout);
 
 	</script>
 </body>

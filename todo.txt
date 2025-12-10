@@ -2,4 +2,5 @@ Projet 1 = Parser apl/ameli et intégrer dans ps_stats
 Projet 2 = SAE + Medecine Hospitalière
     En cours
 Projet 3 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+    https://chaire2p2as.weebly.com/
 Projet 4 = Doctolib scraper
