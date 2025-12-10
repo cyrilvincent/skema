@@ -1,24 +1,4 @@
-Faire le ratio des ETP manquants
-Voir si etp dans Q2? + SYGEN
+Porter calcul en py puis sur serveur
 Dataviz distance urgence : URG GEN + URG PED + PSY
-Indicateur de tension passu / (etpsal + efflib)
 Pharmacie via la table etablissement
 EHPAD via la table ehpad + capacite d'acceuil
-etpsal vs efflib
-
-urgence_p 2023 611
-urgence_p 2023 etpsal and efflib null 0
-urgence_detail 2023 603
-urgence_detail 2023 passu null or 0 0
-
-select up.*, e.* from sae.urgence_p up
-join etablissement e on e.nofinesset=up.fi
-where up.perso='M9999'
-and up.an=2023
-and up.fi not in (
-select fi from sae.urgence_detail ud
-where ud.urg='GEN'
-and ud.an=2023)
-Ne donne que des hopitaux pédiatriques
-Il faut donc partir de la table urgence_detail joint à urgence_p sinon on a trop d'info
-
