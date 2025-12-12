@@ -28,7 +28,7 @@ where d.an={year}
 and d.urg='{urg}'
 """
     print(f"Quering SAE for year {year} and urg={urg}")
-    print(sql)
+    # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -117,6 +117,10 @@ for time in [60]:
                 dico["q10"], dico["q25"], dico["q50"], dico["q75"], dico["q90"] = np.quantile(dist_df3["fake_time"], [0.1, 0.25, 0.5, 0.75, 0.9])
                 dico["min"] = np.min(dist_df3["fake_time"])
                 dico["max"] = np.max(dist_df3["fake_time"])
+                dico["passu_mean"] = np.mean(final[final["passu"] > 0]["passu"])
+                dico["etpsal_mean"] = np.mean(final[final["has_pdata"] == True]["etpsal"])
+                dico["efflib_mean"] = np.mean(final[final["has_pdata"] == True]["efflib"])
+                dico["tension_mean"] = np.mean(final[(final["has_pdata"] == True) & (final["tension"] != np.inf)]["tension"])
                 dico["date"] = datetime.datetime.now()
                 dico["key"] = random.randint(0, 1000000000000)
                 study = pd.DataFrame(dico, index=[dico["key"]])
