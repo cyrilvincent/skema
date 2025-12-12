@@ -104,7 +104,7 @@ for time in [60]:
                 dist_df2["tension"] = dist_df2["passu"] / (dist_df2["etpsal"] + dist_df2["efflib"])
                 dist_df2["iris"] = dist_df2["iris1"]
                 dist_df3 = dist_df2.merge(iriss, on="iris", how="left", suffixes=('', ''))
-                dist_df3 = dist_df3.merge(pop_iris[["iris", "pop"]], on="iris", how="left", suffixes=('', ''))
+                dist_df3 = dist_df3.merge(pop_iris[["iris", "pop", "iris_string"]], on="iris", how="left", suffixes=('', ''))
                 dist_df3["fake_time"] = dist_df3["time_hc"]
                 dist_df3["fake_time"] = dist_df3["fake_time"].fillna(90)
                 sum_pop = np.sum(dist_df3["pop"])
