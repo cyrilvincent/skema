@@ -105,8 +105,11 @@ class SAEUrgencesParser(SAEBaseParser):
                 df["effpl"] = None
             if "effpa" not in df.columns:
                 df["effpa"] = None
-            if "etp" in df.columns:
-                df = df.rename(columns={'etp': 'etpsal'})
+            if "etp" not in df.columns:
+                df["etp"] = df["etpsal"] + df["efflib"].fillna(0)
+            else:
+                df["etpsal"] = None
+                df["efflib"] = None
         return df
 
 # select * from sae.urgence_detail ud
@@ -329,8 +332,9 @@ if __name__ == '__main__':
     context.create(echo=args.echo)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} MB")
-    # p = SAEUrgencesParser(context)
-    # p.load3(args.path)
+    p = SAEUrgencesParser(context)
+    p.loads(args.path, "2")
+    p.loads(args.path, "_P")
     # p = SAEPsyParser(context)
     # p.loads(args.path, "")
     # p.load3(args.path)
@@ -344,8 +348,8 @@ if __name__ == '__main__':
     # p.loads(args.path, "")
     # p = SAEQ24Parser(context)
     # p.loads(args.path, "")
-    p = SAESygenParser(context)
-    p.loads(args.path, "")
+    # p = SAESygenParser(context)
+    # p.loads(args.path, "")
     new_db_size = context.db_size()
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")

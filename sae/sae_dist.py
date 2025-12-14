@@ -17,7 +17,7 @@ def get_urgence_sae(year, urg="GEN"):
     # column = df["column"].iloc[0]
     # condition = df["condition"].iloc[0]
     sql = f"""
-select d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
+select d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
 from sae.urgence_detail d
 left join sae.urgence_p p on p.fi=d.fi and p.an=d.an and p.perso='M9999'
 join etablissement e on e.nofinesset=d.fi
@@ -87,21 +87,23 @@ for time in [60]:
                 ps_df = get_sae_by_bor(year, bor)
                 ps_df["etpsal"] = ps_df["etpsal"].fillna(0)
                 ps_df["efflib"] = ps_df["efflib"].fillna(0)
+                ps_df["etp"] = ps_df["etp"].fillna(0)
                 ps_df = ps_df.sort_values(by='iris')
                 ps_df2 = ps_df.drop_duplicates(subset=['iris'])
                 matrix_merge_df = iris_matrix.merge(ps_df2, on="iris", how="left", suffixes=('', ''))
                 matrix_merge_df["etpsal"] = matrix_merge_df["etpsal"].fillna(0)
                 matrix_merge_df["efflib"] = matrix_merge_df["efflib"].fillna(0)
+                matrix_merge_df["etp"] = matrix_merge_df["etp"].fillna(0)
                 matrix_merge_df["passu"] = matrix_merge_df["passu"].fillna(0)
                 idx_ok = matrix_merge_df[matrix_merge_df['fi'].notna()].groupby('iris1')['time'].idxmin()
                 idx_any = matrix_merge_df.groupby('iris1')['time'].idxmin()
                 idx_final = idx_ok.combine_first(idx_any)
                 result = matrix_merge_df.loc[idx_final].sort_index().reset_index(drop=True)
-                dist_df = result[["iris1", "km", "time_hc", "time_hp", "fi", "passu", "has_pdata", "etpsal", "efflib", "rs", "lon", "lat"]]
+                dist_df = result[["iris1", "km", "time_hc", "time_hp", "fi", "passu", "has_pdata", "etpsal", "efflib", "etp", "rs", "lon", "lat"]]
                 dist_df2 = dist_df.assign(time_hc=dist_df['time_hc'].where(dist_df['fi'].notna()))
                 dist_df2 = dist_df2.assign(time_hp=dist_df['time_hp'].where(dist_df['fi'].notna()))
                 dist_df2 = dist_df2.assign(km=dist_df['km'].where(dist_df['fi'].notna()))
-                dist_df2["tension"] = dist_df2["passu"] / (dist_df2["etpsal"] + dist_df2["efflib"])
+                dist_df2["tension"] = dist_df2["passu"] / dist_df2["etp"]
                 dist_df2["iris"] = dist_df2["iris1"]
                 dist_df3 = dist_df2.merge(iriss, on="iris", how="left", suffixes=('', ''))
                 dist_df3 = dist_df3.merge(pop_iris[["iris", "pop", "iris_string"]], on="iris", how="left", suffixes=('', ''))
@@ -120,6 +122,7 @@ for time in [60]:
                 dico["passu_mean"] = np.mean(final[final["passu"] > 0]["passu"])
                 dico["etpsal_mean"] = np.mean(final[final["has_pdata"] == True]["etpsal"])
                 dico["efflib_mean"] = np.mean(final[final["has_pdata"] == True]["efflib"])
+                dico["etp_mean"] = np.mean(final[final["has_pdata"] == True]["etp"])
                 dico["tension_mean"] = np.mean(final[(final["has_pdata"] == True) & (final["tension"] != np.inf)]["tension"])
                 dico["date"] = datetime.datetime.now()
                 dico["key"] = random.randint(0, 1000000000000)
