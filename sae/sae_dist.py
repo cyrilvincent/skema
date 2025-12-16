@@ -11,11 +11,6 @@ pd.options.mode.copy_on_write = True
 
 
 def get_urgence_sae(year, urg="GEN"):
-    # sql = f"select * from sae.bor where id={bor}"
-    # df = pd.read_sql(sql, config.connection_string)
-    # table = df["table"].iloc[0]
-    # column = df["column"].iloc[0]
-    # condition = df["condition"].iloc[0]
     sql = f"""
 select d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
 from sae.urgence_detail d
@@ -27,7 +22,23 @@ join iris.iris i on i.code=an.iris
 where d.an={year}
 and d.urg='{urg}'
 """
-    print(f"Quering SAE for year {year} and urg={urg}")
+    print(f"Quering SAE urgence for year {year} and urg={urg}")
+    # print(sql)
+    return pd.read_sql(sql, config.connection_string)
+
+
+def get_psy_sae(year):
+    sql = f"""
+select p.fi, p.cap_htp passu, true has_pdata, p.etpsal_pkt etpsal, p.efflib_pkt efflib, p.etp_pkt etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
+from sae.psy p
+join etablissement e on e.nofinesset=p.fi
+join adresse_raw ar on e.adresse_raw_id=ar.id
+join adresse_norm an on ar.adresse_norm_id=an.id
+join iris.iris i on i.code=an.iris
+where p.an={year}
+and p.dis='TOT'
+"""
+    print(f"Quering SAE psy for year {year}")
     # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
@@ -35,7 +46,10 @@ and d.urg='{urg}'
 def get_sae_by_bor(year, bor):
     if bor == "urgence_gen":
         return get_urgence_sae(year, "GEN")
-
+    elif bor == "urgence_ped":
+        return get_urgence_sae(year, "PED")
+    elif bor == "psy":
+        return get_psy_sae(year)
 
 def get_iriss():
     sql = f"""
@@ -82,7 +96,7 @@ for time in [60]:
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for year in range(2013, 2025):
             pop_iris = get_pop_iris(year)
-            for bor in ["urgence_gen"]:
+            for bor in ["psy"]: # ["urgence_gen", "urgence_ped", "psy"]:
                 print(f"Compute dist {bor} in {year} in {time}min {time_type}")
                 ps_df = get_sae_by_bor(year, bor)
                 ps_df["etpsal"] = ps_df["etpsal"].fillna(0)

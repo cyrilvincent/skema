@@ -1,4 +1,3 @@
-Communiquer benj
-Dataviz distance urgence : URG PED + PSY
+PSY : communiquer
 Pharmacie via la table etablissement
 EHPAD via la table ehpad + capacite d'acceuil

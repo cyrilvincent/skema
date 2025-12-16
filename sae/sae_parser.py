@@ -127,10 +127,8 @@ class SAEPsyParser(SAEBaseParser):
 
     def manage_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.suffix == "":
-            if "etp_pkt" in df.columns:
-                df["etpsal_pkt"] = df["etp_pkt"]
-            else:
-                df["etp_pkt"] = df["etpsal_pkt"]
+            if "etp_pkt" not in df.columns:
+                df["etp_pkt"] = df["etpsal_pkt"].fillna(0) + df["efflib_pkt"].fillna(0)
             if "cap_had" not in df.columns:
                 df["cap_had"] = None
                 df["jou_had"] = None
@@ -332,11 +330,11 @@ if __name__ == '__main__':
     context.create(echo=args.echo)
     db_size = context.db_size()
     print(f"Database {context.db_name}: {db_size:.0f} MB")
-    p = SAEUrgencesParser(context)
-    p.loads(args.path, "2")
-    p.loads(args.path, "_P")
-    # p = SAEPsyParser(context)
-    # p.loads(args.path, "")
+    # p = SAEUrgencesParser(context)
+    # p.loads(args.path, "2")
+    # p.loads(args.path, "_P")
+    p = SAEPsyParser(context)
+    p.loads(args.path, "")
     # p.load3(args.path)
     # p = SAEQ20Parser(context)
     # p.loads(args.path, "")
