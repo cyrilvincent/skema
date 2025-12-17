@@ -1,12 +1,12 @@
 config.py
 *.key
 georef*
-
+*.zip
+*.7z
 **/.idea/**
 *.pickle
 **/data/**
 **/chromedriver_win32/**
-*.zip
 .venv
 /data/adresse
 
