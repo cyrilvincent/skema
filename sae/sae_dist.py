@@ -43,6 +43,23 @@ and p.dis='TOT'
     return pd.read_sql(sql, config.connection_string)
 
 
+def get_pharma(year):
+    sql = f"""
+select e.nofinesset fi, null as passu, false as has_pdata, null as etpsal, null as efflib, null as etp, e.id etab_id, e.rs, an.id an_id, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris
+from etablissement e
+join etablissement_date_source eds on eds.etablissement_id=e.id
+join adresse_raw ar on ar.id=e.adresse_raw_id
+join adresse_norm an on an.id=ar.adresse_norm_id
+join iris.iris i on i.code=an.iris
+join date_source ds on eds.date_source_id=ds.id
+where e.categetab=620
+and ds.annee={year-2000}
+    """
+    print(f"Quering etablissement pharma for year {year}")
+    # print(sql)
+    return pd.read_sql(sql, config.connection_string)
+
+
 def get_sae_by_bor(year, bor):
     if bor == "urgence_gen":
         return get_urgence_sae(year, "GEN")
@@ -50,6 +67,8 @@ def get_sae_by_bor(year, bor):
         return get_urgence_sae(year, "PED")
     elif bor == "psy":
         return get_psy_sae(year)
+    elif bor == "pharma":
+        return get_pharma(year)
 
 def get_iriss():
     sql = f"""
@@ -96,7 +115,7 @@ for time in [60]:
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for year in range(2013, 2025):
             pop_iris = get_pop_iris(year)
-            for bor in ["psy"]: # ["urgence_gen", "urgence_ped", "psy"]:
+            for bor in ["pharma"]: # ["urgence_gen", "urgence_ped", "psy", "pharma"]:
                 print(f"Compute dist {bor} in {year} in {time}min {time_type}")
                 ps_df = get_sae_by_bor(year, bor)
                 ps_df["etpsal"] = ps_df["etpsal"].fillna(0)

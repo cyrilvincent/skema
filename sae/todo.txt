@@ -1,3 +1,2 @@
-PSY : communiquer
-Pharmacie via la table etablissement
+Pharma : communiquer
 EHPAD via la table ehpad + capacite d'acceuil
