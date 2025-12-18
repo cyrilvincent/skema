@@ -1,0 +1,5 @@
+Ajouter communes déléguées et tester sur d'autres endroits
+Faire une un dataviz sur la France entière et détecter les jointure de code_commune qui ne se font pas (par exemple autrans)
+Faire le meanw des communes
+GDP en pickle
+Ajouter les scattergeo

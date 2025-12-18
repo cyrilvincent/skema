@@ -194,6 +194,7 @@ apl/*.csv
 ca/*.html
 *.gpkg
 **/out/**
+communes-5m.geojson
 
 
 

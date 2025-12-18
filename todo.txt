@@ -2,10 +2,7 @@ Projet 1 = Parser apl/ameli et intégrer dans ps_stats
 Projet 2 = SAE + Medecine Hospitalière
     En cours
 Projet 3 = Dataviz commune
-    Dupliquer les row gdf avec les ancines ou nouveau code commune
-    https://www.data.gouv.fr/datasets/contours-des-communes-de-france-simplifie-avec-regions-et-departement-doutre-mer-rapproches/
-    https://adresse.data.gouv.fr/data/contours-administratifs/latest/geojson
-    Proto dans le répertoire commune
+    Proto en cours et ok dans les grandes lignes
 Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
 Projet 5 = Doctolib scraper
