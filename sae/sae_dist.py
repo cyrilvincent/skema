@@ -50,7 +50,7 @@ from etablissement e
 join etablissement_date_source eds on eds.etablissement_id=e.id
 join adresse_raw ar on ar.id=e.adresse_raw_id
 join adresse_norm an on an.id=ar.adresse_norm_id
-join iris.iris i on i.code=an.iris
+join iris.iris i on i.code=an.geo_iris
 join date_source ds on eds.date_source_id=ds.id
 where e.categetab=620
 and ds.annee={year-2000}
@@ -67,7 +67,7 @@ from etablissement e
 join etablissement_date_source eds on eds.etablissement_id=e.id
 join adresse_raw ar on ar.id=e.adresse_raw_id
 join adresse_norm an on an.id=ar.adresse_norm_id
-join iris.iris i on i.code=an.iris
+join iris.iris i on i.code=an.geo_iris
 join date_source ds on eds.date_source_id=ds.id
 where e.categretab=4401
 and ds.annee={year-2000}
@@ -127,6 +127,7 @@ where year={yy}
     # print(f"Get pop_iris for year {yy}")
     return pd.read_sql(text(sql), config.connection_string)
 
+
 iriss = get_iriss()
 for time in [60]:
     for time_type in ["HC"]:
@@ -134,7 +135,7 @@ for time in [60]:
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
         for year in range(2004, 2025):
-            for bor in ["ehpad"]:  # ["urgence_gen", "urgence_ped", "psy", "pharma", "ehpad"]:
+            for bor in ["pharma"]:  # ["urgence_gen", "urgence_ped", "psy", "pharma", "ehpad"]:
                 if bor not in ["pharma", "ehpad"] and year < 2013:
                     continue
                 pop_iris = get_pop_iris(year)

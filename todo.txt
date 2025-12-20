@@ -7,3 +7,7 @@ Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
 Projet 5 = Doctolib scraper
 Projet 6 = ps_change_key from excel
+Projet 7 = GeoIris
+    En cours
+    Remplacer pyris
+    Porté uniquement sur pharma et ehpad
