@@ -11,6 +11,7 @@ pd.options.mode.copy_on_write = True
 
 
 def get_urgence_sae(year, urg="GEN"):
+    # TODO iris => geo_iris
     sql = f"""
 select d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
 from sae.urgence_detail d
@@ -28,6 +29,7 @@ and d.urg='{urg}'
 
 
 def get_psy_sae(year):
+    # TODO iris => geo_iris
     sql = f"""
 select p.fi, p.cap_htp passu, true has_pdata, p.etpsal_pkt etpsal, p.efflib_pkt efflib, p.etp_pkt etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
 from sae.psy p
