@@ -1,13 +1,17 @@
 Projet 1 = Parser apl/ameli et intégrer dans ps_stats
 Projet 2 = SAE + Medecine Hospitalière
     En cours
-Projet 3 = Dataviz commune
-    Proto en cours et ok dans les grandes lignes
+Projet 3 = ps_change_key from excel
+    Automatiser XLSX
+    Gérer le 8 en début de RPPS
 Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
-Projet 5 = Doctolib scraper
-Projet 6 = ps_change_key from excel
-Projet 7 = GeoIris
+    En cours
+Projet 5 = GeoIris
     Remplacer pyris
     Porté uniquement sur pharma et ehpad
     Faire psy + urgence + apl
+    Tout refaire tourner en prod
+Projet 6 = Doctolib scraper
+
+

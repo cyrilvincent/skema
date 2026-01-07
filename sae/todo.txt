@@ -1,3 +1,11 @@
 migrer sql iris => geo_iris
 goe_iris remplace pyris
+sae_dist_etab_dataviz à porter sur serveur :
+    apl13 = gdf_merged.loc[gdf_merged['year']==years[0]+2000, ['iris_dest', 'time_hc']].set_index('iris_dest')['time_hc']
+    Variation / {years[0]+2000}: {"NA" if np.isnan(row["delta13"]) else int(np.clip(row["delta13"]*100,-999,999))}%<br>
+Mettre le slider à gauche par défaut pour les APL
+Pharmacie : mettre 15 min sur la colorbar
+
+
+
 
