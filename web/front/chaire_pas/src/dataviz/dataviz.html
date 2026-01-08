@@ -1,9 +1,10 @@
-<p>dataviz works!</p>
-
 <h1>Demo Plotly</h1>
-    <plotly-plot
-      [data]="data"
-      [layout]="layout"
-      [config]="config">
-    </plotly-plot>
+  <div style="height: 1024px;">
+  <plotly-plot
+    [data]="data"
+    [layout]="layout"
+    [config]="config"
+    [useResizeHandler]="true" [style]="{position: 'relative', width: '100%', height: '100%'}">
+  </plotly-plot>
+  </div>
 
