@@ -19,26 +19,25 @@ values = [{"center_lat": 45.120971854318064, "center_lon": 5.590172891026883, "l
   df = this.values[0];
   geojson = this.values[1];
   years = this.df["years"]!;
+  geo: any = {};
   firstYear = Object.keys(this.years)[0];
   steps: Plotly.SliderStep[] = [];
   texts: String[][] = [];
   data: any[] = [];
   layout: Partial<Plotly.Layout> = {};
   scatter: Partial<Plotly.ScatterData> = {};
-  config: Partial<Plotly.Config> = {
-    responsive: true,
-    displayModeBar: true
-  };
+  config: Partial<Plotly.Config> = {};
   
   public constructor() {
     console.log('Plotly version =', (Plotly as any).version);
     this.createScatter();
     this.createLayout();
     this.createTexts();
-    const geo = this.createGeo();
-    this.data = [geo, this.scatter];
+    this.createGeo();
+    this.data = [this.geo, this.scatter];
     this.createSteps();
     this.createSliders();
+    this.createConfig();
   }
 
   public createTexts() {
@@ -75,16 +74,16 @@ APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"]
       geojson: this.geojson,
       colorbar: {title: {text: "APL"}},
       colorscale: [[0.0, "rgb(64,64,127)"],
-                          [0.1, "rgb(112,112,127)"],
-                          [0.25, "rgb(159,159,127)"],
-                          [0.5, "rgb(255,255,127)"],
-                          [0.75, "rgb(209,127,79)"],
-                          [0.90, "rgb(187,64,55)"],
-                          [0.95, "rgb(165,0,32)"],
-                          [1.0, "rgb(127,0,0)"]
+                    [0.1, "rgb(112,112,127)"],
+                    [0.25, "rgb(159,159,127)"],
+                    [0.5, "rgb(255,255,127)"],
+                    [0.75, "rgb(209,127,79)"],
+                    [0.90, "rgb(187,64,55)"],
+                    [0.95, "rgb(165,0,32)"],
+                    [1.0, "rgb(127,0,0)"]
                         ]
     };
-    return geo;
+    this.geo = geo;
   }
 
   public createSteps() {
@@ -159,5 +158,31 @@ APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"]
       name: 'APL',
       visible: true,
     };
+  }
+
+  public createConfig() {
+    const colors: string[] = ['#ff0000', '#00ff00', '#0000ff'];
+    this.config = {
+      responsive: true,
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ['lasso2d'],
+      modeBarButtonsToAdd: [
+        {
+          title: "Hello",
+          name: 'color toggler',
+          icon: Plotly.Icons.question,
+          click: function(gd) {
+            var newColor = colors[Math.floor(3 * Math.random())];
+            (Plotly as any).restyle(gd, 'line.color', newColor);
+          }},
+        {
+          title: "button1",
+          name: 'button1',
+          icon: Plotly.Icons.pencil,
+          click: function(gd) {alert('button1');}
+        },
+      ],
+    }
   }
 }
