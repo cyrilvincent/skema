@@ -1,9 +1,10 @@
 Projet 1 = Parser apl/ameli et intégrer dans ps_stats
 Projet 2 = SAE + Medecine Hospitalière
     En cours
+    Refaire tourner avec 1 seul mois par an
+    IDem pour APL
 Projet 3 = ps_change_key from excel
     Automatiser XLSX
-    Gérer le 8 en début de RPPS
 Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
     En cours

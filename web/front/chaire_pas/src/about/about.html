@@ -3,4 +3,16 @@
 <p>Copyright: {{copyright}}</p>
 <p>Angular: {{angularVersion}}</p>
 <p>Plotly.js: {{plotlyVersion}}</p>
-<p>Angular-plotly.js: {{angularPlotlyVersion}} {{isCDN ? "CDN" : "without CDN"}}</p>
+<p>Angular-plotly.js: {{angularPlotlyVersion}} {{isCDN ? "CDN" : "without CDN"}}</p> 
+@if (loading()) {
+    <p>Chargement…</p>
+}
+@else if (error()) {
+    <p>Erreur: {{error()}}</p>
+}
+@else {
+    <p>{{root()}}: {{ versions()?.icip }}</p>
+    <p>Back: {{ versions()?.back }}</p>
+}
+
+

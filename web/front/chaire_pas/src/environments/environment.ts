@@ -7,6 +7,7 @@ export const environment = {
   title: "Chaire pour la prévention et l'accès aux soins",
   version: '0.1',
   copyright: 'Skema 2026',
+  baseUrl: 'http://127.0.0.1:8000',
 };
 
 /*
