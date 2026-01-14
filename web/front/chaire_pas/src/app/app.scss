@@ -47,15 +47,13 @@
     font-family: "Patua One" !important;
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
-}
-
-@media screen and (min-width: $breakpoint-tablet) {
-    #wsite-title {
-        font-size: 26px !important;
-    }
-}
-
-.header-wrap #logo #wsite-title {
+    font-size: 26px !important;
     display: block;
     max-width: 400px;
+}
+
+@media screen and (max-width: $breakpoint-mobile) {
+    #wsite-title {
+        font-size: 20px !important;
+    }
 }

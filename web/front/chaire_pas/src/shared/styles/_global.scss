@@ -19,7 +19,6 @@ html, body {
   font-size: 16px;
   font-weight: normal;
   line-height: 1.8em;
-  -webkit-font-smoothing: antialiased;
 }
 
 img {
@@ -28,15 +27,15 @@ img {
   display: block;
 }
 
-a {
-    text-decoration: none;
-    color: rgb(43, 43, 43);
-    transition: color 200ms ease-in;
-}
-
 // ===============================
 // Typographie
 // ===============================
+a {
+    text-decoration: none;
+    color: $link-color;
+    transition: color 200ms ease-in;
+}
+
 h1, h2, h3, h4, h5 {
   font-family: $font-family-title;
   font-weight: bold;
@@ -48,13 +47,18 @@ p {
   margin-bottom: 1rem;
 }
 
+ul, li {
+    margin: 0px;
+    padding: 0px;
+}
+
 // ===============================
 // Layout global
 // ===============================
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+    width: 100%;
+    max-width: 960px;
+    margin: 0px auto;
 }
 
 
