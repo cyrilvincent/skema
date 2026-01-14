@@ -4,16 +4,6 @@
     position: relative;
 }
 
-.wsite-not-footer {
-    text-align: left;
-}
-
-.wsite-section-wrap {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
-}
-
 .wsite-header-section::before, .splash-page .header-wrap::before {
     position: absolute;
     top: 0px;

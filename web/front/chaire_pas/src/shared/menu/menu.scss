@@ -1,5 +1,8 @@
 @use "../styles/variables" as *;
 
+// Le hamburger gère les 3 lignes en haut à droite pour les téléphones
+// la classe navmobile-wrapper est en bas de page
+
 .menu {
     font-size: 12px;
     text-transform: uppercase;
