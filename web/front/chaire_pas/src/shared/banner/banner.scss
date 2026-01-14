@@ -38,6 +38,12 @@
     background-size: 100%;
     background-color: transparent;
     background-size: cover;
+
+    @media (max-width: $breakpoint-tablet) {
+        height: 100px;
+        display: block;
+    }
+
 }
 
 .banner-wrap .banner {
@@ -47,6 +53,10 @@
     vertical-align: middle;
     text-align: center;
     padding: 80px 0;
+
+    @media (max-width: $breakpoint-tablet) {
+        padding: 30px 0;
+    }   
 }
 
 h2, .wsite-content-title, .paragraph {
@@ -55,7 +65,7 @@ h2, .wsite-content-title, .paragraph {
     letter-spacing: 5px !important;
 }
 
-@media screen and (min-width: 767px) {
+@media screen and (min-width: $breakpoint-tablet) {
     .wsite-headline, .wsite-header-section .wsite-content-title {
         font-size: 55px !important;
     }
@@ -73,3 +83,4 @@ h2, .wsite-content-title, .paragraph {
     display: table;
     height: 100%;
 }
+
