@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DatavizCommune } from './dataviz-commune';
+import { Home } from './home';
 
-describe('DatavizCommune', () => {
-  let component: DatavizCommune;
-  let fixture: ComponentFixture<DatavizCommune>;
+describe('Home', () => {
+  let component: Home;
+  let fixture: ComponentFixture<Home>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DatavizCommune]
+      imports: [Home]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DatavizCommune);
+    fixture = TestBed.createComponent(Home);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

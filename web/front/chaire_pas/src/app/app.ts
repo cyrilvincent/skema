@@ -1,15 +1,12 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { About } from "../about/about";
-import { DatavizCommune} from "../dataviz-commune/dataviz-commune"
-import { Dataviz} from "../dataviz/dataviz"
+import { Component } from '@angular/core';
+import { RouterOutlet, RouterLinkWithHref, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, About, DatavizCommune, Dataviz],
+  imports: [RouterOutlet, RouterLink, RouterLinkWithHref],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('chaire_pas');
+  title = "Chaire pour la prévention et l'accès aux soins";
 }

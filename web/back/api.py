@@ -15,15 +15,16 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    print("ICIP")
+    print("Get root")
     return "ICIP"
 
 
 @app.get("/versions")
-async def version():
+async def versions():
+    print("Get versions")
     return {"icip": config.version, "back": config.web}
 
 if __name__ == '__main__':
     print(__version__)
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000)
+    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True) # Passer en SSL + enlever reload en prod

@@ -1,0 +1,61 @@
+@use "../shared//styles/variables" as *;
+
+.wrapper {
+    position: relative;
+    right: 0px;
+    background: white;
+    transition: right 610ms cubic-bezier(0, 0.8, 0.55, 1);
+}
+
+.header-wrap .nav-wrap{
+    position: relative;
+    z-index: 6;
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid rgb(204, 204, 204);
+}
+
+.header-wrap #logo {
+    text-align: center;
+    font-family: Cookie, cursive;
+    font-size: 40px;
+    font-weight: normal;
+    line-height: 1.1;
+    padding: 10px 0px !important;
+}
+
+.wsite-logo {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.header-wrap .wsite-logo {
+    padding: 30px 0px 20px;
+}
+
+.header-wrap #logo a {
+    color: black;
+    transition: 300ms ease-in;
+}
+
+.wsite-logo img, .wsite-logo span {
+    vertical-align: top !important;
+}
+
+#wsite-title {
+    font-family: "Patua One" !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+}
+
+@media screen and (min-width: $breakpoint-tablet) {
+    #wsite-title {
+        font-size: 26px !important;
+    }
+}
+
+.header-wrap #logo #wsite-title {
+    display: block;
+    max-width: 400px;
+}

@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   version: '0.1',
-  copyright: 'Cyril Vincent',
-  gamesUrl: 'http://localhost:5000/games',
+  copyright: 'Skema 2026',
+  baseUrl: 'http://127.0.0.1:8000',
+  loading: 'En cours de chargement',
 };

@@ -1,12 +1,19 @@
-<main class="main">
-  <div class="content">
-    <div class="left-side">
-      <h1>{{ title()}}</h1>
-      <app-about></app-about>
-      
+<div class="wrapper">
+  <div class="header-wrap">
+    <div class="nav-wrap">
+      <div id="logo">
+        <span class="wsite-logo">
+          <a routerLink="/">
+            <span id="wsite-title">{{title}}</span>
+          </a>
+          <nav>
+            <a routerLink="/">Home</a> |
+            <a routerLink="/about">About</a> |
+            <a routerLink="/dataviz">Dataviz</a>
+          </nav> 
+        </span> 
+      </div>  
     </div>
   </div>
-</main>
-
-
+</div>
 <router-outlet />

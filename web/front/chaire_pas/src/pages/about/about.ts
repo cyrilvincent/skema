@@ -1,13 +1,10 @@
 import { Component, inject, ChangeDetectionStrategy, VERSION } from '@angular/core';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import { PlotlyModule } from 'angular-plotly.js';
 import pkg from 'angular-plotly.js/package.json' assert { type: 'json' }
 import { AboutService } from './about.service';
-import { AsyncPipe} from '@angular/common';
-import { Observable } from 'rxjs';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-about',
@@ -28,10 +25,14 @@ export class About {
   loading = this.aboutService.loading;   
   error = this.aboutService.error;
   versions = this.aboutService.versions;
+  backendVisible = false;
 
-  constructor() {
-    this.aboutService.fetchRoot();
-    this.aboutService.fetchVersions();
+  backend() {
+    this.backendVisible = !this.backendVisible;
+    if (this.backendVisible) {
+      this.aboutService.fetchRoot();
+      this.aboutService.fetchVersions();
+    }
   }
 
 }

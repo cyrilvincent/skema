@@ -4,10 +4,10 @@
 
 export const environment = {
   production: false,
-  title: "Chaire pour la prévention et l'accès aux soins",
-  version: '0.1',
+  version: '0.0.1.Dev',
   copyright: 'Skema 2026',
   baseUrl: 'http://127.0.0.1:8000',
+  loading: 'En cours de chargement',
 };
 
 /*

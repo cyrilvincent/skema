@@ -1,0 +1,61 @@
+@use "./variables" as *;
+
+// ===============================
+// Reset CSS
+// ===============================
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: $font-family;
+  color: $text-color;
+  background-color: #fff;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.8em;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(43, 43, 43);
+    transition: color 200ms ease-in;
+}
+
+// ===============================
+// Typographie
+// ===============================
+h1, h2, h3, h4, h5 {
+  font-family: $font-family-title;
+  font-weight: bold;
+  color: $primary-color;
+}
+
+p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+// ===============================
+// Layout global
+// ===============================
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+
+
