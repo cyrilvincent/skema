@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
@@ -27,6 +27,7 @@ values = [{"center_lat": 45.120971854318064, "center_lon": 5.590172891026883, "l
   layout: Partial<Plotly.Layout> = {};
   scatter: Partial<Plotly.ScatterData> = {};
   config: Partial<Plotly.Config> = {};
+  ready = signal(false);
   
   public constructor() {
     console.log('Plotly version =', (Plotly as any).version);
