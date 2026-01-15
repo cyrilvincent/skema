@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, Signal, signal } from '@angular/core';
 
 // @ts-ignore
-import Plotly from 'plotly.js-dist-min'
+//import Plotly from 'plotly.js-dist-min'
 import { PlotlyModule } from 'angular-plotly.js';
 
 
@@ -27,10 +27,9 @@ values = [{"center_lat": 45.120971854318064, "center_lon": 5.590172891026883, "l
   layout: Partial<Plotly.Layout> = {};
   scatter: Partial<Plotly.ScatterData> = {};
   config: Partial<Plotly.Config> = {};
-  ready = signal(false);
   
   public constructor() {
-    console.log('Plotly version =', (Plotly as any).version);
+    //console.log('Plotly version =', (Plotly as any).version);
     this.createScatter();
     this.createLayout();
     this.createTexts();
@@ -40,6 +39,8 @@ values = [{"center_lat": 45.120971854318064, "center_lon": 5.590172891026883, "l
     this.createSliders();
     this.createConfig();
   }
+
+
 
   public createTexts() {
     type YearsType = typeof this.years;

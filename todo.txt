@@ -1,18 +1,14 @@
 Projet 1 = Parser apl/ameli et intégrer dans ps_stats
-Projet 2 = SAE + Medecine Hospitalière
-    En cours
-    Refaire tourner avec 1 seul mois par an
-    IDem pour APL
-Projet 3 = ps_change_key from excel
+Projet 2 = ps_change_key from excel
     Automatiser XLSX
-Projet 4 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+Projet 3 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
     En cours
-Projet 5 = GeoIris
-    Remplacer pyris
-    Porté uniquement sur pharma et ehpad
-    Faire psy + urgence + apl
-    Tout refaire tourner en prod
-Projet 6 = Doctolib scraper
+Projet 4 = GeoIris
+    Faire apl => geo_iris : fais sur mon poste
+    APL : Refaire tourner avec 1 seul mois par an : fais sur mon poste
+    Refaire tourner APL en prod
+    Tester Notebook
+Projet 5 = Doctolib scraper
 
 

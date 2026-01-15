@@ -1,7 +1,9 @@
 echo ICIP Monthly
 python --version
+set icipath=D:\icip\skema
 call %icippath%\.venv\Scripts\activate.bat
 cd %icippath%
+d:
 move %icippath%\downloader\logs\ban.log %icippath%\downloader\logs\ban.1
 python -m downloader.ban_downloader > %icippath%\downloader\logs\ban.log 2>&1
 move %icippath%\downloader\logs\etalab.log %icippath%\downloader\logs\etalab.1
@@ -27,6 +29,8 @@ move %icippath%\downloader\logs\score_matcher.log %icippath%\downloader\logs\sco
 python score_matcher.py > %icippath%\downloader\logs\score_matcher.log 2>&1
 move %icippath%\downloader\logs\iris_matcher.log %icippath%\downloader\logs\iris_matcher.1
 python iris_matcher.py > %icippath%\downloader\logs\iris_matcher.log 2>&1
+move %icippath%\downloader\logs\geo_iris.log %icippath%\downloader\logs\geo_iris.1
+python -m iris.geo_iris > %icippath%\downloader\logs\geo_iris.log 2>&1
 move %icippath%\downloader\logs\damir.2 %icippath%\downloader\logs\damir.3
 move %icippath%\downloader\logs\damir.1 %icippath%\downloader\logs\damir.2
 move %icippath%\downloader\logs\damir.log %icippath%\downloader\logs\damir.1
@@ -34,4 +38,4 @@ python -m downloader.damir_downloader > %icippath%\downloader\logs\damir.log 2>&
 move "D:\\icip\\backup\\icip.monthly.bak.1" "D:\\icip\\backup\\icip.monthly.bak.2"
 move "D:\\icip\\backup\\icip.monthly.bak" "D:\\icip\\backup\\icip.monthly.bak.1"
 set PGPASSWORD=sa
-D:\PostgreSQL\17\pgAdmin 4\runtime\pg_dump.exe --file "D:\\icip\\backup\\icip.monthly.bak" --host "localhost" --port "5432" --username "postgres" --no-password --verbose --format=c --large-objects --section=pre-data --section=data --section=post-data "icip"
+D:\PostgreSQL\17\bin\pg_dump.exe --file "D:\\icip\\backup\\icip.monthly.bak" --host "localhost" --port "5432" --username "postgres" --no-password --verbose --format=c --large-objects --section=pre-data --section=data --section=post-data "icip"

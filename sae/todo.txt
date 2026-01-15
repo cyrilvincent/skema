@@ -1,5 +1,5 @@
 migrer sql iris => geo_iris
-goe_iris remplace pyris
+
 
 
 

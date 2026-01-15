@@ -9,8 +9,11 @@ print(config.connection_string)
 pd.set_option('display.max_columns', None)
 pd.options.mode.copy_on_write = True
 
+pa_months = {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9}
+
+
 def get_ps(year, specialite):
-    sql=f"""
+    sql = f"""
 select ps.id, ps.nom, ps.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, 'L' code_mode_exercice 
 from ps
 join tarif t on t.ps_id = ps.id
@@ -20,13 +23,14 @@ join adresse_raw ar on c.adresse_raw_id=ar.id
 join adresse_norm an on ar.adresse_norm_id=an.id
 join specialite_profession sp on sp.profession_id=t.profession_id
 join specialite s on s.id=sp.specialite_id
-join iris.iris i on i.code=an.iris
+join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
 and tds.date_source_id >= {year}00 and  tds.date_source_id < {year+1}00
 group by ps.id, c.id, an.id, i.id
 """
     # print(f"Quering PS for year {year} and specialite {specialite}")
     return pd.read_sql(sql, config.connection_string)
+
 
 def get_pa(year, specialite, is_medecin):
     if is_medecin:
@@ -42,10 +46,11 @@ join profession p on p.id=pd.profession_id
 join specialite_profession sp on sp.profession_id=p.id
 join adresse_norm an on an.id=pands.adresse_norm_id
 join date_source ds on ds.id=pands.date_source_id
-join iris.iris i on i.code=an.iris
+join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
 --and ps.code_mode_exercice='L'
 and ds.annee={year}
+and ds.month={pa_months[year]}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
@@ -59,27 +64,30 @@ join profession_code_profession pcp on pcp.code_profession_id=ps.code_profession
 join specialite_profession sp on sp.profession_id=pcp.profession_id
 join adresse_norm an on an.id=pands.adresse_norm_id
 join date_source ds on ds.id=pands.date_source_id
-join iris.iris i on i.code=an.iris
+join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
 --and ps.code_mode_exercice='L'
 and ds.annee={year}
+and ds.month={pa_months[year]}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
-    # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
-    # print(sql)
+    print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
+    print(sql)
     return pd.read_sql(sql, config.connection_string)
 
+
 def get_by_source(year, specialite, source):
-    if source=="PS":
+    if source == "PS":
         return get_ps(year, specialite)
-    elif source=="PA":
+    elif source == "PA":
         return get_pa(year, specialite, specialite<21)
     else:
         raise ValueError(f"Bad source: {source}")
 
+
 def get_pop_iris(year):
-    yy=min(21, year)
+    yy = min(21, year)
     sql = f"""
 select i.id iris, pi.iris iris_string, c.code code_commune, i.type type_iris, pi.pop, pi.pop0002, pi.pop0305, pi.pop0610, pi.pop1117, pi.pop1824, pi.pop2539, pi.pop4054, pi.pop5564, pi.pop6579, pi.pop80p
 from iris.pop_iris pi
@@ -89,6 +97,7 @@ where year={yy}
 """
     # print(f"Get pop_iris for year {yy}")
     return pd.read_sql(text(sql), config.connection_string)
+
 
 def get_iris_matrix(time: int, time_type: str):
     sql = f"""
@@ -111,8 +120,9 @@ join iris.commune c on c.id=i.commune_id
     # print(sql)
     return pd.read_sql(text(sql), config.connection_string)
 
+
 def get_over(year, specialite, is_medecin):
-    yy=min(year, 24)
+    yy = min(year, 24)
     if is_medecin:
         sql = f"""select o.* from apl.overrepresentation o
         join specialite s on s.psp_spe_snds=o.psp_spe_snds
@@ -128,12 +138,13 @@ def get_over(year, specialite, is_medecin):
     over = pd.read_sql(sql, config.connection_string)
     return over
 
+
 for time in [30, 45, 60]: # [30, 45, 60]:
     for time_type in ["HP"]: # ["HC", "HP"]:
         iris_matrix = get_iris_matrix(time, time_type)
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
-        for source in ["PS"]: #["PA", "PS"]:
+        for source in ["PA"]: #["PA", "PS"]:
             for year in range(20, 26):
                 pop_iris = get_pop_iris(year)
                 for specialite in [21]: #range(1, 28):

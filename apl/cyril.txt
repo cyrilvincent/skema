@@ -3,7 +3,7 @@ Facultatif : refaire tourner ps_stats.ipynb pour voir si les nouvelles data sont
 Importer base-ic-evol-struct-pop-20YY.CSV depuis pop_iris_parser : 1x par an, modifier apl_france.py yy=min(21, year)
 Exécuter damir_age_stats.sql qui créé la table iris.damir_age_stats : 1x par an
 Exécuter overrepresentation.ipynb qui maj la table iris.overrepresenttion : 1x par an, modifier apl_france.py yy=min(year, 24)
-Tester sur apl.ipynb pour les départements et apl_france.ipynb pour la france
+Facultatif Tester sur apl.ipynb pour les départements pour debuger
 apl_france.py qui amende les tables apl.apl_study et apl.apl
 apl_slider_dataviz.ipynb & facultativement apl_dataviz_france.ipynb pour le dataviz
 

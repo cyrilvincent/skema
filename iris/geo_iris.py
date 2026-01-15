@@ -74,7 +74,8 @@ class GeoIris:
         return best_iris
 
     def get_adresse_norms(self):
-        sql = "select * from adresse_norm an where an.geo_iris is null"
+        print("Querying adresse_norm")
+        sql = "select * from adresse_norm an where an.geo_iris is null and an.lon is not null"
         return pd.read_sql(text(sql), config.connection_string)
 
     def update_iris(self, id: int, iris: str):
@@ -85,6 +86,7 @@ class GeoIris:
 
     def check_adresse_norms(self):
         adresse_norms = self.get_adresse_norms()
+        print(f"Found {len(adresse_norms)} adresses to geo_irised")
         nb = 0
         diff = 0
         not_found = 0

@@ -1,0 +1,6 @@
+Méthodologie
+Facultatif : refaire tourner ps_stats.ipynb pour voir si les nouvelles data sont consistentes
+modifier sae_dist.py range(2004, 2025)
+sae_france.py qui amende les tables sae.dist_study et sae.dist (sae.saeapl* : depracted)
+sae_dist_etab_dataviz.ipynb & facultativement dist_france.ipynb pour le dataviz
+
