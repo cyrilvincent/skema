@@ -2,12 +2,18 @@ import { Routes } from '@angular/router';
 import { About } from '../pages/about/about';
 import { Home } from '../pages/home/home';
 import { Dataviz } from '../pages/dataviz/dataviz';
+import { Observatoire } from '../pages/observatoire/observatoire';
 
 export const routes: Routes = [
   {
     path: '',
-    title: "Chaire pour la prévention et l'accès aux soins",
+    title: "Missions: Chaire pour la prévention et l'accès aux soins",
     component: Home,
+  },
+  {
+    path: 'observatoire',
+    title: "L'Observatoire: Chaire pour la prévention et l'accès aux soins",
+    component: Observatoire,
   },
   {
     path: 'about',
