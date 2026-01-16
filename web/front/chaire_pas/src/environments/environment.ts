@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   version: '0.0.1.Dev',
-  copyright: 'Skema 2026',
+  copyright: 'Skema Business School 2026',
   baseUrl: 'http://127.0.0.1:8000',
   loading: 'En cours de chargement',
 };

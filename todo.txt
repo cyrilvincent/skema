@@ -5,9 +5,9 @@ Projet 3 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
     En cours
 Projet 4 = GeoIris
-    Faire apl => geo_iris : fais sur mon poste
-    APL : Refaire tourner avec 1 seul mois par an : fais sur mon poste
-    Refaire tourner APL en prod
+    Faire apl => geo_iris : ok
+    APL : 1 seul mois par an : ok
+    Refaire tourner APL en prod : ok
     Tester Notebook
 Projet 5 = Doctolib scraper
 

@@ -50,7 +50,7 @@ join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
 --and ps.code_mode_exercice='L'
 and ds.annee={year}
-and ds.month={pa_months[year]}
+and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
@@ -68,7 +68,7 @@ join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
 --and ps.code_mode_exercice='L'
 and ds.annee={year}
-and ds.month={pa_months[year]}
+and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
