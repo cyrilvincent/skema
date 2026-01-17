@@ -72,8 +72,8 @@ and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code_mode_exercice
 """
-    print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
-    print(sql)
+    # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
+    # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
