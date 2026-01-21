@@ -1,5 +1,3 @@
-migrer sql iris => geo_iris
-
 
 
 

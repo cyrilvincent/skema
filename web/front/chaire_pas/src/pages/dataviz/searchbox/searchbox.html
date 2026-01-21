@@ -10,14 +10,19 @@
                 matInput
                 [formControl]="myControl"
                 [matAutocomplete]="auto"
-                (input)="filter()"
-                
-                (focus)="filter()"
-                [value]="text()"
+                autocomplete="off"
                 >
-            <mat-autocomplete requireSelection #auto="matAutocomplete"> <!-- #auto <=> [matAutoComplete]="auto" -->
-                @for (option of filteredOptions; track option) {
-                    <mat-option [value]="option">{{option}}</mat-option>
+
+            <mat-autocomplete  
+                #auto="matAutocomplete"
+                (optionSelected)="onSelected($event.option.value)"
+                [displayWith]="displayTuple"
+            >
+                @for (option of options(); track option[0]) {
+                    <mat-option [value]="option">{{option[1]}}</mat-option>
+                }
+                @if (!loading() && options().length === 0) {
+                    <mat-option disabled>Aucun résultat</mat-option>
                 }
             </mat-autocomplete>
         </mat-form-field>
@@ -25,5 +30,6 @@
     <button (click)="okButton()">OK</button>
     <p>Text: {{input.value}}</p>
     <p>Selected: {{text()}}</p>
+    <p>Selected by control: {{selectedId}}</p>
     
 </div>

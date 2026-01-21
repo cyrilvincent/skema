@@ -6,7 +6,7 @@ import time
 
 class CommuneService:
 
-    def __init__(self, limit=20):
+    def __init__(self, limit=10):
         self.limit = limit
         self.ix = Indexer()
         self.ix.start()

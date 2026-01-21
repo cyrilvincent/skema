@@ -1,14 +1,8 @@
 Projet 1 = Parser apl/ameli et intégrer dans ps_stats
-Projet 2 = ps_change_key from excel
-    Automatiser XLSX
-Projet 3 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+Projet 2 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
     https://chaire2p2as.weebly.com/
     En cours
-Projet 4 = GeoIris
-    Faire apl => geo_iris : ok
-    APL : 1 seul mois par an : ok
-    Refaire tourner APL en prod : ok
-    Tester Notebook
-Projet 5 = Doctolib scraper
+Projet 3 = Doctolib scraper
+    Voir octoparse
 
 
