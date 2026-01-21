@@ -17,11 +17,12 @@ class Indexer(threading.Thread):
         self.nb_limit = nb_limit
         self.q_limit = commune_length_limit
         self.join_type = join_type  # TODO C pour commune I pour Iris (cf ligne 38)
+                                    # Mettre les communes associées deleguées
         self.df = pd.DataFrame()
         self.ban = pd.DataFrame()
         self.db: dict[str, dict[str, str]] = {}
         self.limit_year = 2020
-        self.file = f"web/back/index_{datetime.datetime.now().year}{datetime.datetime.now().month:02d}.pickle"
+        self.file = f"data/index_{datetime.datetime.now().year}{datetime.datetime.now().month:02d}.pickle"
 
     def load_commune(self):
         sql = f"""select c.code, c.nom, c.nom_norm, c.epci_id, c.epci_nom, c.bassin_vie_id, c.bassin_vie_nom, c.old_nom,
@@ -171,9 +172,9 @@ class Indexer(threading.Thread):
             with open(self.file, "rb") as f:
                 print(f"Loading {self.file}")
                 self.db = pickle.load(f)
-                print(f"Found {len(self.db)} indexes")
         else:
             self.indexer()
+        print(f"Found {len(self.db)} indexes")
 
     def indexer(self):
         print("Starting indexer")
@@ -187,7 +188,6 @@ class Indexer(threading.Thread):
         self.load_ban()
         self.merge_ban()
         self.index_cps()
-        print(f"Found {len(self.db)} indexes")
         self.save()
 
     def run(self):

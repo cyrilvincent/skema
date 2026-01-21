@@ -489,7 +489,7 @@ class Tarif(Base):
                 self.montant_imagerie, self.borne_inf_imagerie, self.borne_sup_imagerie, self.montant_anesthesie,
                 self.borne_inf_anesthesie, self.borne_sup_anesthesie, self.montant_cec, self.borne_inf_cec,
                 self.borne_sup_cec,
-                self.cabinet_id) # Bug 3.1.2, must be -1
+                self.cabinet_id)
 
     def __repr__(self):
         return f"{self.id} {self.profession} {self.montant}"

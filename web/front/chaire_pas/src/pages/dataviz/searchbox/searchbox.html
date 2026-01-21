@@ -1,0 +1,29 @@
+<p>searchbox works!</p>
+<p><mat-slide-toggle>Toggle me!</mat-slide-toggle></p>
+<div>
+    <form class="example-form">
+        <mat-form-field class="example-full-width">
+            <mat-label>Commune, communauté de commune, département, région, code insee, code postal</mat-label>
+            <input #input
+                type="text"
+                placeholder="Choisir un lieu"
+                matInput
+                [formControl]="myControl"
+                [matAutocomplete]="auto"
+                (input)="filter()"
+                
+                (focus)="filter()"
+                [value]="text()"
+                >
+            <mat-autocomplete requireSelection #auto="matAutocomplete"> <!-- #auto <=> [matAutoComplete]="auto" -->
+                @for (option of filteredOptions; track option) {
+                    <mat-option [value]="option">{{option}}</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
+    <button (click)="okButton()">OK</button>
+    <p>Text: {{input.value}}</p>
+    <p>Selected: {{text()}}</p>
+    
+</div>

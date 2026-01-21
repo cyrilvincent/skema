@@ -51,12 +51,9 @@ Parsing IRIS
 python iris_matcher.py -l
 
 Changement de la clé d'un PS
-python ps_change_key.py ps_old_key ps_new_key
-Cette commande modifie la clé (ou l'INPP) d'un PS
-ps_old_key correspond au ps.key du ps qui va être modifié
-ps_new_key correspond au nouvel INPP du PS
-python ps_change_key.py VINCENT_CYRIL_38250 810000811140
-python ps_change_key.py 800000000000 810000811140
+python ps_change_key.py path.xlsx nom_onglet
+Le fichier excel doit avoir nue colonne key et un colonne Num_RPPS
+python ps_change_key.py data/ps/ps_changekey/pedia_rpps.xlsx -s pedia_rpps
 
 Adresse Finder
 Pour débugger une adresse via BAN et OSM

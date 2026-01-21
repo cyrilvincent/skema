@@ -5,6 +5,7 @@ from sqlentities import Context, PS, PSMerge
 import argparse
 import art
 import config
+import pandas as pd
 
 
 class PSChangeKey(PSParser):
@@ -46,15 +47,20 @@ class PSChangeKey(PSParser):
         self.merge_factory(ps1.key, ps2.key)
         return ps2
 
-    def find_and_change(self, source: str, dest: str) -> PS:
+    def find_and_change(self, source: str, dest: str) -> PS | None:
         if len(dest) > 12:
-            print(f"{dest} must have less than 12 char")
-            quit(2)
+            print(f"ERROR: {dest} must have less than 12 char")
+            return None
         ps = self.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources))\
             .options(joinedload(PS.tarifs)).filter(PS.key == source).one_or_none()
         if ps is None:
-            print(f"PS key {source} does not exist")
-            quit(1)
+            exist = (self.context.session.query(PSMerge)
+                     .filter((PSMerge.key == source) & (PSMerge.inpp == dest)).one_or_none())
+            if exist is None:
+                print(f"ERROR: PS key {source} does not exist")
+            else:
+                print(f"PS {source} already in ps_merge ")
+            return None
         print(f"Found {ps}")
         ps_dest = self.context.session.query(PS).options(joinedload(PS.ps_cabinet_date_sources))\
             .options(joinedload(PS.tarifs)).filter(PS.key == dest).one_or_none()
@@ -72,6 +78,15 @@ class PSChangeKey(PSParser):
         self.find_and_change(source, dest)
         self.context.session.commit()
 
+    def load_xl(self, path, sheet):
+        df = pd.read_excel(path, sheet, dtype=str)
+        print(df)
+        for _, serie in df.iterrows():
+            if serie["key"].strip() == serie["Num_RPPS"].strip():
+                print(f"WARNING: key == Num_RPPS {serie["key"]}")
+            else:
+                self.change(serie["key"].strip(), serie["Num_RPPS"].strip())
+
 
 if __name__ == '__main__':
     art.tprint(config.name, "big")
@@ -80,12 +95,14 @@ if __name__ == '__main__':
     print(f"V{config.version}")
     print(config.copyright)
     print()
-    parser = argparse.ArgumentParser(description="PS Fusion")
-    parser.add_argument("source", help="PS old key")
-    parser.add_argument("dest", help="PS new key")
+    parser = argparse.ArgumentParser(description="PS Change Key")
+    parser.add_argument("path", help="xlsx path")
+    parser.add_argument("-s", "--sheet", help="Sheet name")
     parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
     args = parser.parse_args()
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     psm = PSChangeKey(context)
-    psm.change(args.source, args.dest)
+    psm.load_xl(args.path, args.sheet)
+
+    # data/ps/ps_changekey/pedia_rpps.xlsx -s pedia_rpps

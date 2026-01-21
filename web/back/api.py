@@ -27,10 +27,12 @@ async def versions():
     print("Get /versions")
     return {"icip": config.version, "back": config.web}
 
+
 @app.get("/find/{q}")
 async def find(q: str):
     print(f"Get /find/{q}")
     return commune_service.find(q)
+
 
 if __name__ == '__main__':
     print(__version__)

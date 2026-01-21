@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { About } from '../pages/about/about';
 import { Home } from '../pages/home/home';
-import { Dataviz } from '../pages/dataviz/dataviz';
 import { Observatoire } from '../pages/observatoire/observatoire';
+import { Dataviz } from '../pages/dataviz/dataviz';
 
 export const routes: Routes = [
   {

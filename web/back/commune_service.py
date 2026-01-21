@@ -10,13 +10,21 @@ class CommuneService:
         self.limit = limit
         self.ix = Indexer()
         self.ix.start()
+        self.cscores = {"CC": 0, "CR": 10, "CD": 2, "CE": 20, "CA": 50, "CP": 15}
+
+    def score(self, q: str, v: tuple[str, str]) -> int:
+        score = len(v[1])
+        if not v[1].startswith(q):
+            score += 99
+        score += self.cscores[v[0][:2]]
+        return score
 
     def find(self, q: str) -> list[tuple[str, str]]:
-        q = self.ix.normalize_string(q)
+        q = self.ix.normalize_string(q.strip())
         if q not in self.ix.db:
             return []
         res = self.ix.db[q]
-        res = OrderedDict(sorted(res.items(), key=lambda v: len(v[1]) if v[1].startswith(q) else 99+len(v[1])))
+        res = OrderedDict(sorted(res.items(), key=lambda v: self.score(q, v)))
         return list(res.items())[:self.limit]
 
 
