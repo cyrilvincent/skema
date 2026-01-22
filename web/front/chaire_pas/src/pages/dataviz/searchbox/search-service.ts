@@ -1,7 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { CommonService } from '../../../shared/common.service';
 import { environment } from '../../../environments/environment';
-import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',

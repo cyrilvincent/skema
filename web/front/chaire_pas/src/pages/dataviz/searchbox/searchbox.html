@@ -1,5 +1,3 @@
-<p>searchbox works!</p>
-<p><mat-slide-toggle>Toggle me!</mat-slide-toggle></p>
 <div>
     <form class="example-form">
         <mat-form-field class="example-full-width">
@@ -8,28 +6,26 @@
                 type="text"
                 placeholder="Choisir un lieu"
                 matInput
-                [formControl]="myControl"
+                [formControl]="searchControl"
                 [matAutocomplete]="auto"
                 autocomplete="off"
-                >
-
+            >
             <mat-autocomplete  
                 #auto="matAutocomplete"
                 (optionSelected)="onSelected($event.option.value)"
                 [displayWith]="displayTuple"
+                autoActiveFirstOption 
             >
                 @for (option of options(); track option[0]) {
-                    <mat-option [value]="option">{{option[1]}}</mat-option>
+                    <mat-option [value]="option">
+                        <span>{{option[1]}}</span> |
+                        <small>{{displayCode(option[0])}}</small>
+                    </mat-option>
                 }
-                @if (!loading() && options().length === 0) {
+                @if (!searchLoading() && options().length === 0) {
                     <mat-option disabled>Aucun résultat</mat-option>
                 }
             </mat-autocomplete>
         </mat-form-field>
     </form>
-    <button (click)="okButton()">OK</button>
-    <p>Text: {{input.value}}</p>
-    <p>Selected: {{text()}}</p>
-    <p>Selected by control: {{selectedId}}</p>
-    
 </div>

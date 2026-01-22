@@ -5,7 +5,8 @@
                 <div class="wsite-section-elements">
                     <div class="paragraph" style="text-align:left;">
                         <p>Dataviz</p>
-                        <p><app-searchbox></app-searchbox></p>
+                        <p><app-searchbox (optionSelectedEvent)="optionSelected($event)"></app-searchbox></p>
+                        <p>Code: {{selectedCode()}}</p>
                     </div>
                 </div>
             </div>
