@@ -1,7 +1,7 @@
 <div>
     <form class="example-form">
         <mat-form-field class="example-full-width">
-            <mat-label>Commune, communauté de commune, département, région, code insee, code postal</mat-label>
+            <mat-label>Commune, communauté de commune, département, région, code insee, code postal <mat-icon>location_on</mat-icon></mat-label>
             <input #input
                 type="text"
                 placeholder="Choisir un lieu"
@@ -9,6 +9,7 @@
                 [formControl]="searchControl"
                 [matAutocomplete]="auto"
                 autocomplete="off"
+                required
             >
             <mat-autocomplete  
                 #auto="matAutocomplete"

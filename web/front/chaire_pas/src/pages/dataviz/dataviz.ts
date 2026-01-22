@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { Searchbox } from './searchbox/searchbox';
+import { DatavizParameters } from "./dataviz-parameters/dataviz-parameters";
 
 @Component({
   selector: 'app-dataviz',
-  imports: [ Searchbox ],
+  imports: [Searchbox, DatavizParameters],
   templateUrl: './dataviz.html',
   styleUrl: './dataviz.scss',
 })

@@ -5,10 +5,11 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { SearchService } from './search-service';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-searchbox',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, ReactiveFormsModule, ],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './searchbox.html',
   styleUrl: './searchbox.scss',
 })
@@ -36,7 +37,7 @@ export class Searchbox {
     if (v == null || v[0] == null || v[0].length <= 3) {
       this.optionSelectedEvent.emit(null);
     }
-    else if (v[0][0] == "C" && v[0][2] == "-") {
+    else if (v[0][0] === "C" && v[0][2] === "-") {
       this.optionSelectedEvent.emit(v[0]);
     }
     else {
