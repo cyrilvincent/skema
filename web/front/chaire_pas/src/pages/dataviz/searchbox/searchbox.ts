@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
@@ -12,6 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './searchbox.html',
   styleUrl: './searchbox.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
