@@ -1,6 +1,39 @@
-import { Profession } from "./dataviz-parameters.interface";
+import { Specialite } from "../dataviz.interfaces";
 
-const apl_professions: Profession[] = [
+const sae_etablissements: Specialite[] = [
+  {
+    id: 1,
+    label: "Urgences générales",
+    shortLabel: "urgence_gen",
+    time: 30
+  },
+  {
+    id: 2,
+    label: "Urgences pédiatriques",
+    shortLabel: "urgence_ped",
+    time: 30
+  },
+  {
+    id: 3,
+    label: "Etablissements psychiatriques",
+    shortLabel: "psy",
+    time: 30
+  },
+  {
+    id: 4,
+    label: "Pharmacies",
+    shortLabel: "pharma",
+    time: 30
+  },
+  {
+    id: 5,
+    label: "EHPAD",
+    shortLabel: "ehpad",
+    time: 30
+  },
+]
+
+const apl_specialites: Specialite[] = [
   {
     id: 1,
     label: "Psychiatre",
@@ -135,8 +168,9 @@ const apl_professions: Profession[] = [
   },
 ]
 
-export const professions: {[key: string]: Profession[]} = {
-  APL: apl_professions.sort((a, b) => a.label.localeCompare(b.label)),
+export const specialites: {[key: string]: Specialite[]} = {
+  APL: apl_specialites.sort((a, b) => a.label.localeCompare(b.label)),
+  SAE: sae_etablissements,
 }
 
 

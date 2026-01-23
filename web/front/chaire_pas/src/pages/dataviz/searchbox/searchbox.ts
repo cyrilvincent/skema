@@ -4,12 +4,13 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { SearchService } from './search-service';
-import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-searchbox',
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, ReactiveFormsModule, MatIconModule],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, ReactiveFormsModule, MatIconModule, MatTooltipModule],
   templateUrl: './searchbox.html',
   styleUrl: './searchbox.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,12 +23,13 @@ export class Searchbox {
   optionSelectedEvent = output<string | null>();
   codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département"}
 
-  constructor() {
+  ngOnInit() {
     this.searchControl.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
       map((v) => { 
         if (typeof v === "string") {
+          this.optionSelectedEvent.emit(null);
           this.searchService.fetchFind(v);
         }
       }),

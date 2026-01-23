@@ -1,17 +1,16 @@
-<div [class.disabled]="disabled()">
+<div [class.disabled]="disabled() && false">DISABLED TO REMOVE
     <mat-form-field class="example-full-width">
-    <mat-label><mat-icon>medical_services</mat-icon> Profession</mat-label>
-    <mat-select [formControl]="professionControl" required>
-        @for (p of professions(); track p.id) {
+    <mat-label><mat-icon>medical_services</mat-icon> @if (type()=="APL") {Spécialité} @else {Type d'établissement} <mat-icon matTooltip="Choisir une profession ou un type d'établissement parmis la liste">help</mat-icon></mat-label>
+    <mat-select [formControl]="specialiteControl" required>
+        @for (p of specialites(); track p.id) {
         <mat-option [value]="p">{{p.label}}</mat-option>
         }
     </mat-select>
     </mat-form-field>
-    <p>Profession: {{selectedProfession().shortLabel}}</p>
     <mat-accordion>
     <mat-expansion-panel>
         <mat-expansion-panel-header>
-        <mat-panel-title><mat-icon>settings</mat-icon> Paramètres avancés</mat-panel-title>
+        <mat-panel-title><mat-icon matTooltip="Paramètres avancés facultatifs">settings</mat-icon> Paramètres avancés</mat-panel-title>
         </mat-expansion-panel-header>
         <p><mat-icon>timer</mat-icon> Durée maximale: 
             <mat-button-toggle-group name="time" [formControl]="timeControl">
@@ -19,6 +18,7 @@
                 <mat-button-toggle [value]="45">45 min</mat-button-toggle>
                 <mat-button-toggle [value]="60">60 min</mat-button-toggle>
             </mat-button-toggle-group>
+            <mat-icon matTooltip="Choisir la durée maximale de trajet">help</mat-icon>
         </p>
         <p>
             <mat-icon>hourglass_empty</mat-icon> Calcul des durées:
@@ -26,9 +26,10 @@
                 <mat-button-toggle value="HC">Heures creuses</mat-button-toggle>
                 <mat-button-toggle value="HP">Heures pleines</mat-button-toggle>
             </mat-button-toggle-group>
+            <mat-icon matTooltip="Choisir si la durée de trajet est calculée en heure creuse ou en heure pleine">help</mat-icon>
         </p>
         <p>
-            <mat-icon>trending_up</mat-icon> Exponentiel: 
+            <mat-icon>trending_down</mat-icon> Constante de la fonction de décroissance: 
             <mat-button-toggle-group name="exp" [formControl]="expControl">
                 <mat-button-toggle [value]="-0.12" [disabled]="isBlocked(-0.12)">-0.12</mat-button-toggle>
                 <mat-button-toggle [value]="-0.1" [disabled]="isBlocked(-0.1)">-0.10</mat-button-toggle>
@@ -36,10 +37,18 @@
                 <mat-button-toggle [value]="-0.06" [disabled]="isBlocked(-0.06)">-0.06</mat-button-toggle>
                 <mat-button-toggle [value]="-0.04" [disabled]="isBlocked(-0.04)">-0.04</mat-button-toggle>
             </mat-button-toggle-group>
+            <mat-icon matTooltip="La fonction de calcul de la décroissance du nombre de cabinet en fonction de la durée de trajet l'APL est f(time)=exp(c*time) où time est la durée de trajet et c la constante de la fonction exponentielle. Choisir une constante c petite amplifie la décroissance de la durée de trajet.">help</mat-icon>
         </p>
-        <p>time: {{time()}}</p>
-        <p>exp: {{exp()}}</p>
-        <p>heure: {{hc()}}</p>
     </mat-expansion-panel>
     </mat-accordion>
+    <p>&nbsp;</p>
+    <div class="center">
+        <mat-slide-toggle [formControl]="toggleControl">Plein écran</mat-slide-toggle>
+        <mat-icon matTooltip="Ouvre un nouvel onglet">help</mat-icon>
+        <br>
+        <button type="button" mat-fab extended (click)="buttonClicked()">
+            <mat-icon>@if (fullScreen()) {launch} @else {done}</mat-icon>
+            Afficher le résultat
+        </button>
+    </div>
 </div>

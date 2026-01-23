@@ -4,11 +4,11 @@
             <div class="container">
                 <div class="wsite-section-elements">
                     <div class="paragraph" style="text-align:left;">
-                        <p>Dataviz</p>
                         <form class="example-form">
                             <p><app-searchbox (optionSelectedEvent)="optionSelected($event)"></app-searchbox></p>
-                            <p>Code: {{selectedCode()}}</p>
-                            <p><app-dataviz-parameters type="APL" [disabled]="selectedCode() == null"></app-dataviz-parameters></p>
+                            <p>TO REMOVE<app-dataviz-parameters type="SAE" [disabled]="selectedCode() == null && false" (okEvent)="ok($event)"></app-dataviz-parameters></p>
+                            <mat-divider></mat-divider>
+                            <app-geo-dataviz type="SAE" [dto]="dto()"></app-geo-dataviz>
                         </form>
                     </div>
                 </div>
