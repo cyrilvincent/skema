@@ -1,19 +1,18 @@
 from fastapi import FastAPI, __version__
 from fastapi.middleware.cors import CORSMiddleware
 import config
-from web.back.commune_service import CommuneService
+from commune_service import CommuneService
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4200"],  # ou ["*"] pour tout autoriser (moins sécurisé)
     allow_credentials=True,
-    allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"],  # Autorise tous les headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-commune_service = CommuneService()
+commune_service: CommuneService = CommuneService.factory()
 
 
 @app.get("/")
@@ -35,6 +34,6 @@ async def find(q: str):
 
 
 if __name__ == '__main__':
-    print(__version__)
+    print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True) # Passer en SSL + enlever reload en prod
+    uvicorn.run("api:app", reload=False) # Passer en SSL + enlever reload en prod

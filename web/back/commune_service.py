@@ -1,16 +1,25 @@
 from collections import OrderedDict
-
+import threading
 from indexer import Indexer
 import time
 
 
 class CommuneService:
 
+    _instance = None
+    lock = threading.RLock()
+
     def __init__(self, limit=10):
         self.limit = limit
-        self.ix = Indexer()
-        self.ix.start()
+        self.ix = Indexer.factory()
         self.cscores = {"CC": 0, "CR": 10, "CD": 2, "CE": 20, "CA": 50, "CP": 15}
+
+    @staticmethod
+    def factory():
+        with CommuneService.lock:
+            if CommuneService._instance is None:
+                CommuneService._instance = CommuneService()
+        return CommuneService._instance
 
     def score(self, q: str, v: tuple[str, str]) -> int:
         score = len(v[1])

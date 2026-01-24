@@ -7,22 +7,33 @@ import pickle
 import datetime
 import os
 from collections import OrderedDict
+from iris_loader import IrisLoader
 
 
 class Indexer(threading.Thread):
 
-    def __init__(self, nb_limit=99, commune_length_limit=255, join_type="C"):
+    _instance = None
+    lock = threading.RLock()
+
+    def __init__(self, nb_limit=99, commune_length_limit=255, iris_loader="todo"): # faire les 2 pickles d'un coup C et I
         super().__init__()
         self.time0 = time.perf_counter()
         self.nb_limit = nb_limit
         self.q_limit = commune_length_limit
-        self.join_type = join_type  # TODO C pour commune I pour Iris (cf ligne 38)
-                                    # Mettre les communes associées deleguées
         self.df = pd.DataFrame()
         self.ban = pd.DataFrame()
         self.db: dict[str, dict[str, str]] = {}
         self.limit_year = 2020
         self.file = f"data/index_{datetime.datetime.now().year}{datetime.datetime.now().month:02d}.pickle"
+        self.iris_loader = IrisLoader.factory()
+
+    @staticmethod
+    def factory():
+        with Indexer.lock:
+            if Indexer._instance is None:
+                Indexer._instance = Indexer()
+                Indexer._instance.start()
+        return Indexer._instance
 
     def load_commune(self):
         sql = f"""select c.code, c.nom, c.nom_norm, c.epci_id, c.epci_nom, c.bassin_vie_id, c.bassin_vie_nom, c.old_nom,
