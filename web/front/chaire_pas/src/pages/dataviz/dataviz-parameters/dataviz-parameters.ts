@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import { specialites } from './dataviz-parameters.data';
+import { specialites } from '../dataviz.data';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -26,6 +26,7 @@ interface Food {
 })
 export class DatavizParameters {
   type = input<string>("APL");
+  geoType = input<string>("iris");
   specialites = computed(() => specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
   specialiteControl = new FormControl<Specialite | null>(null);

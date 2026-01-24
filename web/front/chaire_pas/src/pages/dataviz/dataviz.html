@@ -5,10 +5,11 @@
                 <div class="wsite-section-elements">
                     <div class="paragraph" style="text-align:left;">
                         <form class="example-form">
-                            <p><app-searchbox (optionSelectedEvent)="optionSelected($event)"></app-searchbox></p>
-                            <p>TO REMOVE<app-dataviz-parameters type="SAE" [disabled]="selectedCode() == null && false" (okEvent)="ok($event)"></app-dataviz-parameters></p>
+                            <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [geoType]="geoType()"></app-searchbox></p>
+                            <p>TO REMOVE<app-dataviz-parameters [type]="type()" [geoType]="geoType()" [disabled]="selectedCode() == null && false" (okEvent)="ok($event)"></app-dataviz-parameters></p>
+                            <!-- Ajouter geoType à app-dataviz-parameters et dataviz -->
                             <mat-divider></mat-divider>
-                            <app-geo-dataviz type="SAE" [dto]="dto()"></app-geo-dataviz>
+                            <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto()"></app-geo-dataviz>
                         </form>
                     </div>
                 </div>

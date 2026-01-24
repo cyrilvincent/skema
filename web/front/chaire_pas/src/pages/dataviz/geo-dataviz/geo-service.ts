@@ -18,6 +18,7 @@ export class GeoService  extends CommonService {
 
   fetchSAE(dto: GeoInputDTO): void {
     console.log("FetchSAE "+dto);
+    // Cote back si len(df)==0 renvoyer une erreur 204 ou 418 et remettre le empty
     /*this.fetchLoading();
     this.http.post<ProfessionEtablissementDTO>(`${environment.baseUrl}/geo/sae`, dto).subscribe({
       next: (res) => { this._geojsonDTO.set(res); },

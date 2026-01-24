@@ -1,4 +1,4 @@
-import { Specialite } from "../dataviz.interfaces";
+import { Specialite, GeoTupleDTO } from "./dataviz.interfaces";
 
 const sae_etablissements: Specialite[] = [
   {
@@ -172,5 +172,8 @@ export const specialites: {[key: string]: Specialite[]} = {
   APL: apl_specialites.sort((a, b) => a.label.localeCompare(b.label)),
   SAE: sae_etablissements,
 }
+
+export const emptyGeo: GeoTupleDTO = [{"center_lat": 0, "center_lon": 0, "label": "Erreur", "q": "", "commune_nom": "Erreur", "meanws": [1], "years": {"2020": {"code_insee": [""], "nom_commune": [""], "code_iris": [""], "nom_iris": [""], "type_iris": [""], "fid": [1], "lon": [5], "lat": [45], "year": [1], "specialite": [1], "nb": [1], "apl": [1], "R": [1], "swpop": [1], "pop_gp": [1], "pop": [1], "meanw": [1], "pretty": [1], "pop_ajustee": [1], "apl_clip": [1]}}},{"type": "FeatureCollection", "features": [{"id": "1", "type": "Feature", "properties": {"cleabs": "", "code_insee": "", "nom_commune": "", "iris": "", "code_iris": "", "nom_iris": "", "type_iris": "", "fid": 1, "lon": 5, "lat": 45}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[5, 45], [6, 45], [6, 46], [5, 46], [5, 45]]]]}, "bbox": [5,45, 6, 46]}], "bbox": [5, 8, 6, 46]}];
+  
 
 

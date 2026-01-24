@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { Searchbox } from './searchbox/searchbox';
 import { DatavizParameters } from "./dataviz-parameters/dataviz-parameters";
 import {MatDividerModule} from '@angular/material/divider';
@@ -15,6 +15,8 @@ export class Dataviz {
   selectedCode = signal<string | null>(null);
   specialite = signal<GeoInputDTO | null>(null);
   dto = signal<GeoInputDTO | null>(null);
+  type = input<string>("APL");
+  geoType = input<string>("iris");
 
   optionSelected(code: string | null) {
     this.selectedCode.set(code);

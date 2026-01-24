@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
@@ -18,6 +18,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
   searchService = inject(SearchService);
+  geoType = input<string>("iris");
   options = this.searchService.codes;
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();
