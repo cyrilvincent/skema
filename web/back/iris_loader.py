@@ -15,6 +15,7 @@ class IrisLoader(threading.Thread):
         super().__init__()
         self.time0 = time.perf_counter()
         self.gdf = pd.DataFrame()
+        self.geojson = None
         self.file = f"data/contours-iris.gpkg"
 
     @staticmethod
@@ -35,7 +36,7 @@ class IrisLoader(threading.Thread):
         self.gdf["lat"] = self.gdf.geometry.centroid.y
         self.gdf = self.gdf.sort_values(by="code_iris")
         duration = time.perf_counter() - self.time0
-        print(f"Found {len(self.gdf)} communes in {duration:.0f}s")
+        print(f"Found {len(self.gdf)} iris in {duration:.0f}s")
 
     def save(self):
         file = self.file.replace("gpkg", "pickle")
@@ -52,6 +53,9 @@ class IrisLoader(threading.Thread):
         else:
             self.load_gpkg()
         print(f"Found {len(self.gdf)} iris")
+        # self.geojson = self.gdf.__geo_interface__
+        # print(f"Found {len(self.geojson['features'])} geojson")
+
 
     def run(self):
         self.load()

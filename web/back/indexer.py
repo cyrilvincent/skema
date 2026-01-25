@@ -15,14 +15,19 @@ class Indexer(threading.Thread):
     _instance = None
     lock = threading.RLock()
 
-    def __init__(self, nb_limit=99, commune_length_limit=255, iris_loader="todo"): # faire les 2 pickles d'un coup C et I
+    def __init__(self, nb_limit=99, commune_length_limit=255): # faire les 2 pickles d'un coup C et I
         super().__init__()
         self.time0 = time.perf_counter()
         self.nb_limit = nb_limit
         self.q_limit = commune_length_limit
         self.df = pd.DataFrame()
         self.ban = pd.DataFrame()
-        self.db: dict[str, dict[str, str]] = {}
+        self.db: dict[str, dict[str, str]] = {
+            "FR": {"CF-00": "France"},
+            "FRA": {"CF-00": "France"},
+            "FRAN": {"CF-00": "France"},
+            "FRANC": {"CF-00": "France"},
+            "FRANCE": {"CF-00": "France"}}
         self.limit_year = 2020
         self.file = f"data/index_{datetime.datetime.now().year}{datetime.datetime.now().month:02d}.pickle"
         self.iris_loader = IrisLoader.factory()

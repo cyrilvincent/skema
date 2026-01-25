@@ -139,17 +139,17 @@ def get_over(year, specialite, is_medecin):
     return over
 
 
-for time in [30, 45, 60]: # [30, 45, 60]:
-    for time_type in ["HP"]: # ["HC", "HP"]:
+for time in [30]:  # [30, 45, 60]:
+    for time_type in ["HC"]:  # ["HC", "HP"]:
         iris_matrix = get_iris_matrix(time, time_type)
         iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
         iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
-        for source in ["PA"]: #["PA", "PS"]:
+        for source in ["PA"]:  # ["PA", "PS"]:
             for year in range(20, 26):
                 pop_iris = get_pop_iris(year)
-                for specialite in [21]: #range(1, 28):
+                for specialite in [10]:  # range(1, 28):
                     iriss = get_iriss(year, specialite)
-                    for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
+                    for accessibilite_exp in [-0.12]:  # [-0.12, -0.10, -0.08, -0.06, -0.04]:
                         if ((time > 30 and accessibilite_exp < -0.08) or
                                 (time == 30 and accessibilite_exp > -0.06) or
                                 (time > 45 and accessibilite_exp < -0.06)):
