@@ -24,7 +24,11 @@ export class GeoService  extends CommonService {
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
       next: (res) => { this._geoTupleDTO.set(res); },
-      error: (err) => { this.catchError(err); this._geoTupleDTO.set(emptyGeo) },
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+        this._geoTupleDTO.set(emptyGeo);
+      },
       complete: () => this._loading.set(false),
     });
   }

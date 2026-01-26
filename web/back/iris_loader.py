@@ -15,7 +15,6 @@ class IrisLoader(threading.Thread):
         super().__init__()
         self.time0 = time.perf_counter()
         self.gdf = pd.DataFrame()
-        self.geojson = None
         self.file = f"data/contours-iris.gpkg"
 
     @staticmethod
@@ -53,9 +52,6 @@ class IrisLoader(threading.Thread):
         else:
             self.load_gpkg()
         print(f"Found {len(self.gdf)} iris")
-        # self.geojson = self.gdf.__geo_interface__
-        # print(f"Found {len(self.geojson['features'])} geojson")
-
 
     def run(self):
         self.load()

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, __version__
+from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import config
 from commune_service import CommuneService
@@ -35,13 +35,17 @@ async def find(q: str):
     print(f"Get /find/{q}")
     return commune_service.find(q)
 
+
 @app.post("/apl/iris")
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
-    return apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    if len(data[1]["features"]) == 0:
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    return data
 
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", reload=False) # Passer en SSL + enlever reload en prod
+    uvicorn.run("api:app", reload=False)

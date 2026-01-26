@@ -22,7 +22,7 @@ export class Searchbox {
   options = this.searchService.codes;
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();
-  codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département"}
+  codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"}
 
   ngOnInit() {
     this.searchControl.valueChanges.pipe(
@@ -56,7 +56,7 @@ export class Searchbox {
   displayCode(code: string): string {
     const c = code.slice(0, 2);
     let s = this.codes[c];
-    if (c != "CE" && c != "CA") {
+    if (c != "CE" && c != "CA" && c != "CF") {
       const num = code.slice(3);
       s += " " + num;
     }

@@ -63,7 +63,8 @@ APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"]
       locations: this.years()[this.firstYear()]["fid"],
       z: this.years()[this.firstYear()]["apl"],
       zmin: 0,
-      zmax: this.df()["meanws"][0]*2+1,
+      //zmax: this.df()["meanws"][0]*2+1,
+      zmax: 40,
       hoverinfo: "text",
       text: this.getTexts()[0],
       geojson: this.values()[1],
@@ -166,7 +167,7 @@ APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"]
       responsive: true,
       displayModeBar: true,
       displaylogo: false,
-      modeBarButtonsToRemove: ['lasso2d'],
+      modeBarButtonsToRemove: ['lasso2d', 'toImage'],
       modeBarButtonsToAdd: [
         {
           title: "Hello",

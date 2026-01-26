@@ -19,9 +19,9 @@ class APLService:
         self.iris_loader: IrisLoader = IrisLoader.factory()
         self.first_year = 20
         self.years = list(range(self.first_year, 26))
-        self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")  #TODO CP
+        self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")  #TODO CP faire la table cp_insee
         warnings.filterwarnings('ignore', category=UserWarning)
-        # todo remonter régions et apl ici
+        # todo remonter régions ici
 
     @staticmethod
     def factory():
@@ -79,6 +79,17 @@ class APLService:
         iriss = iris_df["code"].to_list()
         return iriss
 
+    def get_iriss_cp(self, id: str) -> list[str]:
+        sql = f"""
+        select i.code from iris.cp_insee ci
+        join iris.commune c on c.code=ci.code_insee
+        join iris.iris i on i.commune_id=c.id
+        where ci.code_postal={id}
+        """
+        iris_df = pd.read_sql(sql, config.connection_string)
+        iriss = iris_df["code"].to_list()
+        return iriss
+
     def get_gdf_by_cc(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cc(id)
         if len(iriss) > 0:
@@ -106,6 +117,11 @@ class APLService:
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
         return gdf
 
+    def get_gdf_by_cp(self, id: str) -> pd.DataFrame:
+        iriss = self.get_iriss_cp(id)
+        gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
+        return gdf
+
     def get_gdf_by_type_code_id(self, type_code: str, id: str) -> pd.DataFrame:
         if type_code == "CC":
             return self.get_gdf_by_cc(id)
@@ -117,6 +133,8 @@ class APLService:
             return self.get_gdf_by_ce(id)
         elif type_code == "CA":
             return self.get_gdf_by_ca(id)
+        elif type_code == "CP":
+            return self.get_gdf_by_cp(id)
         elif type_code == "CF":
             return self.iris_loader.gdf
         else:
@@ -159,7 +177,7 @@ class APLService:
         elif code == "CR":
             depts = self.get_depts_cr(id)
             sql += f"and a.iris_string like any (array{[c+'%' for c in depts]})"
-        elif code == "CA":
+        elif code in ["CA", "CP"]:
             sql += f"and a.iris_string like '{id[:2]}%'"
         apl = pd.read_sql(text(sql), config.connection_string)
         if len(apl) == 0:
@@ -197,33 +215,35 @@ class APLService:
             for col in export.columns:
                 dico_year[col] = export_year[col].values.tolist()
             dico["years"][year + 2000] = dico_year
-        geojson = gdf_merged.__geo_interface__  # Verif car avant c'était gdf
-        print(f"Found {len(geojson["features"]) / len(self.years):.0f} geojsons by years ")  # Optimisation enlever tous les geojson de même fid x6
+        geojson = gdf_merged.__geo_interface__
+        print(f"Found {len(geojson["features"]) / len(self.years):.0f} geojsons by years ")  # TODO Optimisation enlever tous les geojson de même fid x6
         return dico, geojson
 
     def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[dict, any]:
         print(f"Compute APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
-        gdf = self.get_gdf_by_type_code_id(type_code, id)  #TODO ix_iris_commune_epci_id + arr_dpt_id sur serveur
-        geojson = gdf.__geo_interface__  # A enlever (mis dans get_export)
-        print(f"Found {len(geojson["features"])} matching iris")
+        gdf = self.get_gdf_by_type_code_id(type_code, id)
+        # geojson = gdf.__geo_interface__
+        print(f"Found {len(gdf)} gdfs")
         studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
         print(f"Found {len(studies_df)} studies for {len(self.years)} years")
         keys = studies_df["key"].to_list()
-        apl = self.get_apl_by_keys(keys, type_code, id)  #TODO ix_apl_apl_code_commune text_pattern_ops
-        print(f"Found {len(apl) / len(self.years):.0f} apls by year")  #TODO charger l'APL complet dans le constructeur et voir si le merge fonctionne de manière identique
+        apl = self.get_apl_by_keys(keys, type_code, id)
+        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
         self.corrections(apl)
         gdf_merged = self.merge_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
         return export
+        # TODO exporter les vrais data
+        # TODO gérer si vide par exemple cp 75001
 
 
 if __name__ == '__main__':
     s = APLService()
     time.sleep(1)
-    export = s.compute("CC-38185", 10, 30, "HC", -0.12)  #CC-38185 CC-38205 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
+    export = s.compute("CP-75001", 10, 30, "HC", -0.12)  #CC-38185 CC-38205 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     s = json.dumps(export)
     print(s[:5000])

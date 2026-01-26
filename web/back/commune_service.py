@@ -12,7 +12,7 @@ class CommuneService:
     def __init__(self, limit=30):
         self.limit = limit
         self.ix = Indexer.factory()
-        self.cscores = {"CC": 0, "CR": 10, "CD": 2, "CE": 20, "CA": 50, "CP": 15}
+        self.cscores = {"CC": 0, "CR": 10, "CD": 2, "CE": 20, "CA": 50, "CP": 99, "CF": 15}
 
     @staticmethod
     def factory():
@@ -49,4 +49,5 @@ if __name__ == '__main__':
     print(s.find("Vercors"))
     print(s.find("Y"))
     print(s.find("DE"))
+    print(s.find("FRANCE"))
 

@@ -15,7 +15,7 @@ class Indexer(threading.Thread):
     _instance = None
     lock = threading.RLock()
 
-    def __init__(self, nb_limit=99, commune_length_limit=255): # faire les 2 pickles d'un coup C et I
+    def __init__(self, nb_limit=99, commune_length_limit=255):  # faire les 2 pickles d'un coup C et I
         super().__init__()
         self.time0 = time.perf_counter()
         self.nb_limit = nb_limit
