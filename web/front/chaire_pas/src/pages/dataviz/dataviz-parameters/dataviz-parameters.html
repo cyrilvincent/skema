@@ -1,4 +1,4 @@
-<div [class.disabled]="disabled() && false">DISABLED TO REMOVE
+<div [class.disabled]="disabled()">
     <mat-form-field class="example-full-width">
     <mat-label><mat-icon>medical_services</mat-icon> @if (type()=="APL") {Spécialité} @else {Type d'établissement} <mat-icon matTooltip="Choisir une profession ou un type d'établissement parmis la liste">help</mat-icon></mat-label>
     <mat-select [formControl]="specialiteControl" required>

@@ -1,29 +1,31 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { CommonService } from '../../../shared/common.service';
-import { GeoInputDTO } from '../dataviz.interfaces';
+import { GeoInputDTO, GeoTupleDTO } from '../dataviz.interfaces';
 import { environment } from '../../../environments/environment';
+import { emptyGeo } from '../dataviz.data';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GeoService  extends CommonService {
-  _geojsonDTO = signal<GeoInputDTO | null>(null);          
-  geojsonDTO = computed(() => this._geojsonDTO());
+  _geoTupleDTO = signal<GeoTupleDTO>(emptyGeo);          
+  geoTupleDTO = computed(() => this._geoTupleDTO());
 
   fetch(dto: GeoInputDTO, type: string): void {
     if (type == "APL") {
-    }
-    else this.fetchSAE(dto);
+      this.fetchAPL(dto);
+    } 
   }
 
-  fetchSAE(dto: GeoInputDTO): void {
-    console.log("FetchSAE "+dto);
+  private fetchAPL(dto: GeoInputDTO): void {
+    console.log("FetchAPL ");
+    console.log(dto);
     // Cote back si len(df)==0 renvoyer une erreur 204 ou 418 et remettre le empty
-    /*this.fetchLoading();
-    this.http.post<ProfessionEtablissementDTO>(`${environment.baseUrl}/geo/sae`, dto).subscribe({
-      next: (res) => { this._geojsonDTO.set(res); },
-      error: (err) => { this.catchError(err); this._geojsonDTO.set(null) },
+    this.fetchLoading();
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
+      next: (res) => { this._geoTupleDTO.set(res); },
+      error: (err) => { this.catchError(err); this._geoTupleDTO.set(emptyGeo) },
       complete: () => this._loading.set(false),
-    });*/
+    });
   }
 }

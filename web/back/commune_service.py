@@ -9,7 +9,7 @@ class CommuneService:
     _instance = None
     lock = threading.RLock()
 
-    def __init__(self, limit=10):
+    def __init__(self, limit=30):
         self.limit = limit
         self.ix = Indexer.factory()
         self.cscores = {"CC": 0, "CR": 10, "CD": 2, "CE": 20, "CA": 50, "CP": 15}
@@ -26,6 +26,10 @@ class CommuneService:
         if not v[1].startswith(q):
             score += 99
         score += self.cscores[v[0][:2]]
+        if len(q) == 2 and q.isdigit() and v[0][:2] == "CD":
+            score = 1
+        if len(q) == 5 and q.isdigit() and v[0][:2] in ["CC", "CP"]:
+            score = 0
         return score
 
     def find(self, q: str) -> list[tuple[str, str]]:

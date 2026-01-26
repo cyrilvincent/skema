@@ -2,6 +2,8 @@ from fastapi import FastAPI, __version__
 from fastapi.middleware.cors import CORSMiddleware
 import config
 from commune_service import CommuneService
+from apl_service import APLService
+from interfaces import GeoInputDTO
 
 app = FastAPI()
 app.add_middleware(
@@ -13,6 +15,7 @@ app.add_middleware(
 )
 
 commune_service: CommuneService = CommuneService.factory()
+apl_service: APLService = APLService.factory()
 
 
 @app.get("/")
@@ -31,6 +34,11 @@ async def versions():
 async def find(q: str):
     print(f"Get /find/{q}")
     return commune_service.find(q)
+
+@app.post("/apl/iris")
+async def apl_iris(dto: GeoInputDTO):
+    print(f"Get /apl/iris")
+    return apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp)
 
 
 if __name__ == '__main__':

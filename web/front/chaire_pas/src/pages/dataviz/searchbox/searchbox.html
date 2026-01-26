@@ -16,6 +16,7 @@
                 (optionSelected)="onSelected($event.option.value)"
                 [displayWith]="displayTuple"
                 autoActiveFirstOption 
+                
             >
                 @for (option of options(); track option[0]) {
                     <mat-option [value]="option">

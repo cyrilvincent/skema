@@ -41,6 +41,7 @@ export class DatavizParameters {
   toggleControl = new FormControl<boolean>(false);
   fullScreen = signal<boolean>(false);
   okEvent = output<[Specialite, number, number, string, boolean]>();
+  // Ajouter geoType
 
   ngOnInit() {
     this.specialiteControl = new FormControl<Specialite | null>(this.type() == "APL" ? this.generaliste() : this.specialites()[0]);
