@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO } from '../dataviz.interfaces';
-import { emptyGeo } from '../dataviz.data';
 import { GeoService } from './geo-service';
 
 @Component({
@@ -22,11 +21,14 @@ export class GeoDataviz {
   firstYear = computed<string>(() => Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig());
-  data = computed<any[]>(() =>  [this.getGeo(), this.getScatter() as any]);
+  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.getScatter() as any] : [this.getGeo()]);
   visible = computed<boolean>(() => this.df()["center_lon"] != 0);
+  showLabel = signal<boolean>(false);
+  normColorBar = signal<boolean>(true);
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
+    effect(() => this.onValuesChanged(this.values()));
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -35,6 +37,13 @@ export class GeoDataviz {
       console.log(dto);
       this.service.fetch(dto, this.type());
     }
+  }
+
+  onValuesChanged(v: GeoTupleDTO) {
+    const meanws = this.df()["meanws"]
+    console.log("OnValuesChanged")
+    console.log(meanws);
+    console.log(this.years()[this.firstYear()]["apl_max"][0])
   }
 
   getTexts(): String[][] {
@@ -57,14 +66,25 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
     return texts;
   }
 
+  getColorscale(q: number): number {
+    if(!this.normColorBar()) return q;
+    const dico: {[key: number]: number} = {0.1: 0.2, 0.25: 0.5, 0.5: 1, 0.75: 1.5}
+    const mins: {[key: number]: number} = {0.1: 0.25, 0.25: 0.50, 0.50: 0.75, 0.75: 0.89}
+    const meanw = this.df()["meanws"][0]
+    const qq = meanw * dico[q];
+    const q90 = meanw * 2;
+    const value = Math.min(qq / q90, mins[q]);
+    console.log("getColorScale: "+q+" "+value);
+    return value;
+  }
+
   getGeo() {
     const geo = {
       type: "choropleth",
       locations: this.years()[this.firstYear()]["fid"],
       z: this.years()[this.firstYear()]["apl"],
       zmin: 0,
-      zmax: this.df()["meanws"][0]*2+1,
-      //zmax: 40,
+      zmax: this.normColorBar() ? this.df()["meanws"][0]*2+1 : this.years()[this.firstYear()]["apl_max"][0],
       hoverinfo: "text",
       text: this.getTexts()[0],
       geojson: this.values()[1],
@@ -110,7 +130,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
         active: 0,
         currentvalue: {
           prefix: 'Année: ',
-          xanchor: 'right',
+          xanchor: 'left',
         },
         pad: {l: 0, r: 0, t: 0, b: 10},
         len: 0.6,
@@ -162,7 +182,6 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
   }
 
   getConfig(): Partial<Plotly.Config> {
-    const colors: string[] = ['#ff0000', '#00ff00', '#0000ff'];
     const config: Partial<Plotly.Config> = {
       responsive: true,
       displayModeBar: true,
@@ -170,18 +189,16 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
       modeBarButtonsToRemove: ['lasso2d', 'toImage'],
       modeBarButtonsToAdd: [
         {
-          title: "Hello",
-          name: 'color toggler',
-          icon: Plotly.Icons.plotlylogo,
-          click: function(gd) {
-            var newColor = colors[Math.floor(3 * Math.random())];
-            (Plotly as any).restyle(gd, 'line.color', newColor);
-          }},
+          title: "Show labels",
+          name: 'Show labels',
+          icon: Plotly.Icons.zoombox,
+          click: (() => this.showLabel.set(!this.showLabel())),
+        },
         {
-          title: "button1",
-          name: 'button1',
-          icon: Plotly.Icons.pencil,
-          click: function(gd) {alert('button1');}
+          title: "De-normalize",
+          name: 'De-normalize',
+          icon: Plotly.Icons.plotlylogo,
+          click: (() => this.normColorBar.set(!this.normColorBar())),
         },
       ],
     }

@@ -1,9 +1,10 @@
   <div style="height: 1024px;">
-    <plotly-plot
-      [data]="data()"
-      [layout]="layout()"
-      [config]="config()"
-      [useResizeHandler]="true" [style]="{position: 'relative', width: '100%', height: '100%'}">
-    </plotly-plot>
-
+    @if(visible()) {
+      <plotly-plot
+        [data]="data()"
+        [layout]="layout()"
+        [config]="config()"
+        [useResizeHandler]="true" [style]="{position: 'relative', width: '100%', height: '100%'}">
+      </plotly-plot>
+    }
   </div>

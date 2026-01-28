@@ -68,6 +68,7 @@ export interface GeoYearDTO {
     //pretty: number[]; //TODO
     pop_ajustee: number[]; //TODO
     //apl_clip: number[]; //TODO
+    apl_max: number[];
 }
 
 export interface GeoDTO {

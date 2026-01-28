@@ -201,6 +201,7 @@ class APLService:
     def gdf_merge_add_columns(self, gdf_merged: pd.DataFrame) -> pd.DataFrame:
         gdf_merged["pop_ajustee"] = gdf_merged['pop_gp'].fillna(0)
         gdf_merged["pop"] = gdf_merged["pop"].fillna(0)
+        gdf_merged["apl_max"] = gdf_merged["apl"].max()
         # gdf_merged["pretty"] = gdf_merged["apl"].fillna(0).apply(lambda x: round(x, 0)).astype(int)
         # apl20 = gdf_merged.loc[gdf_merged['year'] == 20, ['iris_dest', 'apl']].set_index('iris_dest')['apl']
         # gdf_merged["year20"] = gdf_merged['iris_dest'].map(apl20).fillna(0)
@@ -213,7 +214,7 @@ class APLService:
         center_lon = gdf_merged.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         export = gdf_merged[['code_insee', 'nom_commune', 'code_iris', 'nom_iris', 'lon', 'lat', 'fid', 'year', 'nb',
-                             'apl', 'swpop', 'pop', 'pop_ajustee']]
+                             'apl', 'swpop', 'pop', 'pop_ajustee', 'apl_max']]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
             dico["meanws"].append(meanw)
