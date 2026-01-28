@@ -23,10 +23,10 @@ export interface FeaturePropertiesDTO {
     cleabs: string;
     code_insee: string;
     nom_commune: string;
-    iris: string;
+    //iris: string;
     code_iris: string;
     nom_iris: string;
-    type_iris: string;
+    //type_iris: string;
     fid: number;
     lon: number;
     lat: number;
@@ -52,20 +52,20 @@ export interface GeoYearDTO {
     nom_commune: string[];
     code_iris: string[];
     nom_iris: string[];
-    type_iris: string[];
+    //type_iris: string[];
     fid: number[];
     lon: number[];
     lat: number[];
     year: number[];
-    specialite: number[];
+    //specialite: number[];
     nb: number[];
     apl: number[]; // TODO
-    R: number[]; // TODO
+    //R: number[]; // TODO
     swpop: number[]; // TODO
-    pop_gp: number[]; // TODO
+    //pop_gp: number[]; // TODO
     pop: number[];
     meanw: number[];
-    pretty: number[]; //TODO
+    //pretty: number[]; //TODO
     pop_ajustee: number[]; //TODO
     //apl_clip: number[]; //TODO
 }

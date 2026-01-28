@@ -4,6 +4,8 @@ import config
 from commune_service import CommuneService
 from apl_service import APLService
 from interfaces import GeoInputDTO
+import numpy as np
+
 
 app = FastAPI()
 app.add_middleware(
@@ -42,6 +44,7 @@ async def apl_iris(dto: GeoInputDTO):
     data = apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    debug = data[0]["years"][2020]["pop"]
     return data
 
 

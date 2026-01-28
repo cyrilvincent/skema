@@ -19,9 +19,8 @@ class APLService:
         self.iris_loader: IrisLoader = IrisLoader.factory()
         self.first_year = 20
         self.years = list(range(self.first_year, 26))
-        self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")  #TODO CP faire la table cp_insee
+        self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
         warnings.filterwarnings('ignore', category=UserWarning)
-        # todo remonter régions ici
 
     @staticmethod
     def factory():
@@ -36,6 +35,12 @@ class APLService:
 
     def check_code(self, code: str) -> tuple[str, str]:
         if re.match(self.regex, code):
+            if code[:6] == "CP-750":
+                return "CC", "751"+code[-2:]
+            if code[:7] == "CP-6900":
+                return "CC", "6938"+code[-1]
+            if code[:6] == "CP-130":
+                return "CC", "132"+code[-2:]
             return code[:2], code[3:]
         raise ServiceError(f"Bad code {code}")
 
@@ -194,19 +199,21 @@ class APLService:
         return gdf_merged
 
     def gdf_merge_add_columns(self, gdf_merged: pd.DataFrame) -> pd.DataFrame:
-        gdf_merged["pretty"] = gdf_merged["apl"].fillna(0).apply(lambda x: round(x, 0)).astype(int)
-        gdf_merged["pop_ajustee"] = gdf_merged['pop_gp']
-        apl20 = gdf_merged.loc[gdf_merged['year'] == 20, ['iris_dest', 'apl']].set_index('iris_dest')['apl']
-        gdf_merged["year20"] = gdf_merged['iris_dest'].map(apl20).fillna(0)
-        gdf_merged["diff20"] = gdf_merged["apl"] - gdf_merged["year20"]
-        gdf_merged["delta20"] = gdf_merged["diff20"] / (gdf_merged["year20"] + 0.1)
+        gdf_merged["pop_ajustee"] = gdf_merged['pop_gp'].fillna(0)
+        gdf_merged["pop"] = gdf_merged["pop"].fillna(0)
+        # gdf_merged["pretty"] = gdf_merged["apl"].fillna(0).apply(lambda x: round(x, 0)).astype(int)
+        # apl20 = gdf_merged.loc[gdf_merged['year'] == 20, ['iris_dest', 'apl']].set_index('iris_dest')['apl']
+        # gdf_merged["year20"] = gdf_merged['iris_dest'].map(apl20).fillna(0)
+        # gdf_merged["diff20"] = gdf_merged["apl"] - gdf_merged["year20"]
+        # gdf_merged["delta20"] = gdf_merged["diff20"] / (gdf_merged["year20"] + 0.1)
         return gdf_merged
 
     def get_export(self, code: str, studies_df: pd.DataFrame, gdf_merged: pd.DataFrame) -> tuple[dict, any]:
         center_lat = gdf_merged.geometry.centroid.y.mean()  # 45.1209 5.5901
         center_lon = gdf_merged.geometry.centroid.x.mean()
-        dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}  #TODO enlever le superflu
-        export = gdf_merged[['code_insee', 'nom_commune', 'code_iris', 'nom_iris', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'R', 'swpop', 'pop', 'pop_ajustee']]
+        dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
+        export = gdf_merged[['code_insee', 'nom_commune', 'code_iris', 'nom_iris', 'lon', 'lat', 'fid', 'year', 'nb',
+                             'apl', 'swpop', 'pop', 'pop_ajustee']]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
             dico["meanws"].append(meanw)
@@ -215,8 +222,9 @@ class APLService:
             for col in export.columns:
                 dico_year[col] = export_year[col].values.tolist()
             dico["years"][year + 2000] = dico_year
-        geojson = gdf_merged.__geo_interface__
-        print(f"Found {len(geojson["features"]) / len(self.years):.0f} geojsons by years ")  # TODO Optimisation enlever tous les geojson de même fid x6
+        gdf_first_year = gdf_merged[gdf_merged["year"] == self.first_year]
+        geojson = gdf_first_year.__geo_interface__
+        print(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
 
     def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[dict, any]:
@@ -237,13 +245,11 @@ class APLService:
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
         return export
-        # TODO exporter les vrais data
-        # TODO gérer si vide par exemple cp 75001
 
 
 if __name__ == '__main__':
     s = APLService()
     time.sleep(1)
-    export = s.compute("CP-75001", 10, 30, "HC", -0.12)  #CC-38185 CC-38205 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
+    export = s.compute("CC-38205", 10, 30, "HC", -0.12)  #CC-38185 CC-38205 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     s = json.dumps(export)
     print(s[:5000])

@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .example-form {
   min-width: 150px;
   max-width: 1024px;
@@ -13,3 +15,4 @@
 .mat-autocomplete-panel {
   max-height: 512px !important; /* au lieu de 256px */
 }
+

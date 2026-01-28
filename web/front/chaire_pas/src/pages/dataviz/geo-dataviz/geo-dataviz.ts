@@ -51,7 +51,7 @@ Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
 Population: ${df_year["pop"][i].toFixed(0)}<br>
 Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
 Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
-APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"][i]+1e-5)).toFixed(0)}%)`);
+`);
 	    texts.push(text);
     }
     return texts;
@@ -63,8 +63,8 @@ APL local: ${df_year["R"][i].toFixed(1)} (${(df_year["R"][i]*100/(df_year["apl"]
       locations: this.years()[this.firstYear()]["fid"],
       z: this.years()[this.firstYear()]["apl"],
       zmin: 0,
-      //zmax: this.df()["meanws"][0]*2+1,
-      zmax: 40,
+      zmax: this.df()["meanws"][0]*2+1,
+      //zmax: 40,
       hoverinfo: "text",
       text: this.getTexts()[0],
       geojson: this.values()[1],

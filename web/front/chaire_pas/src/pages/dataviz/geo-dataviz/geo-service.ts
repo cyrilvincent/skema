@@ -20,7 +20,6 @@ export class GeoService  extends CommonService {
   private fetchAPL(dto: GeoInputDTO): void {
     console.log("FetchAPL ");
     console.log(dto);
-    // Cote back si len(df)==0 renvoyer une erreur 204 ou 418 et remettre le empty
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
       next: (res) => { this._geoTupleDTO.set(res); },
