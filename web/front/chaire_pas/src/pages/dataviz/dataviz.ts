@@ -22,16 +22,19 @@ export class Dataviz {
     this.selectedCode.set(code);
   }
 
-  ok(params: [Specialite, number, number, string, boolean]): void {
+  ok(params: [Specialite, number, number, string, boolean, string]): void {
     const s: GeoInputDTO = {
       code: this.selectedCode() ?? "38205", // TODO
       id: params[0].id, 
       bor: params[0].shortLabel, 
       time: params[1],
       exp: params[2],
-      hc: params[3]
+      hc: params[3],
+      resolution: params[5],
     };
     this.dto.set(s);
+    console.log("OK");
+    console.log(this.dto());
   }
 
 }

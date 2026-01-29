@@ -8,5 +8,6 @@ class GeoInputDTO(BaseModel):
     time: int
     exp: float
     hc: str
+    resolution: str
 
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
 import { specialites } from '../dataviz.data';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
@@ -12,11 +12,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
-interface Food {
-  value: string;
-  viewValue: string;
-}
-
 @Component({
   selector: 'app-dataviz-parameters',
   imports: [MatFormFieldModule, MatSelectModule, MatInputModule, FormsModule, ReactiveFormsModule, MatExpansionModule, MatIconModule, MatButtonToggleModule, MatTooltipModule, MatButtonModule, MatSlideToggleModule],
@@ -27,6 +22,7 @@ interface Food {
 export class DatavizParameters {
   type = input<string>("APL");
   geoType = input<string>("iris");
+  code = input<string | null>(null);
   specialites = computed(() => specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
   specialiteControl = new FormControl<Specialite | null>(null);
@@ -40,8 +36,15 @@ export class DatavizParameters {
   disabled = input<boolean>(false);
   toggleControl = new FormControl<boolean>(false);
   fullScreen = signal<boolean>(false);
-  okEvent = output<[Specialite, number, number, string, boolean]>();
+  okEvent = output<[Specialite, number, number, string, boolean, string]>();
+  resolution = signal<string>("HD");
+  resolutionControl = new FormControl<string>("HD");
+  
   // Ajouter geoType
+
+  constructor() {
+    effect(() => this.onCodeChanged(this.code()));
+  }
 
   ngOnInit() {
     this.specialiteControl = new FormControl<Specialite | null>(this.type() == "APL" ? this.generaliste() : this.specialites()[0]);
@@ -66,15 +69,39 @@ export class DatavizParameters {
     this.toggleControl.valueChanges.subscribe(
       b => this.fullScreen.set(b!)
     )
+    this.resolutionControl.valueChanges.subscribe(
+      r => {this.resolution.set(r!);console.log("resolution: "+r!);}
+    )
+  }
+
+  onCodeChanged(code: string | null) {
+    if (code != null) {
+      console.log("CodeChanged "+ code);
+      const c = this.code()!.slice(0, 2);
+      if (c == "CF") this.resolutionControl.setValue("LD");
+      else if (c == "CR" && this.resolution() == "HD") this.resolutionControl.setValue("MD");
+      console.log(this.resolution())
+    }
   }
 
   isBlocked(exp: number): boolean {
     return (this.time() > 30 && exp < -0.08) || (this.time() == 30 && exp > -0.06) || (this.time() > 45 && exp < -0.06);
   }
 
+  isResolutionBlocked(res: string): boolean {
+    const code = this.code()?.slice(0, 2);
+    if (res=="HD") {
+      return code == "CF" || code == "CR"
+    }
+    else if (res=="MD") {
+      return code == "CF";
+    }
+    return false;
+  }
+
   buttonClicked(): void {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
-    this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen()])
+    this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution()])
   }
 
 }

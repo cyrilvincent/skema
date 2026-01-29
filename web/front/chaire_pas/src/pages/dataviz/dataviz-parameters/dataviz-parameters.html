@@ -39,6 +39,32 @@
             </mat-button-toggle-group>
             <mat-icon matTooltip="La fonction de calcul de la décroissance du nombre de cabinet en fonction de la durée de trajet l'APL est f(time)=exp(c*time) où time est la durée de trajet et c la constante de la fonction exponentielle. Choisir une constante c petite amplifie la décroissance de la durée de trajet.">help</mat-icon>
         </p>
+        <p>
+            <mat-icon>high_quality</mat-icon> Résolution: 
+            <mat-button-toggle-group name="resolution" [formControl]="resolutionControl">
+                <mat-button-toggle value="HD" [disabled]="isResolutionBlocked('HD')">High</mat-button-toggle>
+                <mat-button-toggle value="MD" [disabled]="isResolutionBlocked('MD')">Medium</mat-button-toggle>
+                <mat-button-toggle value="LD">Low</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-icon matTooltip="Résolution des coordonnées GPS">help</mat-icon>
+        </p>
+        <p>
+            <mat-icon>aspect_ratio</mat-icon> Granularité: 
+            <mat-button-toggle-group name="granularite">
+                <mat-button-toggle [value]="0">Commune</mat-button-toggle>
+                <mat-button-toggle [value]="1">Iris</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-icon matTooltip="Visualisation au niveau communal ou infra communal (iris)">help</mat-icon>
+        </p>
+        <p>
+        <mat-icon>grid_on</mat-icon> Rendu: 
+            <mat-button-toggle-group name="rendu">
+                <mat-button-toggle [value]="0">Visualisation des données</mat-button-toggle>
+                <mat-button-toggle [value]="1">Téléchargement CSV</mat-button-toggle>
+                <mat-button-toggle [value]="2">Téléchargement GEOJSON</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-icon matTooltip="Visualisation des données dans un graphique géographique (par défaut) ou téléchargement du CSV ou téléchargement du GEOJSON">help</mat-icon>
+        </p>
     </mat-expansion-panel>
     </mat-accordion>
     <p>&nbsp;</p>

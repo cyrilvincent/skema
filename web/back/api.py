@@ -41,7 +41,7 @@ async def find(q: str):
 @app.post("/apl/iris")
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
-    data = apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     debug = data[0]["years"][2020]["pop"]

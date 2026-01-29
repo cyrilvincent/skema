@@ -6,7 +6,7 @@
                     <div class="paragraph" style="text-align:left;">
                         <form class="example-form">
                             <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [geoType]="geoType()"></app-searchbox></p>
-                            <p><app-dataviz-parameters [type]="type()" [geoType]="geoType()" [disabled]="selectedCode() == null" (okEvent)="ok($event)"></app-dataviz-parameters></p>
+                            <p><app-dataviz-parameters [type]="type()" [geoType]="geoType()" [code]="selectedCode()" [disabled]="selectedCode() == null" (okEvent)="ok($event)"></app-dataviz-parameters></p>
                             <!-- Ajouter geoType à app-dataviz-parameters -->
                             <mat-divider></mat-divider>
                             <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto()"></app-geo-dataviz>

@@ -84,7 +84,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
       locations: this.years()[this.firstYear()]["fid"],
       z: this.years()[this.firstYear()]["apl"],
       zmin: 0,
-      zmax: this.normColorBar() ? this.df()["meanws"][0]*2+1 : this.years()[this.firstYear()]["apl_max"][0],
+      zmax: this.normColorBar() ? this.df()["meanws"][0]*2+1 : this.years()[this.firstYear()]["apl_max"][0]+1,
       hoverinfo: "text",
       text: this.getTexts()[0],
       geojson: this.values()[1],

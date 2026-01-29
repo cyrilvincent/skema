@@ -228,7 +228,14 @@ class APLService:
         print(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
 
-    def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[dict, any]:
+    def simplify(self, gdf: pd.DataFrame, resolution: str) -> pd.DataFrame:
+        if resolution == "MD":
+            gdf["geometry"] = gdf["geometry"].simplify(0.001)
+        elif resolution == "LD":
+            gdf["geometry"] = gdf["geometry"].simplify(0.01)
+        return gdf
+
+    def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str) -> tuple[dict, any]:
         print(f"Compute APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
@@ -244,6 +251,7 @@ class APLService:
         gdf_merged = self.merge_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
+        gdf_merged = self.simplify(gdf_merged, resolution)
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 

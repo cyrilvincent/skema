@@ -12,6 +12,7 @@ export interface GeoInputDTO {
     time: number;
     exp: number;
     hc: string;
+    resolution: string;
 }
 
 export interface GeometryDTO {
