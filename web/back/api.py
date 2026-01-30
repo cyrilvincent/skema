@@ -59,4 +59,4 @@ async def apl_iris(dto: GeoInputDTO):
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", reload=False)
+    uvicorn.run("api:app", workers=3, reload=False)

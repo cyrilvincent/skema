@@ -1,10 +1,12 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { GeoInputDTO } from '../dataviz.interfaces';
 import { GeoDataviz } from '../geo-dataviz/geo-dataviz';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { GeoService } from '../geo-dataviz/geo-service';
 
 @Component({
   selector: 'app-fullscreen',
-  imports: [GeoDataviz],
+  imports: [GeoDataviz, MatProgressSpinnerModule],
   templateUrl: './fullscreen.html',
   styleUrl: './fullscreen.scss',
 })
@@ -12,6 +14,7 @@ export class Fullscreen {
 
   dto = signal<GeoInputDTO | null>(null);
   type = signal<string>("APL");
+  service = inject(GeoService);
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);

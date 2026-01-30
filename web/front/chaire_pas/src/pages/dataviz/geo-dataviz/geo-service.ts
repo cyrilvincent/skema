@@ -44,6 +44,7 @@ export class GeoService  extends CommonService {
   private saveAPLJSON(dto: GeoInputDTO): void {
     console.log("saveAPLJSON");
     console.log(dto);
+    this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
       next: (res) => {
         const blob = new Blob([JSON.stringify(res[1])], { type: 'application/json' });
@@ -53,12 +54,14 @@ export class GeoService  extends CommonService {
         if(err.status == 404) console.log("Not found "+dto.code);
         else this.catchError(err);
       },
+      complete: () => this._loading.set(false),
     });
   }
 
   private saveAPLCSV(dto: GeoInputDTO): void {
     console.log("saveAPLCSV");
     console.log(dto);
+    this.fetchLoading();
     this.http.post<string>(`${environment.baseUrl}/apl/iris/csv`, dto).subscribe({    
       next: (res) => {
         const blob = new Blob([res], { type: 'application/json' });
@@ -68,6 +71,7 @@ export class GeoService  extends CommonService {
         if(err.status == 404) console.log("Not found "+dto.code);
         else this.catchError(err);
       },
+      complete: () => this._loading.set(false),
     });
   }
 }

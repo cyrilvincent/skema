@@ -25,6 +25,7 @@ export class GeoDataviz {
   visible = computed<boolean>(() => this.df()["center_lon"] != 0);
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
+  marker = signal<number>(1);
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
@@ -86,7 +87,8 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
                     [0.90, "rgb(187,64,55)"],
                     [0.95, "rgb(165,0,32)"],
                     [1.0, "rgb(127,0,0)"]
-                  ]
+                  ],
+      marker: {line: {width: this.marker(),}},
     };
     return geo;
   }
@@ -133,7 +135,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
     const layout: Partial<Plotly.Layout> = {
       title: {text: this.df()["commune_nom"]},
       geo: {
-        projection: { type: 'mercator' },
+        projection: { type: 'mercator', scale: 2, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
         fitbounds: "locations",
         showcoastlines: false,
@@ -146,7 +148,9 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
         bgcolor: 'rgb(255,255,255)',
       },
       autosize: true,
-      height: 600,
+      //height: window.innerHeight - 10,
+      //width: 1200,
+      margin: {l: 10, r: 10, t: 20, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
       sliders: this.getSliders(),
     }
@@ -175,7 +179,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
       displayModeBar: true,
       displaylogo: false,
       locale: 'fr',
-      modeBarButtonsToRemove: ['lasso2d', 'toImage', 'select2d'],
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toImage'],
       modeBarButtonsToAdd: [
         {
           title: "Afficher les labels",
@@ -188,6 +192,12 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
           name: 'Normalize',
           icon: Plotly.Icons.plotlylogo,
           click: (() => this.normColorBar.set(!this.normColorBar())),
+        },
+        {
+          title: "Contours",
+          name: 'Contours',
+          icon: Plotly.Icons.drawline,
+          click: (() => this.marker.set(this.marker() == 1 ? 0 : 1)),
         },
       ],
     }

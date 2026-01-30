@@ -83,7 +83,7 @@ class Indexer(threading.Thread):
     def normalize_string(self, s: str) -> str:
         s = s.strip().upper()
         s = unidecode.unidecode(s).replace("'", " ").replace("-", " ").replace("/", " ").replace(".", "")
-        return s
+        return s.strip()
 
     def split(self, s: str) -> list[str]:
         if s is None:
