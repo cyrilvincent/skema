@@ -4,7 +4,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { GeoInputDTO, Specialite } from '../dataviz.interfaces';
+import { Specialite } from '../dataviz.interfaces';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -12,10 +12,11 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { GeoService } from '../geo-dataviz/geo-service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-dataviz-parameters',
-  imports: [MatFormFieldModule, MatSelectModule, MatInputModule, FormsModule, ReactiveFormsModule, MatExpansionModule, MatIconModule, MatButtonToggleModule, MatTooltipModule, MatButtonModule, MatSlideToggleModule],
+  imports: [MatFormFieldModule, MatSelectModule, MatInputModule, FormsModule, ReactiveFormsModule, MatExpansionModule, MatIconModule, MatButtonToggleModule, MatTooltipModule, MatButtonModule, MatSlideToggleModule, MatProgressSpinnerModule],
   templateUrl: './dataviz-parameters.html',
   styleUrl: './dataviz-parameters.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

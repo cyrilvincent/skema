@@ -73,8 +73,13 @@
         <mat-icon matTooltip="Ouvre un nouvel onglet">help</mat-icon>
         <br>
         <button type="button" mat-fab extended (click)="buttonClicked()">
-            <mat-icon>@if(renderType()!="dataviz") {download} @else if(fullScreen()) {launch} @else {done}</mat-icon>
+            <mat-icon>
+                @if(geoService.loading()) {<mat-spinner diameter="25"></mat-spinner>}
+                @else if(renderType()!="dataviz") {download}
+                @else if(fullScreen()) {launch} @else {done}
+            </mat-icon>
             @if(renderType()=="dataviz") {Afficher} @else {Télécharger} le résultat
         </button>
+       
     </div>
 </div>

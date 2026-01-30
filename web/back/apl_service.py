@@ -235,19 +235,22 @@ class APLService:
             gdf["geometry"] = gdf["geometry"].simplify(0.01)
         return gdf
 
+    def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[pd.DataFrame, pd.DataFrame]:
+        type_code, id = self.check_code(code)
+        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
+        keys = studies_df["key"].to_list()
+        apl = self.get_apl_by_keys(keys, type_code, id)
+        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
+        self.corrections(apl)
+        return apl, studies_df
+
     def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str) -> tuple[dict, any]:
         print(f"Compute APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         gdf = self.get_gdf_by_type_code_id(type_code, id)
-        # geojson = gdf.__geo_interface__
         print(f"Found {len(gdf)} gdfs")
-        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
-        print(f"Found {len(studies_df)} studies for {len(self.years)} years")
-        keys = studies_df["key"].to_list()
-        apl = self.get_apl_by_keys(keys, type_code, id)
-        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
-        self.corrections(apl)
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
         gdf_merged = self.merge_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
@@ -257,12 +260,7 @@ class APLService:
 
     def compute_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
         print(f"Compute APL CSV for {code} {specialite} {time} {time_type} {aexp}")
-        type_code, id = self.check_code(code)
-        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
-        keys = studies_df["key"].to_list()
-        apl = self.get_apl_by_keys(keys, type_code, id)
-        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
-        self.corrections(apl)
+        apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
 
