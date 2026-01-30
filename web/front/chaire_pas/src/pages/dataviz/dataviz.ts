@@ -24,7 +24,7 @@ export class Dataviz {
 
   ok(params: [Specialite, number, number, string, boolean, string]): void {
     const s: GeoInputDTO = {
-      code: this.selectedCode() ?? "38205", // TODO
+      code: this.selectedCode() ?? "CC-38205",
       id: params[0].id, 
       bor: params[0].shortLabel, 
       time: params[1],

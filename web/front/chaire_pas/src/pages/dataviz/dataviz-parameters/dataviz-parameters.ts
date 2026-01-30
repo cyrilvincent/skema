@@ -101,7 +101,11 @@ export class DatavizParameters {
 
   buttonClicked(): void {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
-    this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution()])
+    if (this.fullScreen()) {
+      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()
+      window.open(url, "_blank");
+    }
+    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution()])
   }
 
 }
