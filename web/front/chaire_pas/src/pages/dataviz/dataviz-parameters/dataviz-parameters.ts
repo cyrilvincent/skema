@@ -114,8 +114,8 @@ export class DatavizParameters {
 
   buttonClicked(): void {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
-    if (this.renderType() == "json") {
-      this.geoService.saveAPLJSON({
+    if (this.renderType() != "dataviz") {
+      this.geoService.save({
             code: this.code()!,
             id: this.selectedSpecialite().id, 
             bor: "", 
@@ -123,7 +123,7 @@ export class DatavizParameters {
             exp: this.exp(),
             hc: this.hc(),
             resolution: this.resolution(),
-          })
+          }, this.type(), this.renderType());
     }
     else if (this.fullScreen()) {
       const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()

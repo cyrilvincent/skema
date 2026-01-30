@@ -66,18 +66,6 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
     return texts;
   }
 
-  getColorscale(q: number): number {
-    if(!this.normColorBar()) return q;
-    const dico: {[key: number]: number} = {0.1: 0.2, 0.25: 0.5, 0.5: 1, 0.75: 1.5}
-    const mins: {[key: number]: number} = {0.1: 0.25, 0.25: 0.50, 0.50: 0.75, 0.75: 0.89}
-    const meanw = this.df()["meanws"][0]
-    const qq = meanw * dico[q];
-    const q90 = meanw * 2;
-    const value = Math.min(qq / q90, mins[q]);
-    console.log("getColorScale: "+q+" "+value);
-    return value;
-  }
-
   getGeo() {
     const geo = {
       type: "choropleth",
@@ -89,7 +77,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
-      colorbar: {title: {text: "APL"}},
+      colorbar: {title: {text: this.normColorBar() ? "APL": "APL local"}},
       colorscale: [[0.0, "rgb(64,64,127)"],
                     [0.1, "rgb(112,112,127)"],
                     [0.25, "rgb(159,159,127)"],
@@ -186,17 +174,18 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
       responsive: true,
       displayModeBar: true,
       displaylogo: false,
-      modeBarButtonsToRemove: ['lasso2d', 'toImage'],
+      locale: 'fr',
+      modeBarButtonsToRemove: ['lasso2d', 'toImage', 'select2d'],
       modeBarButtonsToAdd: [
         {
-          title: "Show labels",
+          title: "Afficher les labels",
           name: 'Show labels',
           icon: Plotly.Icons.zoombox,
           click: (() => this.showLabel.set(!this.showLabel())),
         },
         {
-          title: "De-normalize",
-          name: 'De-normalize',
+          title: "Normaliser localement - nationalement",
+          name: 'Normalize',
           icon: Plotly.Icons.plotlylogo,
           click: (() => this.normColorBar.set(!this.normColorBar())),
         },

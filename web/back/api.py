@@ -1,5 +1,6 @@
 from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 import config
 from commune_service import CommuneService
 from apl_service import APLService
@@ -46,6 +47,13 @@ async def apl_iris(dto: GeoInputDTO):
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     debug = data[0]["years"][2020]["pop"]
     return data
+
+
+@app.post("/apl/iris/csv")
+async def apl_iris(dto: GeoInputDTO):
+    print(f"Get /apl/iris/csv")
+    data = apl_service.compute_csv(dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    return data.to_csv(index=False)
 
 
 if __name__ == '__main__':

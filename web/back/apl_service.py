@@ -255,6 +255,17 @@ class APLService:
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 
+    def compute_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
+        print(f"Compute APL CSV for {code} {specialite} {time} {time_type} {aexp}")
+        type_code, id = self.check_code(code)
+        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
+        keys = studies_df["key"].to_list()
+        apl = self.get_apl_by_keys(keys, type_code, id)
+        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
+        self.corrections(apl)
+        apl["year"] = apl["year"]+2000
+        return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
+
 
 if __name__ == '__main__':
     s = APLService()
