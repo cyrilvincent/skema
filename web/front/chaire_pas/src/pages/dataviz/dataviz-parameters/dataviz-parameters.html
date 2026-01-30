@@ -12,7 +12,7 @@
         <mat-expansion-panel-header>
         <mat-panel-title><mat-icon matTooltip="Paramètres avancés facultatifs">settings</mat-icon> Paramètres avancés</mat-panel-title>
         </mat-expansion-panel-header>
-        <p><mat-icon>timer</mat-icon> Durée maximale: 
+        <p><mat-icon>timer</mat-icon> Durée de trajet maximale: 
             <mat-button-toggle-group name="time" [formControl]="timeControl">
                 <mat-button-toggle [value]="30">30 min</mat-button-toggle>
                 <mat-button-toggle [value]="45">45 min</mat-button-toggle>
@@ -49,21 +49,21 @@
             <mat-icon matTooltip="Résolution des coordonnées GPS">help</mat-icon>
         </p>
         <p>
-            <mat-icon>aspect_ratio</mat-icon> Granularité: 
-            <mat-button-toggle-group name="granularite">
-                <mat-button-toggle [value]="0">Commune</mat-button-toggle>
-                <mat-button-toggle [value]="1">Iris</mat-button-toggle>
+            <mat-icon>aspect_ratio</mat-icon> Granularité géographique: 
+            <mat-button-toggle-group name="granularite" [formControl]="geoTypeControl">
+                <mat-button-toggle value="commune">Commune</mat-button-toggle>
+                <mat-button-toggle value="iris">Iris</mat-button-toggle>
             </mat-button-toggle-group>
             <mat-icon matTooltip="Visualisation au niveau communal ou infra communal (iris)">help</mat-icon>
         </p>
         <p>
         <mat-icon>grid_on</mat-icon> Rendu: 
-            <mat-button-toggle-group name="rendu">
-                <mat-button-toggle [value]="0">Visualisation des données</mat-button-toggle>
-                <mat-button-toggle [value]="1">Téléchargement CSV</mat-button-toggle>
-                <mat-button-toggle [value]="2">Téléchargement GEOJSON</mat-button-toggle>
+            <mat-button-toggle-group name="render" [formControl]="renderTypeControl">
+                <mat-button-toggle value="dataviz">Visualisation</mat-button-toggle>
+                <mat-button-toggle value="csv">CSV</mat-button-toggle>
+                <mat-button-toggle value="json">GEOJSON</mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-icon matTooltip="Visualisation des données dans un graphique géographique (par défaut) ou téléchargement du CSV ou téléchargement du GEOJSON">help</mat-icon>
+            <mat-icon matTooltip="Visualisation des données dans un graphique géographique ou téléchargement du CSV ou téléchargement du GEOJSON">help</mat-icon>
         </p>
     </mat-expansion-panel>
     </mat-accordion>
@@ -73,8 +73,8 @@
         <mat-icon matTooltip="Ouvre un nouvel onglet">help</mat-icon>
         <br>
         <button type="button" mat-fab extended (click)="buttonClicked()">
-            <mat-icon>@if (fullScreen()) {launch} @else {done}</mat-icon>
-            Afficher le résultat
+            <mat-icon>@if(renderType()!="dataviz") {download} @else if(fullScreen()) {launch} @else {done}</mat-icon>
+            @if(renderType()=="dataviz") {Afficher} @else {Télécharger} le résultat
         </button>
     </div>
 </div>

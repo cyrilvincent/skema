@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { specialites } from '../dataviz.data';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { Specialite } from '../dataviz.interfaces';
+import { GeoInputDTO, Specialite } from '../dataviz.interfaces';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { GeoService } from '../geo-dataviz/geo-service';
 
 @Component({
   selector: 'app-dataviz-parameters',
@@ -22,6 +23,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 export class DatavizParameters {
   type = input<string>("APL");
   geoType = input<string>("iris");
+  geoTypeControl = new FormControl<string>("iris");
   code = input<string | null>(null);
   specialites = computed(() => specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
@@ -39,6 +41,9 @@ export class DatavizParameters {
   okEvent = output<[Specialite, number, number, string, boolean, string]>();
   resolution = signal<string>("HD");
   resolutionControl = new FormControl<string>("HD");
+  renderType = signal<string>("dataviz");
+  renderTypeControl = new FormControl<string>("dataviz");
+  geoService = inject(GeoService);
   
   // Ajouter geoType
 
@@ -59,19 +64,27 @@ export class DatavizParameters {
         else if(t === 45) this.expControl.setValue(-0.08);
         else this.expControl.setValue(-0.06);
       }
-    )
+    );
     this.expControl.valueChanges.subscribe(
       e => this.exp.set(e!)
-    )
+    );
     this.hcControl.valueChanges.subscribe(
       h => this.hc.set(h!)
-    )
+    );
     this.toggleControl.valueChanges.subscribe(
       b => this.fullScreen.set(b!)
-    )
+    );
     this.resolutionControl.valueChanges.subscribe(
       r => {this.resolution.set(r!);console.log("resolution: "+r!);}
-    )
+    );
+    this.renderTypeControl.valueChanges.subscribe(
+      r => {
+        this.renderType.set(r!);
+        if (r == "dataviz") this.toggleControl.enable();
+        else this.toggleControl.disable();
+      }
+
+    );
   }
 
   onCodeChanged(code: string | null) {
@@ -101,7 +114,18 @@ export class DatavizParameters {
 
   buttonClicked(): void {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
-    if (this.fullScreen()) {
+    if (this.renderType() == "json") {
+      this.geoService.saveAPLJSON({
+            code: this.code()!,
+            id: this.selectedSpecialite().id, 
+            bor: "", 
+            time: this.time(),
+            exp: this.exp(),
+            hc: this.hc(),
+            resolution: this.resolution(),
+          })
+    }
+    else if (this.fullScreen()) {
       const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()
       window.open(url, "_blank");
     }
