@@ -44,7 +44,7 @@
             <mat-button-toggle-group name="resolution" [formControl]="resolutionControl">
                 <mat-button-toggle value="HD" [disabled]="isResolutionBlocked('HD')">High</mat-button-toggle>
                 <mat-button-toggle value="MD" [disabled]="isResolutionBlocked('MD')">Medium</mat-button-toggle>
-                <mat-button-toggle value="LD">Low</mat-button-toggle>
+                <mat-button-toggle value="LD" [disabled]="isResolutionBlocked('LD')">Low</mat-button-toggle>
             </mat-button-toggle-group>
             <mat-icon matTooltip="Résolution des coordonnées GPS. Pour les iris HD=50m, MD=1Km, LD=10km. Pour les communes HD=50m, MD=100m, LD=1km. Attention une résolution élevée augmente les volumes de transfert.">help</mat-icon>
         </p>

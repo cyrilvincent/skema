@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { specialites } from '../dataviz.data';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
@@ -26,7 +26,6 @@ export class DatavizParameters {
   geoType = input<string>("iris");
   geoTypeControl = new FormControl<string>("iris");
   code = input<string | null>(null);
-  automaticLowerRes = signal<boolean>(false);
   specialites = computed(() => specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
   specialiteControl = new FormControl<Specialite | null>(null);
@@ -77,7 +76,10 @@ export class DatavizParameters {
       b => this.fullScreen.set(b!)
     );
     this.resolutionControl.valueChanges.subscribe(
-      r => {this.resolution.set(r!);console.log("resolution: "+r!);}
+      r => {
+        this.resolution.set(r!);
+        console.log("resolution: "+r!);
+      }
     );
     this.renderTypeControl.valueChanges.subscribe(
       r => {
@@ -95,15 +97,15 @@ export class DatavizParameters {
       const c = this.code()!.slice(0, 2);
       if (c == "CF") {
         this.resolutionControl.setValue("LD");
-        this.automaticLowerRes.set(true);
       }
       else if (c == "CR" && this.resolution() == "HD") {
         this.resolutionControl.setValue("MD");
-        this.automaticLowerRes.set(true);
       }
-      else if (this.automaticLowerRes()) {
+      else if (c != "CF" && c!= "CR" && this.resolution() == "LD") {
         this.resolutionControl.setValue("HD");
-        this.automaticLowerRes.set(false);
+      }
+      else if (c == "CC" && this.resolution() != "HD") {
+        this.resolutionControl.setValue("HD");
       }
     }
   }
@@ -118,9 +120,9 @@ export class DatavizParameters {
       return code == "CF" || code == "CR"
     }
     else if (res=="MD") {
-      return code == "CF";
+      return code == "CF" || code == "CC";
     }
-    return false;
+    return code != "CF" && code != "CR";
   }
 
   buttonClicked(): void {
