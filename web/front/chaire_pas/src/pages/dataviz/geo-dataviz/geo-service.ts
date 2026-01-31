@@ -47,7 +47,7 @@ export class GeoService  extends CommonService {
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
       next: (res) => {
-        const blob = new Blob([JSON.stringify(res[1])], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
         this.fileSaver.save(blob, `apl_iris_${dto.code}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.json`);
       },
       error: (err) => {
