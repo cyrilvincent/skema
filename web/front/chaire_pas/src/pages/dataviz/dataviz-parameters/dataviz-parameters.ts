@@ -26,6 +26,7 @@ export class DatavizParameters {
   geoType = input<string>("iris");
   geoTypeControl = new FormControl<string>("iris");
   code = input<string | null>(null);
+  automaticLowerRes = signal<boolean>(false);
   specialites = computed(() => specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
   specialiteControl = new FormControl<Specialite | null>(null);
@@ -61,9 +62,9 @@ export class DatavizParameters {
     this.timeControl.valueChanges.subscribe(
       t => {
         this.time.set(t!);
-        if(t === 30) this.expControl.setValue(-0.12);
-        else if(t === 45) this.expControl.setValue(-0.08);
-        else this.expControl.setValue(-0.06);
+        if(t == 30 && this.exp() == -0.04) this.expControl.setValue(-0.12);
+        else if(t == 45 && this.exp() <= -0.1) this.expControl.setValue(-0.08);
+        else if (t == 60 && this.exp() <= -0.06) this.expControl.setValue(-0.06);
       }
     );
     this.expControl.valueChanges.subscribe(
@@ -92,9 +93,18 @@ export class DatavizParameters {
     if (code != null) {
       console.log("CodeChanged "+ code);
       const c = this.code()!.slice(0, 2);
-      if (c == "CF") this.resolutionControl.setValue("LD");
-      else if (c == "CR" && this.resolution() == "HD") this.resolutionControl.setValue("MD");
-      console.log(this.resolution())
+      if (c == "CF") {
+        this.resolutionControl.setValue("LD");
+        this.automaticLowerRes.set(true);
+      }
+      else if (c == "CR" && this.resolution() == "HD") {
+        this.resolutionControl.setValue("MD");
+        this.automaticLowerRes.set(true);
+      }
+      else if (this.automaticLowerRes()) {
+        this.resolutionControl.setValue("HD");
+        this.automaticLowerRes.set(false);
+      }
     }
   }
 

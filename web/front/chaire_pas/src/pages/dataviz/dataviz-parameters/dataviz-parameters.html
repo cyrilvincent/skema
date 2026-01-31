@@ -18,7 +18,7 @@
                 <mat-button-toggle [value]="45">45 min</mat-button-toggle>
                 <mat-button-toggle [value]="60">60 min</mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-icon matTooltip="Choisir la durée maximale de trajet">help</mat-icon>
+            <mat-icon matTooltip="La durée de trajet est calculée entre le centre de l'iris de départ et le centre de l'iris de destination. Seules les durées inférieures à la durée maximale sont retenues. Sur cette durée sera appliquée une fonction de décroissance décrite ci dessous. La valeur conseillée est 30 minutes.">help</mat-icon>
         </p>
         <p>
             <mat-icon>hourglass_empty</mat-icon> Calcul des durées:
@@ -26,7 +26,7 @@
                 <mat-button-toggle value="HC">Heures creuses</mat-button-toggle>
                 <mat-button-toggle value="HP">Heures pleines</mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-icon matTooltip="Choisir si la durée de trajet est calculée en heure creuse ou en heure pleine">help</mat-icon>
+            <mat-icon matTooltip="La durée de trajet est calculée en heure creuse (heure normale) ou en heure pleine">help</mat-icon>
         </p>
         <p>
             <mat-icon>trending_down</mat-icon> Constante de la fonction de décroissance: 
@@ -37,7 +37,7 @@
                 <mat-button-toggle [value]="-0.06" [disabled]="isBlocked(-0.06)">-0.06</mat-button-toggle>
                 <mat-button-toggle [value]="-0.04" [disabled]="isBlocked(-0.04)">-0.04</mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-icon matTooltip="La fonction de calcul de la décroissance du nombre de cabinet en fonction de la durée de trajet l'APL est f(time)=exp(c*time) où time est la durée de trajet et c la constante de la fonction exponentielle. Choisir une constante c petite amplifie la décroissance de la durée de trajet.">help</mat-icon>
+            <mat-icon matTooltip="La fonction de calcul de la décroissance du nombre d'établissement en fonction de la durée de trajet l'APL est f(time)=exp(c*time)*nb où time est la durée de trajet, nb le nombre d'établissement (ETP) et c la constante de la fonction exponentielle. Choisir une constante c petite amplifie la décroissance de la durée de trajet. Les valeurs conseillées pour un temps de trajet sont -0.12 pour 30 minutes, -0.08 pour 45 minutes et -0.06 pour 60 minutes.">help</mat-icon>
         </p>
         <p>
             <mat-icon>high_quality</mat-icon> Résolution: 
@@ -46,7 +46,7 @@
                 <mat-button-toggle value="MD" [disabled]="isResolutionBlocked('MD')">Medium</mat-button-toggle>
                 <mat-button-toggle value="LD">Low</mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-icon matTooltip="Résolution des coordonnées GPS">help</mat-icon>
+            <mat-icon matTooltip="Résolution des coordonnées GPS. Pour les iris HD=50m, MD=1Km, LD=10km. Pour les communes HD=50m, MD=100m, LD=1km. Attention une résolution élevée augmente les volumes de transfert.">help</mat-icon>
         </p>
         <p>
             <mat-icon>aspect_ratio</mat-icon> Granularité géographique: 

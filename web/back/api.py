@@ -1,11 +1,12 @@
+import asyncio
+
 from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
 import config
 from commune_service import CommuneService
 from apl_service import APLService
 from interfaces import GeoInputDTO
-import numpy as np
+from fastapi.concurrency import run_in_threadpool
 
 
 app = FastAPI()
@@ -22,13 +23,13 @@ apl_service: APLService = APLService.factory()
 
 
 @app.get("/")
-async def root():
+def root():
     print("Get /")
     return "ICIP"
 
 
 @app.get("/versions")
-async def versions():
+def versions():
     print("Get /versions")
     return {"icip": config.version, "back": config.web}
 
@@ -36,27 +37,27 @@ async def versions():
 @app.get("/find/{q}")
 async def find(q: str):
     print(f"Get /find/{q}")
-    return commune_service.find(q)
+    data = await run_in_threadpool(commune_service.find, q)
+    return data
 
 
 @app.post("/apl/iris")
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
-    data = apl_service.compute(dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+    data = await run_in_threadpool(apl_service.compute, dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
-    debug = data[0]["years"][2020]["pop"]
     return data
 
 
 @app.post("/apl/iris/csv")
-async def apl_iris(dto: GeoInputDTO):
+async def apl_iris_csv(dto: GeoInputDTO):
     print(f"Get /apl/iris/csv")
-    data = apl_service.compute_csv(dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = await run_in_threadpool(apl_service.compute_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
     return data.to_csv(index=False)
 
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", workers=3, reload=False)
+    uvicorn.run("api:app", workers=1, reload=False)

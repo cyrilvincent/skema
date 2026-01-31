@@ -230,9 +230,9 @@ class APLService:
 
     def simplify(self, gdf: pd.DataFrame, resolution: str) -> pd.DataFrame:
         if resolution == "MD":
-            gdf["geometry"] = gdf["geometry"].simplify(0.001)
+            gdf["geometry"] = gdf["geometry"].simplify(0.001)  # 10km
         elif resolution == "LD":
-            gdf["geometry"] = gdf["geometry"].simplify(0.01)
+            gdf["geometry"] = gdf["geometry"].simplify(0.01)   # 1km
         return gdf
 
     def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[pd.DataFrame, pd.DataFrame]:

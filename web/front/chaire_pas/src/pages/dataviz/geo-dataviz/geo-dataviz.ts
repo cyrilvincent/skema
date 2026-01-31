@@ -26,6 +26,7 @@ export class GeoDataviz {
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
   marker = signal<number>(1);
+  fullscreen = input<boolean | null>(null);
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
@@ -148,7 +149,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
         bgcolor: 'rgb(255,255,255)',
       },
       autosize: true,
-      //height: window.innerHeight - 10,
+      height: this.fullscreen() ? undefined : 600,
       //width: 1200,
       margin: {l: 10, r: 10, t: 20, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
@@ -175,6 +176,7 @@ Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
 
   getConfig(): Partial<Plotly.Config> {
     const config: Partial<Plotly.Config> = {
+      autosizable: true,
       responsive: true,
       displayModeBar: true,
       displaylogo: false,
