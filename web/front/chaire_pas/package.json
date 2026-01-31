@@ -39,7 +39,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.0.4",
+    "@angular/build": "^21.1.2",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.1.2",
     "@types/plotly.js-dist-min": "^2.3.4",
