@@ -45,7 +45,7 @@ export class GeoDataviz {
     const meanws = this.df()["meanws"]
     console.log("OnValuesChanged")
     console.log(meanws);
-    console.log(this.years()[this.firstYear()]["apl_max"][0])
+    //console.log(this.years()[this.firstYear()]["apl_max"][0])
   }
 
   getTexts(): String[][] {

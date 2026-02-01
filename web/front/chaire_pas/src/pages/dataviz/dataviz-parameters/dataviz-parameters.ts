@@ -45,8 +45,7 @@ export class DatavizParameters {
   renderType = signal<string>("dataviz");
   renderTypeControl = new FormControl<string>("dataviz");
   geoService = inject(GeoService);
-  
-  // Ajouter geoType
+  lastCode = signal<string>("");
 
   constructor() {
     effect(() => this.onCodeChanged(this.code()));
@@ -61,13 +60,15 @@ export class DatavizParameters {
     this.timeControl.valueChanges.subscribe(
       t => {
         this.time.set(t!);
-        if(t == 30 && this.exp() == -0.04) this.expControl.setValue(-0.12);
-        else if(t == 45 && this.exp() <= -0.1) this.expControl.setValue(-0.08);
-        else if (t == 60 && this.exp() <= -0.06) this.expControl.setValue(-0.06);
+        if (this.type() == "APL") {
+          if(t == 30 && this.exp() == -0.04) this.expControl.setValue(-0.12);
+          else if(t == 45 && this.exp() <= -0.1) this.expControl.setValue(-0.08);
+          else if (t == 60 && this.exp() <= -0.06) this.expControl.setValue(-0.06);
+        }
       }
     );
     this.expControl.valueChanges.subscribe(
-      e => this.exp.set(e!)
+      e => {if (this.type() == "APL") this.exp.set(e!);}
     );
     this.hcControl.valueChanges.subscribe(
       h => this.hc.set(h!)
@@ -91,9 +92,9 @@ export class DatavizParameters {
     );
   }
 
-  onCodeChanged(code: string | null) {
-    if (code != null) {
-      console.log("CodeChanged "+ code);
+  onCodeChanged(code: string | null) { // Warning recursive function
+    if (code != null && code != this.lastCode()) { // lastCode for prevent infinite loop not necessary
+      console.log("CodeChanged "+ code); 
       const c = this.code()!.slice(0, 2);
       if (c == "CF") {
         this.resolutionControl.setValue("LD");
@@ -107,22 +108,19 @@ export class DatavizParameters {
       else if (c == "CC" && this.resolution() != "HD") {
         this.resolutionControl.setValue("HD");
       }
+      this.lastCode.set(code);
     }
-  }
-
-  isBlocked(exp: number): boolean {
-    return (this.time() > 30 && exp < -0.08) || (this.time() == 30 && exp > -0.06) || (this.time() > 45 && exp < -0.06);
   }
 
   isResolutionBlocked(res: string): boolean {
     const code = this.code()?.slice(0, 2);
-    if (res=="HD") {
-      return code == "CF" || code == "CR"
-    }
-    else if (res=="MD") {
-      return code == "CF" || code == "CC";
-    }
+    if (res=="HD") return code == "CF" || code == "CR";
+    else if (res=="MD") return code == "CF" || code == "CC";
     return code != "CF" && code != "CR";
+  }
+
+  isBlocked(exp: number): boolean {
+    return (this.time() > 30 && exp < -0.08) || (this.time() == 30 && exp > -0.06) || (this.time() > 45 && exp < -0.06);
   }
 
   buttonClicked(): void {
@@ -131,7 +129,7 @@ export class DatavizParameters {
       this.geoService.save({
             code: this.code()!,
             id: this.selectedSpecialite().id, 
-            bor: "", 
+            bor: this.selectedSpecialite().shortLabel, 
             time: this.time(),
             exp: this.exp(),
             hc: this.hc(),

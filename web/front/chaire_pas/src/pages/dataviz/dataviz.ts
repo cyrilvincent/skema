@@ -1,4 +1,4 @@
-import { Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { Searchbox } from './searchbox/searchbox';
 import { DatavizParameters } from "./dataviz-parameters/dataviz-parameters";
 import {MatDividerModule} from '@angular/material/divider';
@@ -10,6 +10,7 @@ import { Specialite, GeoInputDTO } from './dataviz.interfaces';
   imports: [Searchbox, DatavizParameters, MatDividerModule, GeoDataviz],
   templateUrl: './dataviz.html',
   styleUrl: './dataviz.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dataviz {
   selectedCode = signal<string | null>(null);
