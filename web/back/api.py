@@ -44,7 +44,7 @@ async def find(q: str):
 @app.post("/apl/iris")
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
-    data = await run_in_threadpool(apl_service.compute, dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+    data = await run_in_threadpool(apl_service.compute_iris, dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data
@@ -53,7 +53,7 @@ async def apl_iris(dto: GeoInputDTO):
 @app.post("/apl/iris/csv")
 async def apl_iris_csv(dto: GeoInputDTO):
     print(f"Get /apl/iris/csv")
-    data = await run_in_threadpool(apl_service.compute_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = await run_in_threadpool(apl_service.compute_iris_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
     return data.to_csv(index=False)
 
 

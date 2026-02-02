@@ -8,6 +8,7 @@ from service_error import ServiceError
 import re
 import pandas as pd
 import config
+from web.back.commune_loader import CommuneLoader
 
 
 class APLService:
@@ -17,6 +18,7 @@ class APLService:
 
     def __init__(self):
         self.iris_loader: IrisLoader = IrisLoader.factory()
+        self.commune_loader: CommuneLoader = CommuneLoader.factory()
         self.first_year = 20
         self.years = list(range(self.first_year, 26))
         self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
@@ -95,7 +97,7 @@ class APLService:
         iriss = iris_df["code"].to_list()
         return iriss
 
-    def get_gdf_by_cc(self, id: str) -> pd.DataFrame:
+    def get_iris_gdf_by_cc(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cc(id)
         if len(iriss) > 0:
             gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
@@ -103,47 +105,46 @@ class APLService:
             gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_insee"] == id]
         return gdf
 
-    def get_gdf_by_cd(self, id: str) -> pd.DataFrame:
+    def get_commune_gdf_by_cc(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        gdf = gdf[(gdf["code"] == id) | (gdf["commune"] == id)]  # 4 cas : code==; commune==; code==&associee; commune==&associee
+        return gdf  # Attendre la jointure et tester autrans + paris + lyon + marseille
+
+    def get_iris_gdf_by_cd(self, id: str) -> pd.DataFrame:
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].str.startswith(id)]
         return gdf
 
-    def get_gdf_by_cr(self, id: str) -> pd.DataFrame:
-        depts = self.get_depts_cr(id)
+    def get_iris_gdf_by_cr(self, id: str) -> pd.DataFrame:
+        depts = self.get_depts_cr(id)  # Inutile pour commune la region est dans le df
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].str.startswith(tuple(depts))]
         return gdf
 
-    def get_gdf_by_ce(self, id: str) -> pd.DataFrame:
-        iriss = self.get_iriss_ce(id)
+    def get_iris_gdf_by_ce(self, id: str) -> pd.DataFrame:
+        iriss = self.get_iriss_ce(id)  # Inutile pour commune le epci est dans le df
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
         return gdf
 
-    def get_gdf_by_ca(self, id: str) -> pd.DataFrame:
+    def get_iris_gdf_by_ca(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_ca(id)
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
         return gdf
 
-    def get_gdf_by_cp(self, id: str) -> pd.DataFrame:
+    def get_iris_gdf_by_cp(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cp(id)
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
         return gdf
 
-    def get_gdf_by_type_code_id(self, type_code: str, id: str) -> pd.DataFrame:
-        if type_code == "CC":
-            return self.get_gdf_by_cc(id)
-        elif type_code == "CD":
-            return self.get_gdf_by_cd(id)
-        elif type_code == "CR":
-            return self.get_gdf_by_cr(id)
-        elif type_code == "CE":
-            return self.get_gdf_by_ce(id)
-        elif type_code == "CA":
-            return self.get_gdf_by_ca(id)
-        elif type_code == "CP":
-            return self.get_gdf_by_cp(id)
-        elif type_code == "CF":
+    def get_iris_gdf_by_type_code_id(self, type_code: str, id: str) -> pd.DataFrame:
+        if type_code == "CF":
             return self.iris_loader.gdf
         else:
-            raise ServiceError(f"Bad type code: {type_code}")
+            return self.__getattribute__(f"get_iris_gdf_by_{type_code.lower()}")(id)
+
+    def get_commune_gdf_by_type_code_id(self, type_code: str, id: str, resolution: str) -> pd.DataFrame:
+        if type_code == "CF":
+            return self.iris_loader.gdf
+        else:
+            return self.__getattribute__(f"get_commune_gdf_by_{type_code.lower()}")(id, resolution)
 
     def get_study_by_year(self, specialite: int, time: int, time_type: str, aexp: float, year: int) -> pd.DataFrame:
         sql = f"""
@@ -196,18 +197,13 @@ class APLService:
     def merge_gdf_apl(self, gdf: pd.DataFrame, apl: pd.DataFrame) -> pd.DataFrame:
         apl["code_iris"] = apl["iris_string"]
         gdf_merged = gdf.merge(apl, on="code_iris", how="left", suffixes=('', '_dest'))
-        return gdf_merged
+        return gdf_merged  # TODO Methode à doubler pour commune /!\ joindre sur code OU commune
 
     def gdf_merge_add_columns(self, gdf_merged: pd.DataFrame) -> pd.DataFrame:
         gdf_merged["pop_ajustee"] = gdf_merged['pop_gp'].fillna(0)
         gdf_merged["pop"] = gdf_merged["pop"].fillna(0)
         gdf_merged["apl_max"] = gdf_merged["apl"].max()
-        # gdf_merged["pretty"] = gdf_merged["apl"].fillna(0).apply(lambda x: round(x, 0)).astype(int)
-        # apl20 = gdf_merged.loc[gdf_merged['year'] == 20, ['iris_dest', 'apl']].set_index('iris_dest')['apl']
-        # gdf_merged["year20"] = gdf_merged['iris_dest'].map(apl20).fillna(0)
-        # gdf_merged["diff20"] = gdf_merged["apl"] - gdf_merged["year20"]
-        # gdf_merged["delta20"] = gdf_merged["diff20"] / (gdf_merged["year20"] + 0.1)
-        return gdf_merged
+        return gdf_merged  # TODO faire un remove column (cleabs ...) pour toutes les colonnes iris non utilisées
 
     def get_export(self, code: str, studies_df: pd.DataFrame, gdf_merged: pd.DataFrame) -> tuple[dict, any]:
         center_lat = gdf_merged.geometry.centroid.y.mean()  # 45.1209 5.5901
@@ -235,7 +231,8 @@ class APLService:
             gdf["geometry"] = gdf["geometry"].simplify(0.01)   # 1km
         return gdf
 
-    def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float)\
+            -> tuple[pd.DataFrame, pd.DataFrame]:
         type_code, id = self.check_code(code)
         studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
         keys = studies_df["key"].to_list()
@@ -244,30 +241,44 @@ class APLService:
         self.corrections(apl)
         return apl, studies_df
 
-    def compute(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str) -> tuple[dict, any]:
-        print(f"Compute APL for {code} {specialite} {time} {time_type} {aexp}")
+    def compute_iris(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str)\
+            -> tuple[dict, any]:
+        print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
-        gdf = self.get_gdf_by_type_code_id(type_code, id)
+        gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
         print(f"Found {len(gdf)} gdfs")
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
         gdf_merged = self.merge_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
-        gdf_merged = self.simplify(gdf_merged, resolution)
+        gdf_merged = self.simplify(gdf_merged, resolution)  # Ne pas appeler pour commune
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 
-    def compute_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
+    def compute_iris_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
         print(f"Compute APL CSV for {code} {specialite} {time} {time_type} {aexp}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
 
+    def compute_commune(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str) \
+            -> tuple[dict, any]:
+        print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(code)
+        gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+        print(f"Found {len(gdf)} gdfs")
+        return {}, gdf
+
 
 if __name__ == '__main__':
+    pd.set_option('display.max_columns', None)
+    pd.options.display.width = 0
     s = APLService()
     time.sleep(1)
-    export = s.compute("CC-38205", 10, 30, "HC", -0.12)  #CC-38185 CC-38205 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
-    s = json.dumps(export)
-    print(s[:5000])
+    # export = s.compute_iris("CC-38225", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
+    # s = json.dumps(export)
+    # print(s[:5000])
+    _, gdf = s.compute_commune("CC-38225", 10, 30, "HC", -0.12, "HD")
+    print(gdf)
