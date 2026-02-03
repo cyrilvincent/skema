@@ -2,15 +2,14 @@ import json
 import threading
 import time
 import warnings
-
 from pandas.errors import SettingWithCopyWarning
 from sqlalchemy import text
 from iris_loader import IrisLoader
+from commune_loader import CommuneLoader
 from service_error import ServiceError
 import re
 import pandas as pd
 import config
-from web.back.commune_loader import CommuneLoader
 
 
 class APLService:
@@ -22,7 +21,8 @@ class APLService:
         self.iris_loader: IrisLoader = IrisLoader.factory()
         self.commune_loader: CommuneLoader = CommuneLoader.factory()
         self.first_year = 20
-        self.years = list(range(self.first_year, 26))
+        self.last_year = 25
+        self.years = list(range(self.first_year, self.last_year + 1))
         self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
         warnings.filterwarnings('ignore', category=UserWarning)
         warnings.filterwarnings('ignore', category=SettingWithCopyWarning)
@@ -89,6 +89,16 @@ class APLService:
         iriss = iris_df["code"].to_list()
         return iriss
 
+    def get_communes_ca(self, id: str) -> list[str]:
+        sql = f"""
+        select code from iris.commune
+        where arr_dept_id='{id}'
+        order by id
+        """
+        iris_df = pd.read_sql(sql, config.connection_string)
+        iriss = iris_df["code"].to_list()
+        return iriss
+
     def get_iriss_cp(self, id: str) -> list[str]:
         sql = f"""
         select i.code from iris.cp_insee ci
@@ -100,6 +110,16 @@ class APLService:
         iriss = iris_df["code"].to_list()
         return iriss
 
+    def get_communes_cp(self, id: str) -> list[str]:
+        sql = f"""
+        select c.code from iris.cp_insee ci
+        join iris.commune c on c.code=ci.code_insee
+        where ci.code_postal={id}
+        """
+        communes_df = pd.read_sql(sql, config.connection_string)
+        communes = communes_df["code"].to_list()
+        return communes
+
     def get_iris_gdf_by_cc(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cc(id)
         if len(iriss) > 0:
@@ -109,24 +129,44 @@ class APLService:
         return gdf
 
     def get_commune_gdf_by_cc(self, id: str, resolution: str) -> pd.DataFrame:
+        if id.startswith("751"):
+            id = "75056"
+        elif id.startswith("6938"):
+            id = "69123"
+        elif id.startswith("132"):
+            id = "13055"
         gdf = self.commune_loader.gdfs[resolution]
-        # gdf = gdf[((gdf["code"] == id) | (gdf["commune"] == id)]
         gdf = gdf[(gdf["code"] == id) & (gdf["associee"] == False)]
-        gdf["code"] = gdf["code"].where(gdf["commune"].isna(), gdf["commune"])  # Pour 75, 69, 13
+        # gdf["code"] = gdf["code"].where(gdf["commune"].isna(), gdf["commune"])  # Pour 75, 69, 13
         return gdf
 
     def get_iris_gdf_by_cd(self, id: str) -> pd.DataFrame:
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].str.startswith(id)]
         return gdf
 
+    def get_commune_gdf_by_cd(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        gdf = gdf[(gdf["departement"] == id) & (gdf["associee"] == False) & (gdf["commune"].isna())]
+        return gdf
+
     def get_iris_gdf_by_cr(self, id: str) -> pd.DataFrame:
-        depts = self.get_depts_cr(id)  # Inutile pour commune la region est dans le df
+        depts = self.get_depts_cr(id)
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].str.startswith(tuple(depts))]
         return gdf
 
+    def get_commune_gdf_by_cr(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        gdf = gdf[(gdf["region"] == id) & (gdf["associee"] == False) & (gdf["commune"].isna())]
+        return gdf
+
     def get_iris_gdf_by_ce(self, id: str) -> pd.DataFrame:
-        iriss = self.get_iriss_ce(id)  # Inutile pour commune le epci est dans le df
+        iriss = self.get_iriss_ce(id)
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
+        return gdf
+
+    def get_commune_gdf_by_ce(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        gdf = gdf[(gdf["epci"] == id) & (gdf["associee"] == False) & (gdf["commune"].isna())]
         return gdf
 
     def get_iris_gdf_by_ca(self, id: str) -> pd.DataFrame:
@@ -134,9 +174,21 @@ class APLService:
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
         return gdf
 
+    def get_commune_gdf_by_ca(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        communes = self.get_communes_ca(id)
+        gdf = gdf[gdf["code"].isin(communes)]
+        return gdf
+
     def get_iris_gdf_by_cp(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cp(id)
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].isin(iriss)]
+        return gdf
+
+    def get_commune_gdf_by_cp(self, id: str, resolution: str) -> pd.DataFrame:
+        gdf = self.commune_loader.gdfs[resolution]
+        communes = self.get_communes_cp(id)
+        gdf = gdf[gdf["code"].isin(communes)]
         return gdf
 
     def get_iris_gdf_by_type_code_id(self, type_code: str, id: str) -> pd.DataFrame:
@@ -310,6 +362,13 @@ class APLService:
         export = self.get_export(code, studies_df, gdf_commune)
         return export
 
+    def compute_commune_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
+        print(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp}")
+        apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
+        apl = self.group_apl_by_commune(apl)
+        apl["year"] = apl["year"]+2000
+        return apl[["specialite", "year", "code_commune", "commune_label", "apl"]]
+
 
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
@@ -319,8 +378,9 @@ if __name__ == '__main__':
     # export = s.compute_iris("CC-38225", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    export = s.compute_commune("CC-75056", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
+    export = s.compute_commune("CA-381", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
     s = json.dumps(export)
     print(s[:5000])
+    # Tester les dept 75, 69 et 13 pour voir si le commune.isna() focntionne bien
 
 

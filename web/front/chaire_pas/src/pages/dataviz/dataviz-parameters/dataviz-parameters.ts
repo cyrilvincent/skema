@@ -136,7 +136,7 @@ export class DatavizParameters {
             exp: this.exp(),
             hc: this.hc(),
             resolution: this.resolution(),
-          }, this.type(), this.renderType());
+          }, this.type(), this.renderType(), this.geoType());
     }
     else if (this.fullScreen()) {
       const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()

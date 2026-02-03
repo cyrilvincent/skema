@@ -20,10 +20,16 @@ export class GeoService  extends CommonService {
     } 
   }
 
-  save(dto: GeoInputDTO, type: string, render: string) {
+  save(dto: GeoInputDTO, type: string, render: string, geoType: string) {
     if (type == "APL") {
-      if (render == "json") this.saveAPLJSON(dto);
-      else if (render == "csv") this.saveAPLCSV(dto);
+      if (render == "json") {
+        if (geoType == "iris") this.saveIrisAPLJSON(dto);
+        else this.saveCommuneAPLJSON(dto);
+      } 
+      else if (render == "csv") {
+        if (geoType == "iris") this.saveIrisAPLCSV(dto);
+        else this.saveCommuneAPLCSV(dto);
+      } 
     }
   }
 
@@ -57,13 +63,13 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveAPLJSON(dto: GeoInputDTO): void {
-    console.log("saveAPLJSON");
+  private saveIrisAPLJSON(dto: GeoInputDTO): void {
+    console.log("saveIrisAPLJSON");
     console.log(dto);
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
       next: (res) => {
-        const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(res[1])], { type: 'application/json' });
         this.fileSaver.save(blob, `apl_iris_${dto.code}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.json`);
       },
       error: (err) => {
@@ -74,8 +80,25 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveAPLCSV(dto: GeoInputDTO): void {
-    console.log("saveAPLCSV");
+    private saveCommuneAPLJSON(dto: GeoInputDTO): void {
+    console.log("saveCommuneAPLJSON");
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/commune`, dto).subscribe({    
+      next: (res) => {
+        const blob = new Blob([JSON.stringify(res[1])], { type: 'application/json' });
+        this.fileSaver.save(blob, `apl_commune_${dto.code}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.json`);
+      },
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+      },
+      complete: () => this._loading.set(false),
+    });
+  }
+
+  private saveIrisAPLCSV(dto: GeoInputDTO): void {
+    console.log("saveIrisAPLCSV");
     console.log(dto);
     this.fetchLoading();
     this.http.post<string>(`${environment.baseUrl}/apl/iris/csv`, dto).subscribe({    
@@ -90,4 +113,23 @@ export class GeoService  extends CommonService {
       complete: () => this._loading.set(false),
     });
   }
+
+  private saveCommuneAPLCSV(dto: GeoInputDTO): void {
+    console.log("saveCommuneAPLCSV");
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<string>(`${environment.baseUrl}/apl/commune/csv`, dto).subscribe({    
+      next: (res) => {
+        const blob = new Blob([res], { type: 'application/json' });
+        this.fileSaver.save(blob, `apl_commune_${dto.code}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
+      },
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+      },
+      complete: () => this._loading.set(false),
+    });
+  }
+
+  
 }

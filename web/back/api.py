@@ -68,6 +68,13 @@ async def apl_iris_csv(dto: GeoInputDTO):
     return data.to_csv(index=False)
 
 
+@app.post("/apl/commune/csv")
+async def apl_commune_csv(dto: GeoInputDTO):
+    print(f"Get /apl/commune/csv")
+    data = await run_in_threadpool(apl_service.compute_commune_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    return data.to_csv(index=False)
+
+
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn

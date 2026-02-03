@@ -45,14 +45,11 @@ export class GeoDataviz {
     const meanws = this.df()["meanws"]
     console.log("OnValuesChanged")
     console.log(meanws);
-    //console.log(this.years()[this.firstYear()]["apl_max"][0])
   }
 
-  getTexts(): String[][] {
-    const texts: string[][] = [];
-    for (const year of Object.keys(this.years())) {
-      const df_year = this.years()[year];
-      let text = df_year["code_iris"].map((ci, i) => `
+  getText(ci: string, i: number, df_year: GeoYearDTO, year: string): string {
+    if(this.geoType() == "iris") {
+      return `
 Commune: ${df_year["nom_commune"][i]}<br>
 Nom Iris: ${df_year["nom_iris"][i]}<br>
 Code Iris: ${ci}<br>
@@ -62,7 +59,25 @@ Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
 Population: ${df_year["pop"][i].toFixed(0)}<br>
 Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
 Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
-`);
+`
+    }
+    else {
+      return `
+Commune: ${df_year["nom_commune"][i]}<br>
+APL ${year}: ${df_year["apl"][i].toFixed(1)}<br>
+Variation APL/${this.firstYear()}: ${((df_year["apl"][i]-this.years()[this.firstYear()]["apl"][i])*100/this.years()[this.firstYear()]["apl"][i]).toFixed(0)}%<br>
+Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
+Population: ${df_year["pop"][i].toFixed(0)}<br>
+Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
+`
+    }
+  }
+
+  getTexts(): String[][] {
+    const texts: string[][] = [];
+    for (const year of Object.keys(this.years())) {
+      const df_year = this.years()[year];
+      let text = df_year["code_iris"].map((ci, i) => this.getText(ci, i, df_year, year));
 	    texts.push(text);
     }
     return texts;
