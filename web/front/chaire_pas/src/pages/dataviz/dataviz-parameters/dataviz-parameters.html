@@ -42,9 +42,9 @@
         <p>
             <mat-icon>high_quality</mat-icon> Résolution: 
             <mat-button-toggle-group name="resolution" [formControl]="resolutionControl">
-                <mat-button-toggle value="HD" [disabled]="isResolutionBlocked('HD')">High</mat-button-toggle>
-                <mat-button-toggle value="MD" [disabled]="isResolutionBlocked('MD')">Medium</mat-button-toggle>
-                <mat-button-toggle value="LD" [disabled]="isResolutionBlocked('LD')">Low</mat-button-toggle>
+                <mat-button-toggle value="HD" [disabled]="isResolutionBlocked('HD')">Haute</mat-button-toggle>
+                <mat-button-toggle value="MD" [disabled]="isResolutionBlocked('MD')">Moyenne</mat-button-toggle>
+                <mat-button-toggle value="LD" [disabled]="isResolutionBlocked('LD')">Basse</mat-button-toggle>
             </mat-button-toggle-group>
             <mat-icon matTooltip="Résolution des coordonnées GPS. Pour les iris HD=50m, MD=1Km, LD=10km. Pour les communes HD=50m, MD=100m, LD=1km. Attention une résolution élevée augmente les volumes de transfert.">help</mat-icon>
         </p>
@@ -72,7 +72,7 @@
         <mat-slide-toggle [formControl]="toggleControl">Plein écran</mat-slide-toggle>
         <mat-icon matTooltip="Ouvre un nouvel onglet">help</mat-icon>
         <br>
-        <button type="button" mat-fab extended (click)="buttonClicked()">
+        <button type="button" mat-fab extended (click)="buttonClicked()" [disabled]="geoService.loading()">
             <mat-icon>
                 @if(geoService.loading()) {<mat-spinner diameter="25"></mat-spinner>}
                 @else if(renderType()!="dataviz") {download}

@@ -1,5 +1,4 @@
 https://chaire2p2as.weebly.com/
-commune : Faire les csv et geojson
 sae
 menu : https://dev.to/chintanonweb/step-by-step-guide-to-an-angular-expandable-and-collapsible-sidebar-with-icons-5e5o
 https://javascript.plainenglish.io/making-a-responsive-animated-hamburger-menu-with-angular-material-f822cdca3ac7
