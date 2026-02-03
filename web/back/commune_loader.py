@@ -43,6 +43,8 @@ class CommuneLoader(threading.Thread):
             gdf = pd.concat([gdf, gdfa], ignore_index=True)
         gdf = gdf[gdf["departement"].str.len() == 2]
         gdf = gdf.drop("plm", axis=1)
+        gdf["lon"] = gdf["geometry"].centroid.y
+        gdf["lat"] = gdf["geometry"].centroid.x
         duration = time.perf_counter() - self.time0
         print(f"Found {len(gdf)} communes in {duration:.0f}s")
         return gdf
@@ -74,3 +76,4 @@ class CommuneLoader(threading.Thread):
 if __name__ == '__main__':
     s = CommuneLoader()
     s.run()
+    # s.load_gdf(1000, False)

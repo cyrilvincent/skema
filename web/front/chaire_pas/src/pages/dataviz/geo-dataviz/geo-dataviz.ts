@@ -35,9 +35,9 @@ export class GeoDataviz {
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
     if (dto != null) {
-      console.log("onInputDTOchanged");
+      console.log("onInputDTOchanged "+ this.geoType());
       console.log(dto);
-      this.service.fetch(dto, this.type());
+      this.service.fetch(dto, this.type(), this.geoType());
     }
   }
 

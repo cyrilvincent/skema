@@ -18,7 +18,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
   searchService = inject(SearchService);
-  geoType = input<string>("iris");
   options = this.searchService.codes;
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();

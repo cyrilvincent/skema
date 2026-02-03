@@ -44,7 +44,18 @@ async def find(q: str):
 @app.post("/apl/iris")
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
-    data = await run_in_threadpool(apl_service.compute_iris, dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+    data = await run_in_threadpool(apl_service.compute_iris,
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+    if len(data[1]["features"]) == 0:
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    return data
+
+
+@app.post("/apl/commune")
+async def apl_commune(dto: GeoInputDTO):
+    print(f"Get /apl/commune")
+    data = await run_in_threadpool(apl_service.compute_commune,
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data

@@ -13,9 +13,10 @@ export class GeoService  extends CommonService {
   geoTupleDTO = computed(() => this._geoTupleDTO());
   fileSaver = inject(FileSaverService);
 
-  fetch(dto: GeoInputDTO, type: string): void {
+  fetch(dto: GeoInputDTO, type: string, geoType: string): void {
     if (type == "APL") {
-      this.fetchAPL(dto);
+      if (geoType == "iris") this.fetchIrisAPL(dto);
+      else this.fetchCommuneAPL(dto);
     } 
   }
 
@@ -26,11 +27,26 @@ export class GeoService  extends CommonService {
     }
   }
 
-  private fetchAPL(dto: GeoInputDTO): void {
-    console.log("FetchAPL ");
+  private fetchIrisAPL(dto: GeoInputDTO): void {
+    console.log("FetchIrisAPL ");
     console.log(dto);
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/iris`, dto).subscribe({    
+      next: (res) => { this._geoTupleDTO.set(res); },
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+        this._geoTupleDTO.set(emptyGeo);
+      },
+      complete: () => this._loading.set(false),
+    });
+  }
+
+    private fetchCommuneAPL(dto: GeoInputDTO): void {
+    console.log("FetchCommuneAPL ");
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/commune`, dto).subscribe({    
       next: (res) => { this._geoTupleDTO.set(res); },
       error: (err) => {
         if(err.status == 404) console.log("Not found "+dto.code);

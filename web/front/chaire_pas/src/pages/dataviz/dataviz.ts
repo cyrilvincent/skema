@@ -17,13 +17,13 @@ export class Dataviz {
   specialite = signal<GeoInputDTO | null>(null);
   dto = signal<GeoInputDTO | null>(null);
   type = input<string>("APL");
-  geoType = input<string>("iris");
+  geoType = signal<string>("iris");
 
   optionSelected(code: string | null) {
     this.selectedCode.set(code);
   }
 
-  ok(params: [Specialite, number, number, string, boolean, string]): void {
+  ok(params: [Specialite, number, number, string, boolean, string, string]): void {
     const s: GeoInputDTO = {
       code: this.selectedCode() ?? "CC-38205",
       id: params[0].id, 
@@ -34,6 +34,7 @@ export class Dataviz {
       resolution: params[5],
     };
     this.dto.set(s);
+    this.geoType.set(params[6])
     console.log("OK");
     console.log(this.dto());
   }

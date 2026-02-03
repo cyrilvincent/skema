@@ -2,6 +2,8 @@ import json
 import threading
 import time
 import warnings
+
+from pandas.errors import SettingWithCopyWarning
 from sqlalchemy import text
 from iris_loader import IrisLoader
 from service_error import ServiceError
@@ -23,6 +25,7 @@ class APLService:
         self.years = list(range(self.first_year, 26))
         self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
         warnings.filterwarnings('ignore', category=UserWarning)
+        warnings.filterwarnings('ignore', category=SettingWithCopyWarning)
 
     @staticmethod
     def factory():
@@ -107,8 +110,10 @@ class APLService:
 
     def get_commune_gdf_by_cc(self, id: str, resolution: str) -> pd.DataFrame:
         gdf = self.commune_loader.gdfs[resolution]
-        gdf = gdf[(gdf["code"] == id) | (gdf["commune"] == id)]  # 4 cas : code==; commune==; code==&associee; commune==&associee
-        return gdf  # Attendre la jointure et tester autrans + paris + lyon + marseille
+        # gdf = gdf[((gdf["code"] == id) | (gdf["commune"] == id)]
+        gdf = gdf[(gdf["code"] == id) & (gdf["associee"] == False)]
+        gdf["code"] = gdf["code"].where(gdf["commune"].isna(), gdf["commune"])  # Pour 75, 69, 13
+        return gdf
 
     def get_iris_gdf_by_cd(self, id: str) -> pd.DataFrame:
         gdf = self.iris_loader.gdf[self.iris_loader.gdf["code_iris"].str.startswith(id)]
@@ -194,33 +199,61 @@ class APLService:
         if len(apl[apl["iris_string"] == "140110000"]) > 0:
             apl.loc[apl["iris_string"] == "140110000", "iris_string"] = "145810000"
 
-    def merge_gdf_apl(self, gdf: pd.DataFrame, apl: pd.DataFrame) -> pd.DataFrame:
+    def merge_iris_gdf_apl(self, gdf: pd.DataFrame, apl: pd.DataFrame) -> pd.DataFrame:
         apl["code_iris"] = apl["iris_string"]
         gdf_merged = gdf.merge(apl, on="code_iris", how="left", suffixes=('', '_dest'))
-        return gdf_merged  # TODO Methode à doubler pour commune /!\ joindre sur code OU commune
+        return gdf_merged
 
-    def gdf_merge_add_columns(self, gdf_merged: pd.DataFrame) -> pd.DataFrame:
-        gdf_merged["pop_ajustee"] = gdf_merged['pop_gp'].fillna(0)
-        gdf_merged["pop"] = gdf_merged["pop"].fillna(0)
-        gdf_merged["apl_max"] = gdf_merged["apl"].max()
-        return gdf_merged  # TODO faire un remove column (cleabs ...) pour toutes les colonnes iris non utilisées
+    def merge_commune_gdf_apl(self, gdf: pd.DataFrame, apl: pd.DataFrame) -> pd.DataFrame:
+        gdf["code_commune"] = gdf["code"]
+        gdf_merged = gdf.merge(apl, on="code_commune", how="left", suffixes=('', '_dest'))
+        return gdf_merged
 
-    def get_export(self, code: str, studies_df: pd.DataFrame, gdf_merged: pd.DataFrame) -> tuple[dict, any]:
-        center_lat = gdf_merged.geometry.centroid.y.mean()  # 45.1209 5.5901
-        center_lon = gdf_merged.geometry.centroid.x.mean()
+    def group_apl_by_commune(self, apl: pd.DataFrame) -> pd.DataFrame:
+        apl = apl.sort_values(by=["year", "iris"])
+        apl["pop_sum"] = apl['pop'].fillna(0).groupby([apl["code_commune"], apl["year"]]).transform('sum')
+        apl["pop_gp_sum"] = apl['pop_gp'].fillna(0).groupby([apl["code_commune"], apl["year"]]).transform('sum')
+        apl["nb_sum"] = apl['nb'].fillna(0).groupby([apl["code_commune"], apl["year"]]).transform('sum')
+        apl[f"apl_meanw"] = ((apl["apl"].fillna(0) * apl["pop"])
+                             .groupby([apl["code_commune"], apl["year"]]).transform('sum') / apl["pop_sum"])
+        apl = apl.drop_duplicates(subset=['year', "code_commune"])
+        return apl
+
+    def gdf_merge_add_columns(self, gdf: pd.DataFrame) -> pd.DataFrame:
+        if "apl_meanw" in gdf.columns:
+            gdf["apl"] = gdf["apl_meanw"]
+            gdf["pop_ajustee"] = gdf["pop_gp_sum"]
+            gdf["nb"] = gdf["nb_sum"]
+            gdf["pop"] = gdf["pop_sum"]
+            gdf["code_insee"] = gdf["code"]
+            gdf["nom_commune"] = gdf["nom"]
+            gdf["fid"] = gdf["code"]
+            gdf["code_iris"] = ""
+            gdf["nom_iris"] = ""
+        else:
+            gdf["pop_ajustee"] = gdf['pop_gp'].fillna(0)
+            gdf["pop"] = gdf["pop"].fillna(0)
+        gdf["apl_max"] = gdf["apl"].max()
+        return gdf
+
+    def get_export(self, code: str, studies_df: pd.DataFrame, gdf: pd.DataFrame) -> tuple[dict, any]:
+        center_lat = gdf.geometry.centroid.y.mean()  # 45.1209 5.5901
+        center_lon = gdf.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
-        export = gdf_merged[['code_insee', 'nom_commune', 'code_iris', 'nom_iris', 'lon', 'lat', 'fid', 'year', 'nb',
-                             'apl', 'swpop', 'pop', 'pop_ajustee', 'apl_max']]
+        cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
+                'apl_max', 'code_iris', 'nom_iris', "geometry"]
+        export = gdf[cols]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
             dico["meanws"].append(meanw)
             export_year = export[export["year"] == year]
             dico_year = {}
             for col in export.columns:
-                dico_year[col] = export_year[col].values.tolist()
+                if col != "geometry":
+                    dico_year[col] = export_year[col].values.tolist()
             dico["years"][year + 2000] = dico_year
-        gdf_first_year = gdf_merged[gdf_merged["year"] == self.first_year]
-        geojson = gdf_first_year.__geo_interface__
+        gdf_first_year = gdf[gdf["year"] == self.first_year]
+        geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
         print(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
 
@@ -246,10 +279,10 @@ class APLService:
         print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
         print(f"Found {len(gdf)} gdfs")
-        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
-        gdf_merged = self.merge_gdf_apl(gdf, apl)
+        gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)  # Ne pas appeler pour commune
@@ -257,7 +290,7 @@ class APLService:
         return export
 
     def compute_iris_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
-        print(f"Compute APL CSV for {code} {specialite} {time} {time_type} {aexp}")
+        print(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
@@ -267,9 +300,15 @@ class APLService:
         print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         print(f"Found {len(gdf)} gdfs")
-        return {}, gdf
+        gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
+        print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        gdf_commune = self.group_apl_by_commune(gdf_merged)
+        gdf_commune = self.gdf_merge_add_columns(gdf_commune)
+        export = self.get_export(code, studies_df, gdf_commune)
+        return export
 
 
 if __name__ == '__main__':
@@ -280,5 +319,8 @@ if __name__ == '__main__':
     # export = s.compute_iris("CC-38225", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    _, gdf = s.compute_commune("CC-38225", 10, 30, "HC", -0.12, "HD")
-    print(gdf)
+    export = s.compute_commune("CC-75056", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
+    s = json.dumps(export)
+    print(s[:5000])
+
+

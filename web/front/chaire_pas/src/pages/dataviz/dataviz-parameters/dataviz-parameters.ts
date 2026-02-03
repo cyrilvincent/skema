@@ -23,7 +23,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 })
 export class DatavizParameters {
   type = input<string>("APL");
-  geoType = input<string>("iris");
+  geoType = signal<string>("iris");
   geoTypeControl = new FormControl<string>("iris");
   code = input<string | null>(null);
   specialites = computed(() => specialites[this.type()]);
@@ -39,7 +39,7 @@ export class DatavizParameters {
   disabled = input<boolean>(false);
   toggleControl = new FormControl<boolean>(false);
   fullScreen = signal<boolean>(false);
-  okEvent = output<[Specialite, number, number, string, boolean, string]>();
+  okEvent = output<[Specialite, number, number, string, boolean, string, string]>();
   resolution = signal<string>("HD");
   resolutionControl = new FormControl<string>("HD");
   renderType = signal<string>("dataviz");
@@ -88,8 +88,10 @@ export class DatavizParameters {
         if (r == "dataviz") this.toggleControl.enable();
         else this.toggleControl.disable();
       }
-
     );
+    this.geoTypeControl.valueChanges.subscribe(
+      g => this.geoType.set(g!)
+    )
   }
 
   onCodeChanged(code: string | null) { // Warning recursive function
@@ -140,7 +142,7 @@ export class DatavizParameters {
       const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()
       window.open(url, "_blank");
     }
-    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution()])
+    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType()])
   }
 
 }

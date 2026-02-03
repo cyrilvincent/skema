@@ -21,16 +21,16 @@ export interface GeometryDTO {
 }
 
 export interface FeaturePropertiesDTO {
-    cleabs: string;
-    code_insee: string;
-    nom_commune: string;
+    // cleabs: string;
+    // code_insee: string;
+    // nom_commune: string;
     //iris: string;
-    code_iris: string;
-    nom_iris: string;
+    // code_iris: string;
+    // nom_iris: string;
     //type_iris: string;
     fid: number;
-    lon: number;
-    lat: number;
+    // lon: number;
+    // lat: number;
 }
 
 
