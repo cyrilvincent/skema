@@ -20,8 +20,8 @@ export class GeoDataviz {
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
   firstYear = computed<string>(() => Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  config = signal<Partial<Plotly.Config>>(this.getConfig());
-  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.getScatter() as any] : [this.getGeo()]);
+  config = signal<Partial<Plotly.Config>>(this.getConfig());  // TODO faire getDATA
+  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatterGeo() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0);
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
@@ -31,6 +31,10 @@ export class GeoDataviz {
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
     effect(() => this.onValuesChanged(this.values()));
+  }
+
+  ngOnInit() {
+    this.showLabel.set(this.type() != "APL");
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -46,6 +50,8 @@ export class GeoDataviz {
     console.log("OnValuesChanged")
     console.log(meanws);
   }
+
+// Gerer scattergeo
 
   getText(i: number, df_year: GeoYearDTO, year: string): string {
     if(this.type() == "APL") {
@@ -78,7 +84,7 @@ export class GeoDataviz {
   Commune: ${df_year["nom_commune"][i]}<br>
   Nom Iris: ${df_year["nom_iris"][i]}<br>
   Code Iris: ${df_year["code_iris"][i]}<br>
-  KM ${year}: ${df_year["km"]![i].toFixed(1)}<br>  
+  KM ${year}: ${df_year["time_hc"]![i].toFixed(1)}<br>  
   Population: ${df_year["pop"][i].toFixed(0)}<br>
   `
       }  // TODO A Améliorer
@@ -91,7 +97,6 @@ export class GeoDataviz {
   getTexts(): String[][] {
     const texts: string[][] = [];
     for (const year of Object.keys(this.years())) {
-      console.log(year);
       const df_year = this.years()[year];
       let text = df_year["pop"].map((_, i) => this.getText(i, df_year, year));
 	    texts.push(text);
@@ -104,14 +109,14 @@ export class GeoDataviz {
       if(this.normColorBar()) return this.df()["meanws"][0]*2+1
       return this.years()[this.firstYear()]["apl_max"]![0]+1
     }
-    else return 60;
+    else return 60; // TODO Gérer 60 et 15
   }
 
   getGeo() {
     const geo = {
       type: "choropleth",
       locations: this.years()[this.firstYear()]["fid"],
-      z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "km"],
+      z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "time_hc"],
       zmin: 0,
       zmax: this.getZMax(),
       hoverinfo: "text",
@@ -137,6 +142,7 @@ export class GeoDataviz {
     const steps: Plotly.SliderStep[] = [];
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
+      df_year["lon"][0] = df_year["lon"][0]+(Number(year)-2020)*0.01; // TODO A enlever
       const step: Plotly.SliderStep = {
         label: String(year),
         value: String(year),
@@ -145,8 +151,14 @@ export class GeoDataviz {
         method: 'update',
         args: [
           {
-            z: [df_year[this.type()=="APL" ? "apl": "km"], null],
-            text: [this.getTexts()[+year - +this.firstYear()], df_year[this.type()=="APL" ? "apl": "km"]!.map((a, i) => `${a.toFixed(0)}`)],
+            z: [df_year[this.type()=="APL" ? "apl": "time_hc"], null],
+            text: [this.getTexts()[+year - +this.firstYear()], df_year[this.type()=="APL" ? "apl": "time_hc"]!.map((a, i) => `${a.toFixed(0)}`)],
+            lon: [null, df_year["lon"]],
+            lat: [null, df_year["lat"]],
+            marker: {
+              color: "#00ffff",
+              size: df_year["km"],
+            }
           }
         ]
       };
@@ -155,7 +167,7 @@ export class GeoDataviz {
     return steps;
   }
 
-  public getSliders(): Partial<Plotly.Slider>[] {
+  public getSliders(): Partial<Plotly.Slider>[] { // TODO en fullscreen apparait tj en APL
     const sliders: Partial<Plotly.Slider>[] = [{
         active: 0,
         currentvalue: {
@@ -202,13 +214,30 @@ export class GeoDataviz {
       type: 'scattergeo',
       lat: this.years()[this.firstYear()]["lat"],
       lon: this.years()[this.firstYear()]["lon"],
-      text: this.years()[this.firstYear()][this.type()=="APL"?"apl":"km"]!.map((a, i) => `${a.toFixed(0)}`),
+      text: this.years()[this.firstYear()][this.type()=="APL"?"apl":"time_hc"]!.map((a, i) => `${a.toFixed(0)}`),
       mode: 'text',
       textposition: 'middle center',
       textfont: { family: 'Arial', size: 12, color: '#000000' },
       hoverinfo: 'none',
       name: 'APL',
       visible: true,
+    };
+    return scatter;
+  }
+
+  getScatterGeo(): Partial<Plotly.ScatterData> {
+    const scatter: Partial<Plotly.ScatterData> = {
+      type: 'scattergeo',
+      lat: this.years()[this.firstYear()]["lat"],
+      lon: this.years()[this.firstYear()]["lon"],
+      mode: 'markers',
+      hoverinfo: 'none',
+      name: 'APL',
+      visible: true,
+      marker: {
+        color: "#00ff00",
+        size: 10,
+      }
     };
     return scatter;
   }
