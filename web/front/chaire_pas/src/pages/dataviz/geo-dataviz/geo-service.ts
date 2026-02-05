@@ -25,16 +25,12 @@ export class GeoService  extends CommonService {
   }
 
   private fetchAPL(dto: GeoInputDTO, geoType: string): void {
-    console.log("FetchIrisAPL "+geoType);
+    console.log("FetchAPL "+geoType);
     console.log(dto);
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({    
       next: (res) => { this._geoTupleDTO.set(res); },
-      error: (err) => {
-        if(err.status == 404) console.log("Not found "+dto.code);
-        else this.catchError(err);
-        this._geoTupleDTO.set(emptyGeo);
-      },
+      error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
     });
   }
@@ -48,16 +44,13 @@ export class GeoService  extends CommonService {
         const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
         this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}_${dto.resolution}.json`);
       },
-      error: (err) => {
-        if(err.status == 404) console.log("Not found "+dto.code);
-        else this.catchError(err);
-      },
+      error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
     });
   }
 
   private saveAPLCSV(dto: GeoInputDTO, geoType: string): void {
-    console.log("saveIrisAPLCSV "+geoType);
+    console.log("saveAPLCSV "+geoType);
     console.log(dto);
     this.fetchLoading();
     this.http.post<string>(`${environment.baseUrl}/apl/${geoType}/csv`, dto).subscribe({    
@@ -65,10 +58,7 @@ export class GeoService  extends CommonService {
         const blob = new Blob([res], { type: 'application/json' });
         this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
       },
-      error: (err) => {
-        if(err.status == 404) console.log("Not found "+dto.code);
-        else this.catchError(err);
-      },
+      error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
     });
   }

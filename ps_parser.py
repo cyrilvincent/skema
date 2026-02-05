@@ -517,10 +517,11 @@ class PSParser(BaseParser):
             if inpp is not None:
                 e.key = inpp
                 e.has_inpp = True
+                e.rule_nb = 0
                 if rule_nb > 0:
                     self.rules[rule_nb - 1] += 1
             if e.key in self.entities:
-                if 0 < rule_nb < self.entities[e.key].rule_nb:
+                if self.entities[e.key].rule_nb is not None and 0 < rule_nb < self.entities[e.key].rule_nb:
                     self.entities[e.key].rule_nb = rule_nb
                 e = self.entities[e.key]
                 self.nb_existing_entity += 1
@@ -533,7 +534,7 @@ class PSParser(BaseParser):
             c = self.create_update_cabinet(e, row)
             c.adresse_raw = a
             # if not args.nosave:
-            self.context.session.commit()
+            # self.context.session.commit()
         else:
             self.nb_out_dept += 1
 

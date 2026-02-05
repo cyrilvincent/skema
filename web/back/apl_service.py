@@ -337,7 +337,7 @@ class APLService:
         gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
-        gdf_merged = self.simplify(gdf_merged, resolution)  # Ne pas appeler pour commune
+        gdf_merged = self.simplify(gdf_merged, resolution)
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 

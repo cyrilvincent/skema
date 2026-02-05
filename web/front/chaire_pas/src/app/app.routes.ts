@@ -3,6 +3,7 @@ import { About } from '../pages/about/about';
 import { Home } from '../pages/home/home';
 import { Observatoire } from '../pages/observatoire/observatoire';
 import { Dataviz } from '../pages/dataviz/dataviz';
+import { Admin } from '../shared/admin/admin';
 
 export const routes: Routes = [
   {
@@ -25,4 +26,10 @@ export const routes: Routes = [
     title: "Dataviz: Chaire pour la prévention et l'accès aux soins",
     component: Dataviz,
   },
+  {
+    path: 'e0206m2205',
+    title: "Admin",
+    component: Admin,
+  },
+
 ]

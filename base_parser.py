@@ -177,8 +177,11 @@ class BaseParser(metaclass=ABCMeta):
                 reader = csv.reader(f, delimiter=delimiter)
             for row in reader:
                 self.row_num += 1
-                self.parse_row(row)
-                self.context.session.commit()
+                try:
+                    self.parse_row(row)
+                    self.context.session.commit()
+                except Exception as ex:
+                    print(f"ERROR in parse_row line {self.row_num}\n{ex}")
                 if self.row_num % 10000 == 0 or self.row_num == 10 or self.row_num == 100 \
                         or self.row_num == 1000 or self.row_num == self.nb_row:
                     duration = time.perf_counter() - time0 - duration_cache + 1e-6

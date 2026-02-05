@@ -60,6 +60,10 @@ class PSTarifParser(PSParser):
         for f in l:
             self.famille_actes[f.id] = f
             self.nb_ram += 1
+        l: List[PSMerge] = self.context.session.query(PSMerge).all()
+        for p in l:
+            self.ps_merges[p.key] = p.inpp
+            self.nb_ram += 1
         self.load_cache_inpp()
         print(f"{self.nb_ram:.0f} objects in cache")
         self.load_cache_tarif()
