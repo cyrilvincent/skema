@@ -47,56 +47,80 @@ export class GeoDataviz {
     console.log(meanws);
   }
 
-  getText(ci: string, i: number, df_year: GeoYearDTO, year: string): string {
+  getText(i: number, df_year: GeoYearDTO, year: string): string {
+    if(this.type() == "APL") {
+      if(this.geoType() == "iris") {
+        return `
+  Commune: ${df_year["nom_commune"][i]}<br>
+  Nom Iris: ${df_year["nom_iris"][i]}<br>
+  Code Iris: ${df_year["code_iris"][i]}<br>
+  APL ${year}: ${df_year["apl"]![i].toFixed(1)}<br>
+  Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/this.years()[this.firstYear()]["apl"]![i]+0.01).toFixed(0)}%<br>
+  Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br>
+  Population: ${df_year["pop"][i].toFixed(0)}<br>
+  Population ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)}<br>
+  Population alentour: ${df_year["swpop"]![i].toFixed(0)}
+  `
+      }
+      else {
+        return `
+  Commune: ${df_year["nom_commune"][i]}<br>
+  APL ${year}: ${df_year["apl"]![i].toFixed(1)}<br>
+  Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/this.years()[this.firstYear()]["apl"]![i]+0.01).toFixed(0)}%<br>
+  Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br>
+  Population: ${df_year["pop"][i].toFixed(0)}<br>
+  Population ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)}
+  `
+      }
+    }
     if(this.geoType() == "iris") {
-      return `
-Commune: ${df_year["nom_commune"][i]}<br>
-Nom Iris: ${df_year["nom_iris"][i]}<br>
-Code Iris: ${ci}<br>
-APL ${year}: ${df_year["apl"][i].toFixed(1)}<br>
-Variation APL/${this.firstYear()}: ${((df_year["apl"][i]-this.years()[this.firstYear()]["apl"][i])*100/this.years()[this.firstYear()]["apl"][i]).toFixed(0)}%<br>
-Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
-Population: ${df_year["pop"][i].toFixed(0)}<br>
-Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
-Population alentour: ${df_year["swpop"][i].toFixed(0)}<br>
-`
-    }
-    else {
-      return `
-Commune: ${df_year["nom_commune"][i]}<br>
-APL ${year}: ${df_year["apl"][i].toFixed(1)}<br>
-Variation APL/${this.firstYear()}: ${((df_year["apl"][i]-this.years()[this.firstYear()]["apl"][i])*100/this.years()[this.firstYear()]["apl"][i]).toFixed(0)}%<br>
-Nb ETP: ${df_year["nb"][i].toFixed(1)}<br>
-Population: ${df_year["pop"][i].toFixed(0)}<br>
-Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
-`
-    }
+        return `
+  Commune: ${df_year["nom_commune"][i]}<br>
+  Nom Iris: ${df_year["nom_iris"][i]}<br>
+  Code Iris: ${df_year["code_iris"][i]}<br>
+  KM ${year}: ${df_year["km"]![i].toFixed(1)}<br>  
+  Population: ${df_year["pop"][i].toFixed(0)}<br>
+  `
+      }  // TODO A Améliorer
+    else return "TODO";
   }
+
+  // TODO type() à rendre dynamique dans dataviz
+  // TODO geo-service à rendre dynamique
 
   getTexts(): String[][] {
     const texts: string[][] = [];
     for (const year of Object.keys(this.years())) {
+      console.log(year);
       const df_year = this.years()[year];
-      let text = df_year["code_iris"].map((ci, i) => this.getText(ci, i, df_year, year));
+      let text = df_year["pop"].map((_, i) => this.getText(i, df_year, year));
 	    texts.push(text);
     }
     return texts;
+  }
+
+  getZMax(): number {
+    if(this.type() == "APL") {
+      if(this.normColorBar()) return this.df()["meanws"][0]*2+1
+      return this.years()[this.firstYear()]["apl_max"]![0]+1
+    }
+    else return 60;
   }
 
   getGeo() {
     const geo = {
       type: "choropleth",
       locations: this.years()[this.firstYear()]["fid"],
-      z: this.years()[this.firstYear()]["apl"],
+      z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "km"],
       zmin: 0,
-      zmax: this.normColorBar() ? this.df()["meanws"][0]*2+1 : this.years()[this.firstYear()]["apl_max"][0]+1,
+      zmax: this.getZMax(),
       hoverinfo: "text",
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
-      colorbar: {title: {text: this.normColorBar() ? "APL": "APL local"}},
-      colorscale: [[0.0, "rgb(64,64,127)"],
-                    [0.1, "rgb(112,112,127)"],
+      colorbar: {title: {text: this.normColorBar() ? "APL": "APL local"}},  //TODO getColorbarTitle()
+      colorscale: [[0.0, "rgb(64,64,127)"],  // TODO Inverser la colorbar pour SAE
+                    [0.1, "rgb(112,112,127)"],  // TODO mettre meanw pour SAE
                     [0.25, "rgb(159,159,127)"],
                     [0.5, "rgb(255,255,127)"],
                     [0.75, "rgb(209,127,79)"],
@@ -121,8 +145,8 @@ Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
         method: 'update',
         args: [
           {
-            z: [df_year["apl"], null],
-            text: [this.getTexts()[+year - +this.firstYear()], df_year["apl"].map((a, i) => `${a.toFixed(0)}`)],
+            z: [df_year[this.type()=="APL" ? "apl": "km"], null],
+            text: [this.getTexts()[+year - +this.firstYear()], df_year[this.type()=="APL" ? "apl": "km"]!.map((a, i) => `${a.toFixed(0)}`)],
           }
         ]
       };
@@ -149,7 +173,7 @@ Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
 
   getLayout(): Partial<Plotly.Layout> {
     const layout: Partial<Plotly.Layout> = {
-      title: {text: this.df()["commune_nom"]},
+      title: {text: "TODO mettre un titre"},
       geo: {
         projection: { type: 'mercator', scale: 2, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
@@ -166,7 +190,7 @@ Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
       autosize: true,
       height: this.fullscreen() ? undefined : 600,
       //width: 1200,
-      margin: {l: 10, r: 10, t: 20, b: 20},
+      margin: {l: 10, r: 10, t: 30, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
       sliders: this.getSliders(),
     }
@@ -178,7 +202,7 @@ Population ajustée: ${df_year["pop_ajustee"][i].toFixed(0)}<br>
       type: 'scattergeo',
       lat: this.years()[this.firstYear()]["lat"],
       lon: this.years()[this.firstYear()]["lon"],
-      text: this.years()[this.firstYear()]["apl"].map((a, i) => `${a.toFixed(0)}`),
+      text: this.years()[this.firstYear()][this.type()=="APL"?"apl":"km"]!.map((a, i) => `${a.toFixed(0)}`),
       mode: 'text',
       textposition: 'middle center',
       textfont: { family: 'Arial', size: 12, color: '#000000' },

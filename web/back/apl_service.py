@@ -378,7 +378,7 @@ if __name__ == '__main__':
     # export = s.compute_iris("CC-38225", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    export = s.compute_commune("CA-381", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
+    export = s.compute_commune("CC-38205", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
     s = json.dumps(export)
     print(s[:5000])
     # Tester les dept 75, 69 et 13 pour voir si le commune.isna() focntionne bien

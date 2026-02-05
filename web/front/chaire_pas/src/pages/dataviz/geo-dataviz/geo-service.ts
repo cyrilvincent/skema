@@ -15,6 +15,7 @@ export class GeoService  extends CommonService {
 
   fetch(dto: GeoInputDTO, type: string, geoType: string): void {
     if (type == "APL") this.fetchAPL(dto, geoType); 
+    else this.fetchSAE(dto, geoType);
   }
 
   save(dto: GeoInputDTO, type: string, render: string, geoType: string) {
@@ -30,7 +31,11 @@ export class GeoService  extends CommonService {
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({    
       next: (res) => { this._geoTupleDTO.set(res); },
-      error: (err) => this.catchError(err),
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+        this._geoTupleDTO.set(emptyGeo);
+      },
       complete: () => this._loading.set(false),
     });
   }
@@ -59,6 +64,26 @@ export class GeoService  extends CommonService {
         this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
       },
       error: (err) => this.catchError(err),
+      complete: () => this._loading.set(false),
+    });
+  }
+
+  private fetchSAE(dto: GeoInputDTO, geoType: string): void {
+    console.log("FetchSAE "+geoType);
+    dto.id=1;  // TODO remove these 3+2 rows
+    dto.code="CC-06088";
+    dto.resolution="HD";
+    dto.hc = "HC";
+    dto.time = 60;
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({    
+      next: (res) => { this._geoTupleDTO.set(res); console.log(res); },
+      error: (err) => {
+        if(err.status == 404) console.log("Not found "+dto.code);
+        else this.catchError(err);
+        this._geoTupleDTO.set(emptyGeo);
+      },
       complete: () => this._loading.set(false),
     });
   }

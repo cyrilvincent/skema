@@ -7,7 +7,7 @@ from commune_service import CommuneService
 from apl_service import APLService
 from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
-
+from sae_service import SAEService
 
 app = FastAPI()
 app.add_middleware(
@@ -20,6 +20,7 @@ app.add_middleware(
 
 commune_service: CommuneService = CommuneService.factory()
 apl_service: APLService = APLService.factory()
+sae_service: SAEService = SAEService.factory()
 
 
 @app.get("/")
@@ -74,6 +75,14 @@ async def apl_commune_csv(dto: GeoInputDTO):
     data = await run_in_threadpool(apl_service.compute_commune_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
     return data.to_csv(index=False)
 
+
+@app.post("/sae/iris")
+async def apl_iris(dto: GeoInputDTO):
+    print(f"Get /sae/iris")
+    data = await run_in_threadpool(sae_service.compute_sae_iris, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
+    if len(data[1]["features"]) == 0:
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    return data
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")

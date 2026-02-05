@@ -90,6 +90,14 @@ class SAEService(APLService):
         self.corrections(sae)
         return sae, studies_df
 
+    def get_tuple(self, l):
+        if len(l) > 1:
+            return tuple(l)
+        elif len(l) == 1:
+            return f"('{l[0]}')"
+        else:
+            return "()"
+
     def get_urgence_sae(self, iris_list: list[str], urg: str) -> pd.DataFrame:
         sql = f"""
             select d.an as year, d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id,
@@ -101,7 +109,7 @@ class SAEService(APLService):
             join adresse_norm an on ar.adresse_norm_id=an.id
             join iris.iris i on i.code=an.iris
             where d.urg='{urg}'
-            and an.iris in {tuple(iris_list)}
+            and an.iris in {self.get_tuple(iris_list)}
             order by d.an, d.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -116,7 +124,7 @@ class SAEService(APLService):
             join adresse_norm an on ar.adresse_norm_id=an.id
             join iris.iris i on i.code=an.iris
             where p.dis='TOT'
-            and an.iris in {tuple(iris_list)}
+            and an.iris in {self.get_tuple(iris_list)}
             order by p.an, p.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -133,7 +141,7 @@ class SAEService(APLService):
             join iris.iris i on i.code=an.iris
             join date_source ds on eds.date_source_id=ds.id
             where e.categetab=620
-            and an.iris in {tuple(iris_list)}
+            and an.iris in {self.get_tuple(iris_list)}
             order by ds.annee, e.nofinesset
         """
         return pd.read_sql(sql, config.connection_string)
@@ -150,7 +158,7 @@ class SAEService(APLService):
             join iris.iris i on i.code=an.iris
             join date_source ds on eds.date_source_id=ds.id
             where e.categretab=4401
-            and an.iris in {tuple(iris_list)}
+            and an.iris in {self.get_tuple(iris_list)}
             order by ds.annee, e.nofinesset
         """
         return pd.read_sql(sql, config.connection_string)
@@ -193,9 +201,12 @@ class SAEService(APLService):
                        years: list[int]) -> tuple[dict, any]:
         center_lat = gdf.geometry.centroid.y.mean()  # 45.1209 5.5901
         center_lon = gdf.geometry.centroid.x.mean()
+        gdf["km"] = gdf["km"].fillna(60)
+        gdf["time_hc"] = gdf["time_hc"].fillna(60)
+        gdf["time_hp"] = gdf["time_hp"].fillna(60)
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'code_iris', 'nom_iris', "geometry",
-                "km", "time_hc", "time_hp", "passu", "has_pdata", "etpsal", "efflib", "etp", "rs", "fi"]
+                "km", "time_hc", "time_hp", "rs", "fi", "pop"]
         export = gdf[cols]
         for year in years:
             meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]

@@ -29,7 +29,7 @@ class GeoIris:
         self.connection.close()
 
     def load(self):
-        with open("../data/iris/gdf.pickle", "rb") as f:
+        with open("data/iris/gdf.pickle", "rb") as f:
             self.gdf = pickle.load(f)
 
     def get_gdf_by_dept(self, dept: str) -> pd.DataFrame:
