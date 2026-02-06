@@ -129,7 +129,7 @@ class SAEService(APLService):
             """
         return pd.read_sql(sql, config.connection_string)
 
-    def get_pharma(self, iris_list: list[str]) -> pd.DataFrame:
+    def get_pharma_sae(self, iris_list: list[str]) -> pd.DataFrame:
         sql = f"""
             select ds.annee+2000 as year, e.nofinesset fi, null as passu, false as has_pdata, null as etpsal,
                 null as efflib, null as etp, e.id etab_id, e.rs, an.id an_id, an.dept_id, an.id adresse_norm_id,
@@ -146,7 +146,7 @@ class SAEService(APLService):
         """
         return pd.read_sql(sql, config.connection_string)
 
-    def get_ehpad(self, iris_list: list[str]) -> pd.DataFrame:
+    def get_ehpad_sae(self, iris_list: list[str]) -> pd.DataFrame:
         sql = f"""
             select ds.annee+2000 as year, e.nofinesset fi, null as passu, false as has_pdata, null as etpsal,
                 null as efflib, null as etp, e.id etab_id, e.rs, an.id an_id, an.dept_id, an.id adresse_norm_id,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
@@ -18,19 +18,21 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
   searchService = inject(SearchService);
-  options = this.searchService.codes;
+  options = computed<[string, string][]>(() => this.type() == "APL" ? this.searchService.apl_codes() : this.searchService.sae_codes())
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();
   codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"}
+  type = input<string>("APL");
 
   ngOnInit() {
+    this.searchService.init();
     this.searchControl.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
       map((v) => { 
         if (typeof v === "string") {
           this.optionSelectedEvent.emit(null);
-          this.searchService.fetchFind(v);
+          this.searchService.fetchFind(v, this.type());
         }
       }),
     ).subscribe();
