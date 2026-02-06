@@ -233,6 +233,9 @@ class SAEService(APLService):
                     dico_year[col] = export_year[col].values.tolist()
             for col in export_etab.columns:
                 etab_year[col] = export_etab_year[col].values.tolist()
+            if len(etab_year["rs"]) > 500:  # 576 urgence_gen in france
+                for col in export_etab.columns:
+                    etab_year[col] = []
             dico_year["etab"] = etab_year
             dico["years"][year + 2000] = dico_year
         first_year = years[0]

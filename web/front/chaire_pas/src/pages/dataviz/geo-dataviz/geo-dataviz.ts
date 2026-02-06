@@ -19,7 +19,7 @@ export class GeoDataviz {
   geoType = input<string>("iris");
   df = computed<GeoDTO>(() => this.values()[0]);
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
-  firstYear = computed<string>(() => Object.keys(this.years())[0]);
+  firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig());
   data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
@@ -99,6 +99,7 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
 
   getTexts(): String[][] {
     const texts: string[][] = [];
+    if (this.dto()?.code == "CF") return texts;
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
       let text = df_year["pop"].map((_, i) => this.getText(i, df_year, year));
@@ -326,6 +327,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
   getSteps(): Plotly.SliderStep[] {
     const steps: Plotly.SliderStep[] = [];
     for (const year of Object.keys(this.years())) {
+      if (+year < 2020 && this.dto()?.code == "CF-00") continue;
       const df_year = this.years()[year];
       const etab = this.years()[year]["etab"]!;
       const step: Plotly.SliderStep = {

@@ -155,7 +155,8 @@ export class DatavizParameters {
   }
 
   disableButton(): boolean {
-    return this.code() == "CF-00" && this.type() == "SAE" && this.selectedSpecialite().id > 2  && this.renderType() == "dataviz";
+    return false && this.code() == "CF-00" && this.type() == "SAE" && this.selectedSpecialite().id > 2  && this.renderType() == "dataviz";
+    // J'ai du limiter à firstYear=2020 pour que ca marche
   }
 
 }
