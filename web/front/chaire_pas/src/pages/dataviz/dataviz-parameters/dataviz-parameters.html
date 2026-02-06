@@ -74,7 +74,7 @@
         <mat-slide-toggle [formControl]="toggleControl">Plein écran</mat-slide-toggle>
         <mat-icon matTooltip="Ouvre un nouvel onglet">help</mat-icon>
         <br>
-        <button type="button" mat-fab extended (click)="buttonClicked()" [disabled]="geoService.loading() && false">
+        <button type="button" mat-fab extended (click)="buttonClicked()" [disabled]="disableButton()">
             <mat-icon>
                 @if(geoService.loading()) {<mat-spinner diameter="25"></mat-spinner>}
                 @else if(renderType()!="dataviz") {download}

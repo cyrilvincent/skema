@@ -188,6 +188,9 @@ for time in [60]:
                 study.to_sql("dist_study", config.connection_string, schema="sae", if_exists="append", index=False)
                 final.to_sql("dist", config.connection_string, schema="sae", if_exists="append", index=False)
 
+                # Puis appliquer update sae.dist d set iris_string = iris::varchar(255) where iris_string = '' or iris_string is null
+                # Puis verifier select * from sae.dist d where length(iris_string) != 9
+
 
 
 

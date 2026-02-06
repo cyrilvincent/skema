@@ -21,7 +21,7 @@ export class GeoDataviz {
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
   firstYear = computed<string>(() => Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  config = signal<Partial<Plotly.Config>>(this.getConfig());  // TODO faire getDATA
+  config = signal<Partial<Plotly.Config>>(this.getConfig());
   data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
@@ -89,7 +89,7 @@ Etablissement le + proche:<br> ${df_year["rs"]![i]=="" ? "Aucun" : df_year["rs"]
 Temps d'accès: ${df_year["time_hc"]![i]==60 ? ">60" : df_year["time_hc"]![i].toFixed(0)} min.<br>
 Distance: ${df_year["km"]![i]==60 ? ">60" : df_year["km"]![i].toFixed(0)} km<br>
 Variation/${this.firstYear()}: ${((df_year["time_hc"]![i]-this.years()[this.firstYear()]["time_hc"]![i])*100/(this.years()[this.firstYear()]["time_hc"]![i]+0.01)).toFixed(0)}%<br>
-Population: ${df_year["pop"][i].toFixed(0)}<br>
+Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
   `
       }
     else return "TODO"; // TODO Faire commune
@@ -317,11 +317,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
       marker: {
         color: this.getScatterColor(etab["tension"]),
         size: this.getScatterSize(etab["passu"]),
-        opacity: 1,
-        // line: {
-        //     color:'#99ff99',
-        //     width:2
-        // },
+        // opacity: 1,
       }
     };
     return scatter;

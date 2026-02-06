@@ -29,7 +29,6 @@ class Indexer(threading.Thread):
             "FRANC": {"CF-00": "France"},
             "FRANCE": {"CF-00": "France"}}
         self.limit_year = 2020
-        # self.file = f"data/index_{datetime.datetime.now().year}{datetime.datetime.now().month:02d}.pickle"
         self.file = f"data/index.pickle"
         self.iris_loader = IrisLoader.factory()
 

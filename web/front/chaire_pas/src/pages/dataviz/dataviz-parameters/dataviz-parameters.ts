@@ -143,13 +143,19 @@ export class DatavizParameters {
       const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)
       window.open(url, "_blank");
     }
-    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType(), this.label()])
+    else {
+      this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType(), this.label()]);
+    }
   }
 
   cancelClicked(): void {
     console.log("Cancel")
     this.geoService._loading.set(false);
     this.geoService.init();
+  }
+
+  disableButton(): boolean {
+    return this.code() == "CF-00" && this.type() == "SAE" && this.selectedSpecialite().id > 2  && this.renderType() == "dataviz";
   }
 
 }
