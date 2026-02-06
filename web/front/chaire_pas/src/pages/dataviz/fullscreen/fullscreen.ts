@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { GeoInputDTO } from '../dataviz.interfaces';
 import { GeoDataviz } from '../geo-dataviz/geo-dataviz';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -9,12 +9,14 @@ import { GeoService } from '../geo-dataviz/geo-service';
   imports: [GeoDataviz, MatProgressSpinnerModule],
   templateUrl: './fullscreen.html',
   styleUrl: './fullscreen.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Fullscreen {
 
   dto = signal<GeoInputDTO | null>(null);
   type = signal<string>("APL");
   service = inject(GeoService);
+  label = signal<string>("");
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
@@ -29,6 +31,7 @@ export class Fullscreen {
     };
     this.dto.set(dto);
     this.type.set(usp.get("type")!)
+    this.label.set(usp.get("label")!)
     console.log("DTO "+this.type());
     console.log(this.dto());
     }

@@ -39,13 +39,14 @@ export class DatavizParameters {
   disabled = input<boolean>(false);
   toggleControl = new FormControl<boolean>(false);
   fullScreen = signal<boolean>(false);
-  okEvent = output<[Specialite, number, number, string, boolean, string, string]>();
+  okEvent = output<[Specialite, number, number, string, boolean, string, string, string | null]>();
   resolution = signal<string>("HD");
   resolutionControl = new FormControl<string>("HD");
   renderType = signal<string>("dataviz");
   renderTypeControl = new FormControl<string>("dataviz");
   geoService = inject(GeoService);
   lastCode = signal<string>("");
+  label = input<string | null>(null);
 
   constructor() {
     effect(() => this.onCodeChanged(this.code()));
@@ -139,10 +140,10 @@ export class DatavizParameters {
           }, this.type(), this.renderType(), this.geoType());
     }
     else if (this.fullScreen()) {
-      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()
+      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)
       window.open(url, "_blank");
     }
-    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType()])
+    else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType(), this.label()])
   }
 
 }

@@ -28,6 +28,7 @@ export class GeoDataviz {
   normColorBar = signal<boolean>(true);
   marker = signal<number>(1);
   fullscreen = input<boolean | null>(null);
+  label = input<string | null>(null);
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
@@ -194,9 +195,20 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     return sliders;
   }
 
+  getTitle(): string {
+    const codes: { [key: string]: string } = {"CC": "Commune de", "CD": "Département", "CR": "Région", "CP": "Commune(s) de", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"};
+    if(this.dto() != null) {
+      const code = this.dto()!.code.slice(0, 2);
+      let s = codes[code];
+      if (code != "CF") s += " "+this.label();
+      return s;
+    }
+    return "";
+  }
+
   getLayout(): Partial<Plotly.Layout> {
     const layout: Partial<Plotly.Layout> = {
-      title: {text: "TODO mettre un titre"}, // TODO depuis searchbox, gérer le fullscreen avec un http get
+      title: {text: this.getTitle()},
       geo: {
         projection: { type: 'mercator', scale: 2, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
@@ -263,9 +275,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     const steps: Plotly.SliderStep[] = [];
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
-      console.log(year);
       df_year["lon"][0] = df_year["lon"][0]+(+year-2020)*0.01; // TODO A enlever, fyi +year = Number(year)
-      console.log( df_year["lon"][0]);
       const step: Plotly.SliderStep = {
         label: year, 
         value: year,

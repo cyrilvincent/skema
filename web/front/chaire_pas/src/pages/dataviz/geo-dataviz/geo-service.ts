@@ -26,7 +26,7 @@ export class GeoService  extends CommonService {
   }
 
   init() {
-    this._geoTupleDTO.set(emptyGeo); // testé sans injection avec succès
+    this._geoTupleDTO.set(emptyGeo);
   }
 
   private fetchAPL(dto: GeoInputDTO, geoType: string): void {
@@ -74,9 +74,6 @@ export class GeoService  extends CommonService {
 
   private fetchSAE(dto: GeoInputDTO, geoType: string): void {
     console.log("FetchSAE "+geoType);
-    //dto.id=1;  // TODO remove these 3+2 rows
-    //dto.code="CC-06088";
-    //dto.resolution="HD";
     dto.hc = "HC";
     dto.time = 60;
     console.log(dto);

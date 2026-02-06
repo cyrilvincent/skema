@@ -13,19 +13,20 @@ import { Specialite, GeoInputDTO } from './dataviz.interfaces';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dataviz {
-  selectedCode = signal<string | null>(null);
+  selectedCode = signal<[string, string] | null>(null);
   specialite = signal<GeoInputDTO | null>(null);
   dto = signal<GeoInputDTO | null>(null);
   type = input<string>("APL");
   geoType = signal<string>("iris");
+  label = signal<string | null>(null);
 
-  optionSelected(code: string | null) {
+  optionSelected(code: [string, string] | null) {
     this.selectedCode.set(code);
   }
 
-  ok(params: [Specialite, number, number, string, boolean, string, string]): void {
+  ok(params: [Specialite, number, number, string, boolean, string, string, string | null]): void {
     const s: GeoInputDTO = {
-      code: this.selectedCode() ?? "CC-38205",
+      code: this.selectedCode()?.[0] ?? "CC-38205",
       id: params[0].id, 
       bor: params[0].shortLabel, 
       time: params[1],
@@ -35,6 +36,7 @@ export class Dataviz {
     };
     this.dto.set(s);
     this.geoType.set(params[6])
+    this.label.set(params[7]);
     console.log("OK");
     console.log(this.dto());
   }
