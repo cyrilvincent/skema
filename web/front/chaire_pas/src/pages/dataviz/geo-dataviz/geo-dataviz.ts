@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
-import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO } from '../dataviz.interfaces';
+import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
 
 @Component({
@@ -95,6 +95,8 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     else return "TODO"; // TODO Faire commune
   }
 
+  // TODO CSV & GEOJSON
+
   getTexts(): String[][] {
     const texts: string[][] = [];
     for (const year of Object.keys(this.years())) {
@@ -110,8 +112,8 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
       if(this.normColorBar()) return this.df()["meanws"][0]*2+1
       return this.years()[this.firstYear()]["apl_max"]![0]+1
     }
-    if(this.dto()?.bor == "pharma") return 15;
-    if(this.dto()?.bor == "ehpad") return 30;
+    if(this.dto()?.id == 4) return 15;
+    if(this.dto()?.id == 5) return 30;
     return 60;
   }
 
@@ -157,7 +159,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
       if (this.normColorBar()) return "APL";
       return "APL local";
     }
-    if (this.normColorBar()) return "Temps de<br>trajet (min.)";
+    if (this.normColorBar()) return "Trajet<br>(min.)";
     return "Temps<br>normalisé"
   }
 
@@ -172,7 +174,11 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
-      colorbar: {title: {text: this.getColorbarTitle()}}, 
+      colorbar: {
+        title: {text: this.getColorbarTitle()},
+        side: "left",
+        padding: { t: 0, r: 20, b: 0, l: 0 },
+      }, 
       colorscale: this.getColorscale(),
       marker: {line: {width: this.marker(),}},
     };
@@ -225,7 +231,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
       autosize: true,
       height: this.fullscreen() ? undefined : 600,
       //width: 1200,
-      margin: {l: 10, r: 10, t: 30, b: 20},
+      margin: {l: 10, r: 120, t: 30, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
       sliders: this.getSliders(),
     }
@@ -248,24 +254,74 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     return scatter;
   }
 
+  getScatterSize(passus: number[]): number[] {
+    if(this.dto() != null) {
+      let coef = 0;
+      let c = 2;
+      if (this.dto()!.id <= 2) coef = 8 /30000;
+      else if (this.dto()!.id == 3) coef = 6/100;
+      if (this.dto()!.id <= 3) c=3;
+      return passus.map(p => p<0 ? c : c+p*coef)
+    }
+    return [];
+  }
+
+  getScatterColor(tensions: number[]): string[] {
+    if(this.dto() != null) {
+      return tensions.map(t => {
+        let r = 127;
+        let g = 127;
+        if (t != -1) {
+          let a = 0.1;
+          let b = 3000;
+          if (this.dto()!.id > 2) {
+            a = 10;
+            b = 11;
+          }
+          r = this.clip(Math.round((t-b)*a+127.5), 0, 255);
+          g = 255 - this.clip(Math.round((t-b)*a+127.5), 0, 255);
+        }
+        return `rgb(${r},${g},0, 255)`;
+      })
+    }
+    return [];
+  }
+
+  getScatterGeoText(etab: EtabDTO): string[] {
+    return  etab["rs"].map((r, i) => {
+      let s = " "+r;
+      if (this.dto()!.id <= 3) {
+        s += `<br>
+NB passage ${etab["year"][i]}: ${etab["passu"][i] < 0 || etab["passu"][i] == null ? "N/A" : etab["passu"][i]}<br>
+ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>
+Dont salarié: ${etab["etpsal"][i] < 0 ? "N/A" : etab["etpsal"][i].toFixed(1)}<br>
+Dont libéraux: ${etab["efflib"][i] < 0 ? "N/A" : etab["efflib"][i].toFixed(1)}<br>
+Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passage/ETP
+        `;
+      }
+      return s;
+    });
+  }
+
   getScatterGeo(): Partial<Plotly.ScatterData> { // TODO C'est seulement un mock à modifier
+    const etab = this.years()[this.firstYear()]["etab"]!;
     const scatter: Partial<Plotly.ScatterData> = {
       type: 'scattergeo',
-      lat: this.years()[this.firstYear()]["lat"],
-      lon: this.years()[this.firstYear()]["lon"],
+      lat: etab["lat"],
+      lon: etab["lon"],
       mode: 'markers',
-      hoverinfo: 'skip', // TODO gérer le hoverinfo
-      text: "TODO",          // TODO getTextGeo
+      hoverinfo: etab["lon"].length < 20 ? "text": "skip",
+      text: this.getScatterGeoText(etab),
       name: 'APL',
       visible: true,     
       marker: {
-        color: "#8800ff",
-        size: 10,
+        color: this.getScatterColor(etab["tension"]),
+        size: this.getScatterSize(etab["passu"]),
         opacity: 1,
-        line: {
-            color:'#99ff99',
-            width:2
-        },
+        // line: {
+        //     color:'#99ff99',
+        //     width:2
+        // },
       }
     };
     return scatter;
@@ -275,7 +331,8 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     const steps: Plotly.SliderStep[] = [];
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
-      df_year["lon"][0] = df_year["lon"][0]+(+year-2020)*0.01; // TODO A enlever, fyi +year = Number(year)
+      const etab = this.years()[year]["etab"]!;
+      //df_year["lon"][0] = df_year["lon"][0]+(+year-2020)*0.01; // TODO A enlever, fyi +year = Number(year)
       const step: Plotly.SliderStep = {
         label: year, 
         value: year,
@@ -285,12 +342,12 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
         args: [
           {
             z: [df_year[this.type()=="APL" ? "apl": "time_hc"]],
-            text: [this.getTexts()[+year - +this.firstYear()], df_year[this.type()=="APL" ? "apl": "time_hc"]!.map((a, i) => `${a.toFixed(0)}`)],
-            lon: [null, df_year["lon"]],
-            lat: [null, df_year["lat"]],
+            text: [this.getTexts()[+year - +this.firstYear()], this.type() == "APL" ? df_year["apl"]!.map((a, i) => `${a.toFixed(0)}`) : this.getScatterGeoText(etab)],
+            lon: [null, this.type() == "APL" ? df_year["lon"] : etab["lon"]],
+            lat: [null, this.type() == "APL" ? df_year["lon"] : etab["lat"]],
             marker: {
-              color: "#00ffff",
-              //size: df_year["km"],
+              color: this.type() == "APL" ? undefined : this.getScatterColor(etab["tension"]),
+              size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"])
             }
           }
         ]

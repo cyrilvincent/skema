@@ -38,6 +38,20 @@ export interface FeatureCollectionDTO {
     bbox: number[];
 }
 
+export interface EtabDTO {
+    year: number[];
+    fi: string[];
+    passu: number[];
+    has_pdata: boolean[];
+    etp: number[];
+    efflib: number[];
+    etpsal: number[];
+    rs: string[];
+    lon: number[];
+    lat: number[];
+    tension: number[];
+}
+
 export interface GeoYearDTO {
     code_insee: string[];
     nom_commune: string[];
@@ -58,6 +72,7 @@ export interface GeoYearDTO {
     time_hc?: number[];
     time_hp?: number[];
     rs?: string[];
+    etab?: EtabDTO;
 }
 
 export interface GeoDTO {

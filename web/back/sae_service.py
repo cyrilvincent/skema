@@ -3,6 +3,8 @@ import threading
 import time
 import warnings
 from typing import Iterable
+
+import numpy as np
 from pandas.errors import SettingWithCopyWarning
 from sqlalchemy import text
 from iris_loader import IrisLoader
@@ -176,7 +178,7 @@ class SAEService(APLService):
         etab_df = etab_df.drop_duplicates(subset=['year', "lon", "lat"])
         etab_df["tension"] = etab_df["passu"] / etab_df["etp"]
         etab_df["has_pdata"] = etab_df["tension"].notna()
-        return etab_df[["year", "fi", "rs", "passu", "has_pdata", "etpsal", "efflib", "etp", "tension", "lon", "lat"]]
+        return etab_df
 
     def etab_corrections(self, bor: str, etab: pd.DataFrame) -> pd.DataFrame:
         if bor in ["pharma", "ehpad"]:
@@ -208,14 +210,26 @@ class SAEService(APLService):
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'code_iris', 'nom_iris', "geometry",
                 "km", "time_hc", "time_hp", "rs", "fi", "pop"]
         export = gdf[cols]
+        etab_df["etpsal"] = etab_df["etpsal"].fillna(-1)
+        etab_df["efflib"] = etab_df["efflib"].fillna(-1)
+        etab_df["etp"] = etab_df["etp"].fillna(-1)
+        etab_df["tension"] = etab_df["tension"].fillna(-1).replace([np.inf, -np.inf], -1)
+        # etab_df["passu"] = etab_df["passu"].fillna(-1)
+        cols = ["year", "fi", "passu", "has_pdata", "etp", "efflib", "etpsal", "rs", "lon", "lat", "tension"]
+        export_etab = etab_df[cols]
         for year in years:
             meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
             dico["meanws"].append(meanw)
             export_year = export[export["year"] == year + 2000]
+            export_etab_year = export_etab[export_etab["year"] == year + 2000]
             dico_year = {}
+            etab_year = {}
             for col in export.columns:
                 if col != "geometry":
                     dico_year[col] = export_year[col].values.tolist()
+            for col in export_etab.columns:
+                etab_year[col] = export_etab_year[col].values.tolist()
+            dico_year["etab"] = etab_year
             dico["years"][year + 2000] = dico_year
         gdf_first_year = gdf[gdf["year"] == years[0] + 2000]
         geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
@@ -241,7 +255,7 @@ class SAEService(APLService):
         gdf_merged = self.simplify(gdf_merged, resolution)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
-        return export  #TODO manque etab_df
+        return export
         # A enlever ['nb', 'apl', 'swpop', 'pop_ajustee', 'apl_max']
         # A Ajouter km	time_hc	time_hp	passu	has_pdata	etpsal	efflib	etp	rs
 
@@ -251,7 +265,7 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
+    export = s.compute_sae_iris("CC-38205", 1, 60, "HC", "HD")
     s = json.dumps(export)
     print(s[:5000])
 
