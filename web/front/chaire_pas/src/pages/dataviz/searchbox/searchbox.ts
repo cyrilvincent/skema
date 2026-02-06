@@ -17,8 +17,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 })
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
-  searchService = new SearchService(); //inject(SearchService);
-  options = this.searchService.codes; //computed<[string, string][]>(() => this.type() == "APL" ? this.searchService.apl_codes() : this.searchService.sae_codes())
+  searchService = inject(SearchService);
+  options = this.searchService.codes;
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();
   codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"}

@@ -196,7 +196,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
 
   getLayout(): Partial<Plotly.Layout> {
     const layout: Partial<Plotly.Layout> = {
-      title: {text: "TODO mettre un titre"}, // TODO depuis searchbox
+      title: {text: "TODO mettre un titre"}, // TODO depuis searchbox, gérer le fullscreen avec un http get
       geo: {
         projection: { type: 'mercator', scale: 2, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
@@ -274,7 +274,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
         method: 'update',
         args: [
           {
-            z: [df_year[this.type()=="APL" ? "apl": "time_hc"]], // TODO peut on virer le null ?
+            z: [df_year[this.type()=="APL" ? "apl": "time_hc"]],
             text: [this.getTexts()[+year - +this.firstYear()], df_year[this.type()=="APL" ? "apl": "time_hc"]!.map((a, i) => `${a.toFixed(0)}`)],
             lon: [null, df_year["lon"]],
             lat: [null, df_year["lat"]],

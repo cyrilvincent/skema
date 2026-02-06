@@ -2,9 +2,9 @@ import { computed, Injectable, signal } from '@angular/core';
 import { CommonService } from '../../../shared/common.service';
 import { environment } from '../../../environments/environment';
 
-// @Injectable({
-//   providedIn: 'root',
-// })
+@Injectable({
+  providedIn: 'root',
+}) 
 export class SearchService extends CommonService {
 
   codes = signal<[string, string][]>([]);
@@ -25,10 +25,9 @@ export class SearchService extends CommonService {
     }
   }
 
-  // init() {
-  //   this.apl_codes.set([]);
-  //   this.sae_codes.set([]);
-  // }
+  init() {
+    this.codes.set([]);
+  }
 }
 
 
