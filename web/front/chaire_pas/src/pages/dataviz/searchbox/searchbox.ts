@@ -17,22 +17,22 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 })
 export class Searchbox {
   searchControl = new FormControl<[string, string] | null>(null);
-  searchService = inject(SearchService);
-  options = computed<[string, string][]>(() => this.type() == "APL" ? this.searchService.apl_codes() : this.searchService.sae_codes())
+  searchService = new SearchService(); //inject(SearchService);
+  options = this.searchService.codes; //computed<[string, string][]>(() => this.type() == "APL" ? this.searchService.apl_codes() : this.searchService.sae_codes())
   searchLoading = this.searchService.loading;
   optionSelectedEvent = output<string | null>();
   codes: { [key: string]: string } = {"CC": "Code INSEE", "CD": "Département", "CR": "Région", "CP": "Code postal", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"}
   type = input<string>("APL");
 
   ngOnInit() {
-    this.searchService.init();
+    //this.searchService.init();
     this.searchControl.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
       map((v) => { 
         if (typeof v === "string") {
           this.optionSelectedEvent.emit(null);
-          this.searchService.fetchFind(v, this.type());
+          this.searchService.fetchFind(v); //, this.type());
         }
       }),
     ).subscribe();

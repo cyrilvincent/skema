@@ -29,9 +29,9 @@
                         <small>{{displayCode(option[0])}}</small>
                     </mat-option>
                 }
-                <!-- @if (!searchLoading() && options().length === 0) {
+                @if (!searchLoading() && options().length === 0 && input.value.length > 0) {
                     <mat-option disabled>Aucun résultat</mat-option>
-                } -->
+                }
             </mat-autocomplete>
         </mat-form-field>
     </form>

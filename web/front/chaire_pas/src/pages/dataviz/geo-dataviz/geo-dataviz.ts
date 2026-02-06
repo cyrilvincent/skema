@@ -61,7 +61,7 @@ Commune: ${df_year["nom_commune"][i]}<br>
 Nom Iris: ${df_year["nom_iris"][i]}<br>
 Code Iris: ${df_year["code_iris"][i]}<br>
 APL ${year}: ${df_year["apl"]![i].toFixed(1)}<br>
-Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/this.years()[this.firstYear()]["apl"]![i]+0.01).toFixed(0)}%<br>
+Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/(this.years()[this.firstYear()]["apl"]![i]+0.01)).toFixed(0)}%<br>
 Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br>
 Population: ${df_year["pop"][i].toFixed(0)}<br>
 Population ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)}<br>
@@ -72,7 +72,7 @@ Population alentour: ${df_year["swpop"]![i].toFixed(0)}
         return `
 Commune: ${df_year["nom_commune"][i]}<br>
 APL ${year}: ${df_year["apl"]![i].toFixed(1)}<br>
-Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/this.years()[this.firstYear()]["apl"]![i]+0.01).toFixed(0)}%<br>
+Variation APL/${this.firstYear()}: ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/(this.years()[this.firstYear()]["apl"]![i]+0.01)).toFixed(0)}%<br>
 Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br>
 Population: ${df_year["pop"][i].toFixed(0)}<br>
 Population ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)}
@@ -87,14 +87,12 @@ Code Iris: ${df_year["code_iris"][i]}<br>
 Etablissement le + proche:<br> ${df_year["rs"]![i]=="" ? "Aucun" : df_year["rs"]![i]}<br>
 Temps d'accès: ${df_year["time_hc"]![i]==60 ? ">60" : df_year["time_hc"]![i].toFixed(0)} min.<br>
 Distance: ${df_year["km"]![i]==60 ? ">60" : df_year["km"]![i].toFixed(0)} km<br>
-Variation/${this.firstYear()}: ${((df_year["time_hc"]![i]-this.years()[this.firstYear()]["time_hc"]![i])*100/this.years()[this.firstYear()]["time_hc"]![i]+0.01).toFixed(0)}%<br>
+Variation/${this.firstYear()}: ${((df_year["time_hc"]![i]-this.years()[this.firstYear()]["time_hc"]![i])*100/(this.years()[this.firstYear()]["time_hc"]![i]+0.01)).toFixed(0)}%<br>
 Population: ${df_year["pop"][i].toFixed(0)}<br>
   `
       }
-    else return "TODO";
+    else return "TODO"; // TODO Faire commune
   }
-
-  // TODO Mettre APL dans observatoire
 
   getTexts(): String[][] {
     const texts: string[][] = [];
@@ -153,6 +151,15 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
     return sae;
   }
 
+  getColorbarTitle(): string {
+    if (this.type() == "APL") {
+      if (this.normColorBar()) return "APL";
+      return "APL local";
+    }
+    if (this.normColorBar()) return "Temps de<br>trajet (min.)";
+    return "Temps<br>normalisé"
+  }
+
   getGeo() {
     const geo = {
       type: "choropleth",
@@ -164,14 +171,14 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
-      colorbar: {title: {text: this.normColorBar() ? "APL": "APL local"}},  //TODO getColorbarTitle()
+      colorbar: {title: {text: this.getColorbarTitle()}}, 
       colorscale: this.getColorscale(),
       marker: {line: {width: this.marker(),}},
     };
     return geo;
   }
 
-  public getSliders(): Partial<Plotly.Slider>[] { // TODO gérer le fullscreen
+  public getSliders(): Partial<Plotly.Slider>[] {
     const sliders: Partial<Plotly.Slider>[] = [{
         active: 0,
         currentvalue: {
@@ -189,7 +196,7 @@ Population: ${df_year["pop"][i].toFixed(0)}<br>
 
   getLayout(): Partial<Plotly.Layout> {
     const layout: Partial<Plotly.Layout> = {
-      title: {text: "TODO mettre un titre"}, // TODO
+      title: {text: "TODO mettre un titre"}, // TODO depuis searchbox
       geo: {
         projection: { type: 'mercator', scale: 2, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },

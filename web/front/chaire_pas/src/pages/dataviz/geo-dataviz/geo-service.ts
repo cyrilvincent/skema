@@ -26,7 +26,7 @@ export class GeoService  extends CommonService {
   }
 
   init() {
-    this._geoTupleDTO.set(emptyGeo);
+    this._geoTupleDTO.set(emptyGeo); // testé sans injection avec succès
   }
 
   private fetchAPL(dto: GeoInputDTO, geoType: string): void {
