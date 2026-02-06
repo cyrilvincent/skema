@@ -118,7 +118,7 @@ where route_min <= {time}) order by "iris1", "iris2"
 def get_pop_iris(year):
     yy = max(min(year - 2000, 21), 17)
     sql = f"""
-select i.id iris, pi.iris iris_string, c.code code_commune, i.type type_iris, pi.pop, pi.pop0002, pi.pop0305, pi.pop0610, pi.pop1117, pi.pop1824, pi.pop2539, pi.pop4054, pi.pop5564, pi.pop6579, pi.pop80p
+select i.id iris, i.code iris_string, c.code code_commune, i.type type_iris, pi.pop, pi.pop0002, pi.pop0305, pi.pop0610, pi.pop1117, pi.pop1824, pi.pop2539, pi.pop4054, pi.pop5564, pi.pop6579, pi.pop80p
 from iris.pop_iris pi
 join iris.iris i on  pi.iris=i.code
 join iris.commune c on i.commune_id=c.id

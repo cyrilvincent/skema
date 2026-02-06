@@ -146,5 +146,11 @@ export class DatavizParameters {
     else this.okEvent.emit([this.selectedSpecialite(), this.time(), this.exp(), this.hc(), this.fullScreen(), this.resolution(), this.geoType(), this.label()])
   }
 
+  cancelClicked(): void {
+    console.log("Cancel")
+    this.geoService._loading.set(false);
+    this.geoService.init();
+  }
+
 }
 

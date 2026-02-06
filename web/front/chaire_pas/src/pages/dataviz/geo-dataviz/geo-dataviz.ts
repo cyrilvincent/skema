@@ -303,7 +303,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
     });
   }
 
-  getScatterGeo(): Partial<Plotly.ScatterData> { // TODO C'est seulement un mock à modifier
+  getScatterGeo(): Partial<Plotly.ScatterData> {
     const etab = this.years()[this.firstYear()]["etab"]!;
     const scatter: Partial<Plotly.ScatterData> = {
       type: 'scattergeo',
@@ -332,7 +332,6 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
       const etab = this.years()[year]["etab"]!;
-      //df_year["lon"][0] = df_year["lon"][0]+(+year-2020)*0.01; // TODO A enlever, fyi +year = Number(year)
       const step: Plotly.SliderStep = {
         label: year, 
         value: year,
@@ -357,6 +356,12 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
     return steps;
   }
 
+  delay(delay: number) {
+    return new Promise(r => {
+      setTimeout(r, delay);
+    })
+  }
+
   getConfig(): Partial<Plotly.Config> {
     const config: Partial<Plotly.Config> = {
       autosizable: true,
@@ -370,8 +375,11 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
           title: "Afficher les labels",
           name: 'Show labels',
           icon: Plotly.Icons.zoombox,
-          click: (() => {
+          click: (async () => {
+            this.service._loading.set(true);
+            //await this.delay(100);
             this.showLabel.set(!this.showLabel()); // Bug peu visible : revient au slider 1, j'ai testé visible mais c'est pareil
+            this.service._loading.set(false);
           }),
         },
         {
@@ -384,7 +392,11 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
           title: "Contours",
           name: 'Contours',
           icon: Plotly.Icons.drawline,
-          click: (() => this.marker.set(this.marker() == 1 ? 0 : 1)),
+          click: (() => {
+            this.service._loading.set(true);
+            this.marker.set(this.marker() == 1 ? 0 : 1)
+            this.service._loading.set(false);
+          }),
         },
       ],
     }

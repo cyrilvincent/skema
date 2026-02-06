@@ -206,6 +206,7 @@ class SAEService(APLService):
         gdf["km"] = gdf["km"].fillna(60)
         gdf["time_hc"] = gdf["time_hc"].fillna(60)
         gdf["time_hp"] = gdf["time_hp"].fillna(60)
+        gdf["pop"] = gdf["pop"].fillna(0)
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'code_iris', 'nom_iris', "geometry",
                 "km", "time_hc", "time_hp", "rs", "fi", "pop"]
@@ -214,11 +215,14 @@ class SAEService(APLService):
         etab_df["efflib"] = etab_df["efflib"].fillna(-1)
         etab_df["etp"] = etab_df["etp"].fillna(-1)
         etab_df["tension"] = etab_df["tension"].fillna(-1).replace([np.inf, -np.inf], -1)
-        # etab_df["passu"] = etab_df["passu"].fillna(-1)
+        etab_df["passu"] = etab_df["passu"].fillna(-1)
+        etab_df["has_pdata"] = etab_df["has_pdata"].fillna(False)
         cols = ["year", "fi", "passu", "has_pdata", "etp", "efflib", "etpsal", "rs", "lon", "lat", "tension"]
         export_etab = etab_df[cols]
         for year in years:
             meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
+            if meanw is None:
+                meanw = 1
             dico["meanws"].append(meanw)
             export_year = export[export["year"] == year + 2000]
             export_etab_year = export_etab[export_etab["year"] == year + 2000]
@@ -231,7 +235,11 @@ class SAEService(APLService):
                 etab_year[col] = export_etab_year[col].values.tolist()
             dico_year["etab"] = etab_year
             dico["years"][year + 2000] = dico_year
-        gdf_first_year = gdf[gdf["year"] == years[0] + 2000]
+        first_year = years[0]
+        if len(gdf) > 0:
+            gdf = gdf.sort_values(by="year")
+            first_year = gdf["year"].unique()[0]
+        gdf_first_year = gdf[gdf["year"] == first_year]
         geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
         print(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
@@ -253,7 +261,7 @@ class SAEService(APLService):
         gdf_merged = self.merge_iris_gdf_apl(gdf, sae)
         gdf_merged = self.gdf_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
-        print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
+        print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
         return export
         # A enlever ['nb', 'apl', 'swpop', 'pop_ajustee', 'apl_max']
@@ -265,7 +273,7 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    export = s.compute_sae_iris("CC-38205", 1, 60, "HC", "HD")
+    export = s.compute_sae_iris("CC-69072", 1, 60, "HC", "HD")
     s = json.dumps(export)
     print(s[:5000])
 

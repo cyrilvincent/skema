@@ -1,5 +1,7 @@
 https://chaire2p2as.weebly.com/
-sae
-menu : https://dev.to/chintanonweb/step-by-step-guide-to-an-angular-expandable-and-collapsible-sidebar-with-icons-5e5o
-https://javascript.plainenglish.io/making-a-responsive-animated-hamburger-menu-with-angular-material-f822cdca3ac7
-ux : https://www.constances.fr/
+SAE
+    iris csv + json
+    commune
+    en CD-69 il y a 2 iris absent : CC-69072 : Bug corrigé, ca venait d'un iris_string=null j'ai corrigé get_pop_iris sur sae_dist et je l'ai refais tourner sur le serveur. Il y a comme conséquence des pop==0, le bug n'existe pas sur APL car c'est pour des dates < 2020
+menu : https://dev.to/chintanonweb/step-by-step-guide-to-an-angular-expandable-and-collapsible-sidebar-with-icons-5e5o ou https://javascript.plainenglish.io/making-a-responsive-animated-hamburger-menu-with-angular-material-f822cdca3ac7
+ui : https://www.constances.fr/
