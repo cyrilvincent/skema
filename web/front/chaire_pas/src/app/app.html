@@ -2,21 +2,16 @@
   <app-fullscreen></app-fullscreen>
 }
 @else {
-  <div class="wrapper">
-    <div class="header-wrap">
-      <div class="nav-wrap">
-        <div id="logo">
-          <span class="wsite-logo">
-            <a routerLink="/">
-              <span id="wsite-title">{{title}}</span>
-            </a>
-          </span> 
-        </div>  
-        <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
-      </div>
-      <app-banner [activeMenu]="activeMenu()"></app-banner>
-    </div>
-  </div>
+
+  <div class="logo">
+    <div class="wsite-logo">
+      <a routerLink="/">
+        <span id="wsite-title">{{title}}</span>
+      </a>
+    </div> 
+  </div>  
+  <app-menu-old (menuChangedEvent)="menuChanged($event)"></app-menu-old> 
+<!-- <app-banner [activeMenu]="activeMenu()"></app-banner> -->
   <router-outlet />
   <app-footer></app-footer>
 }

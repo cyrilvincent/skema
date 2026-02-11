@@ -7,7 +7,7 @@ import { RouterLinkWithHref, RouterLink } from '@angular/router';
   templateUrl: './menu_old.html',
   styleUrl: './menu_old.scss',
 })
-export class Menu {
+export class MenuOld {
   activeMenu = signal(0);
   menuChangedEvent = output<number>();
 

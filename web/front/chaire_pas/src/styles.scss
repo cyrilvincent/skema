@@ -4,9 +4,20 @@
 // components according to the Material 3 design spec.
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
-@use './shared/styles/global' as *;
 @use '@angular/material' as mat;
-@use './shared/styles/variables' as *;
+
+$primary-color: #000000;
+$secondary-color: #ffffff;
+$accent-color: #0066cc;
+$link-color: #2b2b2b;
+$text-color: #030303;
+$font-family: 'Open Sans', sans-serif;
+$font-family-title: 'Patua One', serif;
+$font-family-menu: 'Montserrat', sans-serif;
+
+$breakpoint-mobile: 576px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
 
 html {
   height: 100%;
@@ -20,21 +31,61 @@ html {
   ));
 }
 
-/*body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+// body {
+//   // Default the application to a light color theme. This can be changed to
+//   // `dark` to enable the dark color theme, or to `light dark` to defer to the
+//   // user's system settings.
+//   // color-scheme: light;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+//   // Set a default background, font and text colors for the application using
+//   // Angular Material's system-level CSS variables. Learn more about these
+//   // variables at https://material.angular.dev/guide/system-variables
+//   // background-color: var(--mat-sys-surface);
+//   // color: var(--mat-sys-on-surface);
+//   // font: var(--mat-sys-body-medium);
 
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
-}*/
+//   // Reset the user agent margin.
+//   margin: 0;
+//   height: 100%;
+// }
 /* You can add global styles to this file, and also import other style files */
+
+// Copy from wsite old
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: Roboto;
+  color: $text-color;
+  background-color: #fff;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.8em;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border: 0;
+}
+
+a {
+    text-decoration: none;
+    color: $link-color;
+    transition: color 200ms ease-in;
+}
+
+.container {
+    width: 100%;
+    max-width: 1024px;
+    margin: 0px auto;
+}

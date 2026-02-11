@@ -1,13 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterOutlet, ActivatedRoute } from '@angular/router';
-import { Menu } from "../shared/menu/menu";
-import { Banner } from '../shared/banner/banner';
+import { MenuOld } from "../shared/menu/menu_old";
+// import { Banner } from '../shared/banner/banner';
 import { Footer } from "../shared/footer/footer";
 import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, Banner, Footer, Fullscreen],
+  imports: [RouterOutlet, MenuOld, Footer, Fullscreen],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
