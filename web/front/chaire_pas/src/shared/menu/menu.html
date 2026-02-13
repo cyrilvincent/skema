@@ -1,3 +1,28 @@
 <div class="menu">
-    Menu TODO
+    <div class="container">
+         
+        <ul class="wsite-menu-default">
+            <li [id]="activeMenu()==0 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)">Missions</a>
+            </li>
+            <li [id]="activeMenu()==1 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/observatoire" class="wsite-menu-item" (click)="changeMenu(1)">L'observatoire</a>
+            </li>
+            <li [id]="activeMenu()==2 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/research" class="wsite-menu-item" (click)="changeMenu(2)">Recherche</a>
+            </li>
+            <li [id]="activeMenu()==3 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/data" class="wsite-menu-item" (click)="changeMenu(3)">Data</a>
+            </li>
+            <li [id]="activeMenu()==4 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/media" class="wsite-menu-item" (click)="changeMenu(4)">Medias</a>
+            </li>
+            <li [id]="activeMenu()==5 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/sustain" class="wsite-menu-item" (click)="changeMenu(5)">Nous soutenir</a>
+            </li>
+            <li [id]="activeMenu()==6 ? 'active' : ''" class="wsite-menu-item-wrap">
+                <a routerLink="/about" class="wsite-menu-item" (click)="changeMenu(6)">A propos</a>
+            </li>
+        </ul>
+    </div>
 </div>

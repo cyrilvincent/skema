@@ -1,18 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterOutlet, ActivatedRoute } from '@angular/router';
-import { MenuOld } from "../shared/menu/menu_old";
-// import { Banner } from '../shared/banner/banner';
+import { Menu } from "../shared/menu/menu";
+import { Banner } from '../shared/banner/banner';
 import { Footer } from "../shared/footer/footer";
 import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MenuOld, Footer, Fullscreen],
+  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  title = "Chaire pour la prévention et l'accès aux soins";
   activeMenu = signal(0);
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);

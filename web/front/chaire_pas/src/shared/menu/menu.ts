@@ -4,8 +4,8 @@ import { RouterLinkWithHref, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-menu-old',
   imports: [RouterLink, RouterLinkWithHref],
-  templateUrl: './menu_old.html',
-  styleUrl: './menu_old.scss',
+  templateUrl: './menu.html',
+  styleUrl: './menu.scss',
 })
 export class Menu {
   activeMenu = signal(0);

@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Versions } from './about.interfaces';
-import { environment} from '../../environments/environment'
-import { CommonService } from '../../shared/common.service';
+import { Versions } from './versions.interfaces';
+import { environment} from '../../../environments/environment'
+import { CommonService } from '../../../shared/common.service';
 
 
 @Injectable({

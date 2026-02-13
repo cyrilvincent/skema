@@ -2,12 +2,12 @@ import { Component, computed, input } from '@angular/core';
 // import { APP_BASE_HREF } from '@angular/common';
 
 @Component({
-  selector: 'app-banner',
+  selector: 'app-banner-old',
   imports: [],
-  templateUrl: './banner.html',
-  styleUrl: './banner.scss',
+  templateUrl: './banner_old.html',
+  styleUrl: './banner_old.scss',
 })
-export class Banner {
+export class BannerOld {
   //baseHref = document.querySelector('base')?.getAttribute('href') ?? '';
   activeMenu = input<number>(0);
   activeImage = computed(() => `background-image: url('img/banner${this.activeMenu()}.jpg');background-position: 50.00% ${this.activePosition()}%;`)

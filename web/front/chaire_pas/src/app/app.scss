@@ -1,20 +1,21 @@
-.logo {
-    text-align: center;  
-    
+.top-spacer {
+    height: 270px;
 }
 
-.wsite-logo {
-    display: inline-block;
-}
-
-#wsite-title {
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-    font-size: 26px !important;
+header {
     display: block;
-    max-width: 400px;
-    line-height: 1.1;
-    padding: 10px 0px !important;
-    vertical-align: top;
+    unicode-bidi: isolate;
 }
+
+
+.header {
+    position: fixed; 
+    z-index: 99999;
+    left: 0px;
+    top: 0px;
+    height: 245px;
+    right: 0px;
+    background: white;
+}
+
 

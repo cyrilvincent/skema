@@ -1,23 +1,2 @@
-<div class="wsite-section-wrap">  
-    <div class="container"> 
-        <div class="wsite-spacer" style="height:17px;">
-        </div>
-<h2>About</h2>
-<p>Version: {{version}}</p>
-<p>Copyright: {{copyright}}</p>
-<p>Angular: {{angularVersion}}</p>
-<p>Plotly.js: {{plotlyVersion}}</p>
-<p>Angular-plotly.js: {{angularPlotlyVersion}} {{isCDN ? "CDN" : "without CDN"}}</p>
-<button (click)="backend()">Backend</button>
-@if (loading()) {
-    <p>Chargement…</p>
-}
-@else if (error()) {
-    <p>Erreur: {{error()}}</p>
-}
-@if (backendVisible) {
-    <p>{{root()}}: {{versions().icip}}</p>
-    <p>Back: {{versions().back}}</p>
-}
-</div></div>
-
+<app-members></app-members>
+<app-versions></app-versions>

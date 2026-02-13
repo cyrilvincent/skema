@@ -1,0 +1,35 @@
+
+.banner {
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.4)),
+        url('/img/banner4.jpg');
+    background-position: 50.0% 25.0%;
+    height: 200px;
+}
+
+.logo {
+    text-align: center;  
+    height: 120px;
+}
+
+
+.wsite-logo {
+    display: inline-block;
+    padding-top: 40px;
+}
+
+#wsite-title {
+    text-transform: uppercase !important;
+    letter-spacing: 4px !important;
+    font-size: 30px !important;
+    display: block;
+    max-width: 400px;
+    line-height: 1.1;
+    padding: 10px 0px !important;
+    color: #ffffff;
+    font-weight: 900;
+    
+text-shadow:
+    1px 1px 0 #0B586F,
+}
+
