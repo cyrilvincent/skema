@@ -10,9 +10,11 @@ import { RouterLinkWithHref, RouterLink } from '@angular/router';
 export class Menu {
   activeMenu = signal(0);
   menuChangedEvent = output<number>();
+  clicked = signal<boolean>(false);
 
   changeMenu(nb: number) {
     this.activeMenu.set(nb);
     this.menuChangedEvent.emit(nb);
+    this.clicked.set(true);
   }
 }

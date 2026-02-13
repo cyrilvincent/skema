@@ -1,8 +1,8 @@
 .menu {
-    font-size: 12px;
+    font-size: 14px;
     text-transform: uppercase;
     text-align: center;
-    font-weight: 700;
+    font-weight: 200;
     border-bottom: 1px solid rgba(116, 116, 116, 0.15);
 }
 
@@ -22,9 +22,8 @@
 }
 
 .menu > .container > ul > li > a {
-    //font-family: $font-family-menu !important;
     font-weight: 400 !important;
-    letter-spacing: 2px !important;
+    letter-spacing: 3px !important;
 }
 
 .wsite-menu-default > li > a {
@@ -35,13 +34,13 @@
 }
 
 .menu > .container > ul > li#active > a {
-    border-bottom: 2px solid ;
+    border-bottom: 3px solid ;
     border-color: #0B586F;
     position: relative;
 }
 
 .menu > .container > ul > li > a:hover {
-    border-bottom: 2px solid ;
+    border-bottom: 3px solid ;
     position: relative;
 }
 
@@ -79,8 +78,11 @@
   display: flex;
 }
 
+.sub-menu.clicked:hover {
+  display: none;
+}
+
 .sub-menu > li > a {
     font-weight: 400;
     letter-spacing: 1px;
 }
-

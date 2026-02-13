@@ -4,18 +4,13 @@
         <ul class="wsite-menu-default">
             <li [id]="activeMenu()==0 ? 'active' : ''" class="wsite-menu-item-wrap">
                 <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)">Missions</a>
-                <ul class="sub-menu">
-                    <li class="menu-item"><a>Nos actualités</a></li>
-                    <li class="menu-item"><a>Revue de presse</a></li>
-                    <li class="menu-item"><a>Anciennes newsletters</a></li>
-                </ul>
             </li>
             <li [id]="activeMenu()==1 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a class="wsite-menu-item" (click)="changeMenu(1)">L'observatoire</a>
-                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/observatoire">L'observatoire</a></li>
-                    <li class="menu-item"><a routerLink="/sae">SAE</a></li>
-                    <li class="menu-item"><a routerLink="/apl">APL</a></li>
+                <a class="wsite-menu-item" routerLink="/observatoire" (click)="changeMenu(1)">L'observatoire</a>
+                <ul class="sub-menu" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
+                    <li class="menu-item"><a routerLink="/observatoire" (click)="changeMenu(1)">L'observatoire</a></li>
+                    <li class="menu-item"><a routerLink="/sae" (click)="changeMenu(1)">SAE</a></li>
+                    <li class="menu-item"><a routerLink="/apl" (click)="changeMenu(1)">APL</a></li>
                 </ul>
             </li>
             <li [id]="activeMenu()==2 ? 'active' : ''" class="wsite-menu-item-wrap">
@@ -28,12 +23,12 @@
                 <a routerLink="/media" class="wsite-menu-item" (click)="changeMenu(4)">Medias</a>
             </li>
             <li [id]="activeMenu()==5 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a class="wsite-menu-item" (click)="changeMenu(5)">Nous soutenir</a>
-                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/sustain">Nous soutenir</a></li>
-                    <li class="menu-item"><a routerLink="/about">A propos</a></li>
-                    <li class="menu-item"><a routerLink="/about" fragment="members">Les membres fondateurs</a></li>
-                    <li class="menu-item"><a routerLink="/about" fragment="versions">Versions</a></li>
+                <a class="wsite-menu-item" routerLink="/sustain" (click)="changeMenu(5)">Nous soutenir</a>
+                <ul class="sub-menu" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
+                    <li class="menu-item"><a routerLink="/sustain" (click)="changeMenu(5)">Nous soutenir</a></li>
+                    <li class="menu-item"><a routerLink="/about" (click)="changeMenu(5)">A propos</a></li>
+                    <li class="menu-item"><a routerLink="/about" fragment="members" (click)="changeMenu(5)">Les membres fondateurs</a></li>
+                    <li class="menu-item"><a routerLink="/about" fragment="versions"(click)="changeMenu(5)">Versions</a></li>
                 </ul>
             </li>
         </ul>
