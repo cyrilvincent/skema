@@ -4,54 +4,33 @@
         <ul class="wsite-menu-default">
             <li [id]="activeMenu()==0 ? 'active' : ''" class="wsite-menu-item-wrap">
                 <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)">Missions</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/about" fragment="test">Nos actualités</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/revue-de-presse/">Revue de presse</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/anciennes-newsletters-archives/">Anciennes newsletters</a></li>
+                <ul class="sub-menu">
+                    <li class="menu-item"><a>Nos actualités</a></li>
+                    <li class="menu-item"><a>Revue de presse</a></li>
+                    <li class="menu-item"><a>Anciennes newsletters</a></li>
                 </ul>
             </li>
             <li [id]="activeMenu()==1 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a routerLink="/observatoire" class="wsite-menu-item" (click)="changeMenu(1)">L'observatoire</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/about" fragment="test">Nos actualités</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/revue-de-presse/">Revue de presse</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/anciennes-newsletters-archives/">Anciennes newsletters</a></li>
+                <a class="wsite-menu-item" (click)="changeMenu(1)">L'observatoire</a>
+                <ul class="sub-menu">
+                    <li class="menu-item"><a routerLink="/observatoire">L'observatoire</a></li>
+                    <li class="menu-item"><a routerLink="/sae">SAE</a></li>
+                    <li class="menu-item"><a routerLink="/apl">APL</a></li>
                 </ul>
             </li>
             <li [id]="activeMenu()==2 ? 'active' : ''" class="wsite-menu-item-wrap">
                 <a routerLink="/research" class="wsite-menu-item" (click)="changeMenu(2)">Recherche</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/about" fragment="test">Nos actualités</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/revue-de-presse/">Revue de presse</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/anciennes-newsletters-archives/">Anciennes newsletters</a></li>
-                </ul>
             </li>
             <li [id]="activeMenu()==3 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a routerLink="/data" class="wsite-menu-item" (click)="changeMenu(3)">Data</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/sae" fragment="test">SAE</a></li>
-                    <li class="menu-item"><a routerLink="/apl">APL</a></li>
-                </ul>
+                <a routerLink="/data" class="wsite-menu-item" (click)="changeMenu(3)">Data</a>               
             </li>
             <li [id]="activeMenu()==4 ? 'active' : ''" class="wsite-menu-item-wrap">
                 <a routerLink="/media" class="wsite-menu-item" (click)="changeMenu(4)">Medias</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/about" fragment="test">Nos actualités</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/revue-de-presse/">Revue de presse</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/anciennes-newsletters-archives/">Anciennes newsletters</a></li>
-                </ul>
             </li>
             <li [id]="activeMenu()==5 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a routerLink="/sustain" class="wsite-menu-item" (click)="changeMenu(5)">Nous soutenir</a>
-                                <ul class="sub-menu">
-                    <li class="menu-item"><a routerLink="/about" fragment="test">Nos actualités</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/revue-de-presse/">Revue de presse</a></li>
-                    <li class="menu-item"><a href="https://www.constances.fr/actualites/anciennes-newsletters-archives/">Anciennes newsletters</a></li>
-                </ul>
-            </li>
-            <li [id]="activeMenu()==6 ? 'active' : ''" class="wsite-menu-item-wrap">
-                <a routerLink="/about" class="wsite-menu-item" (click)="changeMenu(6)">A propos</a>
+                <a class="wsite-menu-item" (click)="changeMenu(5)">Nous soutenir</a>
                 <ul class="sub-menu">
+                    <li class="menu-item"><a routerLink="/sustain">Nous soutenir</a></li>
                     <li class="menu-item"><a routerLink="/about">A propos</a></li>
                     <li class="menu-item"><a routerLink="/about" fragment="members">Les membres fondateurs</a></li>
                     <li class="menu-item"><a routerLink="/about" fragment="versions">Versions</a></li>
