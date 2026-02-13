@@ -8,6 +8,8 @@ import { Data } from '../pages/data/data';
 import { Research } from '../pages/research/research';
 import { Sustain } from '../pages/sustain/sustain';
 import { Media } from '../pages/media/media';
+import { Sae } from '../pages/sae/sae';
+import { Apl } from '../pages/apl/apl';
 
 export const routes: Routes = [
   {
@@ -29,6 +31,16 @@ export const routes: Routes = [
     path: 'data',
     title: "Dataviz: Chaire pour la prévention et l'accès aux soins",
     component: Data,
+  },
+  {
+    path: 'sae',
+    title: "SAE: Chaire pour la prévention et l'accès aux soins",
+    component: Sae,
+  },
+  {
+    path: 'apl',
+    title: "APL: Chaire pour la prévention et l'accès aux soins",
+    component: Apl,
   },
   {
     path: 'research',
