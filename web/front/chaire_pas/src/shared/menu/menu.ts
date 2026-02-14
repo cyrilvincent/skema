@@ -1,10 +1,11 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { RouterLinkWithHref, RouterLink } from '@angular/router';
 import { MenuService } from './menu-service';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-menu-old',
-  imports: [RouterLink, RouterLinkWithHref],
+  imports: [RouterLink, RouterLinkWithHref, MatIconModule],
   templateUrl: './menu.html',
   styleUrl: './menu.scss',
 })

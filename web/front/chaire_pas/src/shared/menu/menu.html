@@ -3,32 +3,32 @@
          
         <ul class="wsite-menu-default">
             <li [id]="activeMenu()==0 ? 'active' : ''">
-                <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)">Missions</a>
+                <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)"><mat-icon>home</mat-icon>Missions</a>
             </li>
             <li [id]="activeMenu()==1 ? 'active' : ''">
-                <a class="wsite-menu-item" routerLink="/observatoire" (click)="changeMenu(1)">L'observatoire</a>
+                <a class="wsite-menu-item" routerLink="/observatoire" (click)="changeMenu(1)"><mat-icon>travel_explore</mat-icon>L'observatoire</a>
                 <ul class="sub-menu" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
-                    <li class="menu-item"><a routerLink="/observatoire" (click)="changeMenu(1)">L'observatoire</a></li>
-                    <li class="menu-item"><a routerLink="/sae" (click)="changeMenu(1)">SAE</a></li>
-                    <li class="menu-item"><a routerLink="/apl" (click)="changeMenu(1)">APL</a></li>
+                    <li class="menu-item"><a routerLink="/observatoire" (click)="changeMenu(1)"><mat-icon>travel_explore</mat-icon>L'observatoire</a></li>
+                    <li class="menu-item"><a routerLink="/sae" (click)="changeMenu(1)"><mat-icon>map</mat-icon>SAE</a></li>
+                    <li class="menu-item"><a routerLink="/apl" (click)="changeMenu(1)"><mat-icon>place</mat-icon>APL</a></li>
                 </ul>
             </li>
             <li [id]="activeMenu()==2 ? 'active' : ''">
-                <a routerLink="/research" class="wsite-menu-item" (click)="changeMenu(2)">Recherche</a>
+                <a routerLink="/research" class="wsite-menu-item" (click)="changeMenu(2)"><mat-icon>science</mat-icon>Recherche</a>
             </li>
             <li [id]="activeMenu()==3 ? 'active' : ''">
-                <a routerLink="/data" class="wsite-menu-item" (click)="changeMenu(3)">Data</a>               
+                <a routerLink="/data" class="wsite-menu-item" (click)="changeMenu(3)"><mat-icon>analytics</mat-icon>Data</a>               
             </li>
             <li [id]="activeMenu()==4 ? 'active' : ''">
-                <a routerLink="/media" class="wsite-menu-item" (click)="changeMenu(4)">Medias</a>
+                <a routerLink="/media" class="wsite-menu-item" (click)="changeMenu(4)"><mat-icon>article</mat-icon>Medias</a>
             </li>
             <li [id]="activeMenu()==5 ? 'active' : ''">
-                <a class="wsite-menu-item" routerLink="/sustain" (click)="changeMenu(5)">Nous soutenir</a>
+                <a class="wsite-menu-item" routerLink="/sustain" (click)="changeMenu(5)"><mat-icon>star</mat-icon>Nous soutenir</a>
                 <ul class="sub-menu" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
-                    <li class="menu-item"><a routerLink="/sustain" (click)="changeMenu(5)">Nous soutenir</a></li>
-                    <li class="menu-item"><a routerLink="/about" (click)="changeMenu(5)">A propos</a></li>
-                    <li class="menu-item"><a routerLink="/about" fragment="members" (click)="changeMenu(5)">Les membres fondateurs</a></li>
-                    <li class="menu-item"><a routerLink="/about" fragment="versions"(click)="changeMenu(5)">Versions</a></li>
+                    <li class="menu-item"><a routerLink="/sustain" (click)="changeMenu(5)"><mat-icon>star</mat-icon>Nous soutenir</a></li>
+                    <li class="menu-item"><a routerLink="/about" (click)="changeMenu(5)"><mat-icon>info</mat-icon>A propos</a></li>
+                    <li class="menu-item"><a routerLink="/about" fragment="members" (click)="changeMenu(5)"><mat-icon>group</mat-icon>Les membres fondateurs</a></li>
+                    <li class="menu-item"><a routerLink="/about" fragment="versions"(click)="changeMenu(5)"><mat-icon>settings</mat-icon>Versions</a></li>
                 </ul>
             </li>
         </ul>

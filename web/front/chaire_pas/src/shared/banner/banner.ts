@@ -1,5 +1,5 @@
-import { Component, computed, input } from '@angular/core';
-// import { APP_BASE_HREF } from '@angular/common';
+import { Component } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-banner',
@@ -8,6 +8,5 @@ import { Component, computed, input } from '@angular/core';
   styleUrl: './banner.scss',
 })
 export class Banner {
-  title = "Chaire pour la prévention et l'accès aux soins";
-  //baseHref = document.querySelector('base')?.getAttribute('href') ?? '';
+  title = environment.title;
 }

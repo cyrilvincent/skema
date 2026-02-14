@@ -3,6 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  title: "Chaire pour la prévention et l'accès aux soins",
   production: false,
   version: '0.0.1.Dev',
   copyright: 'Skema Business School 2026',
