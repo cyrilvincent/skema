@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { CommonService } from '../common.service';
 
 @Component({
   selector: 'app-banner',
@@ -9,4 +10,5 @@ import { environment } from '../../environments/environment';
 })
 export class Banner {
   title = environment.title;
+  service = inject(CommonService);
 }

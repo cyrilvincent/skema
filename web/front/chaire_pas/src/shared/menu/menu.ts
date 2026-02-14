@@ -2,6 +2,7 @@ import { Component, inject, output, signal } from '@angular/core';
 import { RouterLinkWithHref, RouterLink } from '@angular/router';
 import { MenuService } from './menu-service';
 import { MatIconModule } from "@angular/material/icon";
+import { CommonService } from '../common.service';
 
 @Component({
   selector: 'app-menu-old',
@@ -11,6 +12,7 @@ import { MatIconModule } from "@angular/material/icon";
 })
 export class Menu {
   service = inject(MenuService);
+  commonService = inject(CommonService);
   activeMenu = this.service.activeMenu; 
   menuChangedEvent = output<number>(); // Ne sert plus
   clicked = signal<boolean>(false);
@@ -18,7 +20,7 @@ export class Menu {
   async changeMenu(nb: number) {
     this.service.changeMenu(nb);
     this.menuChangedEvent.emit(nb);
-    await this.service.delay(200);
+    await this.commonService.delay(200);
     this.clicked.set(true);
   }
 

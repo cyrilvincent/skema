@@ -1,8 +1,8 @@
-<div class="banner" style="background-image: linear-gradient(rgba(0,0,0,0.4)), url('img/banner4.jpg'); background-position: 50.0% 25.0%;">
+<div [class]="service.isMobile() ? 'mobile-banner' : 'banner'" style="background-image: linear-gradient(rgba(0,0,0,0.4)), url('img/banner4.jpg'); background-position: 50.0% 25.0%;">
     <div class="logo">
         <div class="wsite-logo">
             <a routerLink="/">
-                <span id="wsite-title">{{title}}</span>
+                <span  [class]="service.isMobile() ? 'mobile-title' : 'title'">{{title}}</span>
             </a>
         </div> 
     </div>  

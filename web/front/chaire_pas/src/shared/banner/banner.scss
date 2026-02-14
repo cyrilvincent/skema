@@ -3,6 +3,10 @@
     height: 200px;
 }
 
+.mobile-banner {
+    height: 100px;
+}
+
 .logo {
     text-align: center;  
     height: 120px;
@@ -13,17 +17,29 @@
     display: inline-block;
 }
 
-#wsite-title {
+.title {
     text-transform: uppercase !important;
-    letter-spacing: 4px !important;
-    font-size: 40px !important;
+    letter-spacing: 4px;
+    font-size: 40px;
     display: block;
     max-width: 500px;
     line-height: 1.1;
     padding: 36px 0px !important;
     color: #ffffff;
     font-weight: 1000;
-    //text-shadow: 1px 1px 0 #0B586F;
+    font-family: 'Patua One';
+}
+
+.mobile-title {
+    text-transform: uppercase !important;
+    letter-spacing: 2px;
+    font-size: 20px;
+    display: block;
+    max-width: 400px;
+    line-height: 1.1;
+    padding: 30px 0px !important;
+    color: #ffffff;
+    font-weight: 500;
     font-family: 'Patua One';
 }
 
