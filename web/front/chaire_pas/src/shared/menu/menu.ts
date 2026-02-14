@@ -1,5 +1,6 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import { RouterLinkWithHref, RouterLink } from '@angular/router';
+import { MenuService } from './menu-service';
 
 @Component({
   selector: 'app-menu-old',
@@ -8,13 +9,17 @@ import { RouterLinkWithHref, RouterLink } from '@angular/router';
   styleUrl: './menu.scss',
 })
 export class Menu {
-  activeMenu = signal(0);
-  menuChangedEvent = output<number>();
+  service = inject(MenuService);
+  activeMenu = this.service.activeMenu; 
+  menuChangedEvent = output<number>(); // Ne sert plus
   clicked = signal<boolean>(false);
 
-  changeMenu(nb: number) {
-    this.activeMenu.set(nb);
+  async changeMenu(nb: number) {
+    this.service.changeMenu(nb);
     this.menuChangedEvent.emit(nb);
+    await this.service.delay(200);
     this.clicked.set(true);
   }
+
+  
 }
