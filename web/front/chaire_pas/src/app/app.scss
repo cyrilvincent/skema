@@ -2,6 +2,10 @@
     height: 270px;
 }
 
+.mobile-top-spacer {
+    height: 120px;
+} 
+
 header {
     display: block;
     unicode-bidi: isolate;
@@ -10,10 +14,20 @@ header {
 
 .header {
     position: fixed; 
-    z-index: 99999;
+    z-index: 99;
     left: 0px;
     top: 0px;
     height: 245px;
+    right: 0px;
+    background: white;
+}
+
+.mobile-header {
+    position: fixed; 
+    z-index: 99;
+    left: 0px;
+    top: 0px;
+    height: 100px;
     right: 0px;
     background: white;
 }

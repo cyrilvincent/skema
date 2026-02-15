@@ -1,6 +1,6 @@
 <div class="container">
     <div class="sub-banner">
-        <span class="sub-title" style="background-image: linear-gradient(rgba(0,0,0,0.2)), url('img/banner0.jpg'); height: 200px; background-position: 50% 40%;">Les missions de la Chaire</span>
+        <span class="sub-title" [style]="service.isMobile() ? 'color: #0B586F;font-size: 15px;padding: 10px 0px;' : 'background-image: linear-gradient(rgba(0,0,0,0.2)), url(\'img/banner0.jpg\'); height: 200px; background-position: 50% 40%;'">Les missions de la Chaire</span>
     </div>
     <br>
     <p class="bold">L'Université Côte d'Azur et Skema Business School se sont associées pour créer une Chaire dédiée à la recherche sur l'accès aux soins et la prévention.</p>
@@ -19,20 +19,22 @@
                                 Notre ambition est de produire et diffuser largement des contenus uniques à l’ensemble des parties prenantes du système de santé afin d’améliorer la santé des populations en France. 
                             </div>
                         </td>
-                        <td class="wsite-multicol-col" style="width:50%; padding:0 15px;">
-                            <div>
-                                <div class="wsite-image wsite-image-border-none " style="padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center">
-                                    <img src="img/sant-num-rique_orig.png" alt="Santé numérique" style="width:auto;max-width:100%">
-                                    <div style="display:block;font-size:90%"></div>
-                                </div>
+                        @if(!service.isMobile()) {
+                            <td class="wsite-multicol-col" style="width:50%; padding:0 15px;">
                                 <div>
                                     <div class="wsite-image wsite-image-border-none " style="padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center">
-                                        <img src="img/secteur-sante.png" alt="Secteur santé" style="width:auto;max-width:100%">
+                                        <img src="img/sant-num-rique_orig.png" alt="Santé numérique" style="width:auto;max-width:100%">
                                         <div style="display:block;font-size:90%"></div>
                                     </div>
+                                    <div>
+                                        <div class="wsite-image wsite-image-border-none " style="padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center">
+                                            <img src="img/secteur-sante.png" alt="Secteur santé" style="width:auto;max-width:100%">
+                                            <div style="display:block;font-size:90%"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
+                            </td>
+                        }
                     </tr>
                 </tbody>
             </table>

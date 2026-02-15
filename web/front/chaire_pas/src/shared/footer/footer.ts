@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { CommonService } from '../common.service';
 
 @Component({
   selector: 'app-footer',
@@ -8,7 +9,6 @@ import { environment } from '../../environments/environment';
   styleUrl: './footer.scss',
 })
 export class Footer {
-
   copyright = environment.copyright;
-
+  service = inject(CommonService);
 }

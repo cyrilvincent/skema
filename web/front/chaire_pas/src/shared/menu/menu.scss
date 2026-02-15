@@ -54,7 +54,7 @@
     left: -100px;
     top: 100%;
     //right: -150px;
-    z-index: 2;
+    z-index: 999;
     backdrop-filter: blur(4px);
     list-style-type: none;
     display: none;
@@ -78,9 +78,14 @@
   display: flex;
 }
 
-.sub-menu.clicked:hover {
-  display: none;
+
+@media (pointer: fine) { // pas tactile
+    .sub-menu.clicked:hover {
+        display: none;
+    }
 }
+
+
 
 .sub-menu > li > a {
     font-weight: 400;

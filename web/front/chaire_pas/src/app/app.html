@@ -2,11 +2,13 @@
   <app-fullscreen></app-fullscreen>
 }
 @else {
-  <header class="header">
+  <header [class]="service.isMobile() ? 'mobile-header' : 'header'" >
     <app-banner></app-banner>
-    <app-menu-old (menuChangedEvent)="menuChanged($event)"></app-menu-old> 
+    <!-- @if(!service.isMobile()) { -->
+      <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
+    <!-- } -->
   </header>
-  <div class="top-spacer"></div> 
+  <div [class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'"></div>
   <router-outlet />
   <app-footer></app-footer>
 }

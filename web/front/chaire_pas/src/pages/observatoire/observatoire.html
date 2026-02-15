@@ -1,7 +1,7 @@
 
 <div class="container">
     <div class="sub-banner">
-        <span class="sub-title" style="background-image: linear-gradient(rgba(0,0,0,0.5)), url('img/banner1.jpg'); height: 100px; background-position: 50.0% 50.0%;">L'observatoire de l'accès aux soins</span>
+        <span class="sub-title" [style]="commonService.isMobile() ? 'color: #0B586F;font-size: 15px;padding: 10px 0px;' : 'background-image: linear-gradient(rgba(0,0,0,0.5)), url(\'img/banner1.jpg\'); height: 100px; background-position: 50.0% 50.0%;'">L'observatoire de l'accès aux soins</span>
     </div>
     <br>
     <div class="paragraph" style="text-align:left;">

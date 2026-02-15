@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonService } from '../../shared/common.service';
 
 @Component({
   selector: 'app-sustain',
@@ -7,5 +8,5 @@ import { Component } from '@angular/core';
   styleUrl: './sustain.scss',
 })
 export class Sustain {
-
+  service = inject(CommonService);
 }

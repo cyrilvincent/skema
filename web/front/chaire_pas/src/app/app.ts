@@ -4,6 +4,7 @@ import { Menu } from "../shared/menu/menu";
 import { Banner } from '../shared/banner/banner';
 import { Footer } from "../shared/footer/footer";
 import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
+import { CommonService } from '../shared/common.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class App {
   activeMenu = signal(0);
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);
+  service = inject(CommonService);
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
@@ -26,65 +28,6 @@ export class App {
   }
 }
 
-// TODO
-// +---------------------------+
-// | ☰  App title              |  ← mat-toolbar
-// +------+--------------------+
-// | Menu | Contenu principal  |  ← mat-sidenav + mat-sidenav-content
-// |      |                    |
-// +------+--------------------+
 
-// ✅ Bonnes pratiques Material
-// Menu = mat-nav-list
-// Icône hamburger = menu
-// Ne jamais faire ça à la main avec du CSS
-// Toujours utiliser BreakpointObserver
-
-// HTML
-// // 
-// <mat-sidenav-container class="sidenav-container">
-
-//   <!-- Menu gauche -->
-//   <mat-sidenav
-//     #sidenav
-//     [mode]="isMobile ? 'over' : 'side'"
-//     [opened]="!isMobile">
-
-//     <mat-nav-list>
-//       <a mat-list-item routerLink="/home">Home</a>
-//       <a mat-list-item routerLink="/map">Map</a>
-//       <a mat-list-item routerLink="/settings">Settings</a>
-//     </mat-nav-list>
-//   </mat-sidenav>
-
-// .ts
-
-// import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-
-// @Component({
-//   selector: 'app-layout',
-//   templateUrl: './layout.component.html'
-// })
-// export class LayoutComponent {
-//   isMobile = false;
-
-//   constructor(private breakpointObserver: BreakpointObserver) {
-//     this.breakpointObserver
-//       .observe([Breakpoints.Handset])
-//       .subscribe(result => {
-//         this.isMobile = result.matches;
-//       });
-//   }
-// }
-
-// CSS
-
-// .sidenav-container {
-//   height: 100vh;
-// }
-
-// .content {
-//   padding: 16px;
-// }
 
 

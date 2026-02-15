@@ -5,7 +5,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { CommonService } from '../common.service';
 
 @Component({
-  selector: 'app-menu-old',
+  selector: 'app-menu',
   imports: [RouterLink, RouterLinkWithHref, MatIconModule],
   templateUrl: './menu.html',
   styleUrl: './menu.scss',

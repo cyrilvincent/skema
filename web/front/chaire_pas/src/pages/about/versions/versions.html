@@ -1,21 +1,25 @@
 <div id="versions" class="container anchor"> 
     <div class="wsite-spacer" style="height:200px;">
     </div>
-    <p>Version: {{version}}</p>
-    <p>Copyright: {{copyright}}</p>
-    <p>Angular: {{angularVersion}}</p>
-    <p>Plotly.js: {{plotlyVersion}}</p>
-    <p>Angular-plotly.js: {{angularPlotlyVersion}} {{isCDN ? "CDN" : "without CDN"}}</p>
-    <button (click)="backend()">Backend</button>
-    @if (loading()) {
-        <p>Chargement…</p>
-    }
-    @else if (error()) {
-        <p>Erreur: {{error()}}</p>
-    }
-    @if (backendVisible) {
-        <p>{{root()}}: {{versions().icip}}</p>
-        <p>Back: {{versions().back}}</p>
+    <button type="button" mat-fab extended (click)="isVisible.set(!isVisible())">Configuration</button>
+    @if(isVisible()) {
+        <p>Version: {{version}}</p>
+        <p>Copyright: {{copyright}}</p>
+        <p>Angular: {{angularVersion}}</p>
+        <p>Plotly.js: {{plotlyVersion}}</p>
+        <p>Angular-plotly.js: {{angularPlotlyVersion}} {{isCDN ? "CDN" : "without CDN"}}</p>
+        <button mat-fab extended  (click)="backend()">Backend</button>
+        @if (loading()) {
+            <p>Chargement…</p>
+        }
+        @else if (error()) {
+            <p>Erreur: {{error()}}</p>
+        }
+        @if (backendVisible) {
+            <p>{{root()}}: {{versions().icip}}</p>
+            <p>Back: {{versions().back}}</p>
+        }
     }
 </div>
+
 

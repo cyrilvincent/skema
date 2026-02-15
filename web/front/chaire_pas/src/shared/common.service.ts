@@ -39,7 +39,6 @@ export class CommonService {
       .pipe(map(result => result.matches)),
     { initialValue: false }
   );
- 
 }
 
 

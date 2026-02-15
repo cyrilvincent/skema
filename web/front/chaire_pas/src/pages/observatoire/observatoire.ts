@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from "@angular/router";
 import { MenuService } from '../../shared/menu/menu-service';
+import { CommonService } from '../../shared/common.service';
 
 @Component({
   selector: 'app-observatoire',
@@ -11,5 +12,6 @@ import { MenuService } from '../../shared/menu/menu-service';
 export class Observatoire {
 
   menuService = inject(MenuService);
+  commonService = inject(CommonService);
 
 }
