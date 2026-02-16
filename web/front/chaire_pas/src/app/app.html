@@ -4,16 +4,19 @@
 @else {
   <header [class]="service.isMobile() ? 'mobile-header' : 'header'" >
     <app-banner></app-banner>
-    <!-- @if(!service.isMobile()) { -->
-    <mat-toolbar [class]="service.isMobile() || !menuVisible() ? 'mobile-toolbar' : 'toolbar'">
+    <mat-toolbar [class]="service.isMobile() ? 'mobile-toolbar' : 'toolbar'">
       @if(service.isMobile()) {
-        <a (click)="menuVisible.set(!menuVisible())"><mat-icon>more_vert</mat-icon></a>
+        
+        <a (click)="hamburgerClicked()">
+          <mat-icon>menu</mat-icon>
+        </a>
+
+        <app-hamburger [visible]="hamburgerVisible()"></app-hamburger>
       }
-      @if(menuVisible()) {
+      @else {
         <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
       }
     </mat-toolbar>
-    <!-- } -->
   </header>
   <div [class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'"></div>
   <router-outlet />

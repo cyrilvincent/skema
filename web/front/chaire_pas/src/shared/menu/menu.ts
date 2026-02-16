@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { RouterLinkWithHref, RouterLink } from '@angular/router';
 import { MenuService } from './menu-service';
 import { MatIconModule } from "@angular/material/icon";
@@ -9,6 +9,7 @@ import { CommonService } from '../common.service';
   imports: [RouterLink, RouterLinkWithHref, MatIconModule],
   templateUrl: './menu.html',
   styleUrl: './menu.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Menu {
   service = inject(MenuService);

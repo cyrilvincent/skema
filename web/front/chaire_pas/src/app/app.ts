@@ -7,10 +7,11 @@ import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 import { CommonService } from '../shared/common.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { Hamburger } from '../shared/menu/hamburger/hamburger';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule],
+  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule, Hamburger],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -19,15 +20,24 @@ export class App {
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);
   service = inject(CommonService);
-  menuVisible = signal(!this.service.isMobile());
+  hamburgerVisible = signal(false);
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
     this.fullscreen.set(usp.get("fullscreen") == "true");
   }
 
+  ngOnInit() {
+    console.log("isMobile: "+this.service.isMobile())
+  }
+
   menuChanged(nb: number) {
     this.activeMenu.set(nb);
+  }
+
+  hamburgerClicked() {
+    this.hamburgerVisible.set(!this.hamburgerVisible())
+        console.log("HamburgerClicked " + this.hamburgerVisible());
   }
 }
 
