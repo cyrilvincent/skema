@@ -11,7 +11,6 @@ header {
     unicode-bidi: isolate;
 }
 
-
 .header {
     position: fixed; 
     z-index: 99;
@@ -30,6 +29,17 @@ header {
     height: 100px;
     right: 0px;
     background: white;
+}
+
+.toolbar {
+    justify-content: center;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(116, 116, 116, 0.15);
+}
+
+.mobile-toolbar {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(116, 116, 116, 0.15);
 }
 
 

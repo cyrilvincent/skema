@@ -5,10 +5,12 @@ import { Banner } from '../shared/banner/banner';
 import { Footer } from "../shared/footer/footer";
 import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 import { CommonService } from '../shared/common.service';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner],
+  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -17,6 +19,7 @@ export class App {
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);
   service = inject(CommonService);
+  menuVisible = signal(!this.service.isMobile());
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);

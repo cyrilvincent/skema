@@ -4,5 +4,4 @@ SAE
     commune
 menu : https://javascript.plainenglish.io/making-a-responsive-animated-hamburger-menu-with-angular-material-f822cdca3ac7
 ui : https://www.constances.fr/
-mobile 450px
 

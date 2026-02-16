@@ -1,8 +1,21 @@
 <div class="menu">
     <div class="container">
-         
         <ul class="wsite-menu-default">
-            <li [id]="activeMenu()==0 ? 'active' : ''">
+            @for (m of service.menu; track m.id) {
+                <li [id]="activeMenu()==m.nb ? 'active' : ''">
+                    <a [routerLink]="m.url" class="wsite-menu-item" (click)="changeMenu(m.nb)"><mat-icon>{{m.icon}}</mat-icon>{{m.label}}</a>
+                    @if (m.subMenuItems) {
+                        <ul class="sub-menu" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
+                            @for (sm of m.subMenuItems; track sm.id) {
+                                <li class="menu-item">
+                                    <a [routerLink]="sm.url" [fragment]="sm.fragment" (click)="changeMenu(sm.nb)"><mat-icon>{{sm.icon}}</mat-icon>{{sm.label}}</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+            <!-- <li [id]="activeMenu()==0 ? 'active' : ''">
                 <a routerLink="/" class="wsite-menu-item" (click)="changeMenu(0)"><mat-icon>home</mat-icon>Missions</a>
             </li>
             <li [id]="activeMenu()==1 ? 'active' : ''">
@@ -30,7 +43,7 @@
                     <li class="menu-item"><a routerLink="/about" fragment="members" (click)="changeMenu(5)"><mat-icon>group</mat-icon>Les membres fondateurs</a></li>
                     <li class="menu-item"><a routerLink="/about" fragment="versions" (click)="changeMenu(5)"><mat-icon>settings</mat-icon>Paramètres</a></li>
                 </ul>
-            </li>
+            </li> -->
         </ul>
     </div>
 </div>

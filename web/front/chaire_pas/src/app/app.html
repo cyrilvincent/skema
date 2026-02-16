@@ -5,7 +5,14 @@
   <header [class]="service.isMobile() ? 'mobile-header' : 'header'" >
     <app-banner></app-banner>
     <!-- @if(!service.isMobile()) { -->
-      <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
+    <mat-toolbar [class]="service.isMobile() || !menuVisible() ? 'mobile-toolbar' : 'toolbar'">
+      @if(service.isMobile()) {
+        <a (click)="menuVisible.set(!menuVisible())"><mat-icon>more_vert</mat-icon></a>
+      }
+      @if(menuVisible()) {
+        <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
+      }
+    </mat-toolbar>
     <!-- } -->
   </header>
   <div [class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'"></div>

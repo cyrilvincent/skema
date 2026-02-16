@@ -3,7 +3,7 @@
     text-transform: uppercase;
     text-align: center;
     font-weight: 200;
-    border-bottom: 1px solid rgba(116, 116, 116, 0.15);
+    //border-bottom: 1px solid rgba(116, 116, 116, 0.15);
 }
 
 .container ul {
@@ -95,5 +95,11 @@
 
 mat-icon {
   vertical-align: sub;
+}
+
+.toolbar-center {
+    justify-content: center;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(116, 116, 116, 0.15);
 }
 
