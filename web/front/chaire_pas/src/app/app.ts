@@ -7,11 +7,10 @@ import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 import { CommonService } from '../shared/common.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { Hamburger } from '../shared/menu/hamburger/hamburger';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule, Hamburger],
+  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -20,7 +19,6 @@ export class App {
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);
   service = inject(CommonService);
-  hamburgerVisible = signal(false);
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
@@ -35,10 +33,6 @@ export class App {
     this.activeMenu.set(nb);
   }
 
-  hamburgerClicked() {
-    this.hamburgerVisible.set(!this.hamburgerVisible())
-        console.log("HamburgerClicked " + this.hamburgerVisible());
-  }
 }
 
 

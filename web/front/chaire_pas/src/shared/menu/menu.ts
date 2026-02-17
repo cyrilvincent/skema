@@ -17,6 +17,7 @@ export class Menu {
   activeMenu = this.service.activeMenu; 
   menuChangedEvent = output<number>(); // Ne sert plus
   clicked = signal<boolean>(false);
+  hamburgerOn = signal(false);
 
   async changeMenu(nb: number) {
     this.service.changeMenu(nb);
