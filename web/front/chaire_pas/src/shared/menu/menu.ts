@@ -22,6 +22,7 @@ export class Menu {
   async changeMenu(nb: number) {
     this.service.changeMenu(nb);
     this.menuChangedEvent.emit(nb);
+    this.hamburgerOn.set(false);
     await this.commonService.delay(200);
     this.clicked.set(true);
   }

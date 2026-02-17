@@ -44,7 +44,7 @@
 .mobile-menu-container {
     position: absolute;
     pointer-events: all;
-    background: #000;
+    background: #0B586F;
     color: #fff;
     left: -16px;
     top: 100%;
@@ -99,8 +99,9 @@
     display: grid;
 }
 
-.mobile-sub-menu-item {
-    display: flex;
+.mobile-sub-menu-item > a {
+    color: #fff;
+    padding-left: 20px;
 }
 
 .menu-item:hover + .sub-menu {

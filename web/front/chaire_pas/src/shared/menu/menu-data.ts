@@ -77,7 +77,7 @@ export const data: MenuItem[] = [
             {
                 id: 501,
                 nb:5,
-                icon: "info",
+                icon: "support",
                 label: "Nous soutenir",
                 url: "/sustain",
             },
