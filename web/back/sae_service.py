@@ -1,16 +1,8 @@
-import json
 import threading
 import time
-import warnings
 from typing import Iterable
-
 import numpy as np
-from pandas.errors import SettingWithCopyWarning
 from sqlalchemy import text
-from iris_loader import IrisLoader
-from commune_loader import CommuneLoader
-from service_error import ServiceError
-import re
 import pandas as pd
 import config
 from apl_service import APLService
@@ -109,9 +101,9 @@ class SAEService(APLService):
             join etablissement e on e.nofinesset=d.fi
             join adresse_raw ar on e.adresse_raw_id=ar.id
             join adresse_norm an on ar.adresse_norm_id=an.id
-            join iris.iris i on i.code=an.iris
+            join iris.iris i on i.code=an.geo_iris
             where d.urg='{urg}'
-            and an.iris in {self.get_tuple(iris_list)}
+            and an.geo_iris in {self.get_tuple(iris_list)}
             order by d.an, d.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -125,9 +117,9 @@ class SAEService(APLService):
             join etablissement e on e.nofinesset=d.fi
             join adresse_raw ar on e.adresse_raw_id=ar.id
             join adresse_norm an on ar.adresse_norm_id=an.id
-            join iris.iris i on i.code=an.iris
+            join iris.iris i on i.code=an.geo_iris
             where d.urg='{urg}'
-            and an.iris in {self.get_tuple(iris_list)}
+            and an.geo_iris in {self.get_tuple(iris_list)}
             order by d.an, d.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -140,9 +132,9 @@ class SAEService(APLService):
             join etablissement e on e.nofinesset=p.fi
             join adresse_raw ar on e.adresse_raw_id=ar.id
             join adresse_norm an on ar.adresse_norm_id=an.id
-            join iris.iris i on i.code=an.iris
+            join iris.iris i on i.code=an.geo_iris
             where p.dis='TOT'
-            and an.iris in {self.get_tuple(iris_list)}
+            and an.geo_iris in {self.get_tuple(iris_list)}
             order by p.an, p.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -156,10 +148,10 @@ class SAEService(APLService):
             join etablissement_date_source eds on eds.etablissement_id=e.id
             join adresse_raw ar on ar.id=e.adresse_raw_id
             join adresse_norm an on an.id=ar.adresse_norm_id
-            join iris.iris i on i.code=an.iris
+            join iris.iris i on i.code=an.geo_iris
             join date_source ds on eds.date_source_id=ds.id
             where e.categetab=620
-            and an.iris in {self.get_tuple(iris_list)}
+            and an.geo_iris in {self.get_tuple(iris_list)}
             order by ds.annee, e.nofinesset
         """
         return pd.read_sql(sql, config.connection_string)
@@ -173,10 +165,10 @@ class SAEService(APLService):
             join etablissement_date_source eds on eds.etablissement_id=e.id
             join adresse_raw ar on ar.id=e.adresse_raw_id
             join adresse_norm an on an.id=ar.adresse_norm_id
-            join iris.iris i on i.code=an.iris
+            join iris.iris i on i.code=an.geo_iris
             join date_source ds on eds.date_source_id=ds.id
             where e.categretab=4401
-            and an.iris in {self.get_tuple(iris_list)}
+            and an.geo_iris in {self.get_tuple(iris_list)}
             order by ds.annee, e.nofinesset
         """
         return pd.read_sql(sql, config.connection_string)
@@ -313,7 +305,7 @@ class SAEService(APLService):
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         print(f"Found {len(gdf)} gdfs")
-        # TODO migrate an.iris => geo_iris (ok pour apl)
+        # TODO migrate an.geo_iris => geo_iris (ok pour apl)
         etab_df = self.get_sae_by_bor(bor, gdf) # TODO Refaire toutes les fonctions SQL au niveau commune gdf["code"]
         # etab_df = self.etab_tension(etab_df)
         # etab_df = self.etab_corrections(bor, etab_df)

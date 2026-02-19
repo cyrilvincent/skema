@@ -1,7 +1,6 @@
 https://chaire2p2as.weebly.com/
 SAE
     commune + json + csv
-    /!\ Tout est en iris et non geo_iris
 angular 21.2 semaine du 23/2
 
 
