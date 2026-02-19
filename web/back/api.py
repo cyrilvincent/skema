@@ -77,12 +77,19 @@ async def apl_commune_csv(dto: GeoInputDTO):
 
 
 @app.post("/sae/iris")
-async def apl_iris(dto: GeoInputDTO):
+async def sae_iris(dto: GeoInputDTO):
     print(f"Get /sae/iris")
     data = await run_in_threadpool(sae_service.compute_sae_iris, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data
+
+
+@app.post("/sae/iris/csv")
+async def sae_iris_csv(dto: GeoInputDTO):
+    print(f"Get /sae/iris/csv")
+    data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
+    return data.to_csv(index=False)
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")

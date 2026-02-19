@@ -6,11 +6,10 @@ import { Footer } from "../shared/footer/footer";
 import { Fullscreen } from '../pages/dataviz/fullscreen/fullscreen';
 import { CommonService } from '../shared/common.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule, MatIconModule],
+  imports: [RouterOutlet, Menu, Footer, Fullscreen, Banner, MatToolbarModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

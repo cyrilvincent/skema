@@ -1,7 +1,7 @@
 https://chaire2p2as.weebly.com/
 SAE
-    iris csv + json
-    commune
-menu : https://javascript.plainenglish.io/making-a-responsive-animated-hamburger-menu-with-angular-material-f822cdca3ac7
-ui : https://www.constances.fr/
+    commune + json + csv
+    /!\ Tout est en iris et non geo_iris
+angular 21.2 semaine du 23/2
+
 

@@ -12,15 +12,15 @@
         <mat-expansion-panel-header>
         <mat-panel-title><mat-icon matTooltip="Paramètres avancés facultatifs">settings</mat-icon> Paramètres avancés</mat-panel-title>
         </mat-expansion-panel-header>
-        <p><mat-icon>timer</mat-icon> Durée de trajet maximale: 
-            <mat-button-toggle-group name="time" [formControl]="timeControl">
-                <mat-button-toggle [value]="30">30 min</mat-button-toggle>
-                <mat-button-toggle [value]="45">45 min</mat-button-toggle>
-                <mat-button-toggle [value]="60">60 min</mat-button-toggle>
-            </mat-button-toggle-group>
-            <mat-icon matTooltip="La durée de trajet est calculée entre le centre de l'iris de départ et le centre de l'iris de destination. Seules les durées inférieures à la durée maximale sont retenues. Sur cette durée sera appliquée une fonction de décroissance décrite ci dessous. La valeur conseillée est 30 minutes.">help</mat-icon>
-        </p>
-        @if(type()=="APL") {
+        @if(type()=="APL") {*
+            <p><mat-icon>timer</mat-icon> Durée de trajet maximale: 
+                <mat-button-toggle-group name="time" [formControl]="timeControl">
+                    <mat-button-toggle [value]="30">30 min</mat-button-toggle>
+                    <mat-button-toggle [value]="45">45 min</mat-button-toggle>
+                    <mat-button-toggle [value]="60">60 min</mat-button-toggle>
+                </mat-button-toggle-group>
+                <mat-icon matTooltip="La durée de trajet est calculée entre le centre de l'iris de départ et le centre de l'iris de destination. Seules les durées inférieures à la durée maximale sont retenues. Sur cette durée sera appliquée une fonction de décroissance décrite ci dessous. La valeur conseillée est 30 minutes.">help</mat-icon>
+            </p>
             <p>
                 <mat-icon>hourglass_empty</mat-icon> Calcul des durées:
                 <mat-button-toggle-group name="hc" [formControl]="hcControl">

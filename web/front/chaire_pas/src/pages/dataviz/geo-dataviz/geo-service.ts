@@ -9,12 +9,12 @@ import { FileSaverService } from 'ngx-filesaver';
   providedIn: 'root',
 })
 export class GeoService  extends CommonService {
-  _geoTupleDTO = signal<GeoTupleDTO>(emptyGeo);          
+  _geoTupleDTO = signal<GeoTupleDTO>(emptyGeo);
   geoTupleDTO = computed(() => this._geoTupleDTO());
   fileSaver = inject(FileSaverService);
 
   fetch(dto: GeoInputDTO, type: string, geoType: string): void {
-    if (type == "APL") this.fetchAPL(dto, geoType); 
+    if (type == "APL") this.fetchAPL(dto, geoType);
     else this.fetchSAE(dto, geoType);
   }
 
@@ -22,6 +22,10 @@ export class GeoService  extends CommonService {
     if (type == "APL") {
       if (render == "json") this.saveAPLJSON(dto, geoType);
       else if (render == "csv") this.saveAPLCSV(dto, geoType);
+    }
+    else {
+      if (render == "json") this.saveSAEJSON(dto, geoType);
+      else if (render == "csv") this.saveSAECSV(dto, geoType);
     }
   }
 
@@ -33,7 +37,7 @@ export class GeoService  extends CommonService {
     console.log("FetchAPL "+geoType);
     console.log(dto);
     this.fetchLoading();
-    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({    
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({
       next: (res) => { this._geoTupleDTO.set(res); },
       error: (err) => {
         if(err.status == 404) console.log("Not found "+dto.code);
@@ -48,10 +52,10 @@ export class GeoService  extends CommonService {
     console.log("saveAPLJSON "+geoType);
     console.log(dto);
     this.fetchLoading();
-    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({    
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({
       next: (res) => {
         const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
-        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}_${dto.resolution}.json`);
+        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}_${dto.resolution}.json`);
       },
       error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
@@ -59,13 +63,13 @@ export class GeoService  extends CommonService {
   }
 
   private saveAPLCSV(dto: GeoInputDTO, geoType: string): void {
-    console.log("saveAPLCSV "+geoType);
+    console.log("SaveAPLCSV "+geoType);
     console.log(dto);
     this.fetchLoading();
-    this.http.post<string>(`${environment.baseUrl}/apl/${geoType}/csv`, dto).subscribe({    
+    this.http.post<string>(`${environment.baseUrl}/apl/${geoType}/csv`, dto).subscribe({
       next: (res) => {
         const blob = new Blob([res], { type: 'application/json' });
-        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.id}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
+        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
       },
       error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
@@ -78,7 +82,7 @@ export class GeoService  extends CommonService {
     dto.time = 60;
     console.log(dto);
     this.fetchLoading();
-    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({    
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({
       next: (res) => { this._geoTupleDTO.set(res); console.log(res); },
       error: (err) => {
         if(err.status == 404) console.log("Not found "+dto.code);
@@ -88,4 +92,37 @@ export class GeoService  extends CommonService {
       complete: () => this._loading.set(false),
     });
   }
+
+  private saveSAEJSON(dto: GeoInputDTO, geoType: string): void {
+    console.log("saveSAEJSON "+geoType);
+    dto.hc = "HC";
+    dto.time = 60;
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({
+      next: (res) => {
+        const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
+        this.fileSaver.save(blob, `sae_${geoType}_${dto.bor}_${dto.resolution}.json`);
+      },
+      error: (err) => this.catchError(err),
+      complete: () => this._loading.set(false),
+    });
+  }
+
+  private saveSAECSV(dto: GeoInputDTO, geoType: string): void {
+    console.log("SaveSAECSV "+geoType);
+    dto.hc = "HC";
+    dto.time = 60;
+    console.log(dto);
+    this.fetchLoading();
+    this.http.post<string>(`${environment.baseUrl}/sae/${geoType}/csv`, dto).subscribe({
+      next: (res) => {
+        const blob = new Blob([res], { type: 'application/json' });
+        this.fileSaver.save(blob, `sae_${geoType}_${dto.bor}.csv`);
+      },
+      error: (err) => this.catchError(err),
+      complete: () => this._loading.set(false),
+    });
+  }
+
 }

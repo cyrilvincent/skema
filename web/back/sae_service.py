@@ -116,6 +116,22 @@ class SAEService(APLService):
             """
         return pd.read_sql(sql, config.connection_string)
 
+    def get_urgence_commune_sae(self, iris_list: list[str], urg: str) -> pd.DataFrame:
+        sql = f"""
+            select d.an as year, d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id,
+                e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
+            from sae.urgence_detail d
+            left join sae.urgence_p p on p.fi=d.fi and p.an=d.an and p.perso='M9999'
+            join etablissement e on e.nofinesset=d.fi
+            join adresse_raw ar on e.adresse_raw_id=ar.id
+            join adresse_norm an on ar.adresse_norm_id=an.id
+            join iris.iris i on i.code=an.iris
+            where d.urg='{urg}'
+            and an.iris in {self.get_tuple(iris_list)}
+            order by d.an, d.fi
+            """
+        return pd.read_sql(sql, config.connection_string)
+
     def get_psy_sae(self, iris_list: list[str]) -> pd.DataFrame:
         sql = f"""
             select p.an as year, p.fi, p.cap_htp passu, true has_pdata, p.etpsal_pkt etpsal, p.efflib_pkt efflib,
@@ -168,11 +184,20 @@ class SAEService(APLService):
     def get_sae_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
         iris_list = list(gdf["code_iris"].unique())
         if bor == "urgence_gen":
-            return self.get_urgence_sae(iris_list, "GEN")
+            return self.get_urgence_commune_sae(iris_list, "GEN")
         elif bor == "urgence_ped":
-            return self.get_urgence_sae(iris_list, "PED")
+            return self.get_urgence_commune_sae(iris_list, "PED")
         else:
             return self.__getattribute__(f"get_{bor}_sae")(iris_list)
+
+    def get_sae_commune_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
+        commune_list = list(gdf["code"].unique())
+        if bor == "urgence_gen":
+            return self.get_urgence_sae(commune_list, "GEN")
+        elif bor == "urgence_ped":
+            return self.get_urgence_sae(commune_list, "PED")
+        # else:
+        #     return self.__getattribute__(f"get_{bor}_sae")(iris_list)
 
     def etab_tension(self, etab_df: pd.DataFrame) -> pd.DataFrame:
         etab_df = etab_df.drop_duplicates(subset=['year', "lon", "lat"])
@@ -248,7 +273,7 @@ class SAEService(APLService):
         return dico, geojson
 
     def compute_sae_iris(self, code: str, specialite: int, time: int, time_type: str, resolution: str)\
-            -> tuple[dict, dict, any]:
+            -> tuple[dict, any]:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         print(f"Compute IRIS SAE for {code} {bor}")
@@ -267,8 +292,39 @@ class SAEService(APLService):
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
         return export
-        # A enlever ['nb', 'apl', 'swpop', 'pop_ajustee', 'apl_max']
-        # A Ajouter km	time_hc	time_hp	passu	has_pdata	etpsal	efflib	etp	rs
+
+    def compute_sae_iris_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
+        bor = self.bors[specialite - 1]
+        years = self.years_list(bor)
+        print(f"Compute IRIS SAE CSV for {code} {specialite}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(code)
+        sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+        return sae[["km", "time_hc", "time_hp", "fi", "rs", "lon", "lat", "passu", "etpsal", "efflib", "etp",
+                    "tension", "iris_string", "iris_label", "code_commune", "commune_label", "pop", "meanw", "year"]]
+
+    def compute_sae_commune(self, code: str, specialite: int, time: int, time_type: str, resolution: str) \
+            -> tuple[dict, any]:
+        bor = self.bors[specialite - 1]
+        years = self.years_list(bor)
+        print(f"Compute Commune SAE for {code} {bor}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(code)
+        sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
+        gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+        print(f"Found {len(gdf)} gdfs")
+        # TODO migrate an.iris => geo_iris (ok pour apl)
+        etab_df = self.get_sae_by_bor(bor, gdf) # TODO Refaire toutes les fonctions SQL au niveau commune gdf["code"]
+        # etab_df = self.etab_tension(etab_df)
+        # etab_df = self.etab_corrections(bor, etab_df)
+        # print(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        # gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
+        # print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        # gdf_commune = self.group_apl_by_commune(gdf_merged)
+        # gdf_commune = self.gdf_merge_add_columns(gdf_commune)
+        # export = self.get_export(code, studies_df, gdf_commune)
+        # return export
+
 
 
 if __name__ == '__main__':
@@ -276,9 +332,11 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    export = s.compute_sae_iris("CC-69072", 1, 60, "HC", "HD")
-    s = json.dumps(export)
-    print(s[:5000])
+    # export = s.compute_sae_iris("CC-69072", 1, 60, "HC", "HD")
+    # s = json.dumps(export)
+    # print(s[:5000])
+    # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
+    export = s.compute_sae_commune("CC-38205", 1, 60, "HC", "HD")
 
 
 
