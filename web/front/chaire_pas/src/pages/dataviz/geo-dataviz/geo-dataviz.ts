@@ -1,16 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
-import { PlotlyModule } from 'angular-plotly.js';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
+import { PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
 
 @Component({
   selector: 'app-geo-dataviz',
-  imports: [PlotlyModule],
+  imports: [PlotlyComponent],
+  providers: [PlotlyService],
   templateUrl: './geo-dataviz.html',
   styleUrl: './geo-dataviz.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeoDataviz {
+export class GeoDataviz implements OnInit {
+  plotlyReady = signal(false);
   service = inject(GeoService);
   values = this.service.geoTupleDTO;
   loading = this.service.loading;
@@ -21,7 +23,8 @@ export class GeoDataviz {
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
   firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  config = signal<Partial<Plotly.Config>>(this.getConfig());
+  //config = signal<Partial<Plotly.Config>>(this.getConfig());
+  config = signal<Partial<Plotly.Config>>({});
   data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
@@ -29,15 +32,20 @@ export class GeoDataviz {
   marker = signal<number>(1);
   fullscreen = input<boolean | null>(null);
   label = input<string | null>(null);
+  Plotly: any = null;
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
     effect(() => this.onValuesChanged(this.values()));
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.service.init();
     this.showLabel.set(this.type() != "APL");
+    this.Plotly = await import('plotly.js-dist-min');
+    PlotlyService.setPlotly(this.Plotly.default);
+    this.config.set(this.getConfig());
+    this.plotlyReady.set(true);
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -372,7 +380,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
         {
           title: "Afficher les labels",
           name: 'Show labels',
-          icon: Plotly.Icons.zoombox,
+          icon: this.Plotly.Icons.drawline,
           click: (async () => {
             this.service._loading.set(true);
             //await this.delay(100);
@@ -383,13 +391,13 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
         {
           title: "Normaliser localement - nationalement",
           name: 'Normalize',
-          icon: Plotly.Icons.plotlylogo,
+          icon: this.Plotly.Icons.zoombox,
           click: (() => this.normColorBar.set(!this.normColorBar())),  // Idem
         },
         {
           title: "Contours",
           name: 'Contours',
-          icon: Plotly.Icons.drawline,
+          icon: this.Plotly.Icons.plotlylogo,
           click: (() => {
             this.service._loading.set(true);
             this.marker.set(this.marker() == 1 ? 0 : 1)

@@ -1,6 +1,7 @@
 https://chaire2p2as.weebly.com/
 SAE
     commune + json + csv
+about : versions de plotly par pkg
 angular 21.2 semaine du 23/2
 
 

@@ -108,18 +108,19 @@ class SAEService(APLService):
             """
         return pd.read_sql(sql, config.connection_string)
 
-    def get_urgence_commune_sae(self, iris_list: list[str], urg: str) -> pd.DataFrame:
+    def get_urgence_commune_sae(self, commune_list: list[str], urg: str) -> pd.DataFrame:
         sql = f"""
             select d.an as year, d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id,
-                e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, i.id iris 
+                e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat, c.code as code_commune 
             from sae.urgence_detail d
             left join sae.urgence_p p on p.fi=d.fi and p.an=d.an and p.perso='M9999'
             join etablissement e on e.nofinesset=d.fi
             join adresse_raw ar on e.adresse_raw_id=ar.id
             join adresse_norm an on ar.adresse_norm_id=an.id
             join iris.iris i on i.code=an.geo_iris
+            join iris.commune c on c.id=i.commune_id
             where d.urg='{urg}'
-            and an.geo_iris in {self.get_tuple(iris_list)}
+            and c.code in {self.get_tuple(commune_list)}
             order by d.an, d.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -135,6 +136,23 @@ class SAEService(APLService):
             join iris.iris i on i.code=an.geo_iris
             where p.dis='TOT'
             and an.geo_iris in {self.get_tuple(iris_list)}
+            order by p.an, p.fi
+            """
+        return pd.read_sql(sql, config.connection_string)
+
+    def get_psy_commune_sae(self, commune_list: list[str]) -> pd.DataFrame:
+        sql = f"""
+            select p.an as year, p.fi, p.cap_htp passu, true has_pdata, p.etpsal_pkt etpsal, p.efflib_pkt efflib,
+                p.etp_pkt etp, e.id etab_id, e.rs, an.dept_id, an.id adresse_norm_id, an.lon, an.lat,
+                c.code as code_commune  
+            from sae.psy p
+            join etablissement e on e.nofinesset=p.fi
+            join adresse_raw ar on e.adresse_raw_id=ar.id
+            join adresse_norm an on ar.adresse_norm_id=an.id
+            join iris.iris i on i.code=an.geo_iris
+            join iris.commune c on c.id=i.commune_id
+            where p.dis='TOT'
+            and c.code in {self.get_tuple(commune_list)}
             order by p.an, p.fi
             """
         return pd.read_sql(sql, config.connection_string)
@@ -156,6 +174,24 @@ class SAEService(APLService):
         """
         return pd.read_sql(sql, config.connection_string)
 
+    def get_pharma_commune_sae(self, commune_list: list[str]) -> pd.DataFrame:
+        sql = f"""
+            select ds.annee+2000 as year, e.nofinesset fi, null as passu, false as has_pdata, null as etpsal,
+                null as efflib, null as etp, e.id etab_id, e.rs, an.id an_id, an.dept_id, an.id adresse_norm_id,
+                an.lon, an.lat, c.code as code_commune
+            from etablissement e
+            join etablissement_date_source eds on eds.etablissement_id=e.id
+            join adresse_raw ar on ar.id=e.adresse_raw_id
+            join adresse_norm an on an.id=ar.adresse_norm_id
+            join iris.iris i on i.code=an.geo_iris
+            join iris.commune c on c.id=i.commune_id
+            join date_source ds on eds.date_source_id=ds.id
+            where e.categetab=620
+            and c.code in {self.get_tuple(commune_list)}
+            order by ds.annee, e.nofinesset
+        """
+        return pd.read_sql(sql, config.connection_string)
+
     def get_ehpad_sae(self, iris_list: list[str]) -> pd.DataFrame:
         sql = f"""
             select ds.annee+2000 as year, e.nofinesset fi, null as passu, false as has_pdata, null as etpsal,
@@ -173,23 +209,39 @@ class SAEService(APLService):
         """
         return pd.read_sql(sql, config.connection_string)
 
+    def get_ehpad_commune_sae(self, commune_list: list[str]) -> pd.DataFrame:
+        sql = f"""
+            select ds.annee+2000 as year, e.nofinesset fi, null as passu, false as has_pdata, null as etpsal,
+                null as efflib, null as etp, e.id etab_id, e.rs, an.id an_id, an.dept_id, an.id adresse_norm_id,
+                an.lon, an.lat, c.code as code_commune
+            from etablissement e
+            join etablissement_date_source eds on eds.etablissement_id=e.id
+            join adresse_raw ar on ar.id=e.adresse_raw_id
+            join adresse_norm an on an.id=ar.adresse_norm_id
+            join iris.iris i on i.code=an.geo_iris
+            join iris.commune c on c.id=i.commune_id
+            join date_source ds on eds.date_source_id=ds.id
+            where e.categretab=4401
+            and c.code in {self.get_tuple(commune_list)}
+            order by ds.annee, e.nofinesset
+        """
+        return pd.read_sql(sql, config.connection_string)
+
     def get_sae_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
         iris_list = list(gdf["code_iris"].unique())
         if bor == "urgence_gen":
-            return self.get_urgence_commune_sae(iris_list, "GEN")
+            return self.get_urgence_sae(iris_list, "GEN")
         elif bor == "urgence_ped":
-            return self.get_urgence_commune_sae(iris_list, "PED")
+            return self.get_urgence_sae(iris_list, "PED")
         else:
             return self.__getattribute__(f"get_{bor}_sae")(iris_list)
 
     def get_sae_commune_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
         commune_list = list(gdf["code"].unique())
-        if bor == "urgence_gen":
-            return self.get_urgence_sae(commune_list, "GEN")
-        elif bor == "urgence_ped":
-            return self.get_urgence_sae(commune_list, "PED")
-        # else:
-        #     return self.__getattribute__(f"get_{bor}_sae")(iris_list)
+        if bor.startswith("urgence"):
+            return self.get_urgence_commune_sae(commune_list, bor[-3:].upper())
+        else:
+            return self.__getattribute__(f"get_{bor}_commune_sae")(commune_list)
 
     def etab_tension(self, etab_df: pd.DataFrame) -> pd.DataFrame:
         etab_df = etab_df.drop_duplicates(subset=['year', "lon", "lat"])
@@ -197,7 +249,7 @@ class SAEService(APLService):
         etab_df["has_pdata"] = etab_df["tension"].notna()
         return etab_df
 
-    def etab_corrections(self, bor: str, etab: pd.DataFrame) -> pd.DataFrame:
+    def etab_corrections(self, bor: str, etab: pd.DataFrame) -> pd.DataFrame:  #TODO fusionner les 2 méthodes
         if bor in ["pharma", "ehpad"]:
             etab = etab[etab['year'] != 2018]
             rows_2017 = etab[etab['year'] == 2017].copy()
@@ -305,8 +357,7 @@ class SAEService(APLService):
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         print(f"Found {len(gdf)} gdfs")
-        # TODO migrate an.geo_iris => geo_iris (ok pour apl)
-        etab_df = self.get_sae_by_bor(bor, gdf) # TODO Refaire toutes les fonctions SQL au niveau commune gdf["code"]
+        etab_df = self.get_sae_by_bor(bor, gdf)
         # etab_df = self.etab_tension(etab_df)
         # etab_df = self.etab_corrections(bor, etab_df)
         # print(f"Found {len(etab_df) / len(years):.0f} etab by year")
@@ -328,7 +379,9 @@ if __name__ == '__main__':
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    export = s.compute_sae_commune("CC-38205", 1, 60, "HC", "HD")
+    # export = s.compute_sae_commune("CC-38205", 1, 60, "HC", "HD")
+    df = s.get_ehpad_commune_sae(["38185"])
+    print(df)
 
 
 

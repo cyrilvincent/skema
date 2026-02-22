@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, VERSION } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { PlotlyModule } from 'angular-plotly.js';
+//import { PlotlyModule } from 'angular-plotly.js';
 // @ts-ignore
-import Plotly from 'plotly.js-dist-min'
+//import Plotly from 'plotly.js-dist-min'
 import pkg from 'angular-plotly.js/package.json' assert { type: 'json' }
 import { AboutService } from './versions.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,7 +18,7 @@ export class Versions {
   isVisible = signal(false);
   version = environment.version;
   copyright = environment.copyright;
-  plotlyVersion = (Plotly as any).version;
+  plotlyVersion = 0; // (Plotly as any).version;
   angularPlotlyVersion = pkg.version;
   angularVersion = VERSION.full;
   isCDN = false;

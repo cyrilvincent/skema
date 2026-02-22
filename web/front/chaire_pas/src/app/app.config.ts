@@ -4,8 +4,8 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 
 // @ts-ignore
-import Plotly from 'plotly.js-dist-min'
-import { PlotlyModule } from 'angular-plotly.js';
+// import Plotly from 'plotly.js-dist-min'
+// import { PlotlyModule } from 'angular-plotly.js';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,6 +17,6 @@ export const appConfig: ApplicationConfig = {
           })
       ),
     provideHttpClient(),
-    ...PlotlyModule.forRoot(Plotly).providers ?? [],
+    //...PlotlyModule.forRoot(Plotly).providers ?? [],
   ]
 };

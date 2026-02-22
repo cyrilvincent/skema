@@ -1,15 +1,14 @@
 import { Routes } from '@angular/router';
-import { About } from '../pages/about/about';
+//import { About } from '../pages/about/about';
 import { Home } from '../pages/home/home';
 import { Observatoire } from '../pages/observatoire/observatoire';
-import { Dataviz } from '../pages/dataviz/dataviz';
 import { Admin } from '../shared/admin/admin';
 import { Data } from '../pages/data/data';
 import { Research } from '../pages/research/research';
 import { Sustain } from '../pages/sustain/sustain';
 import { Media } from '../pages/media/media';
-import { Sae } from '../pages/sae/sae';
-import { Apl } from '../pages/apl/apl';
+//import { Sae } from '../pages/sae/sae';
+//import { Apl } from '../pages/apl/apl';
 
 export const routes: Routes = [
   {
@@ -25,7 +24,8 @@ export const routes: Routes = [
   {
     path: 'about',
     title: "A propos: Chaire pour la prévention et l'accès aux soins",
-    component: About,
+    loadComponent: () =>
+      import('../pages/about/about').then((m) => m.About),
   },
   {
     path: 'data',
@@ -35,12 +35,16 @@ export const routes: Routes = [
   {
     path: 'sae',
     title: "SAE: Chaire pour la prévention et l'accès aux soins",
-    component: Sae,
+    //component: Sae,
+    loadComponent: () =>
+      import('../pages/sae/sae').then((m) => m.Sae),
   },
   {
     path: 'apl',
     title: "APL: Chaire pour la prévention et l'accès aux soins",
-    component: Apl,
+    //component: Apl,
+    loadComponent: () =>
+      import('../pages/apl/apl').then((m) => m.Apl),
   },
   {
     path: 'research',
