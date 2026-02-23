@@ -1,9 +1,6 @@
 https://chaire2p2as.weebly.com/
-SAE
-    commune + json + csv
-about : versions de plotly par pkg
 angular 21.2 semaine du 23/2
-Installer sur serveur
+Installer sur serveur node 24.12
 Repasser en lazy quand on aura nginx
-Plotly CDN
+
 
