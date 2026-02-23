@@ -51,6 +51,7 @@ class IrisLoader(threading.Thread):
                 self.gdf = pickle.load(f)
         else:
             self.load_gpkg()
+            self.save()
         print(f"Found {len(self.gdf)} iris")
 
     def run(self):
