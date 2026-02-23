@@ -249,7 +249,7 @@ class SAEService(APLService):
         etab_df["has_pdata"] = etab_df["tension"].notna()
         return etab_df
 
-    def etab_corrections(self, bor: str, etab: pd.DataFrame) -> pd.DataFrame:  #TODO fusionner les 2 méthodes
+    def etab_corrections(self, bor: str, etab: pd.DataFrame) -> pd.DataFrame:  #TODO A virer et remplace par df_corrections
         if bor in ["pharma", "ehpad"]:
             etab = etab[etab['year'] != 2018]
             rows_2017 = etab[etab['year'] == 2017].copy()
@@ -257,12 +257,44 @@ class SAEService(APLService):
             etab = pd.concat([etab, rows_2018], ignore_index=True)
         return etab
 
-    def gdf_corrections(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
+    def df_corrections(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
         if bor in ["pharma", "ehpad"]:
             gdf = gdf[gdf['year'] != 2018]
             rows_2017 = gdf[gdf['year'] == 2017].copy()
             rows_2018 = rows_2017.assign(year=2018)
             gdf = pd.concat([gdf, rows_2018], ignore_index=True)
+        return gdf
+
+    def group_sae_by_commune(self, sae: pd.DataFrame) -> pd.DataFrame:
+        sae = sae.sort_values(by=["year", "iris"])
+        sae["km_mean"] = sae["km"].fillna(90).groupby([sae["code_commune"], sae["year"]]).transform('mean')
+        sae["time_hc_mean"] = sae["time_hc"].fillna(90).groupby([sae["code_commune"], sae["year"]]).transform('mean')
+        sae["time_hp_mean"] = sae["time_hp"].fillna(90).groupby([sae["code_commune"], sae["year"]]).transform('mean')
+        sae["passu_sum"] = sae["passu"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
+        sae["has_pdata_or"] = (sae["has_pdata"].fillna(False).groupby([sae["code_commune"], sae["year"]])
+                               .transform('max'))
+        sae["etpsal_sum"] = sae["etpsal"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
+        sae["efflib_sum"] = sae["efflib"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
+        sae["etp_sum"] = sae["etp"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
+        sae["tension_sum"] = sae["passu_sum"] / sae["etp_sum"]
+        sae = sae.drop_duplicates(subset=['year', "code_commune"])
+        return sae
+    
+    def gdf_commune_add_columns(self, gdf: pd.DataFrame) -> pd.DataFrame:
+        gdf["km"] = gdf["km_mean"]
+        gdf["time_hc"] = gdf["time_hc_mean"]
+        gdf["time_hp"] = gdf["time_hp_mean"]
+        gdf["passu"] = gdf["passu_sum"]
+        gdf["has_pdata"] = gdf["has_pdata_or"]
+        gdf["etpsal"] = gdf["etpsal_sum"]
+        gdf["efflib"] = gdf["efflib_sum"]
+        gdf["etp"] = gdf["etp_sum"]
+        gdf["tension"] = gdf["tension_sum"]
+        gdf["code_insee"] = gdf["code"]
+        gdf["nom_commune"] = gdf["nom"]
+        gdf["fid"] = gdf["code"]
+        gdf["code_iris"] = ""
+        gdf["nom_iris"] = ""
         return gdf
 
     def get_sae_export(self, code: str,
@@ -331,7 +363,7 @@ class SAEService(APLService):
         etab_df = self.etab_corrections(bor, etab_df)
         print(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_iris_gdf_apl(gdf, sae)
-        gdf_merged = self.gdf_corrections(bor, gdf_merged)
+        gdf_merged = self.df_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
@@ -357,16 +389,17 @@ class SAEService(APLService):
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         print(f"Found {len(gdf)} gdfs")
-        etab_df = self.get_sae_by_bor(bor, gdf)
-        # etab_df = self.etab_tension(etab_df)
-        # etab_df = self.etab_corrections(bor, etab_df)
-        # print(f"Found {len(etab_df) / len(years):.0f} etab by year")
-        # gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
-        # print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
-        # gdf_commune = self.group_apl_by_commune(gdf_merged)
-        # gdf_commune = self.gdf_merge_add_columns(gdf_commune)
-        # export = self.get_export(code, studies_df, gdf_commune)
-        # return export
+        etab_df = self.get_sae_commune_by_bor(bor, gdf)
+        etab_df = self.etab_tension(etab_df)
+        etab_df = self.df_corrections(bor, etab_df)
+        print(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        gdf_merged = self.merge_commune_gdf_apl(gdf, sae)
+        print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
+        gdf_commune = self.group_sae_by_commune(gdf_merged)
+        gdf_commune = self.df_corrections(bor, gdf_commune)
+        gdf_commune = self.gdf_commune_add_columns(gdf_commune)
+        export = self.get_sae_export(code, studies_df, gdf_commune, etab_df, years)
+        return export
 
 
 
@@ -379,9 +412,9 @@ if __name__ == '__main__':
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    # export = s.compute_sae_commune("CC-38205", 1, 60, "HC", "HD")
-    df = s.get_ehpad_commune_sae(["38185"])
-    print(df)
+    export = s.compute_sae_commune("CC-38185", 1, 60, "HC", "HD")
+    print(export)
+
 
 
 

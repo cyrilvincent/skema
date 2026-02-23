@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
-import { PlotlyComponent, PlotlyService } from 'angular-plotly.js';
+import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
+//import Plotly from 'plotly.js-dist-min'
 
 @Component({
   selector: 'app-geo-dataviz',
-  imports: [PlotlyComponent],
-  providers: [PlotlyService],
+  imports: [PlotlyModule],  // [PlotlyComponent] for lazy load
+  //providers: [PlotlyService] For Lazy load
   templateUrl: './geo-dataviz.html',
   styleUrl: './geo-dataviz.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GeoDataviz implements OnInit {
-  plotlyReady = signal(false);
+  plotlyReady = signal(true); // false for lazy loading
   service = inject(GeoService);
   values = this.service.geoTupleDTO;
   loading = this.service.loading;
@@ -23,8 +24,7 @@ export class GeoDataviz implements OnInit {
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
   firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  //config = signal<Partial<Plotly.Config>>(this.getConfig());
-  config = signal<Partial<Plotly.Config>>({});
+  config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading replace previous line
   data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
@@ -32,7 +32,7 @@ export class GeoDataviz implements OnInit {
   marker = signal<number>(1);
   fullscreen = input<boolean | null>(null);
   label = input<string | null>(null);
-  Plotly: any = null;
+  //Plotly: any = null; for lazy loading
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
@@ -42,10 +42,14 @@ export class GeoDataviz implements OnInit {
   async ngOnInit() {
     this.service.init();
     this.showLabel.set(this.type() != "APL");
-    this.Plotly = await import('plotly.js-dist-min');
-    PlotlyService.setPlotly(this.Plotly.default);
-    this.config.set(this.getConfig());
-    this.plotlyReady.set(true);
+
+    // For lazy load, uniquement quand on sera en prod sur un nginx, car ca declenche une erreur sur cyrilvincent.com
+    //this.Plotly = await import('plotly.js-dist-min');
+    // PlotlyService.setPlotly(this.Plotly.default);
+    // console.log("Plotly lazy loaded");
+    // console.log(this.Plotly);
+    // this.config.set(this.getConfig());
+    // this.plotlyReady.set(true);
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -58,8 +62,6 @@ export class GeoDataviz implements OnInit {
 
   onValuesChanged(v: GeoTupleDTO) {
     const meanws = this.df()["meanws"]
-    // console.log("OnValuesChanged")
-    // console.log(meanws);
   }
 
   getText(i: number, df_year: GeoYearDTO, year: string): string {
@@ -102,8 +104,6 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
       }
     else return "TODO"; // TODO Faire commune
   }
-
-  // TODO CSV & GEOJSON
 
   getTexts(): String[][] {
     const texts: string[][] = [];
@@ -267,7 +267,7 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
     if(this.dto() != null) {
       let coef = 0;
       let c = 2;
-      if (this.dto()!.id <= 2) coef = 8 /30000;
+      if (this.dto()!.id <= 2) coef = 8/30000;
       else if (this.dto()!.id == 3) coef = 6/100;
       if (this.dto()!.id <= 3) c=3;
       return passus.map(p => p<0 ? c : c+p*coef)
@@ -362,7 +362,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
     return steps;
   }
 
-  delay(delay: number) {
+  delay(delay: number) { // A virer
     return new Promise(r => {
       setTimeout(r, delay);
     })
@@ -380,7 +380,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
         {
           title: "Afficher les labels",
           name: 'Show labels',
-          icon: this.Plotly.Icons.drawline,
+          icon: Plotly.Icons.drawline,  // Prefixer par this si lazy
           click: (async () => {
             this.service._loading.set(true);
             //await this.delay(100);
@@ -391,13 +391,13 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
         {
           title: "Normaliser localement - nationalement",
           name: 'Normalize',
-          icon: this.Plotly.Icons.zoombox,
+          icon: Plotly.Icons.zoombox,
           click: (() => this.normColorBar.set(!this.normColorBar())),  // Idem
         },
         {
           title: "Contours",
           name: 'Contours',
-          icon: this.Plotly.Icons.plotlylogo,
+          icon: Plotly.Icons.plotlylogo,
           click: (() => {
             this.service._loading.set(true);
             this.marker.set(this.marker() == 1 ? 0 : 1)

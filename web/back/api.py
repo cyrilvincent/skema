@@ -91,6 +91,15 @@ async def sae_iris_csv(dto: GeoInputDTO):
     data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
     return data.to_csv(index=False)
 
+
+@app.post("/sae/commune")
+async def sae_commune(dto: GeoInputDTO):
+    print(f"Get /sae/commune")
+    data = await run_in_threadpool(sae_service.compute_sae_commune, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
+    if len(data[1]["features"]) == 0:
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    return data
+
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn

@@ -199,7 +199,7 @@ class APLService:
 
     def get_commune_gdf_by_type_code_id(self, type_code: str, id: str, resolution: str) -> pd.DataFrame:
         if type_code == "CF":
-            return self.iris_loader.gdf
+            return self.commune_loader.gdfs["LD"]
         else:
             return self.__getattribute__(f"get_commune_gdf_by_{type_code.lower()}")(id, resolution)
 
@@ -359,7 +359,7 @@ class APLService:
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_commune = self.group_apl_by_commune(gdf_merged)
         gdf_commune = self.gdf_merge_add_columns(gdf_commune)
-        export = self.get_export(code, studies_df, gdf_commune)
+        export = self.get_export(code, studies_df, gdf_commune) # BUG, je prends apl et non apl_meanw
         return export
 
     def compute_commune_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
