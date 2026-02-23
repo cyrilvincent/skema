@@ -102,7 +102,14 @@ Variation/${this.firstYear()}: ${((df_year["time_hc"]![i]-this.years()[this.firs
 Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
   `
       }
-    else return "TODO"; // TODO Faire commune
+    else return `
+Commune: ${df_year["nom_commune"][i]}<br>
+Etablissement le + proche:<br> ${df_year["rs"]![i]=="" ? "Aucun" : df_year["rs"]![i]}<br>
+Temps d'accès moyen: ${df_year["time_hc"]![i]==60 ? ">60" : df_year["time_hc"]![i].toFixed(0)} min.<br>
+Distance moyenne: ${df_year["km"]![i]==60 ? ">60" : df_year["km"]![i].toFixed(0)} km<br>
+Variation/${this.firstYear()}: ${((df_year["time_hc"]![i]-this.years()[this.firstYear()]["time_hc"]![i])*100/(this.years()[this.firstYear()]["time_hc"]![i]+0.01)).toFixed(0)}%<br>
+Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
+  `
   }
 
   getTexts(): String[][] {

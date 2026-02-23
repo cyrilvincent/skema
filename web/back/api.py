@@ -100,6 +100,13 @@ async def sae_commune(dto: GeoInputDTO):
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data
 
+
+@app.post("/sae/commune/csv")
+async def sae_commune_csv(dto: GeoInputDTO):
+    print(f"Get /sae/commune/csv")
+    data = await run_in_threadpool(sae_service.compute_sae_commune_csv, dto.code, dto.id, dto.time, dto.hc)
+    return data.to_csv(index=False)
+
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn

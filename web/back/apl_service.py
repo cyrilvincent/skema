@@ -367,7 +367,7 @@ class APLService:
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
         apl = self.group_apl_by_commune(apl)
         apl["year"] = apl["year"]+2000
-        return apl[["specialite", "year", "code_commune", "commune_label", "apl"]]
+        return apl[["specialite", "year", "code_commune", "commune_label", "apl_meanw"]]
 
 
 if __name__ == '__main__':

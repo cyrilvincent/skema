@@ -277,6 +277,7 @@ class SAEService(APLService):
         sae["efflib_sum"] = sae["efflib"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
         sae["etp_sum"] = sae["etp"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
         sae["tension_sum"] = sae["passu_sum"] / sae["etp_sum"]
+        sae["pop_sum"] = sae["pop"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
         sae = sae.drop_duplicates(subset=['year', "code_commune"])
         return sae
     
@@ -290,6 +291,7 @@ class SAEService(APLService):
         gdf["efflib"] = gdf["efflib_sum"]
         gdf["etp"] = gdf["etp_sum"]
         gdf["tension"] = gdf["tension_sum"]
+        gdf["pop"] = gdf["pop_sum"]
         gdf["code_insee"] = gdf["code"]
         gdf["nom_commune"] = gdf["nom"]
         gdf["fid"] = gdf["code"]
@@ -401,6 +403,16 @@ class SAEService(APLService):
         export = self.get_sae_export(code, studies_df, gdf_commune, etab_df, years)
         return export
 
+    def compute_sae_commune_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
+        bor = self.bors[specialite - 1]
+        years = self.years_list(bor)
+        print(f"Compute Commune SAE CSV for {code} {specialite}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(code)
+        sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+        sae = self.group_sae_by_commune(sae)
+        return sae[["km_mean", "time_hc_mean", "time_hp_mean", "fi", "rs", "lon", "lat", "passu_sum", "etpsal_sum",
+                    "efflib_sum", "etp_sum", "tension_sum", "code_commune", "commune_label", "year"]]
 
 
 if __name__ == '__main__':
