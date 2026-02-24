@@ -1,11 +1,12 @@
-Projet 1 = Parser apl/ameli et intégrer dans ps_stats
-Projet 2 = Site Web + APL + SAE + Depassement? + Geoloc etablissement
+Projet 1 = Site Web
     https://chaire2p2as.weebly.com/
     En cours
-Projet 3 = Doctolib scraper
+Projet 2 = Doctolib scraper
     Voir octoparse
-Projet 4 = New PS (downloader + parser)
+Projet 3 = New PS (downloader + parser)
     https://www.data.gouv.fr/datasets/annuaire-sante-ameli
     URS stable (à verif) URL stable : https://www.data.gouv.fr/api/1/datasets/r/432983b9-2e6f-473a-b35a-20403c300a5f
+Petites choses
+    Ameli 24 ? + MAJ du apl/ps_starts à porter dans ameli
 
 
