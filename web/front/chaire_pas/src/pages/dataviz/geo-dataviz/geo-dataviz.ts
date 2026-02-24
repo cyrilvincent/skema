@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
@@ -32,6 +32,8 @@ export class GeoDataviz implements OnInit {
   marker = signal<number>(1);
   fullscreen = input<boolean | null>(null);
   label = input<string | null>(null);
+  frames = computed<Partial<Plotly.Frame>[]>(() => this.getFrames());
+  @ViewChild('myPlot') plotEl!: ElementRef;
   //Plotly: any = null; for lazy loading
 
   constructor() {
@@ -63,6 +65,9 @@ export class GeoDataviz implements OnInit {
   onValuesChanged(v: GeoTupleDTO) {
     const meanws = this.df()["meanws"]
   }
+
+  // onAfterPlot() {
+  // }
 
   getText(i: number, df_year: GeoYearDTO, year: string): string {
     if(this.type() == "APL") {
@@ -112,7 +117,7 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
   `
   }
 
-  getTexts(): String[][] {
+  getTexts(): string[][] {
     const texts: string[][] = [];
     if (this.dto()?.code == "CF") return texts;
     for (const year of Object.keys(this.years())) {
@@ -250,6 +255,38 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
       margin: {l: 10, r: 120, t: 30, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
       sliders: this.getSliders(),
+      updatemenus: [{
+        type: 'buttons',
+        showactive: false,
+        x: 0.1,
+        y: 0.05,
+        xanchor: 'right',
+        yanchor: 'top',
+        buttons: [
+          {
+            label: '▶',
+            method: 'animate',
+            args: [
+              null,
+              {
+                fromcurrent: true,
+                mode: 'immediate',
+                transition: { duration: 300, easing: 'linear' },
+                frame: { duration: 8000/(Object.keys(this.years()).length+1), redraw: true },
+              },
+            ],
+          },
+          {
+            label: '⏸',
+            method: 'animate',
+            args: [
+              [null],
+              { mode: 'immediate', frame: { duration: 0, redraw: true } },
+            ],
+          },
+
+        ],
+      }]
     }
     return layout;
   }
@@ -339,40 +376,83 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
     return scatter;
   }
 
+  // getSteps(): Plotly.SliderStep[] {
+  //   const steps: Plotly.SliderStep[] = [];
+  //   for (const year of Object.keys(this.years())) {
+  //     if (+year < 2020 && this.dto()?.code == "CF-00") continue;
+  //     const df_year = this.years()[year];
+  //     const etab = this.years()[year]["etab"]!;
+  //     const step: Plotly.SliderStep = {
+  //       label: year, 
+  //       value: year,
+  //       execute: true,
+  //       visible: true,
+  //       method: 'update',
+  //       args: [
+  //         {
+  //           z: [df_year[this.type()=="APL" ? "apl": "time_hc"]],
+  //           text: [this.getTexts()[+year - +this.firstYear()], this.type() == "APL" ? df_year["apl"]!.map((a, i) => `${a.toFixed(0)}`) : this.getScatterGeoText(etab)],
+  //           lon: [null, this.type() == "APL" ? df_year["lon"] : etab["lon"]],
+  //           lat: [null, this.type() == "APL" ? df_year["lat"] : etab["lat"]],
+  //           marker: {
+  //             color: this.type() == "APL" ? undefined : this.getScatterColor(etab["tension"]),
+  //             size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"])
+  //           }
+  //         }
+  //       ]
+  //     };
+  //     steps.push(step);
+  //   }
+  //   return steps;
+  // }
+
   getSteps(): Plotly.SliderStep[] {
-    const steps: Plotly.SliderStep[] = [];
+    return Object.keys(this.years())
+      .filter(year => !(+year < 2020 && this.dto()?.code == "CF-00"))
+      .map(year => ({
+        label: year,
+        value: year,
+        execute: true,
+        visible: true,
+        method: 'animate',
+        args: [
+          [year],
+          {
+            mode: 'immediate',
+            transition: { duration: 300, easing: 'cubic-in-out' },
+            frame: { duration: 300, redraw: true },
+          },
+        ],
+      }));
+  }
+
+  getFrames(): Partial<Plotly.Frame>[] {
+    const frames: Partial<Plotly.Frame>[] = [];
     for (const year of Object.keys(this.years())) {
       if (+year < 2020 && this.dto()?.code == "CF-00") continue;
       const df_year = this.years()[year];
       const etab = this.years()[year]["etab"]!;
-      const step: Plotly.SliderStep = {
-        label: year, 
-        value: year,
-        execute: true,
-        visible: true,
-        method: 'update',
-        args: [
+      const frame: Partial<Plotly.Frame> = {
+        name: year,
+        data: [
           {
-            z: [df_year[this.type()=="APL" ? "apl": "time_hc"]],
-            text: [this.getTexts()[+year - +this.firstYear()], this.type() == "APL" ? df_year["apl"]!.map((a, i) => `${a.toFixed(0)}`) : this.getScatterGeoText(etab)],
-            lon: [null, this.type() == "APL" ? df_year["lon"] : etab["lon"]],
-            lat: [null, this.type() == "APL" ? df_year["lon"] : etab["lat"]],
+            z: df_year[this.type() == "APL" ? "apl" : "time_hc"],
+            text: this.getTexts()[+year - +this.firstYear()],
+          },
+          {
+            text: this.type() == "APL" ? df_year["apl"]!.map(a => `${a.toFixed(0)}`) : this.getScatterGeoText(etab),
+            lon: this.type() == "APL" ? df_year["lon"] : etab["lon"],
+            lat: this.type() == "APL" ? df_year["lat"] : etab["lat"],
             marker: {
               color: this.type() == "APL" ? undefined : this.getScatterColor(etab["tension"]),
-              size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"])
-            }
-          }
-        ]
+              size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"]),
+            },
+          },
+        ],
       };
-      steps.push(step);
+      frames.push(frame);
     }
-    return steps;
-  }
-
-  delay(delay: number) { // A virer
-    return new Promise(r => {
-      setTimeout(r, delay);
-    })
+    return frames;
   }
 
   getConfig(): Partial<Plotly.Config> {
@@ -382,7 +462,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
       displayModeBar: true,
       displaylogo: false,
       locale: 'fr',
-      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toImage'],
+      modeBarButtonsToRemove: ['lasso2d', 'select2d'],  //, 'toImage'],
       modeBarButtonsToAdd: [
         {
           title: "Afficher les labels",

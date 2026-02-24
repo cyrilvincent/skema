@@ -12,7 +12,7 @@
         <mat-expansion-panel-header>
         <mat-panel-title><mat-icon matTooltip="Paramètres avancés facultatifs">settings</mat-icon> Paramètres avancés</mat-panel-title>
         </mat-expansion-panel-header>
-        @if(type()=="APL") {*
+        @if(type()=="APL") {
             <p><mat-icon>timer</mat-icon> Durée de trajet maximale: 
                 <mat-button-toggle-group name="time" [formControl]="timeControl">
                     <mat-button-toggle [value]="30">30 min</mat-button-toggle>

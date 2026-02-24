@@ -1,9 +1,10 @@
-  <div style="height: 100vh">
+  <div style="height: 100vh" #myPlot>
     @if(visible() && plotlyReady()) {
-      <plotly-plot
+      <plotly-plot #plotEl
         [data]="data()"
         [layout]="layout()"
         [config]="config()"
+        [frames]="frames()"
         [useResizeHandler]="true" [style]="{position: 'relative', width: '100%', height: '100%'}">
       </plotly-plot>
     }
