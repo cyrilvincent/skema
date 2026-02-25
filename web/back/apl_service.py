@@ -286,6 +286,7 @@ class APLService:
             gdf["pop_ajustee"] = gdf['pop_gp'].fillna(0)
             gdf["pop"] = gdf["pop"].fillna(0)
         gdf["apl_max"] = gdf["apl"].max()
+        gdf["apl_min"] = gdf["apl"].min()
         return gdf
 
     def get_export(self, code: str, studies_df: pd.DataFrame, gdf: pd.DataFrame) -> tuple[dict, any]:
@@ -293,7 +294,7 @@ class APLService:
         center_lon = gdf.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
-                'apl_max', 'code_iris', 'nom_iris', "geometry"]
+                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry"]
         export = gdf[cols]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]

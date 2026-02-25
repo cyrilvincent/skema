@@ -92,7 +92,7 @@ export class DatavizParameters {
     );
     this.geoTypeControl.valueChanges.subscribe(
       g => this.geoType.set(g!)
-    )
+    );
   }
 
   onCodeChanged(code: string | null) { // Warning recursive function

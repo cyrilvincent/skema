@@ -37,7 +37,6 @@ export class Dataviz {
     this.dto.set(s);
     this.geoType.set(params[6])
     this.label.set(params[7]);
-    console.log("OK");
     console.log(this.dto());
   }
 

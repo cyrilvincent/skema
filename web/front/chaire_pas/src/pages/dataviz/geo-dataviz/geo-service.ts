@@ -12,6 +12,7 @@ export class GeoService  extends CommonService {
   _geoTupleDTO = signal<GeoTupleDTO>(emptyGeo);
   geoTupleDTO = computed(() => this._geoTupleDTO());
   fileSaver = inject(FileSaverService);
+  chloroType = signal("chloroplethmap");
 
   fetch(dto: GeoInputDTO, type: string, geoType: string): void {
     if (type == "APL") this.fetchAPL(dto, geoType);

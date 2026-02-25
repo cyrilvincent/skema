@@ -33,6 +33,8 @@ export class GeoDataviz implements OnInit {
   fullscreen = input<boolean | null>(null);
   label = input<string | null>(null);
   frames = computed<Partial<Plotly.Frame>[]>(() => this.getFrames());
+  mapType = signal<string>("choropleth");
+  zooms: { [key: string]: number } = {"CC": 11, "CP": 11, "CA": 8, "CE": 8, "CD": 7, "CR": 6, "CF": 4};
   @ViewChild('myPlot') plotEl!: ElementRef;
   //Plotly: any = null; for lazy loading
 
@@ -62,7 +64,7 @@ export class GeoDataviz implements OnInit {
     const active = (el as any).layout.updatemenus[0].active
     if (activeStep === lastIndex && active <= 1) {
       const buttons = this.plotEl.nativeElement.querySelectorAll('.updatemenu-button');
-      setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), 1000);
+      setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), active == 0 ? 1000 : 400);
     }
   }
 
@@ -150,6 +152,12 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
     return 60;
   }
 
+  getZMin(): number {
+    if(this.type() == "APL" && !this.normColorBar())
+      return this.years()[this.firstYear()]["apl_min"]![0]
+    return 0
+  }
+
   clip(value: number, min: number, max: number): number {
     if (value < min) return min;
     if (value > max) return max;
@@ -198,10 +206,10 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
 
   getGeo() {
     const geo = {
-      type: "choropleth",
+      type: this.mapType(),
       locations: this.years()[this.firstYear()]["fid"],
       z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "time_hc"],
-      zmin: 0,
+      zmin: this.getZMin(),
       zmax: this.getZMax(),
       hoverinfo: "text",
       text: this.getTexts()[0],
@@ -245,6 +253,11 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
     return "";
   }
 
+  getZoom(): number {
+    const code: string = this.dto()!.code.slice(0,2)
+    return this.zooms[code];
+  }
+
   getLayout(): Partial<Plotly.Layout> {
     const layout: Partial<Plotly.Layout> = {
       title: {text: this.getTitle()},
@@ -260,6 +273,11 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
         showrivers: false,
         showframe: false,
         bgcolor: 'rgb(255,255,255)',
+      },
+      map: {
+        style: 'open-street-map',
+        center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
+        zoom: this.getZoom(),
       },
       autosize: true,
       height: this.fullscreen() ? undefined : 600,
@@ -496,7 +514,6 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
           icon: Plotly.Icons.drawline,  // Prefixer par this si lazy
           click: (async () => {
             this.service._loading.set(true);
-            //await this.delay(100);
             this.showLabel.set(!this.showLabel());
             this.service._loading.set(false);
           }),
@@ -517,6 +534,16 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
             this.service._loading.set(false);
           }),
         },
+        {
+          title: "Map",
+          name: 'map',
+          icon: Plotly.Icons.drawrect,
+          click: (() => {
+            this.service._loading.set(true);
+            this.mapType.set(this.mapType() == "choropleth" ? "choroplethmap": "choropleth");
+            this.service._loading.set(false);
+          }),
+        }
       ],
     }
     return config;
