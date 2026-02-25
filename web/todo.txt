@@ -1,7 +1,6 @@
 angular 21.2 semaine du 23/2
 Repasser en lazy quand on aura nginx
 Norm colorbar local min=min et max=max
-slider bouton play auto : https://claude.ai/share/ae458ce2-05fa-48ab-9192-932735614b94
 Ehpad afficher + d'info
 Admin
 CMS

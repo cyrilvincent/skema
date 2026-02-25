@@ -54,6 +54,18 @@ export class GeoDataviz implements OnInit {
     // this.plotlyReady.set(true);
   }
 
+  autoPlay() {
+    const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
+    const frames = el._transitionData._frames;
+    const activeStep = el._fullLayout.sliders[0].active;
+    const lastIndex = frames.length - 1;
+    const active = (el as any).layout.updatemenus[0].active
+    if (activeStep === lastIndex && active <= 1) {
+      const buttons = this.plotEl.nativeElement.querySelectorAll('.updatemenu-button');
+      setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), 1000);
+    }
+  }
+
   onInputDTOChanged(dto: GeoInputDTO | null) {
     if (dto != null) {
       console.log("onInputDTOchanged "+ this.geoType());
@@ -257,7 +269,8 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
       sliders: this.getSliders(),
       updatemenus: [{
         type: 'buttons',
-        showactive: false,
+        showactive: true,
+        direction: 'left',
         x: 0.1,
         y: 0.05,
         xanchor: 'right',
@@ -272,7 +285,20 @@ Population: ${df_year["pop"][i] == 0 ? "N/A" : df_year["pop"][i].toFixed(0)}<br>
                 fromcurrent: true,
                 mode: 'immediate',
                 transition: { duration: 300, easing: 'linear' },
-                frame: { duration: 8000/(Object.keys(this.years()).length+1), redraw: true },
+                frame: { duration: 1000, redraw: true },
+              },
+            ],
+          },
+          {
+            label: '⏭',
+            method: 'animate',
+            args: [
+              null,
+              {
+                fromcurrent: true,
+                mode: 'immediate',
+                transition: { duration: 300, easing: 'linear' },
+                frame: { duration: 200, redraw: true },
               },
             ],
           },
@@ -419,8 +445,8 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
           [year],
           {
             mode: 'immediate',
-            transition: { duration: 300, easing: 'cubic-in-out' },
-            frame: { duration: 300, redraw: true },
+            transition: { duration: 100, easing: 'linear' },
+            frame: { duration: 100, redraw: true },
           },
         ],
       }));
@@ -471,7 +497,7 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
           click: (async () => {
             this.service._loading.set(true);
             //await this.delay(100);
-            this.showLabel.set(!this.showLabel()); // Bug peu visible : revient au slider 1, j'ai testé visible mais c'est pareil
+            this.showLabel.set(!this.showLabel());
             this.service._loading.set(false);
           }),
         },
