@@ -1,3 +1,4 @@
+import datetime
 import json
 import threading
 import time
@@ -33,6 +34,14 @@ class APLService:
             if APLService._instance is None:
                 APLService._instance = APLService()
         return APLService._instance
+
+    def get_tuple(self, l):
+        if len(l) > 1:
+            return tuple(l)
+        elif len(l) == 1:
+            return f"('{l[0]}')"
+        else:
+            return "()"
 
     def check_time_type(self, time_type: str):
         if time_type not in ["HC", "HP"]:
@@ -119,6 +128,47 @@ class APLService:
         communes_df = pd.read_sql(sql, config.connection_string)
         communes = communes_df["code"].to_list()
         return communes
+
+    def clone_df_year(self, df: pd.DataFrame, year: int, new_year: int) -> pd.DataFrame:
+        rows = df[df["year"] == year].copy()
+        new_rows = rows.assign(year=new_year)
+        df = pd.concat([df, new_rows], ignore_index=True)
+        return df
+
+    def get_filo_by_iriss(self, iriss: list[str]) -> pd.DataFrame:
+        sql = f"""
+        select f.iris_string code_iris, f.year filo_year, f.tp60, f.med::integer, f.gi, ff.tp60 tp60_france,
+            ff.med::integer med_france, ff.gi gi_france
+        from iris.filo f
+        left join iris.filo_france ff on ff.year=f.year and ff.is_dec=f.is_dec
+        where f.iris_string in {self.get_tuple(iriss)}
+        and f.is_dec is true
+        order by f.iris, f.year
+        """
+        df = pd.read_sql(sql, config.connection_string)
+        df["year"] = df["filo_year"]
+        if len(df) > 0:
+            last_year = df.iloc[-1]["year"]
+            for year in range(last_year + 1, datetime.date.today().year - 2000 + 1):
+                df = self.clone_df_year(df, last_year, year)
+        return df
+
+    def get_pop_by_iriss(self, iriss: list[str]) -> pd.DataFrame:
+        sql = f"""
+        select p.year pop_year, p.iris code_iris, p.pop::integer, p.pop65p::integer pop65p, 
+            pf.pop65p_ratio pop65p_ratio_france
+        from iris.pop_iris p
+        left join iris.pop_france pf on pf.year=p.year
+        where p.iris in {self.get_tuple(iriss)}
+        order by p.year, p.iris
+        """
+        df = pd.read_sql(sql, config.connection_string)
+        df["year"] = df["pop_year"]
+        if len(df) > 0:
+            last_year = df.iloc[-1]["year"]
+            for year in range(last_year + 1, datetime.date.today().year - 2000 + 1):
+                df = self.clone_df_year(df, last_year, year)
+        return df
 
     def get_iris_gdf_by_cc(self, id: str) -> pd.DataFrame:
         iriss = self.get_iriss_cc(id)
@@ -231,7 +281,7 @@ class APLService:
         return df
 
     def get_apl_by_keys(self, keys: list[int], code: str, id: str):
-        sql = f"select * from apl.apl a  where a.study_key in {tuple(keys)} "
+        sql = f"select * from apl.apl a where a.study_key in {tuple(keys)} "
         sql0 = sql
         if code == "CC":
             sql += f"and code_commune='{id}'"
@@ -294,7 +344,8 @@ class APLService:
         center_lon = gdf.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
-                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry"]
+                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry", 'filo_year', 'tp60', 'med', 'gi',
+                'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p", "pop65p_ratio_france"]
         export = gdf[cols]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
@@ -316,6 +367,33 @@ class APLService:
         elif resolution == "LD":
             gdf["geometry"] = gdf["geometry"].simplify(0.01)   # 1km
         return gdf
+
+    def merge_filo(self, gdf: pd.DataFrame) -> pd.DataFrame:
+        iriss = gdf["code_iris"].unique()
+        filo = self.get_filo_by_iriss(iriss)
+        gdf = gdf.merge(filo, on=["year", "code_iris"], how="left")
+        gdf["filo_year"] = gdf["filo_year"].fillna(0)
+        gdf["tp60"] = gdf["tp60"].fillna(0)
+        gdf["med"] = gdf["med"].fillna(0)
+        gdf["gi"] = gdf["gi"].fillna(0)
+        gdf["tp60_france"] = gdf["tp60_france"].fillna(0)
+        gdf["med_france"] = gdf["med_france"].fillna(0)
+        gdf["gi_france"] = gdf["gi_france"].fillna(0)
+        return gdf
+
+    def merge_pop(self, gdf: pd.DataFrame) -> pd.DataFrame:
+        iriss = gdf["code_iris"].unique()
+        pop = self.get_pop_by_iriss(iriss)
+        if "pop" in gdf.columns:
+            pop = pop.drop("pop", axis=1)
+        gdf = gdf.merge(pop, on=["year", "code_iris"], how="left")
+        gdf["pop"] = gdf["pop"].fillna(0)
+        gdf["pop65p"] = gdf["pop65p"].fillna(0)
+        gdf["pop65p_ratio_france"] = gdf["pop65p_ratio_france"].fillna(0)
+        gdf["pop_year"] = gdf["pop_year"].fillna(0)
+        return gdf
+
+
 
     def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float)\
             -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -339,6 +417,8 @@ class APLService:
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 
@@ -360,7 +440,7 @@ class APLService:
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_commune = self.group_apl_by_commune(gdf_merged)
         gdf_commune = self.gdf_merge_add_columns(gdf_commune)
-        export = self.get_export(code, studies_df, gdf_commune) # BUG, je prends apl et non apl_meanw
+        export = self.get_export(code, studies_df, gdf_commune)
         return export
 
     def compute_commune_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
@@ -376,12 +456,13 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = APLService()
     time.sleep(1)
-    # export = s.compute_iris("CC-38225", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
+    export = s.compute_iris("CC-38185", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    export = s.compute_commune("CC-38205", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
-    s = json.dumps(export)
-    print(s[:5000])
-    # Tester les dept 75, 69 et 13 pour voir si le commune.isna() focntionne bien
+    # export = s.compute_commune("CC-38205", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
+    # s = json.dumps(export)
+    # print(s[:5000])
+    # df = s.get_pop_by_iriss(["381850102"])
+    # print(df)
 
 

@@ -84,14 +84,6 @@ class SAEService(APLService):
         self.corrections(sae)
         return sae, studies_df
 
-    def get_tuple(self, l):
-        if len(l) > 1:
-            return tuple(l)
-        elif len(l) == 1:
-            return f"('{l[0]}')"
-        else:
-            return "()"
-
     def get_urgence_sae(self, iris_list: list[str], urg: str) -> pd.DataFrame:
         sql = f"""
             select d.an as year, d.fi, d.passu, p.perso is not null has_pdata, p.etpsal, p.efflib, p.etp, e.id etab_id,
@@ -226,6 +218,13 @@ class SAEService(APLService):
             order by ds.annee, e.nofinesset
         """
         return pd.read_sql(sql, config.connection_string)
+
+    def get_filo_by_iriss(self, iriss: list[str]) -> pd.DataFrame:
+        df = super().get_filo_by_iriss(iriss)
+        first_year = df.iloc[0]["year"]
+        for year in range(4, first_year):
+            df = self.clone_df_year(df, first_year, year)
+        return df
 
     def get_sae_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
         iris_list = list(gdf["code_iris"].unique())

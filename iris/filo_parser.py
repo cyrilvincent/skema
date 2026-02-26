@@ -1,8 +1,6 @@
 import psycopg2
-from sqlentities import Context, DateSource
-from base_parser import time0
+from sqlentities import Context
 import argparse
-import time
 import art
 import config
 import pandas as pd

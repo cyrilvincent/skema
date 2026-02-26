@@ -74,6 +74,16 @@ export interface GeoYearDTO {
     time_hp?: number[];
     rs?: string[];
     etab?: EtabDTO;
+    filo_year?: number[];
+    tp60?: number[];
+    med?: number[];
+    gi?: number[];
+    pop65p?: number[]
+    tp60_france?: number[];
+    med_france?: number[];
+    gi_france?: number[];
+    pop65p_ratio_france?: number[];
+    pop_year?: number[];
 }
 
 export interface GeoDTO {
