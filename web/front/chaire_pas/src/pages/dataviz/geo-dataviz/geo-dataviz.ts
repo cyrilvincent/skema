@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, injec
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
+import { Y } from '@angular/cdk/keycodes';
+import { textChangeRangeIsUnchanged } from 'typescript';
 //import Plotly from 'plotly.js-dist-min'
 
 @Component({
@@ -80,28 +82,68 @@ export class GeoDataviz implements OnInit {
     const meanws = this.df()["meanws"]
   }
 
-  // onAfterPlot() {
-  // }
+  variation(a: number, b: number, delta=1): string {
+    return ((a - b) * 100 / (b + 0.01)).toFixed(delta);
+  }
+
+  getCommuneIrisText(i: number, df_year: GeoYearDTO): string {
+    return `<b>${df_year["nom_commune"][i]} - ${df_year["nom_iris"][i]} (${df_year["code_iris"][i]})</b><br><br>`;
+  }
+
+  getAplText(i: number, df_year: GeoYearDTO, year: string): string {
+    let s = "<b>Accessibilité aux soins</b><br>";
+    s += `APL ${year}: ${df_year["apl"]![i].toFixed(1)} `;
+    s += `(Δ${this.firstYear()} ${this.variation(df_year["apl"]![i], this.years()[this.firstYear()]["apl"]![i])}%)<br>`
+    s += `  Δ à la moyenne: ${this.variation(df_year["apl"]![i], this.df()["meanws"][+year-(+this.firstYear())])}%<br>`
+    s += `Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br><br>`
+    return s;
+  }
+
+  getPopText(i: number, df_year: GeoYearDTO): string {
+    let s = "<b>Caractéristiques Socio-économiques</b><br>";
+    s += `Population: ${df_year["pop"][i].toFixed(0)} (ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)})<br>`;
+    s += `Proportion de +65 ans: ${(df_year["pop65p"]![i]*100/(df_year["pop"]![i]+0.01)).toFixed(1)}% `;
+    s += `(Δ${this.firstYear()} ${this.variation(df_year["pop65p"]![i], this.years()[this.firstYear()]["pop65p"]![i])}%)<br>`;
+    s += `  Δ à la moyenne de ${((df_year["pop_year"]![i]+2000))}: ${(((df_year["pop65p"]![i]/(df_year["pop"]![i]+0.01))-df_year["pop65p_ratio_france"]![i])*100).toFixed(1)}%<br>`;
+    return s;
+  }
+
+  getFiloText(i: number, df_year: GeoYearDTO): string {
+    let s = "Taux de pauvreté: ";
+    if (df_year["tp60"]![i] == 0) s+= "N/A<br>"
+    else {
+      s += `${df_year["tp60"]![i].toFixed(1)}% `;
+      s += `(Δ${this.firstYear()} ${this.variation(df_year["tp60"]![i], this.years()[this.firstYear()]["tp60"]![i])}%)<br>`
+      s += `  Δ à la moyenne de ${((df_year["filo_year"]![i]+2000))}: ${(df_year["tp60"]![i]-df_year["tp60_france"]![i]).toFixed(1)}%<br>`;
+    }
+    s += "Revenu médian: ";
+    if (df_year["med"]![i] == 0) s+= "N/A<br>"
+    else {
+      s += `${df_year["med"]![i].toFixed(0)}€ `;
+      s += `(Δ${this.firstYear()} ${this.variation(df_year["med"]![i], this.years()[this.firstYear()]["med"]![i])}%)<br>`;
+      s += `  Δ à la moyenne de ${((df_year["filo_year"]![i]+2000))}: ${this.variation(df_year["med"]![i],df_year["med_france"]![i])}%<br>`;
+    }
+    s += "Gini: ";
+    if (df_year["med"]![i] == 0) s+= "N/A<br>"
+    else {
+      s += `${(df_year["gi"]![i]*100).toFixed(1)}% `;
+      s += `(Δ${this.firstYear()} ${this.variation(df_year["gi"]![i], this.years()[this.firstYear()]["gi"]![i])}%)<br>`;
+      s += `  Δ à la moyenne de ${((df_year["filo_year"]![i]+2000))}: ${((df_year["gi"]![i]-df_year["gi_france"]![i])*100).toFixed(1)}%<br>`;
+    }
+    return s;
+  }
+
+  getAplIrisText(i: number, df_year: GeoYearDTO, year: string): string {
+    let s = this.getCommuneIrisText(i, df_year);
+    s += this.getAplText(i, df_year, year);
+    s += this.getPopText(i, df_year);
+    s += this.getFiloText(i, df_year);
+    return s
+  }
 
   getText(i: number, df_year: GeoYearDTO, year: string): string {
     if(this.type() == "APL") {
-      if(this.geoType() == "iris") {
-        return `
-${df_year["nom_commune"][i]} - ${df_year["nom_iris"][i]} (${df_year["code_iris"][i]})<br><br>
-Accessibilité aux soins<br>
-APL ${year}: ${df_year["apl"]![i].toFixed(1)} (Δ${this.firstYear()} ${((df_year["apl"]![i]-this.years()[this.firstYear()]["apl"]![i])*100/(this.years()[this.firstYear()]["apl"]![i]+0.01)).toFixed(0)}%)<br>
- Δ à la moyenne: ${((df_year["apl"]![i]-this.df()["meanws"][+year-(+this.firstYear())])*100/this.df()["meanws"][+year-(+this.firstYear())]+0.01).toFixed(1)}%<br>
-Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br><br>
-Caractéristiques Socio-économiques<br>
-Population: ${df_year["pop"][i].toFixed(0)} (ajustée: ${df_year["pop_ajustee"]![i].toFixed(0)})<br>
-Proportion de +65 ans: ${(df_year["pop65p"]![i]*100/(df_year["pop"]![i]+0.01)).toFixed(1)}% (Δ${this.firstYear()} ${((df_year["pop65p"]![i]-this.years()[this.firstYear()]["pop65p"]![i])*100/(this.years()[this.firstYear()]["pop65p"]![i]+0.01)).toFixed(0)}%)<br>
- Δ à la moyenne de ${((df_year["pop_year"]![i]+2000))}: ${(((df_year["pop65p"]![i]/(df_year["pop"]![i]+0.01))-df_year["pop65p_ratio_france"]![i])*100).toFixed(1)}%<br>
-Taux de pauvreté: ${df_year["tp60"]![i] == 0 ? "N/A" : df_year["tp60"]![i].toFixed(0)}% (Δ${this.firstYear()} ${((df_year["tp60"]![i]-this.years()[this.firstYear()]["tp60"]![i])*100/(this.years()[this.firstYear()]["tp60"]![i]+0.01)).toFixed(0)}%)<br>
- Δ à la moyenne de ${((df_year["filo_year"]![i]+2000))}: ${df_year["tp60"]![i] == 0 ? "N/A" : (df_year["tp60"]![i]-df_year["tp60_france"]![i]).toFixed(1)}%<br>
-Revenu médian: ${df_year["med"]![i] == 0 ? "N/A" : df_year["med"]![i].toFixed(0)}€ (Δ${this.firstYear()} ${((df_year["med"]![i]-this.years()[this.firstYear()]["med"]![i])*100/(this.years()[this.firstYear()]["med"]![i]+0.01)).toFixed(0)}%)<br>
-Gini: ${df_year["gi"]![i] == 0 ? "N/A" : (df_year["gi"]![i]*100).toFixed(1)}% (Δ${this.firstYear()} ${((df_year["gi"]![i]-this.years()[this.firstYear()]["gi"]![i])*100/(this.years()[this.firstYear()]["gi"]![i]+0.01)).toFixed(0)}%)<br>
-`
-      }
+      if(this.geoType() == "iris") return this.getAplIrisText(i, df_year, year);
       else {
         return `
 Commune: ${df_year["nom_commune"][i]}<br>
