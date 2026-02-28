@@ -344,8 +344,10 @@ class APLService:
         center_lon = gdf.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
-                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry", 'filo_year', 'tp60', 'med', 'gi',
-                'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p", "pop65p_ratio_france"]
+                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry"]
+        if "tp60" in gdf:
+            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p",
+                     "pop65p_ratio_france"]
         export = gdf[cols]
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
@@ -371,6 +373,8 @@ class APLService:
     def merge_filo(self, gdf: pd.DataFrame) -> pd.DataFrame:
         iriss = gdf["code_iris"].unique()
         filo = self.get_filo_by_iriss(iriss)
+        if (gdf["year"] > 2000).any():
+            filo["year"] = filo["year"] + 2000
         gdf = gdf.merge(filo, on=["year", "code_iris"], how="left")
         gdf["filo_year"] = gdf["filo_year"].fillna(0)
         gdf["tp60"] = gdf["tp60"].fillna(0)
@@ -386,6 +390,8 @@ class APLService:
         pop = self.get_pop_by_iriss(iriss)
         if "pop" in gdf.columns:
             pop = pop.drop("pop", axis=1)
+        if (gdf["year"] > 2000).any():
+            pop["year"] = pop["year"] + 2000
         gdf = gdf.merge(pop, on=["year", "code_iris"], how="left")
         gdf["pop"] = gdf["pop"].fillna(0)
         gdf["pop65p"] = gdf["pop65p"].fillna(0)

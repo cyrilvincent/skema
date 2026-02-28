@@ -1,12 +1,6 @@
-angular 21.2 semaine du 23/2
-Repasser en lazy quand on aura nginx
+Fullscreen commune : bug affiche iris
 Ehpad afficher + d'info
-filosofi : taux de pauvreté (% et écart à la moyenne nationale),
-        Médiane niveau de revenu (euros et écart à la moyenne nationale)
-        Indice de Gini (valeur et écart à la moyenne nationale)
-        On pourrait séparer les infos en trois partie pour plus de visibilité: Identification IRIS (numéro / nom), Accessibilité aux soins (Nb ETP/ Valeur APL (variation depuis 2020)/ Ecart à la moyenne pondérée et Caractéristiques Socio-éco (Population totale, % population de + de 65 ans/taux de pauvreté/revenu médian et indice de Gini)
-    filo.TP60 MED GI en left join bien sur
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 CMS
-
-
+Repasser en lazy quand on aura nginx
+Ajouter pram APL+S (défaut) ou APL L only

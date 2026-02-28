@@ -34,13 +34,14 @@ class PSLibreAccesRawParser:
         self.df["code_diplome"] = self.df["Code savoir-faire"]
         self.df["dep"] = self.df["Code Département (structure)"]
         self.df["code_profession"] = self.df["Code profession"]
-        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome", "code_profession"]]
+        self.df["raison_sociale_site"] = self.df["Raison sociale site"]
+        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome", "code_profession", "raison_sociale_site"]]
         self.df["date_source_id"] = self.date_source_id
         self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
 
     def commit(self):
         print("Deleting old values")
-        table_name = "ps_libreacces_2"
+        table_name = "ps_libreacces"
         try:
             conn = psycopg2.connect(config.connection_string)
             sql = f"delete from apl.{table_name} where date_source_id={self.date_source_id}"
@@ -80,3 +81,4 @@ if __name__ == '__main__':
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_small_202010071006.txt -e
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_202010071006.txt
     # PS_LibreAcces_Personne_activite_202112020908.txt
+    # {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9}

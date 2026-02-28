@@ -9,5 +9,9 @@ Projet 3 = New PS (downloader + parser)
 Projet 4 = Divers
     Ameli 24 ? + MAJ du apl/ps_starts à porter dans ameli
 Projet 5 = CMS
+Projet 6 = APL_S avec les non libéraux
+code_mode_exercice="S" ET (Raison sociale site="CDS" OU "MSP" OU "Centre de Santé OU "C.D.S" OU M.S.P (verif les valeurs)
+MAISON SANTE + MAISON MEDICALE + maison de sante
+Ne pas prendre : MAS
 
 

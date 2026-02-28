@@ -312,6 +312,9 @@ class SAEService(APLService):
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'code_iris', 'nom_iris', "geometry",
                 "km", "time_hc", "time_hp", "rs", "fi", "pop"]
+        if "tp60" in gdf:
+            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p",
+                     "pop65p_ratio_france"]
         export = gdf[cols]
         etab_df["etpsal"] = etab_df["etpsal"].fillna(-1)
         etab_df["efflib"] = etab_df["efflib"].fillna(-1)
@@ -367,6 +370,8 @@ class SAEService(APLService):
         gdf_merged = self.df_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
         return export
 
@@ -419,11 +424,11 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    # export = s.compute_sae_iris("CC-69072", 1, 60, "HC", "HD")
+    export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    export = s.compute_sae_commune("CC-38185", 1, 60, "HC", "HD")
+    # export = s.compute_sae_commune("CC-38185", 1, 60, "HC", "HD")
     print(export)
 
 
