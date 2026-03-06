@@ -46,7 +46,7 @@ async def find(q: str):
 async def apl_iris(dto: GeoInputDTO):
     print(f"Get /apl/iris")
     data = await run_in_threadpool(apl_service.compute_iris,
-                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution, dto.apl_type == "APL_S")
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data
@@ -56,7 +56,7 @@ async def apl_iris(dto: GeoInputDTO):
 async def apl_commune(dto: GeoInputDTO):
     print(f"Get /apl/commune")
     data = await run_in_threadpool(apl_service.compute_commune,
-                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution)
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.resolution, dto.apl_type == "APL_S")
     if len(data[1]["features"]) == 0:
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     return data
@@ -65,14 +65,16 @@ async def apl_commune(dto: GeoInputDTO):
 @app.post("/apl/iris/csv")
 async def apl_iris_csv(dto: GeoInputDTO):
     print(f"Get /apl/iris/csv")
-    data = await run_in_threadpool(apl_service.compute_iris_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = await run_in_threadpool(apl_service.compute_iris_csv,
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     return data.to_csv(index=False)
 
 
 @app.post("/apl/commune/csv")
 async def apl_commune_csv(dto: GeoInputDTO):
     print(f"Get /apl/commune/csv")
-    data = await run_in_threadpool(apl_service.compute_commune_csv, dto.code, dto.id, dto.time, dto.hc, dto.exp)
+    data = await run_in_threadpool(apl_service.compute_commune_csv,
+                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     return data.to_csv(index=False)
 
 

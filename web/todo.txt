@@ -1,5 +1,4 @@
 Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
-CMS
-Server : Repasser en lazy
-APL_S : back + csv + fullscreen
+Server : Linux + Repasser en lazy
+Verif download auto de mars

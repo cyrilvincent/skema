@@ -253,9 +253,16 @@ class APLService:
         else:
             return self.__getattribute__(f"get_commune_gdf_by_{type_code.lower()}")(id, resolution)
 
-    def get_study_by_year(self, specialite: int, time: int, time_type: str, aexp: float, year: int) -> pd.DataFrame:
+    def get_study_by_year(self,
+                          specialite: int,
+                          time: int,
+                          time_type: str,
+                          aexp: float,
+                          year: int,
+                          with_sal: bool) -> pd.DataFrame:
+        table = "apl_s_study" if with_sal else "apl_study"
         sql = f"""
-        select * from apl.apl_study s
+        select * from apl.{table} s
         where s.specialite_id={specialite}
         and s.year={year}
         and s.source='PA'
@@ -271,17 +278,20 @@ class APLService:
                              time: int,
                              time_type: str,
                              aexp: float,
-                             years: list[int]) -> pd.DataFrame:
+                             years: list[int],
+                             with_sal: bool) -> pd.DataFrame:
         df = None
         for year in years:
             if df is None:
-                df = self.get_study_by_year(specialite, time, time_type, aexp, year)
+                df = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
             else:
-                df = pd.concat([df, self.get_study_by_year(specialite, time, time_type, aexp, year)], ignore_index=True)
+                df = pd.concat([df, self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)],
+                               ignore_index=True)
         return df
 
-    def get_apl_by_keys(self, keys: list[int], code: str, id: str):
-        sql = f"select * from apl.apl a where a.study_key in {tuple(keys)} "
+    def get_apl_by_keys(self, keys: list[int], code: str, id: str, with_sal: bool):
+        table = "apl_s" if with_sal else "apl"
+        sql = f"select * from apl.{table} a where a.study_key in {tuple(keys)} "
         sql0 = sql
         if code == "CC":
             sql += f"and code_commune='{id}'"
@@ -399,24 +409,34 @@ class APLService:
         gdf["pop_year"] = gdf["pop_year"].fillna(0)
         return gdf
 
-
-
-    def get_apl(self, code: str, specialite: int, time: int, time_type: str, aexp: float)\
-            -> tuple[pd.DataFrame, pd.DataFrame]:
+    def get_apl(self,
+                code: str,
+                specialite: int,
+                time: int,
+                time_type: str,
+                aexp: float,
+                with_sal: bool) -> tuple[pd.DataFrame, pd.DataFrame]:
         type_code, id = self.check_code(code)
-        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years)
+        studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years, with_sal)
         keys = studies_df["key"].to_list()
-        apl = self.get_apl_by_keys(keys, type_code, id)
+        apl = self.get_apl_by_keys(keys, type_code, id, with_sal)
         print(f"Found {len(apl) / len(self.years):.0f} apls by year")
         self.corrections(apl)
         return apl, studies_df
 
-    def compute_iris(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str)\
-            -> tuple[dict, any]:
+    def compute_iris(self,
+                     code: str,
+                     specialite: int,
+                     time: int,
+                     time_type: str,
+                     aexp: float,
+                     resolution: str,
+                     with_sal: bool,
+                     ) -> tuple[dict, any]:
         print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
-        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
         print(f"Found {len(gdf)} gdfs")
         gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
@@ -428,18 +448,30 @@ class APLService:
         export = self.get_export(code, studies_df, gdf_merged)
         return export
 
-    def compute_iris_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
+    def compute_iris_csv(self,
+                         code: str,
+                         specialite: int,
+                         time: int,
+                         time_type: str,
+                         aexp: float,
+                         with_sal: bool) -> pd.DataFrame:
         print(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp}")
-        apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
+        apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
 
-    def compute_commune(self, code: str, specialite: int, time: int, time_type: str, aexp: float, resolution: str) \
-            -> tuple[dict, any]:
+    def compute_commune(self,
+                        code: str,
+                        specialite: int,
+                        time: int,
+                        time_type: str,
+                        aexp: float,
+                        resolution: str,
+                        with_sal: bool) -> tuple[dict, any]:
         print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
-        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp)
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         print(f"Found {len(gdf)} gdfs")
         gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
@@ -449,9 +481,15 @@ class APLService:
         export = self.get_export(code, studies_df, gdf_commune)
         return export
 
-    def compute_commune_csv(self, code: str, specialite: int, time: int, time_type: str, aexp: float) -> pd.DataFrame:
+    def compute_commune_csv(self,
+                            code: str,
+                            specialite: int,
+                            time: int,
+                            time_type: str,
+                            aexp: float,
+                            with_sal: bool) -> pd.DataFrame:
         print(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp}")
-        apl, _ = self.get_apl(code, specialite, time, time_type, aexp)
+        apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl = self.group_apl_by_commune(apl)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "code_commune", "commune_label", "apl_meanw"]]

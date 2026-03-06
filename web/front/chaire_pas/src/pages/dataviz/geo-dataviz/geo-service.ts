@@ -56,7 +56,7 @@ export class GeoService  extends CommonService {
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({
       next: (res) => {
         const blob = new Blob([JSON.stringify(res)], { type: 'application/json' });
-        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}_${dto.resolution}.json`);
+        this.fileSaver.save(blob, `apl${dto.apl_type == "APL" ? "_L" : ""}_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}_${dto.resolution}.json`);
       },
       error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
@@ -70,7 +70,7 @@ export class GeoService  extends CommonService {
     this.http.post<string>(`${environment.baseUrl}/apl/${geoType}/csv`, dto).subscribe({
       next: (res) => {
         const blob = new Blob([res], { type: 'application/json' });
-        this.fileSaver.save(blob, `apl_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
+        this.fileSaver.save(blob, `apl${dto.apl_type == "APL" ? "_L" : ""}_${geoType}_${dto.bor}_${dto.time}_${dto.hc}_${dto.exp}.csv`);
       },
       error: (err) => this.catchError(err),
       complete: () => this._loading.set(false),
