@@ -14,7 +14,7 @@ pa_months = {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9}
 
 def get_ps(year, specialite):
     sql = f"""
-select ps.id, ps.nom, ps.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, 'L' code_mode_exercice 
+select ps.id, ps.nom, ps.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, 'L' code 
 from ps
 join tarif t on t.ps_id = ps.id
 join tarif_date_source tds on tds.tarif_id=t.id
@@ -35,7 +35,7 @@ group by ps.id, c.id, an.id, i.id
 def get_pa(year, specialite, is_medecin):
     if is_medecin:
         sql = f"""
-select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice 
+select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code
 from apl.ps_libreacces ps
 join personne_activite pa on pa.inpp=ps.inpp
 join pa_adresse_norm_date_source pands on pands.personne_activite_id=pa.id and pands.date_source_id=ps.date_source_id
@@ -52,11 +52,11 @@ where sp.specialite_id={specialite}
 and ds.annee={year}
 and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
-group by pa.id, an.id, i.id, ps.code_mode_exercice
+group by pa.id, an.id, i.id, ps.code
 """
     else:
         sql = f"""
-select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code_mode_exercice
+select pa.id, pa.inpp, pa.nom, pa.prenom, an.dept_id, an.id adresse_norm_id, i.id iris, an.lon, an.lat, ps.code
 from apl.ps_libreacces ps
 join personne_activite pa on pa.inpp=ps.inpp
 join pa_adresse_norm_date_source pands on pands.personne_activite_id=pa.id and pands.date_source_id=ps.date_source_id
@@ -70,10 +70,10 @@ where sp.specialite_id={specialite}
 and ds.annee={year}
 and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
-group by pa.id, an.id, i.id, ps.code_mode_exercice
+group by pa.id, an.id, i.id, ps.code
 """
     # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
-    # print(sql)
+    print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -138,262 +138,236 @@ def get_over(year, specialite, is_medecin):
     over = pd.read_sql(sql, config.connection_string)
     return over
 
+for with_s in [True]: #[True, False]
+    for time in [30]: #[30, 45, 60]:
+        for time_type in ["HC"]: #["HC", "HP"]:
+            iris_matrix = get_iris_matrix(time, time_type)
+            iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
+            iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
+            for source in ["PA"]:  # ["PA", "PS"]:
+                for year in range(20, 26):
+                    pop_iris = get_pop_iris(year)
+                    for specialite in [10]: #range(1, 28):
+                        iriss = get_iriss(year, specialite)
+                        for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
+                            if ((time > 30 and accessibilite_exp < -0.08) or
+                                    (time == 30 and accessibilite_exp > -0.06) or
+                                    (time > 45 and accessibilite_exp < -0.06)):
+                                continue
 
-for time in [30]:  # [30, 45, 60]:
-    for time_type in ["HC"]:  # ["HC", "HP"]:
-        iris_matrix = get_iris_matrix(time, time_type)
-        iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
-        iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
-        for source in ["PA"]:  # ["PA", "PS"]:
-            for year in range(20, 26):
-                pop_iris = get_pop_iris(year)
-                for specialite in [10]:  # range(1, 28):
-                    iriss = get_iriss(year, specialite)
-                    for accessibilite_exp in [-0.12]:  # [-0.12, -0.10, -0.08, -0.06, -0.04]:
-                        if ((time > 30 and accessibilite_exp < -0.08) or
-                                (time == 30 and accessibilite_exp > -0.06) or
-                                (time > 45 and accessibilite_exp < -0.06)):
-                            continue
+                            print(f"Compute APL specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
+                            ps_df = get_by_source(year, specialite, source)
+                            if len(ps_df) == 0:
+                                raise ValueError(f"Dataframe is empty for year {year} and specialite {specialite}")
 
-                        # accessibilite_exp = -(75 - time) * 4 / 1500
-                        print(f"Compute APL specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
+                            nb_ps = ps_df["id"].nunique()
+                            nb_cabinet_ps = ps_df.groupby(["id", "lon", "lat"])
+                            ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["code"] + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
+                            ps_df["nb_cabinet"] = ps_df.groupby("id")["key"].transform("nunique")
 
-                        ps_df = get_by_source(year, specialite, source)
-                        ps_df
+                            if with_s:
+                                ps_df = ps_df[(ps_df["code"] == "L") | (ps_df["code"] == "M")]
+                            else:
+                                ps_df = ps_df[ps_df["code"] == "L"]
+                            ps_df["weight"] = (1 / ps_df["nb_cabinet"]).replace(np.inf, 0)
+                            ps_df["nb"] = ps_df.groupby("iris")["weight"].transform("sum")
+                            ps_df = ps_df.sort_values(by='iris')
+                            ps_df2 = ps_df.drop_duplicates(subset=['iris', 'nb'])
 
+                            iris_matrix_pop_df = iris_matrix.merge(pop_iris, on="iris", how="left", suffixes=('', ''))
+                            iris_matrix_pop_df
 
-                        # In[9]:
+                            accessibilite_fn = lambda x: np.exp(accessibilite_exp * x)
+                            iris_matrix_pop_df["accessibilite_weight"] = accessibilite_fn(iris_matrix_pop_df["time"])
+                            iris_matrix_pop_df.head(10)
 
 
-                        nb_ps = ps_df["id"].nunique()
-                        nb_cabinet_ps = ps_df.groupby(["id", "lon", "lat"])
-                        # print(f"Nb unique PS {nb_ps}")
-                        # print(f"Nb cabinet {len(nb_cabinet_ps)}")
+                            # In[18]:
 
 
-                        # In[10]:
+                            cols = [col for col in iris_matrix_pop_df.columns if "pop" in col and col != "pop"]
+                            cols
 
 
-                        ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["code_mode_exercice"] + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
-                        ps_df["nb_cabinet"] = ps_df.groupby("id")["key"].transform("nunique")
-                        # ps_df["nb_cabinet"].value_counts(normalize=True)
+                            # In[78]:
+                            over = get_over(year, specialite, specialite < 21)
 
+                            if len(over) > 0:
+                                weights = over.values[0,3:]
+                            else:
+                                weights = np.ones(len(over.columns) - 3)
 
-                        # In[11]:
+                            # In[21]:
 
-                        ps_df = ps_df[ps_df["code_mode_exercice"] == "L"]
-                        ps_df["weight"] = (1 / ps_df["nb_cabinet"]).replace(np.inf, 0)
-                        ps_df["nb"] = ps_df.groupby("iris")["weight"].transform("sum")
-                        ps_df.head(10)
 
+                            iris_matrix_pop_df["pop_gp"] = sum(w * iris_matrix_pop_df[c] for w, c in zip(weights, cols))
+                            iris_matrix_pop_df=iris_matrix_pop_df.sort_values(by='iris2')
+                            # iris_matrix_pop_df.head(5)
+                            test_pop = iris_matrix_pop_df.drop_duplicates(subset=['iris2'])
+                            ratio = test_pop["pop_gp"] / (test_pop["pop"] + 1)
+                            ratio_mean = np.mean(ratio)
+                            # print(ratio_mean)
+                            iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
+                            if specialite == 5:
+                                iris_matrix_pop_df["pop_gp"] /= 2
 
-                        # In[12]:
 
+                            # In[22]:
 
-                        ps_df = ps_df.sort_values(by='iris')
-                        ps_df2 = ps_df.drop_duplicates(subset=['iris', 'nb'])
-                        ps_df2
 
+                            matrix_df = iris_matrix_pop_df[["iris1","iris2","km","time","accessibilite_weight","pop_gp","pop","type_iris"]]
+                            matrix_df.head(5)
 
-                        # In[15]:
 
+                            # In[24]:
 
-                        iris_matrix_pop_df = iris_matrix.merge(pop_iris, on="iris", how="left", suffixes=('', ''))
-                        iris_matrix_pop_df
 
+                            matrix_df["iris"] = matrix_df["iris1"].copy()
+                            matrix_df = matrix_df.sort_values(by='iris2')
+                            matrix_merge_df = matrix_df.merge(ps_df2, on="iris", how="left", suffixes=('', ''))
+                            matrix_merge_df
 
-                        # In[17]:
 
+                            # In[25]:
 
-                        accessibilite_fn = lambda x: np.exp(accessibilite_exp * x)
-                        iris_matrix_pop_df["accessibilite_weight"] = accessibilite_fn(iris_matrix_pop_df["time"])
-                        iris_matrix_pop_df.head(10)
 
+                            matrix_merge_df["nb"] = matrix_merge_df["nb"].fillna(0)
+                            matrix_merge_df = matrix_merge_df.sort_values(by=['iris1', "iris2"])
+                            matrix_merge_df["nb"].nunique()
 
-                        # In[18]:
 
+                            # In[28]:
 
-                        cols = [col for col in iris_matrix_pop_df.columns if "pop" in col and col != "pop"]
-                        cols
 
+                            # matrix_merge_df = matrix_merge_df.sort_values(by='iris1')
+                            matrix_merge_df["wpop"] = matrix_merge_df["accessibilite_weight"] * matrix_merge_df["pop_gp"]
+                            matrix_merge_df["swpop"] = matrix_merge_df.groupby("iris1")["wpop"].transform("sum")
+                            matrix_merge_df["R"] = (matrix_merge_df["nb"] / (matrix_merge_df["swpop"] / 100000)).replace(np.inf, 0)
+                            matrix_merge_df.head(5)
+                            # apl["R"].unique()
 
-                        # In[78]:
-                        over = get_over(year, specialite, specialite < 21)
 
-                        if len(over) > 0:
-                            weights = over.values[0,3:]
-                        else:
-                            weights = np.ones(len(over.columns) - 3)
+                            # In[29]:
 
-                        # In[21]:
 
+                            rgp = matrix_merge_df[matrix_merge_df["iris1"] == matrix_merge_df["iris2"]]
+                            rgp = rgp[["iris1", "iris2", "type_iris", "pop_gp", "nb", "R", "swpop", "wpop", "pop_gp", "pop"]].copy()
+                            rgp
 
-                        iris_matrix_pop_df["pop_gp"] = sum(w * iris_matrix_pop_df[c] for w, c in zip(weights, cols))
-                        iris_matrix_pop_df=iris_matrix_pop_df.sort_values(by='iris2')
-                        # iris_matrix_pop_df.head(5)
-                        test_pop = iris_matrix_pop_df.drop_duplicates(subset=['iris2'])
-                        ratio = test_pop["pop_gp"] / (test_pop["pop"] + 1)
-                        ratio_mean = np.mean(ratio)
-                        # print(ratio_mean)
-                        iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
-                        if specialite == 5:
-                            iris_matrix_pop_df["pop_gp"] /= 2
 
+                            # In[30]:
 
-                        # In[22]:
 
+                            apl = matrix_merge_df.merge(rgp, on="iris2", suffixes=("", "_dest"))
+                            apl
 
-                        matrix_df = iris_matrix_pop_df[["iris1","iris2","km","time","accessibilite_weight","pop_gp","pop","type_iris"]]
-                        matrix_df.head(5)
 
+                            # In[31]:
 
-                        # In[24]:
 
+                            apl = apl.sort_values(by=['iris1', "iris2"])
+                            apl["ap"] = apl["accessibilite_weight"] * apl["R_dest"]
+                            apl.head(5)
 
-                        matrix_df["iris"] = matrix_df["iris1"].copy()
-                        matrix_df = matrix_df.sort_values(by='iris2')
-                        matrix_merge_df = matrix_df.merge(ps_df2, on="iris", how="left", suffixes=('', ''))
-                        matrix_merge_df
 
+                            # In[32]:
 
-                        # In[25]:
 
+                            apl["apl"] = apl.groupby("iris1")["ap"].transform("sum")
+                            apl
 
-                        matrix_merge_df["nb"] = matrix_merge_df["nb"].fillna(0)
-                        matrix_merge_df = matrix_merge_df.sort_values(by=['iris1', "iris2"])
-                        matrix_merge_df["nb"].nunique()
 
+                            # In[33]:
 
-                        # In[28]:
 
+                            apl2 = apl[apl["iris1"] == apl["iris2"]]
+                            apl2
 
-                        # matrix_merge_df = matrix_merge_df.sort_values(by='iris1')
-                        matrix_merge_df["wpop"] = matrix_merge_df["accessibilite_weight"] * matrix_merge_df["pop_gp"]
-                        matrix_merge_df["swpop"] = matrix_merge_df.groupby("iris1")["wpop"].transform("sum")
-                        matrix_merge_df["R"] = (matrix_merge_df["nb"] / (matrix_merge_df["swpop"] / 100000)).replace(np.inf, 0)
-                        matrix_merge_df.head(5)
-                        # apl["R"].unique()
 
+                            # In[34]:
 
-                        # In[29]:
 
+                            # print(year, specialite, source)
+                            apl2["apl"].describe()
+                            # 21-10-PA:66-57
 
-                        rgp = matrix_merge_df[matrix_merge_df["iris1"] == matrix_merge_df["iris2"]]
-                        rgp = rgp[["iris1", "iris2", "type_iris", "pop_gp", "nb", "R", "swpop", "wpop", "pop_gp", "pop"]].copy()
-                        rgp
 
+                            # In[ ]:
 
-                        # In[30]:
 
+                            # 21 10 PA
+                            # count    48569.000000
+                            # mean        66.239008
+                            # std         36.200523
+                            # min          0.000000
+                            # 25%         40.432111
+                            # 50%         56.872725
+                            # 75%         85.083597
+                            # max        681.212229
+                            # Name: apl, dtype: float64
 
-                        apl = matrix_merge_df.merge(rgp, on="iris2", suffixes=("", "_dest"))
-                        apl
 
+                            # In[56]:
 
-                        # In[31]:
 
+                            dico = {"year":year, "specialite_id":specialite, "source":source, "time":time, "time_type":time_type, "exp":accessibilite_exp}
+                            dico["mean"] = np.mean(apl2["apl"])
+                            dico["std"] = np.std(apl2["apl"])
+                            dico["q10"], dico["q25"], dico["q50"], dico["q75"], dico["q90"] = np.quantile(apl2["apl"], [0.1, 0.25, 0.5, 0.75, 0.9])
+                            dico["min"] = np.min(apl2["apl"])
+                            dico["max"] = np.max(apl2["apl"])
+                            dico["date"] = datetime.datetime.now()
+                            dico["key"] = random.randint(0, 1000000000000)
+                            dico
 
-                        apl = apl.sort_values(by=['iris1', "iris2"])
-                        apl["ap"] = apl["accessibilite_weight"] * apl["R_dest"]
-                        apl.head(5)
 
+                            # In[62]:
 
-                        # In[32]:
 
+                            study = pd.DataFrame(dico, index=[dico["key"]])
+                            study
 
-                        apl["apl"] = apl.groupby("iris1")["ap"].transform("sum")
-                        apl
 
+                            # In[35]:
 
-                        # In[33]:
 
+                            apl2[apl2["apl"]>400]
 
-                        apl2 = apl[apl["iris1"] == apl["iris2"]]
-                        apl2
 
+                            # In[36]:
 
-                        # In[34]:
 
+                            apl3 = apl2[["iris1", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "wpop", "swpop", "R", "pop_gp","pop"]]
+                            apl3 = apl3.rename(columns={'iris1': 'iris'})
+                            apl3.head(5)
 
-                        # print(year, specialite, source)
-                        apl2["apl"].describe()
-                        # 21-10-PA:66-57
 
+                            # In[37]:
 
-                        # In[ ]:
 
+                            # iriss = get_iriss()
+                            # iriss
 
-                        # 21 10 PA
-                        # count    48569.000000
-                        # mean        66.239008
-                        # std         36.200523
-                        # min          0.000000
-                        # 25%         40.432111
-                        # 50%         56.872725
-                        # 75%         85.083597
-                        # max        681.212229
-                        # Name: apl, dtype: float64
 
+                            # In[38]:
 
-                        # In[56]:
 
+                            apl_final = apl3.merge(iriss, on="iris", how="left", suffixes=("", "_dest"))
+                            apl_final = apl_final[["year", "specialite", "iris", "iris_string", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "R", "wpop", "swpop", "pop_gp","pop", "iris_label", "dept", "code_commune", "commune_label"]]
+                            apl_final
 
-                        dico = {"year":year, "specialite_id":specialite, "source":source, "time":time, "time_type":time_type, "exp":accessibilite_exp}
-                        dico["mean"] = np.mean(apl2["apl"])
-                        dico["std"] = np.std(apl2["apl"])
-                        dico["q10"], dico["q25"], dico["q50"], dico["q75"], dico["q90"] = np.quantile(apl2["apl"], [0.1, 0.25, 0.5, 0.75, 0.9])
-                        dico["min"] = np.min(apl2["apl"])
-                        dico["max"] = np.max(apl2["apl"])
-                        dico["date"] = datetime.datetime.now()
-                        dico["key"] = random.randint(0, 1000000000000)
-                        dico
 
 
-                        # In[62]:
+                            sum_pop = np.sum(apl_final["pop_gp"])
+                            apl_final["meanw"] = apl_final["apl"] * apl_final["pop_gp"] * len(apl_final) / sum_pop
+                            study["meanw"] = np.mean(apl_final["meanw"])
 
+                            apl_final["year"]=year
+                            apl_final["study_key"]=dico["key"]
 
-                        study = pd.DataFrame(dico, index=[dico["key"]])
-                        study
-
-
-                        # In[35]:
-
-
-                        apl2[apl2["apl"]>400]
-
-
-                        # In[36]:
-
-
-                        apl3 = apl2[["iris1", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "wpop", "swpop", "R", "pop_gp","pop"]]
-                        apl3 = apl3.rename(columns={'iris1': 'iris'})
-                        apl3.head(5)
-
-
-                        # In[37]:
-
-
-                        # iriss = get_iriss()
-                        # iriss
-
-
-                        # In[38]:
-
-
-                        apl_final = apl3.merge(iriss, on="iris", how="left", suffixes=("", "_dest"))
-                        apl_final = apl_final[["year", "specialite", "iris", "iris_string", "type_iris", "nb", "apl", "ap", "accessibilite_weight", "R", "wpop", "swpop", "pop_gp","pop", "iris_label", "dept", "code_commune", "commune_label"]]
-                        apl_final
-
-
-
-                        sum_pop = np.sum(apl_final["pop_gp"])
-                        apl_final["meanw"] = apl_final["apl"] * apl_final["pop_gp"] * len(apl_final) / sum_pop
-                        study["meanw"] = np.mean(apl_final["meanw"])
-
-                        apl_final["year"]=year
-                        apl_final["study_key"]=dico["key"]
-                        study.to_sql("apl_study", config.connection_string, schema="apl", if_exists="append", index=False)
-                        apl_final.to_sql("apl", config.connection_string, schema="apl", if_exists="append", index=False)
+                            table_name = "apl_s" if with_s else "apl"
+                            study.to_sql(f"{table_name}_study", config.connection_string, schema="apl", if_exists="append", index=False)
+                            apl_final.to_sql(table_name, config.connection_string, schema="apl", if_exists="append", index=False)
 
 
 

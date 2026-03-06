@@ -1,8 +1,7 @@
+import re
 import psycopg2
 from sqlentities import Context
-from base_parser import time0
 import argparse
-import time
 import art
 import config
 import pandas as pd
@@ -34,9 +33,17 @@ class PSLibreAccesRawParser:
         self.df["code_diplome"] = self.df["Code savoir-faire"]
         self.df["dep"] = self.df["Code Département (structure)"]
         self.df["code_profession"] = self.df["Code profession"]
-        self.df["raison_sociale_site"] = self.df["Raison sociale site"]
-        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome", "code_profession", "raison_sociale_site"]]
+        self.df["rs"] = self.df["Raison sociale site"].str.upper()
+        self.df = self.df[["inpp", "code_mode_exercice", "cp", "code_diplome", "code_profession", "rs"]]
         self.df["date_source_id"] = self.date_source_id
+
+        self.df["code"] = self.df['code_mode_exercice']
+        regex = r"^(?:CDS|MS(?![ADF])|CENTRES?[ \-_]*(?:DE[ \-_]*)?SANT[ÉE]|MAISONS?[ \-_]*(?:DE[ \-_]*)?SANT[ÉE])(?!.*\bOPTIC\b)"
+        regex = re.compile(regex, flags=re.IGNORECASE)
+
+        mask = self.df['rs'].str.match(regex, na=False)
+        self.df.loc[mask, 'code'] = 'M'
+
         self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
 
     def commit(self):
@@ -52,7 +59,8 @@ class PSLibreAccesRawParser:
         except:
             pass
         print("Committing")
-        self.df.to_sql(table_name, config.connection_string, schema="apl", chunksize=10000, if_exists="append", index=False)
+        self.df.to_sql(table_name, config.connection_string, schema="apl", chunksize=10000, if_exists="append",
+                       index=False)
         print("Committed")
 
 

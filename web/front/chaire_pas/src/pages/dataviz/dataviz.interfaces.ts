@@ -13,6 +13,7 @@ export interface GeoInputDTO {
     exp: number;
     hc: string;
     resolution: string;
+    apl_type: string;
 }
 
 export interface GeometryDTO {

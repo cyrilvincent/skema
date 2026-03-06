@@ -1,6 +1,5 @@
-Fullscreen commune : bug affiche iris
 Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 CMS
-Repasser en lazy quand on aura nginx
-Ajouter pram APL+S (défaut) ou APL L only
+Server : Repasser en lazy
+APL_S : back + csv + fullscreen

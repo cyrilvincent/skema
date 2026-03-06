@@ -24,7 +24,7 @@ export class Dataviz {
     this.selectedCode.set(code);
   }
 
-  ok(params: [Specialite, number, number, string, boolean, string, string, string | null]): void {
+  ok(params: [Specialite, number, number, string, boolean, string, string, string | null, string]): void {
     const s: GeoInputDTO = {
       code: this.selectedCode()?.[0] ?? "CC-38205",
       id: params[0].id, 
@@ -33,6 +33,7 @@ export class Dataviz {
       exp: params[2],
       hc: params[3],
       resolution: params[5],
+      apl_type: params[8],
     };
     this.dto.set(s);
     this.geoType.set(params[6])

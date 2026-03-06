@@ -17,6 +17,7 @@ export class Fullscreen {
   type = signal<string>("APL");
   service = inject(GeoService);
   label = signal<string>("");
+  geoType = signal("iris");
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
@@ -28,12 +29,14 @@ export class Fullscreen {
       exp: Number(usp.get("exp")!),
       hc: usp.get("hc")!,
       resolution: usp.get("resolution")!,
+      apl_type: usp.get("aplType")!,
     };
     this.dto.set(dto);
-    this.type.set(usp.get("type")!)
-    this.label.set(usp.get("label")!)
+    this.type.set(usp.get("type")!);
+    this.label.set(usp.get("label")!);
+    this.geoType.set(usp.get("geoType")!);
     console.log("DTO "+this.type());
     console.log(this.dto());
-    }
+  }
 
 }

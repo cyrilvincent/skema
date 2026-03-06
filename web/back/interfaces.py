@@ -9,5 +9,6 @@ class GeoInputDTO(BaseModel):
     exp: float
     hc: str
     resolution: str
+    apl_type: str
 
 

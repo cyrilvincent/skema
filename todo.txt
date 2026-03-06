@@ -7,11 +7,5 @@ Projet 3 = New PS (downloader + parser)
     https://www.data.gouv.fr/datasets/annuaire-sante-ameli
     URS stable (à verif) URL stable : https://www.data.gouv.fr/api/1/datasets/r/432983b9-2e6f-473a-b35a-20403c300a5f
 Projet 4 = Divers
-    Ameli 24 ? + MAJ du apl/ps_starts à porter dans ameli
+    Ameli 24 + MAJ du apl/ps_stats + filo 22 + filo<18 + pop22 + damir25
 Projet 5 = CMS
-Projet 6 = APL_S avec les non libéraux
-code_mode_exercice="S" ET (Raison sociale site="CDS" OU "MSP" OU "Centre de Santé OU "C.D.S" OU M.S.P (verif les valeurs)
-MAISON SANTE + MAISON MEDICALE + maison de sante
-Ne pas prendre : MAS
-
-
