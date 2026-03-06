@@ -2,8 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, injec
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
-import { Y } from '@angular/cdk/keycodes';
-import { textChangeRangeIsUnchanged } from 'typescript';
 //import Plotly from 'plotly.js-dist-min'
 
 @Component({

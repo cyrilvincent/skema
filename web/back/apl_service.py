@@ -431,9 +431,8 @@ class APLService:
                      time_type: str,
                      aexp: float,
                      resolution: str,
-                     with_sal: bool,
-                     ) -> tuple[dict, any]:
-        print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp}")
+                     with_sal: bool) -> tuple[dict, any]:
+        print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
@@ -455,7 +454,7 @@ class APLService:
                          time_type: str,
                          aexp: float,
                          with_sal: bool) -> pd.DataFrame:
-        print(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp}")
+        print(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
@@ -468,7 +467,7 @@ class APLService:
                         aexp: float,
                         resolution: str,
                         with_sal: bool) -> tuple[dict, any]:
-        print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution}")
+        print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
@@ -488,7 +487,7 @@ class APLService:
                             time_type: str,
                             aexp: float,
                             with_sal: bool) -> pd.DataFrame:
-        print(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp}")
+        print(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl = self.group_apl_by_commune(apl)
         apl["year"] = apl["year"]+2000
