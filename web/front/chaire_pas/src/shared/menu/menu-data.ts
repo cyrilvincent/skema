@@ -2,6 +2,7 @@ export interface MenuItem {
     id: number;
     nb: number;
     icon: string;
+    style?: string;
     label: string;
     url?: string;
     fragment?: string;
@@ -52,59 +53,84 @@ export const data: MenuItem[] = [
         icon: "science",
         label: "Recherche",
         url: "/research",
+        subMenuItems: [
+            {
+                id:201,
+                nb:2,
+                icon: "travel_explore",
+                label: "Axes de recherche",
+                url: "/research",
+            },
+            {
+                id:202,
+                nb:2,
+                icon: "map",
+                label: "Publications et travaux scientifiques",
+                url: "/publication",
+            },
+            {
+                id:203,
+                nb:2,
+                icon: "place",
+                label: "Etudes",
+                url: "/publication",
+                fragment: "etudes"
+            },
+        ]
     },
     {
-        id:300,
-        nb:3,
-        icon: "analytics",
-        label: "Data",
-        url: "/data",
-    },
-    {
-        id: 400,
-        nb:4,
+        id: 300,
+        nb: 3,
         icon: "article",
-        label: "Medias",
+        label: "Equipe",
         url: "/media",
     },
     {
-        id: 500,
-        nb:5,
+        id: 400,
+        nb: 4,
         icon: "info",
-        label: "A propos",
+        label: "Nous soutenir",
         url: "/sustain",
         subMenuItems: [
             {
-                id: 501,
-                nb:5,
+                id: 401,
+                nb: 4,
                 icon: "support",
                 label: "Nous soutenir",
                 url: "/sustain",
             },
             {
-                id:502,
-                nb:5,
+                id: 402,
+                nb: 4,
                 icon: "info",
                 label: "A propos",
                 url: "/about",
             },
             {
-                id:503,
-                nb:5,
+                id: 403,
+                nb: 4,
                 icon: "group",
                 label: "Les membres fondateurs",
                 url: "/about",
                 fragment: "members"
             },
             {
-                id:504,
-                nb:5,
+                id: 404,
+                nb: 4,
                 icon: "settings",
                 label: "Paramètres",
                 url: "/about",
                 fragment: "versions"
             },
         ]
+    },
+    {
+        id: 500,
+        nb: 5,
+        icon: "person",
+        //style: "color: white; -webkit-text-stroke: 1px #0B586F;",
+        label: "",
+        url: "/e0206m2205",
     },
 
 ]

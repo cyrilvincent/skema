@@ -23,7 +23,7 @@ html {
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
-    typography: Roboto,
+    typography: Poppins,
     density: 0,
   ));
 }
@@ -60,7 +60,7 @@ html {
 
 html, body {
   height: 100%;
-  font-family: Roboto;
+  font-family: Poppins;
   color: $text-color;
   background-color: #fff;
   font-size: 16px;
@@ -130,9 +130,14 @@ li {
     display: block;
     line-height: 1.1;
     padding: 36px 0px;
-    color: #ffffff;
+    //color: #ffffff;
     font-weight: 600;
     text-align: center;
+}
+
+
+mat-icon {
+  vertical-align: sub;
 }
 
 

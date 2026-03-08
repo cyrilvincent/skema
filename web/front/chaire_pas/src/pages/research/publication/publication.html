@@ -1,0 +1,11 @@
+<div class="container">
+    <div class="sub-title">Publications</div>
+    @for (p of service.publications(); track p.id) {
+        <p>
+            <b>{{p.title}}. @if(p.year) {({{p.year}})}</b>
+        </p>
+        <p style="text-transform: uppercase">{{p.authors}}</p>
+        @if(p.source) {<p>{{p.source}} @if(p.url) {<a [href]="p.url" target="_blank" rel="noreferrer"><mat-icon>launch</mat-icon></a>}</p>}
+        <br>
+    }
+</div>

@@ -2,55 +2,6 @@ Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
-Remplacer titre de la Chaire par « Chaire Prévention et Accès aux soins ».
-
-Remplacer Onglet « A propos » par nous soutenir
-
-Pourquoi soutenir la Chaire ?
-Accéder à une expertise et à des données uniques
-En soutenant la Chaire, vous contribuez au développement du premier observatoire local de l’accès aux soins, destiné à produire une information rigoureuse et visuelle sur l’évolution de l’offre de soins et son adéquation aux besoins des populations. Cet observatoire a vocation à devenir un outil de référence pour les acteurs publics, les institutions de santé et l’ensemble des partenaires engagés dans l’amélioration de l’accès aux soins.
-Contribuer à un projet à fort impact sociétal
-La Chaire a pour ambition de répondre aux grands défis contemporains en matière d’accès aux soins et d’inégalités de santé. Elle s’inscrit également dans une démarche de formation et d’inclusion, en développant des nouveaux programmes universitaires.
-Soutenir une recherche académique de premier plan
-Votre soutien permettra de développer des travaux de recherche à la frontière de l’économie, de la santé publique et des sciences sociales, afin de mieux comprendre l’influence des facteurs économiques, sociaux et environnementaux sur la santé et d’éclairer les décisions publiques.
-
-Comment devenir partenaire ?
-
-Les organisations souhaitant soutenir la Chaire et rejoindre un réseau de partenaires engagés dans l’amélioration de l’accès aux soins sont invitées à prendre contact avec la direction de la Chaire :
-benjamin.montmartin@skema.edu
-
-Dans  l’onglet « Recherche » :
-Faire un premier Sous-Onglet « Axes de recherche »
-Nos travaux scientifiques s’articulent autour de deux axes principaux de recherche:
-
-Axe 1 : Comportements des professionnels de santé, organisation du système de santé et accès aux soins
-
-
-•	Déterminants de la tarification des médecins libéraux : concurrence, qualité, altruisme et effets de pairs.
-•	Déterminants de la localisation des médecins libéraux
-•	Efficacité des politiques publiques de limitations des dépassements d’honoraires.
-•	Interdépendances entre médecine de ville et médecine hospitalière.
-
-Axe 2 : Impact de l’exposome sur la santé
-
-•	Analyse de l’impact de l'environnement (particules fines, soleil, perturbateurs endocriniens,…) sur différentes pathologies.
-•	Analyse de la santé des femmes (à définir avec PA)
-•	Emergences infectieuses : nouveaux virus, nouveaux périls, nouveaux vecteurs
-•	Impact de politiques préventives sur la santé des populations
-
-
-
-
-Faire un deuxième sous-onglet « Publications et travaux scientifiques » et inclure ces publications (par ordre de date de publication  plus récentes aux plus anciennes)
-
-Publications
-MONTMARTIN B. & HERRERA M. (2023), "Spatial dependence in physicians’ prices and additional fees: Evidence from France", Journal of Health Economics, Volume 88, 102724, https://doi.org/10.1016/j.jhealeco.2023.102724, lien internet: https://www.sciencedirect.com/science/article/abs/pii/S0167629623000012
-BAILLY, L., BELGAIED, R., JOBERT, T. et MONTMARTIN, B. (2025). Socioeconomic determinants of pandemics: a spatial methodological approach with evidence from COVID-19 in Nice, France. Geospatial Health, 20(2). Lien internet: https://www.geospatialhealth.net/gh/article/view/1383
-BARGNA, L., LA TORRE, D., MAGGISTRO, R. et MONTMARTIN, B. (2026). Balancing health and sustainability: Optimizing investments in organic vs. conventional agriculture through pesticide reduction. Journal of Economic Behavior and Organization, 243, pp. 107442. Lien internet: https://www.sciencedirect.com/science/article/pii/S0167268126000302
-Crouzat, A., Cremoni, M., Boukaïdi, S., Seitz-Polski, B., & Gauci, P. A. (2026). “Chronic air pollution exposure is associated with lower chance of live birth after frozen embryo transfer”. Reproductive BioMedicine Online, Volume 52, Issue 4. Lien internet : https://www.rbmojournal.com/article/S1472-6483(25)00625-X/fulltext
-Allouche J, Cremoni M, Brglez V, Graça D, Benzaken S, Zorzi K, Fernandez C, Esnault V, Levraut M, Oppo S, Jacquinot M, Armengaud A, Pradier C, Bailly L, Seitz-Polski B. (2022), “Air pollution exposure induces a decrease in type II interferon response: A paired cohort study”, EBioMedicine, Volume 85, 104291, doi: 10.1016/j.ebiom.2022.104291. Lien internet: https://www.thelancet.com/journals/ebiom/article/PIIS2352-3964(22)00473-X/fulltext
-Cremoni M, Agbekodo S, Teisseyre M, Zorzi K, Brglez V, Benzaken S, Esnault V, Planchard JH, Seitz-Polski B., (2022) “Toxic Occupational Exposures and Membranous Nephropathy”, Clinical Journal of the American Society of Nephrology, Volume 17(11), p.1609-1619. doi: 10.2215/CJN.02930322. Lien : https://journals.lww.com/cjasn/fulltext/2022/11000/toxic_occupational_exposures_and_membranous.8.aspx
-
 Travaux en cours
 Lambotte M. & Montmartin B., “Conformity, Competition, and Voluntary Price Regulation: Evidence from French Physicians”
 Gauci P.A & Montmartin B., “Adenomyosis and Time to Live Birth in Assisted Reproductive Technology: A Retrospective Matched Cohort Study”
@@ -130,17 +81,10 @@ L’observatoire va s’enrichir au fil du temps en intégrant des informations 
 Mettre en dessous la carte de France avec lien vers l’observatoire
 
 
-Autres modifs
-
-Enlever les picto devant chaque item menus
-
-Changer la police : Google Font Poppins
 Dans le header du haut (Mettre à Gauche SKEMA et mettre à droite le logo  Université Côte d’Azur). Taille du logo Université doit être de la même taille que celui de SKEMA. Ne pas mettre le logo France 2030
 Page d’accueil  image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en  voir proposition Image (Chat GPT)
 
 Enlever les images pour chaque rubrique
-
-Nom de domaine : chaire_paas.com ?
 
 Mettre le logo IDex avec le texte Missions (cf description changement contenu Missions)
 
@@ -148,10 +92,13 @@ En bas si possible mettre les 5 logos (faire défiler si trop lourd) : SKEMA, Un
 
 Vérifier et s’assurer de la conformité au RGPD sur les points suivants (cf SKEMA)
 •	Informations légales
-•	Accessibilité : 77,14 % (site SKEMA)
+•	Accessibilité : 77,14 % (site SKEMA) : faire lighthouse
 •	Plan du site
 •	Gérer les cookies
-•	© SKEMA Business School & Université Côte d’Azur
 
-Pour l’onglet Data, je pense que le mieux est de le supprimer et de l’intégrer avec l’observatoire. Je dois encore réfléchir à quels contenu mettre en Open data. Ce qui serait bien c’est de mettre à disposition l’ensemble des données à l’aide d’un accès comme on en a parlé.
+Je partage avec toi cet autre texte à mettre dans la partie Partenaires concernant le GREDEG.
+
+GREDEG CNRS : https://gredeg.univ-cotedazur.fr/
+Le GREDEG (UMR 7321) est une Unité Mixte de Recherche placée sous la double tutelle du CNRS et d’Université Côte d’Azur, et Unité Sous Contrat avec INRAe (USC 1365). Le laboratoire rassemble des chercheurs du CNRS et de l’INRAE ainsi que des enseignants-chercheurs d’Université Côte d’Azur et de SKEMA Business School, au sein d’un environnement scientifique reconnu pour la qualité et l’impact international de ses travaux.
+Les recherches menées au GREDEG portent sur les dynamiques de l’innovation, de la connaissance et des transformations économiques et institutionnelles. La spécificité du laboratoire réside dans son approche pluridisciplinaire, qui articule économie, droit, management et sociologie afin d’analyser des enjeux complexes et d’alimenter le dialogue entre recherche académique, politiques publiques et acteurs socio-économiques.
 

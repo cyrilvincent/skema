@@ -1,1 +1,13 @@
+mat-icon {
+  vertical-align: sub;
+}
+
+p {
+    padding-top: 10px;
+}
+
+
+p:has(> b) {
+  padding-top: 20px;
+}
 

@@ -5,10 +5,11 @@
 export const environment = {
   title: "Chaire Prévention et Accès aux soins",
   production: false,
-  version: '0.0.1.Dev',
-  copyright: 'Skema Business School 2026',
-  baseUrl: 'http://127.0.0.1:8000',
-  loading: 'En cours de chargement',
+  version: "0.0.2.Dev",
+  copyright: "SKEMA Business School & Université Côte d’Azur 2026",
+  baseUrl: "http://127.0.0.1:8000",
+  loading: "En cours de chargement",
+  dns: "chaire_paas.com",
 };
 
 /*
@@ -17,4 +18,4 @@ export const environment = {
  * below file. Don't forget to comment it out in production mode
  * because it will have a performance impact when errors are thrown
  */
-// import 'zone.js/dist/zone-error';  // Included with Angular CLI.
+//import 'zone.js/dist/zone-error';  // Included with Angular CLI.

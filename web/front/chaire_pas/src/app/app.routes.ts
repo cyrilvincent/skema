@@ -7,59 +7,66 @@ import { Data } from '../pages/data/data';
 import { Research } from '../pages/research/research';
 import { Sustain } from '../pages/sustain/sustain';
 import { Media } from '../pages/media/media';
+import { environment } from '../environments/environment';
+import { Publication } from '../pages/research/publication/publication';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
 export const routes: Routes = [
   {
     path: '',
-    title: "Missions: Chaire pour la prévention et l'accès aux soins",
+    title: "Missions: "+environment.title,
     component: Home,
   },
   {
     path: 'observatoire',
-    title: "L'Observatoire: Chaire pour la prévention et l'accès aux soins",
+    title: "L'Observatoire: "+environment.title,
     component: Observatoire,
   },
   {
     path: 'about',
-    title: "A propos: Chaire pour la prévention et l'accès aux soins",
+    title: "A propos: "+environment.title,
     loadComponent: () =>
       import('../pages/about/about').then((m) => m.About),
   },
   {
     path: 'data',
-    title: "Dataviz: Chaire pour la prévention et l'accès aux soins",
+    title: "Dataviz: "+environment.title,
     component: Data,
   },
   {
     path: 'sae',
-    title: "SAE: Chaire pour la prévention et l'accès aux soins",
+    title: "SAE: "+environment.title,
     //component: Sae,
     loadComponent: () =>
       import('../pages/sae/sae').then((m) => m.Sae),
   },
   {
     path: 'apl',
-    title: "APL: Chaire pour la prévention et l'accès aux soins",
+    title: "APL: "+environment.title,
     //component: Apl,
     loadComponent: () =>
       import('../pages/apl/apl').then((m) => m.Apl),
   },
   {
     path: 'research',
-    title: "Recherche: Chaire pour la prévention et l'accès aux soins",
+    title: "Recherche: "+environment.title,
     component: Research,
   },
   {
     path: 'sustain',
-    title: "Nous soutenir: Chaire pour la prévention et l'accès aux soins",
+    title: "Nous soutenir: "+environment.title,
     component: Sustain,
   },
   {
     path: 'media',
-    title: "Medias: Chaire pour la prévention et l'accès aux soins",
+    title: "Medias: "+environment.title,
     component: Media,
+  },
+  {
+    path: 'publication',
+    title: "Publications: "+environment.title,
+    component: Publication,
   },
   {
     path: 'e0206m2205',
