@@ -2,10 +2,28 @@
     <div class="sub-title">Publications</div>
     @for (p of service.publications(); track p.id) {
         <p>
-            <b>{{p.title}}. @if(p.year) {({{p.year}})}</b>
+            <b>"{{p.title}}". @if(p.year) {({{p.year}})}</b>
         </p>
-        <p style="text-transform: uppercase">{{p.authors}}</p>
+        <p style="text-transform: uppercase">{{p.authors}}.</p>
         @if(p.source) {<p>{{p.source}} @if(p.url) {<a [href]="p.url" target="_blank" rel="noreferrer"><mat-icon>launch</mat-icon></a>}</p>}
         <br>
     }
+    <div class="sub-title">Travaux en cours</div>
+    @for (p of service.works(); track p.id) {
+        <p>
+            <b>"{{p.title}}".</b>
+        </p>
+        <p style="text-transform: uppercase">{{p.authors}}.</p>
+        <br>
+    }
+    <div id="studies" class="anchor"> 
+    <div class="sub-title">Etudes</div>
+    @for (p of service.studies(); track p.id) {
+        <p>
+            <b>"{{p.title}}". @if(p.year) {({{p.year}})}</b>
+        </p>
+        <p>Publié par {{p.publisher}}. @if(p.url) {<a [href]="p.url" target="_blank" rel="noreferrer"><mat-icon>launch</mat-icon></a>}</p>
+        <br>
+    }
+    </div>   
 </div>

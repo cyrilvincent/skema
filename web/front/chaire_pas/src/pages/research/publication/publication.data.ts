@@ -1,11 +1,12 @@
 export interface PublicationDTO {
     id: number;
     title: string;
-    authors: string;
-    source: string;
-    year: number;
+    authors?: string;
+    source?: string;
+    year?: number;
     type: string;
-    url: string;
+    url?: string;
+    publisher?: string;
 }
 
 export const publications: PublicationDTO[] = [
@@ -62,5 +63,73 @@ export const publications: PublicationDTO[] = [
         source: "Clinical Journal of the American Society of Nephrology, Volume 17(11), p.1609-1619. doi: 10.2215/CJN.02930322",
         url: "https://journals.lww.com/cjasn/fulltext/2022/11000/toxic_occupational_exposures_and_membranous.8.aspx",
         type: "P"
+    },
+]
+
+export const works: PublicationDTO[] = [
+    {
+        id:7,
+        title: "Conformity, Competition, and Voluntary Price Regulation: Evidence from French Physicians",
+        authors: "Lambotte M. & Montmartin B.",
+        type: "W"
+    },
+    {
+        id:8,
+        title: "Adenomyosis and Time to Live Birth in Assisted Reproductive Technology: A Retrospective Matched Cohort Study",
+        authors: "Gauci P.A & Montmartin B.",
+        type: "W"
+    },
+    {
+        id:9,
+        title: "Where patients live matters: Linking environmental exposure, healthcare access, and income to IVF success",
+        authors: "Montmartin B., Laffineur C. & Gauci P.A",
+        type: "W"
+    },
+]
+
+export const studies: PublicationDTO[] = [
+    {
+        id:10,
+        year: 2026,
+        title: "Reconversion professionnelle : désir et obstacle",
+        url: "https://www.cepremap.fr/2026/02/reconversion-professionnelle-desir-et-obstacles/",
+        publisher: "CEPREMAP",
+        type: "S"
+    },
+    {
+        id:11,
+        year: 2025,
+        title: "Lutte contre les déserts médicaux en France : Les avantages de l'installation obligatoire",
+        url: "https://publika.skema.edu/fr/lutte-contre-les-deserts-medicaux-en-france/",
+        publisher: "SKEMA Publika",
+        type: "S"
+    },
+    {
+        id:12,
+        year: 2024,
+        title: "Etude sur les Dépassements d'honoraires",
+        publisher: "UFC que Choisir",
+        type: "S"
+    },
+    {
+        id:13,
+        year: 2023,
+        title: "Etude sur l'aggravation de l'accès aux soins",
+        publisher: "UFC que Choisir",
+        type: "S"
+    },
+    {
+        id:14,
+        year: 2023,
+        title: "Etude sur la tension dans les services d'urgences",
+        publisher: "UFC que Choisir",
+        type: "S"
+    },
+    {
+        id:15,
+        year: 2022,
+        title: "Etude sur le fracture sanitaire et les déserts médicaux",
+        publisher: "UFC que Choisir",
+        type: "S"
     },
 ]

@@ -74,7 +74,7 @@ export const data: MenuItem[] = [
                 icon: "place",
                 label: "Etudes",
                 url: "/publication",
-                fragment: "etudes"
+                fragment: "studies"
             },
         ]
     },

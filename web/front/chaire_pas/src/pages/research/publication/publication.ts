@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { PublicationService } from './publication.service';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [MatIconModule],
   templateUrl: './publication.html',
   styleUrl: './publication.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Publication {
 
@@ -14,6 +15,8 @@ export class Publication {
 
   constructor() {
     this.service.getPublications();
+    this.service.getWorks();
+    this.service.getStudies();
   }
 
 }
