@@ -1,44 +1,28 @@
 <div class="container">
-    <div class="sub-banner">
-        <span class="sub-title" [style]="service.isMobile() ? 'color: #0B586F;font-size: 15px;padding: 50px 0px 20px 0px;' : 'background-image: linear-gradient(rgba(0,0,0,0.2)), url(\'img/banner0.jpg\'); height: 200px; background-position: 50% 40%;'">Les missions de la Chaire</span>
+    <br>
+    <p><b>L'Université Côte d'Azur et Skema Business School se sont associées pour créer une Chaire dédiée à la recherche sur la prévention et l'accès aux soins.</b></p>
+    <p>Cette Chaire est soutenue et labelisée Initiative d'Excellence par l'Université Côte d'Azur (IdeX)
+        <a href="https://univ-cotedazur.fr/universite/idex" target="_blank" rel="noreferrer"><mat-icon>launch</mat-icon>.<img src="img/idex_6.png" alt="idex" style="width:128px;display:inline;vertical-align: middle;"></a></p>
+    <br>
+    <div class="sub-title">Les missions de la Chaire Prévention et Accès aux Soins</div>
+    <p>Créée en 2025, la Chaire Prévention et Accès aux Soins développe une approche pluridisciplinaire et syndémique pour analyser les inégalités sociales et territoriales de santé. Elle est dirigée par Benjamin Montmartin, Professeur d'Econométrie et de Data Science à SKEMA Business School et chercheur affilié au laboratoire GREDEG CNRS.</p>
+    <br>
+    <p><b>La Chaire s'articule autour de quatre missions principales :</b></p>
+    <div>
+        <ul>
+            <li>Fournir à l'ensemble de la société une information objective sur l'évolution de l'accès aux soins dans les territoires via son observatoire et une publication annuelle.</li>
+            <li>Développer une recherche scientifique de premier plan sur les thématiques de prévention et d’accès aux soins.</li>
+            <li>Proposer des formations permettant d'exploiter et de valoriser les données de santé.</li>
+            <li>Contribuer aux débats sur les politiques publiques permettant d'améliorer la santé des populations en France.</li>
+        </ul>
     </div>
-    <p class="bold">L'Université Côte d'Azur et Skema Business School se sont associées pour créer une Chaire dédiée à la recherche sur l'accès aux soins et la prévention.</p>
-    <p class="bold">Cette Chaire est soutenue et labelisée Initiative d'Excellence par l'Université Côte d'Azur (IdeX).</p>
-    <div class="spacer"></div>
-    <div class="wsite-multicol">
-        <div class="wsite-multicol-table-wrap">
-            <table class="wsite-multicol-table">
-                <tbody class="wsite-multicol-tbody">
-                    <tr class="wsite-multicol-tr">
-                        <td class="wsite-multicol-col" style="width:50%; padding:0 15px;">
-                            <div class="paragraph" style="text-align:justify;">
-                                La Chaire pour la prévention et l’accès aux soins regroupe une équipe pluridisciplinaire dont les travaux portent sur les <b>inégalités sociales et territoriales de santé et notamment :</b><br><br>
-                                <b>1) L’analyse du comportement économique des professionnels de santé et de l’organisation du système de santé sur l’accès aux soins des patients.</b><br><br>
-                                <b>2) L’analyse des déterminants de la santé des individus notamment via les liens entre exposome interne (facteurs individuels) et exposome externe (facteurs sociaux-économiques et environnementaux).</b><br>
-                                Notre ambition est de produire et diffuser largement des contenus uniques à l’ensemble des parties prenantes du système de santé afin d’améliorer la santé des populations en France. 
-                            </div>
-                        </td>
-                        @if(!service.isMobile()) {
-                            <td class="wsite-multicol-col" style="width:50%; padding:0 15px;">
-                                <div>
-                                    <div class="wsite-image wsite-image-border-none " style="padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center">
-                                        <img src="img/sant-num-rique_orig.png" alt="Santé numérique" style="width:auto;max-width:100%">
-                                        <div style="display:block;font-size:90%"></div>
-                                    </div>
-                                    <div>
-                                        <div class="wsite-image wsite-image-border-none " style="padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center">
-                                            <img src="img/secteur-sante.png" alt="Secteur santé" style="width:auto;max-width:100%">
-                                            <div style="display:block;font-size:90%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        }
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <br><br>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        @if(!service.isMobile()) {
+            <img src="img/sant-num-rique_orig.png" alt="Santé numérique" style="width:550px">
+        }
     </div>
+    
 </div>
 
 
