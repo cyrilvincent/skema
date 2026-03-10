@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { Home } from '../pages/home/home';
 import { Observatoire } from '../pages/observatoire/observatoire';
 import { Admin } from '../shared/admin/admin';
-import { Data } from '../pages/data/data';
 import { Research } from '../pages/research/research';
 import { Sustain } from '../pages/sustain/sustain';
 import { environment } from '../environments/environment';
@@ -29,11 +28,6 @@ export const routes: Routes = [
     title: "A propos: "+environment.title,
     loadComponent: () =>
       import('../pages/about/about').then((m) => m.About),
-  },
-  {
-    path: 'data',
-    title: "Dataviz: "+environment.title,
-    component: Data,
   },
   {
     path: 'sae',

@@ -9,9 +9,8 @@
 .mobile-menu {
     font-size: 14px;
     text-transform: uppercase;
-    font-weight: 200;
     position: absolute;
-    top: 110px;
+    top: 115px;
 }
 
 .container ul {
@@ -31,12 +30,12 @@
 
 .menu > .container > ul > li > a {
     font-weight: 400 !important;
-    letter-spacing: 3px !important;
+    letter-spacing: 2px;
 }
 
 .menu-container > li > a {
     padding-bottom: 11px;
-    letter-spacing: 0.03em;
+    //letter-spacing: 0.03em;
     border-bottom: 3px solid transparent;
     transition: border-bottom 0.2s ease-in;
 }
@@ -57,13 +56,13 @@
     color: #fff;
 }
 
-.menu > .container > .menu-container > li#active > a {
+.menu .menu-container > li#active > a {
     border-bottom: 3px solid ;
     border-color: #0B586F;
     position: relative;
 }
 
-.menu > .container > .menu-container > li > a:hover {
+.menu > .menu-container > li > a:hover {
     border-bottom: 3px solid ;
     position: relative;
 }
@@ -74,11 +73,11 @@
     position: absolute;
     pointer-events: all;
     border-radius: 9px;
-    background: rgba(250, 250, 255, 0.8);
+    background: rgba(250, 250, 255, 0.9);
     left: -115px;
     top: 99%;
     z-index: 999;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
     list-style-type: none;
     display: none;
     padding: 15px;
@@ -92,7 +91,7 @@
 }
 
 .sub-menu-item {
-    flex: 1 1 100%; //calc(50% - 20px);
+    flex: 1 1 100%;
     grid-template-rows: auto 0px;
     display: grid;
 }
@@ -122,11 +121,11 @@
     letter-spacing: 1px;
 }
 
-.toolbar-center {
-    justify-content: center;
-    background-color: #fff;
-    border-bottom: 1px solid rgba(116, 116, 116, 0.15);
-}
+// .toolbar-center {
+//     justify-content: center;
+//     background-color: #fff;
+//     border-bottom: 1px solid rgba(116, 116, 116, 0.15);
+// }
 
 .hamburger {
     cursor: pointer;

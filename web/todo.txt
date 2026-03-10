@@ -2,27 +2,8 @@ Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
-Dans l’ Onglet « Observatoire » ajouter ce texte
-
-La Chaire développe le premier observatoire local d’accès aux soins de santé en France. Il permet notamment de visualiser et quantifier l’évolution de l’accessibilité de la population aux différents services de santé à un niveau infra-communal.
-
-Cet observatoire s’appuie sur une plateforme de données géolocalisées unique développée depuis 6 ans.
-
-Pour les soins de premier recours (médecine de ville), l’indicateur retenu est l’APL (Accessibilité Potentielle Localisée – lien vers le document méthodologique), qui mesure la facilité avec laquelle les habitants d’un territoire peuvent accéder à un professionnel de santé. Il tient compte du nombre de professionnels accessibles à proximité, du temps de trajet pour les consulter, ainsi que des besoins de la population locale.
-
-Pour les soins hospitaliers, nous mesurons le temps d’accès aux établissements ainsi que la tension des services, évaluée à partir du volume d’activité rapporté au nombre de médecins en équivalent temps plein (ETP).
-
-L’observatoire va s’enrichir au fil du temps en intégrant des informations sur l’accessibilité à d’autres services de santé (comme les pharmacies, EHPAD,…).
-
-Mettre en dessous la carte de France avec lien vers l’observatoire
-
-
 Dans le header du haut (Mettre à Gauche SKEMA et mettre à droite le logo  Université Côte d’Azur). Taille du logo Université doit être de la même taille que celui de SKEMA. Ne pas mettre le logo France 2030
 Page d’accueil  image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en  voir proposition Image (Chat GPT)
-
-Enlever les images pour chaque rubrique
-
-Mettre le logo IDex avec le texte Missions (cf description changement contenu Missions)
 
 En bas si possible mettre les 5 logos (faire défiler si trop lourd) : SKEMA, Université Côte d’Azur, GREDEG-CNRS, Faculté de Médecine, EUR ELMI
 
@@ -31,10 +12,3 @@ Vérifier et s’assurer de la conformité au RGPD sur les points suivants (cf S
 •	Accessibilité : 77,14 % (site SKEMA) : faire lighthouse
 •	Plan du site
 •	Gérer les cookies
-
-Je partage avec toi cet autre texte à mettre dans la partie Partenaires concernant le GREDEG.
-
-GREDEG CNRS : https://gredeg.univ-cotedazur.fr/
-Le GREDEG (UMR 7321) est une Unité Mixte de Recherche placée sous la double tutelle du CNRS et d’Université Côte d’Azur, et Unité Sous Contrat avec INRAe (USC 1365). Le laboratoire rassemble des chercheurs du CNRS et de l’INRAE ainsi que des enseignants-chercheurs d’Université Côte d’Azur et de SKEMA Business School, au sein d’un environnement scientifique reconnu pour la qualité et l’impact international de ses travaux.
-Les recherches menées au GREDEG portent sur les dynamiques de l’innovation, de la connaissance et des transformations économiques et institutionnelles. La spécificité du laboratoire réside dans son approche pluridisciplinaire, qui articule économie, droit, management et sociologie afin d’analyser des enjeux complexes et d’alimenter le dialogue entre recherche académique, politiques publiques et acteurs socio-économiques.
-

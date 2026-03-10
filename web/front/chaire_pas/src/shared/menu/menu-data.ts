@@ -105,38 +105,6 @@ export const data: MenuItem[] = [
         icon: "info",
         label: "Nous soutenir",
         url: "/sustain",
-        subMenuItems: [
-            {
-                id: 501,
-                nb: 5,
-                icon: "support",
-                label: "Nous soutenir",
-                url: "/sustain",
-            },
-            {
-                id: 502,
-                nb: 5,
-                icon: "info",
-                label: "A propos",
-                url: "/about",
-            },
-            {
-                id: 503,
-                nb: 5,
-                icon: "group",
-                label: "Les membres fondateurs",
-                url: "/about",
-                fragment: "members"
-            },
-            {
-                id: 504,
-                nb: 5,
-                icon: "settings",
-                label: "Paramètres",
-                url: "/about",
-                fragment: "versions"
-            },
-        ]
     },
     {
         id: 600,
@@ -144,7 +112,24 @@ export const data: MenuItem[] = [
         icon: "person",
         //style: "color: white; -webkit-text-stroke: 1px #0B586F;",
         label: "",
-        url: "/e0206m2205",
+        url: "/about",
+        subMenuItems: [
+            {
+                id: 601,
+                nb: 6,
+                icon: "info",
+                label: "Se connecter",
+                url: "/about",
+            },
+            {
+                id: 602,
+                nb: 6,
+                icon: "settings",
+                label: "A propos",
+                url: "/about",
+                fragment: "versions"
+            },
+        ]
     },
 
 ]

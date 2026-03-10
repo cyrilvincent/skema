@@ -1,26 +1,32 @@
 
 <div class="container">
-    <div class="sub-banner">
-        <span class="sub-title" [style]="commonService.isMobile() ? 'color: #0B586F;font-size: 15px;padding: 50px 0px 20px 0px;' : 'background-image: linear-gradient(rgba(0,0,0,0.5)), url(\'img/banner1.jpg\'); height: 100px; background-position: 50.0% 50.0%;'">L'observatoire de l'accès aux soins</span>
-    </div>
-    <div class="paragraph" style="text-align:left;">
-        Nous développons<strong>&nbsp;le premier Observatoire d’accès aux soins de santé en France.&nbsp;</strong>Il s’appuie sur une plateforme de<strong> données uniques</strong> développée depuis 5 ans, et un ensemble de techniques de pointe en intelligence artificielle (IA) qui permettent de produire des indicateurs et des analyses territoriales fines.<br><br><strong>Notre ambition est de </strong><strong>rendre une partie de cette production accessible à&nbsp;la communauté scientifique, des territoires, des acteurs de la santé et de la société civile en Open Data</strong> (onglet Data du site).<br><br>
-        Les données produites par l’observatoire permettront notamment de :<br>• Comparer les territoires en matière d’adéquation de l’offre de santé et de préciser la notion de <strong>désert médical.</strong><br>
-        • Proposer une <strong>publication annuelle</strong> de référence sur l’évolution de l’accès aux soins en France.<br>
-        • Développer des<strong> outils de pilotage et de prospective opérationnels</strong> (indicateurs, outils de visualisation) à destination des territoires pour la conduite des politiques de santé publique locales et des acteurs de la santé pour la mise en place d’offres adaptées aux besoins locaux.<br><br>
-        Depuis son lancement en 2020, l’observatoire a déjà répondu à des besoins exprimés par des partenaires externes (onglet Média du site).
-    </div>
+    <div class="sub-title">L'observatoire de l'accès aux soins</div>
+    <p>La Chaire développe <b>le premier observatoire local d'accès aux soins de santé en France</b>. Il permet notamment de visualiser et quantifier l’évolution de l'accessibilité de la population aux différents services de santé à un niveau infra-communal.</p>
     <br>
-    <div class="paragraph" style="text-align:left;">
-       APL 
-       todo
-    </div>
+    <p>Cet observatoire s'appuie sur une plateforme de données géolocalisées unique développée depuis 6 ans.</p>
     <br>
-    <div class="paragraph" style="text-align:center;">
-        <a routerLink="/apl" (click)="menuService.changeMenu(1)"> <!-- Facultatif ici c'est juste pour tester -->
-            <img src="img/france_apl_10.png" style="display: inline;">
+    <p><b>Pour les soins de premier recours</b> (médecine de ville), l'indicateur retenu est l'<b>APL</b> (Accessibilité Potentielle Localisée – TODO lien vers le document méthodologique), qui mesure la facilité avec laquelle les habitants d'un territoire peuvent accéder à un professionnel de santé. Il tient compte du nombre de professionnels accessibles à proximité, du temps de trajet pour les consulter, ainsi que des besoins de la population locale.</p>
+    <div style="text-align:center;">
+        <a routerLink="/apl" (click)="menuService.changeMenu(1)">
+            <img src="img/france_apl_10.png" matTooltip="Accès aux calcul des APL pour les généralistes" style="height: 200px;display: inline;">
         </a> 
     </div>
+    <br>
+    <p><b>Pour les soins hospitaliers</b> nous mesurons le temps d'accès aux établissements ainsi que la tension des services, évaluée à partir du volume d’activité rapporté au nombre de médecins en équivalent temps plein (ETP).</p>
+    <div style="text-align:center;">
+        <a routerLink="/sae" (click)="menuService.changeMenu(1)">
+            <img src="img/france_sae_urg.png" matTooltip="Accès aux calcul des temps d'accès pour les urgences générales" style="height: 200px;display: inline;">
+        </a> 
+    </div>
+    <br>
+    <p><b>Autres services de santé TODO</b>. L’observatoire va s’enrichir au fil du temps en intégrant des informations sur l’accessibilité à d’autres services de santé (comme les pharmacies, EHPAD,…).</p>
+    <div style="text-align:center;">
+        <a routerLink="/sae2" (click)="menuService.changeMenu(1)">
+            <img src="img/france_sae_pharma.png" matTooltip="Accès aux calcul des temps d'accès pour les pharmacies" style="height: 200px;display: inline;">
+        </a> 
+    </div>
+    <br>
+    
 </div>
 
 
