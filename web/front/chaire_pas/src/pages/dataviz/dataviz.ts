@@ -19,6 +19,7 @@ export class Dataviz {
   type = input<string>("APL");
   geoType = signal<string>("iris");
   label = signal<string | null>(null);
+  sae2 = input<boolean>(false);
 
   optionSelected(code: [string, string] | null) {
     this.selectedCode.set(code);

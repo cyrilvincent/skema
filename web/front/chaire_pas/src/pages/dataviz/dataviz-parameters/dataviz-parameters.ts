@@ -26,7 +26,8 @@ export class DatavizParameters {
   geoType = signal<string>("iris");
   geoTypeControl = new FormControl<string>("iris");
   code = input<string | null>(null);
-  specialites = computed(() => specialites[this.type()]);
+  sae2 = input<boolean>(false);
+  specialites = computed(() => this.sae2() ? specialites["SAE2"] : specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
   specialiteControl = new FormControl<Specialite | null>(null);
   selectedSpecialite = signal<Specialite>(this.generaliste());

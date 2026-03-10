@@ -186,19 +186,12 @@ for with_s in [True]: #[True, False]
 
 
                             cols = [col for col in iris_matrix_pop_df.columns if "pop" in col and col != "pop"]
-                            cols
 
-
-                            # In[78]:
                             over = get_over(year, specialite, specialite < 21)
-
                             if len(over) > 0:
-                                weights = over.values[0,3:]
+                                weights = over.values[0, 3:]
                             else:
                                 weights = np.ones(len(over.columns) - 3)
-
-                            # In[21]:
-
 
                             iris_matrix_pop_df["pop_gp"] = sum(w * iris_matrix_pop_df[c] for w, c in zip(weights, cols))
                             iris_matrix_pop_df=iris_matrix_pop_df.sort_values(by='iris2')

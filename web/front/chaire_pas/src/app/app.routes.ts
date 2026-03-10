@@ -9,6 +9,7 @@ import { Sustain } from '../pages/sustain/sustain';
 import { Media } from '../pages/media/media';
 import { environment } from '../environments/environment';
 import { Publication } from '../pages/research/publication/publication';
+import { Members } from '../pages/members/members';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -36,17 +37,24 @@ export const routes: Routes = [
   },
   {
     path: 'sae',
-    title: "SAE: "+environment.title,
+    title: "Accessibilité aux soins hospitaliers: "+environment.title,
     //component: Sae,
     loadComponent: () =>
-      import('../pages/sae/sae').then((m) => m.Sae),
+      import('../pages/dataviz/sae/sae').then((m) => m.Sae),
+  },
+  {
+    path: 'sae2',
+    title: "Accessibilité aux autres services de santé: "+environment.title,
+    //component: Sae,
+    loadComponent: () =>
+      import('../pages/dataviz/sae/sae2').then((m) => m.Sae2),
   },
   {
     path: 'apl',
-    title: "APL: "+environment.title,
+    title: "Accessibilité aux soins de premier recours: "+environment.title,
     //component: Apl,
     loadComponent: () =>
-      import('../pages/apl/apl').then((m) => m.Apl),
+      import('../pages/dataviz/apl/apl').then((m) => m.Apl),
   },
   {
     path: 'research',
@@ -67,6 +75,11 @@ export const routes: Routes = [
     path: 'publication',
     title: "Publications: "+environment.title,
     component: Publication,
+  },
+  {
+    path: 'members',
+    title: "Equipe: "+environment.title,
+    component: Members,
   },
   {
     path: 'e0206m2205',

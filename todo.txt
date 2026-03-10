@@ -13,4 +13,6 @@ Projet 6 = Nominatim OSM en local
     OSMMatcher blacklisté, changé un peu le score matcher le cas échéant
     https://nominatim.org/release-docs/latest/admin/Installation/
     https://github.com/mediagis/nominatim-docker
+Projet 7 = APL Psychologue
+    Non présent dans DAMIR
 

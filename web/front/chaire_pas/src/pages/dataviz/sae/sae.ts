@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Dataviz } from '../dataviz/dataviz';
+import { Dataviz } from '../dataviz';
 
 @Component({
   selector: 'app-sae',

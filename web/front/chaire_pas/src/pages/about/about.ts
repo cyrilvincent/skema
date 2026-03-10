@@ -1,11 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Members } from './members/members';
 import { Versions } from './versions/versions';
 
 
 @Component({
   selector: 'app-about',
-  imports: [Members, Versions],
+  imports: [Versions],
   templateUrl: './about.html',
   styleUrl: './about.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

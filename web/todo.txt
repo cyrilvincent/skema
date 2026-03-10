@@ -2,23 +2,6 @@ Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
-Faire un troisième sous-onglet « Etudes »
-2026 : Reconvertion professionnelle : désir et obstacle. Lien internet : https://www.cepremap.fr/2026/02/reconversion-professionnelle-desir-et-obstacles/
-2025 : Lutte contre les déserts médicaux en France : Les avantages de l'installation obligatoire, publié par SKEMA Publika, lien internet : https://publika.skema.edu/fr/lutte-contre-les-deserts-medicaux-en-france/
-2024: Etude sur les Dépassements d’honoraires, publié par UFC que Choisir
-2023: Etude sur l’aggravation de l’accès aux soins, publié par UFC que Choisir
-2023: Etude sur la tension dans les services d'urgences, publié par UFC que Choisir
-2022: Etude sur le fracture sanitaire et les déserts médicaux, publié par UFC que Choisir
-
-Remplacer dans sous-onglet Observatoire :
-APL par « Accessibilité aux soins de premier recours »
-SAE par « Accessibilité aux soins hospitaliers »
-Ajouter un sous-onglet « Accessibilité aux autres services de santé »  (pharmacie, EPHAD)
-
-Supprimer l’onglet Média et ajouter un onglet Equipe
--	Ajouter photo de Pierre-Alexis Gauci : Gynécologue-Obstétricien, CHU de Nice
--	Ajouter photo de Kwami Nouchet : Doctorant, SKEMA Business School
-Enlever le terme Membre fondateur et ajouter les deux photos en dessous des précentes
 Ajouter un onglet Partenaires avec logo, lien vers site web et présentation :
 Université Côte d’Azur : https://univ-cotedazur.fr/
 A propos de Université Côte d’Azur

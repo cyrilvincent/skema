@@ -1,23 +1,19 @@
-<div id="main-wrap">
-    <div id="wsite-content" class="wsite-elements wsite-not-footer">
-        <div class="wsite-section-wrap">
-            <div class="container">
-                <div class="wsite-section-elements">
-                    <div class="paragraph" style="text-align:left;">
-                        <form class="example-form">
-                            <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [type]="type()"></app-searchbox></p>
-                            <p><app-dataviz-parameters [type]="type()" 
-                                    [code]="selectedCode()?.[0] ?? null" 
-                                    [disabled]="selectedCode() == null" 
-                                    (okEvent)="ok($event)" 
-                                    [label]="selectedCode()?.[1] ?? null">
-                                </app-dataviz-parameters></p>
-                            <mat-divider></mat-divider>
-                            <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto()" [label]="label()"></app-geo-dataviz>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> 
+<div class="wsite-section-elements">
+    <div class="paragraph" style="text-align:left;">
+        <form class="example-form">
+            <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [type]="type()"></app-searchbox></p>
+            <p><app-dataviz-parameters 
+                    [type]="type()" 
+                    [code]="selectedCode()?.[0] ?? null" 
+                    [disabled]="selectedCode() == null" 
+                    (okEvent)="ok($event)" 
+                    [sae2]="sae2()"
+                    [label]="selectedCode()?.[1] ?? null">
+                </app-dataviz-parameters></p>
+            <mat-divider></mat-divider>
+            <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto()" [label]="label()"></app-geo-dataviz>
+        </form>
+    </div>
 </div>
+
+

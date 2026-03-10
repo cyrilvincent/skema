@@ -35,16 +35,23 @@ export const data: MenuItem[] = [
                 id:102,
                 nb:1,
                 icon: "map",
-                label: "APL",
+                label: "Accessibilité aux soins de premier recours",
                 url: "/apl",
             },
             {
                 id:103,
                 nb:1,
                 icon: "place",
-                label: "SAE",
+                label: "Accessibilité aux soins hospitaliers",
                 url: "/sae",
             },
+            {
+                id:104,
+                nb:1,
+                icon: "place",
+                label: "Accessibilité aux autres services de santé",
+                url: "/sae2",
+            }
         ]
     },
     {
@@ -83,40 +90,47 @@ export const data: MenuItem[] = [
         nb: 3,
         icon: "article",
         label: "Equipe",
-        url: "/media",
+        url: "/members",
     },
     {
         id: 400,
         nb: 4,
+        icon: "article",
+        label: "Partenaires",
+        url: "/media",
+    },
+    {
+        id: 500,
+        nb: 5,
         icon: "info",
         label: "Nous soutenir",
         url: "/sustain",
         subMenuItems: [
             {
-                id: 401,
-                nb: 4,
+                id: 501,
+                nb: 5,
                 icon: "support",
                 label: "Nous soutenir",
                 url: "/sustain",
             },
             {
-                id: 402,
-                nb: 4,
+                id: 502,
+                nb: 5,
                 icon: "info",
                 label: "A propos",
                 url: "/about",
             },
             {
-                id: 403,
-                nb: 4,
+                id: 503,
+                nb: 5,
                 icon: "group",
                 label: "Les membres fondateurs",
                 url: "/about",
                 fragment: "members"
             },
             {
-                id: 404,
-                nb: 4,
+                id: 504,
+                nb: 5,
                 icon: "settings",
                 label: "Paramètres",
                 url: "/about",
@@ -125,8 +139,8 @@ export const data: MenuItem[] = [
         ]
     },
     {
-        id: 500,
-        nb: 5,
+        id: 600,
+        nb: 6,
         icon: "person",
         //style: "color: white; -webkit-text-stroke: 1px #0B586F;",
         label: "",
