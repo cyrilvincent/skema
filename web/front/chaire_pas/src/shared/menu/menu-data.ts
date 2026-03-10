@@ -97,7 +97,7 @@ export const data: MenuItem[] = [
         nb: 4,
         icon: "article",
         label: "Partenaires",
-        url: "/media",
+        url: "/partners",
     },
     {
         id: 500,

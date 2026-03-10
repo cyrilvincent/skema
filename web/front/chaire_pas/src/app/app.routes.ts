@@ -6,10 +6,10 @@ import { Admin } from '../shared/admin/admin';
 import { Data } from '../pages/data/data';
 import { Research } from '../pages/research/research';
 import { Sustain } from '../pages/sustain/sustain';
-import { Media } from '../pages/media/media';
 import { environment } from '../environments/environment';
 import { Publication } from '../pages/research/publication/publication';
 import { Members } from '../pages/members/members';
+import { Partners } from '../pages/partners/partners';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -67,9 +67,9 @@ export const routes: Routes = [
     component: Sustain,
   },
   {
-    path: 'media',
-    title: "Medias: "+environment.title,
-    component: Media,
+    path: 'partners',
+    title: "Partenaires: "+environment.title,
+    component: Partners,
   },
   {
     path: 'publication',
