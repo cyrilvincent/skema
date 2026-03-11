@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, VERSION } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import pkg from 'angular-plotly.js/package.json' assert { type: 'json' }
 import pkg2 from 'plotly.js-dist-min/package.json' assert { type: 'json' }
 import { AboutService } from './versions.service';

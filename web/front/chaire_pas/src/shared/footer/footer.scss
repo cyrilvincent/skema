@@ -1,0 +1,12 @@
+.footer {
+    display: flex;
+    flex-wrap: nowrap; /* empêche le retour à la ligne */
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.copyright {
+    text-align:center;
+    font-size:80%;
+}

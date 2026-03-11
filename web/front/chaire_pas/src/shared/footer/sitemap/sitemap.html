@@ -1,0 +1,21 @@
+<div class="container">
+    <div class="sub-title">Plan du site</div>
+    <div>
+        <ul class="menu">
+            @for (m of service.menu; track m.id) {
+                <li class="menu-item">
+                    <a [routerLink]="m.url">@if(m.icon == "person"){<mat-icon [style]="m.style">{{m.icon}}</mat-icon>}{{m.label}}</a>
+                    @if (m.subMenuItems) {
+                        <ul class="sub-menu">
+                            @for (sm of m.subMenuItems; track sm.id) {
+                                <li class="sub-menu-item">
+                                    <a [routerLink]="sm.url" [fragment]="sm.fragment">{{sm.label}}</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+</div>

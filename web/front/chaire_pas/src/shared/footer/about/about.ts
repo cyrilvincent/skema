@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Versions } from './versions/versions';
+import { environment } from '../../../environments/environment';
 
 
 @Component({
@@ -10,6 +11,6 @@ import { Versions } from './versions/versions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class About {
-  
-
+  title = environment.title;
+  accessibilite = environment.accessibilite;
 }

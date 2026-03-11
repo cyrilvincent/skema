@@ -5,10 +5,3 @@ Server : Linux + Repasser en lazy
 Dans le header du haut (Mettre à Gauche SKEMA et mettre à droite le logo  Université Côte d’Azur). Taille du logo Université doit être de la même taille que celui de SKEMA. Ne pas mettre le logo France 2030
 Page d’accueil  image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en  voir proposition Image (Chat GPT)
 
-En bas si possible mettre les 5 logos (faire défiler si trop lourd) : SKEMA, Université Côte d’Azur, GREDEG-CNRS, Faculté de Médecine, EUR ELMI
-
-Vérifier et s’assurer de la conformité au RGPD sur les points suivants (cf SKEMA)
-•	Informations légales
-•	Accessibilité : 77,14 % (site SKEMA) : faire lighthouse
-•	Plan du site
-•	Gérer les cookies

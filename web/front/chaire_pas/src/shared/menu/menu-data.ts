@@ -112,22 +112,28 @@ export const data: MenuItem[] = [
         icon: "person",
         //style: "color: white; -webkit-text-stroke: 1px #0B586F;",
         label: "",
-        url: "/about",
+        url: "/account",
         subMenuItems: [
             {
                 id: 601,
                 nb: 6,
                 icon: "info",
-                label: "Se connecter",
-                url: "/about",
+                label: "Compte utilisateur",
+                url: "/account",
             },
             {
                 id: 602,
                 nb: 6,
                 icon: "settings",
-                label: "A propos",
-                url: "/about",
-                fragment: "versions"
+                label: "Informations légales",
+                url: "/legal",
+            },
+            {
+                id: 603,
+                nb: 6,
+                icon: "settings",
+                label: "Gérer les cookies",
+                url: "/cookies",
             },
         ]
     },

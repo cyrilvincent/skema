@@ -9,6 +9,8 @@ import { environment } from '../environments/environment';
 import { Publication } from '../pages/research/publication/publication';
 import { Members } from '../pages/members/members';
 import { Partners } from '../pages/partners/partners';
+import { Legal } from '../shared/footer/legal/legal';
+import { Cookies } from '../shared/footer/cookies/cookies';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -27,7 +29,7 @@ export const routes: Routes = [
     path: 'about',
     title: "A propos: "+environment.title,
     loadComponent: () =>
-      import('../pages/about/about').then((m) => m.About),
+      import('../shared/footer/about/about').then((m) => m.About),
   },
   {
     path: 'sae',
@@ -79,6 +81,28 @@ export const routes: Routes = [
     path: 'e0206m2205',
     title: "Admin",
     component: Admin,
+  },
+  {
+    path: 'legal',
+    title: "Informations légales: "+environment.title,
+    component: Legal,
+  },
+  {
+    path: 'cookies',
+    title: "Gestion des cookies: "+environment.title,
+    component: Cookies,
+  },
+  {
+    path: 'sitemap',
+    title: "Plan du site: "+environment.title,
+    loadComponent: () =>
+      import('../shared/footer/sitemap/sitemap').then((m) => m.Sitemap),
+  },
+  {
+    path: 'account',
+    title: "Compte utilisateur: "+environment.title,
+    loadComponent: () =>
+      import('../shared/account/account').then((m) => m.Account),
   },
 
 ]

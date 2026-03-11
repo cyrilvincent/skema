@@ -1,34 +1,32 @@
 
 <div class="container">
 	<br>
+	<br>
 	@if(!service.isMobile()) {
-		<table>
-			<tbody>
-				<tr>
-					<td class="wsite-multicol-col" style="width:33%;">
-						<div class="wsite-image wsite-image-border-none " style="text-align: left;">
-							<a href="https://www.skema.edu/fr" target="_blank">
-								<img src="img/logo-skema-couleur_12.png" alt="Skema" style="width:200px">
-							</a>
-						</div>
-					</td>
-					<td class="wsite-multicol-col" style="width:33%;">
-						<div class="wsite-image wsite-image-border-none " style="text-align: center;">
-							<a href="https://univ-cotedazur.fr/universite/idex" target="_blank">
-								<img src="img/idex_6.png" alt="Université Côte d'Azur" style="width:120px">
-							</a>
-						</div>
-					</td>
-					<td class="wsite-multicol-col" style="width:10%">
-						<div class="wsite-image wsite-image-border-none " style="text-align: right">
-							<a href="https://univ-cotedazur.fr/" target="_blank">
-								<img src="img/unica_6.jpg" alt="Université Côte d'Azur" style="width:300px;">
-							</a>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+		<div class="footer">
+			<a href="https://www.skema.edu/fr" target="_blank">
+				<img src="img/logo-skema-couleur_12.png" alt="Skema" style="width:120px">
+			</a>
+			<a href="https://univ-cotedazur.fr/" target="_blank">
+				<img src="img/unica_6.jpg" alt="Université Côte d'Azur" style="width:120px;">
+			</a>
+			<a href="https://gredeg.univ-cotedazur.fr/" target="_blank">
+				<img src="img/gredeg_cnrs.jpg" alt="GREDEG" style="width:120px;">
+			</a>
+			<a href="https://medecine.univ-cotedazur.fr/" target="_blank">
+				<img src="img/fac.jpg" alt="Faculté de médecine" style="width:100px;">
+			</a>
+			<a href="https://elmi.univ-cotedazur.fr/" target="_blank">
+				<img src="img/eur.jpg" alt="EUR Elmi" style="width:140px;">
+			</a>
+		</div>
 	}
-	<div class="paragraph" style="text-align:center;font-size:80%">&copy; {{copyright}}</div>	
+	<br>
+	<div class="copyright">
+		<a routerLink="/legal">Informations légales</a> -
+		<a routerLink="/about">Accessibilité: {{accessibilite}}%</a> -
+		<a routerLink="/cookies">Gérer les cookies</a> -
+		<a routerLink="/sitemap">Plan du site</a> -
+		&copy; {{copyright}}
+	</div>	
 </div>
