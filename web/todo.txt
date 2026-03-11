@@ -2,6 +2,5 @@ Ehpad afficher + d'info
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
-Dans le header du haut (Mettre à Gauche SKEMA et mettre à droite le logo  Université Côte d’Azur). Taille du logo Université doit être de la même taille que celui de SKEMA. Ne pas mettre le logo France 2030
-Page d’accueil  image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en  voir proposition Image (Chat GPT)
+image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en
 

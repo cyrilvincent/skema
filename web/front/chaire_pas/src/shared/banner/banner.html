@@ -1,10 +1,14 @@
-<div [class]="service.isMobile() ? 'mobile-banner' : 'banner'" style="background-image: linear-gradient(rgba(0,0,0,0.4)), url('img/banner4.jpg'); background-position: 50.0% 25.0%;">
-    <div class="logo">
-        <div class="wsite-logo">
-            <a routerLink="/">
-                <span  [class]="service.isMobile() ? 'mobile-title' : 'title'">{{title}}</span>
-            </a>
-        </div> 
+<div [class]="service.isMobile() ? 'mobile-banner' : 'banner'" style="background-image: linear-gradient(rgba(0,0,0,0.4)), url('img/banner.jpg')">
+    <div class="logo" >
+        <div [class]="service.isMobile() ? 'mobile-skema' : 'skema'" style="background-image: url('img/skema.png')">
+            <div [class]="service.isMobile() ? 'mobile-univ' : 'univ'" style="background-image: url('img/univ-all-white.png')">
+                <div class="logo-block">
+                    <a routerLink="/">
+                        <span  [class]="service.isMobile() ? 'mobile-title' : 'title'">{{title}}</span>
+                    </a>
+                </div> 
+            </div>
+        </div>
     </div>  
 </div>
 
