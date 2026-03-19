@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-legal',
-  imports: [],
+  imports: [MatIconModule],
   templateUrl: './legal.html',
   styleUrl: './legal.scss',
 })

@@ -1,6 +1,7 @@
 Image à la Skema en home
-Logo un peu + gros
-Footer log em + gros
+Marketing apl carte de France : visualiser l'accès votre accès aux soins
+OK Logo un peu + gros
+OK Footer logo em + gros
 OK Enlever image missions 
 OK Justifier textes
 OK Mettre texte fac medecine
@@ -8,12 +9,9 @@ OK research Mettre 1. avec un espace + mettre les points 1 et 2 en gras
 OK Enlever la phrase dynamique prix medicament
 OK Remettre le texte du Word
 OK Mettre un sub-menu data dans observatoire
-Marketing apl carte de France : visualiser l'accès votre accès aux soins
-Keywords
-Information légales mettre skema + univ (info legale)
-Mettre directeur de pub = benjamin + les infos d'adresse mail
-Dans equipe mettre mail cliquable
-site_web.docx
+OK Information légales mettre skema + univ (info legale)
+OK Mettre directeur de pub = benjamin + les infos d'adresse mail
+OK Dans equipe mettre mail cliquable
 
 Tout fin de semaine
 Fin Mars : APL Psy + EHPAD Text + serveur benj
