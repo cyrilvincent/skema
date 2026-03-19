@@ -1,4 +1,5 @@
 Ehpad afficher + d'info
+SAE quand trop d'info afficher les données de l'tablissement et non ceux de l'iris
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 

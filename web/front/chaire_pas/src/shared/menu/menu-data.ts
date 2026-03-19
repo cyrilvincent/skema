@@ -51,6 +51,13 @@ export const data: MenuItem[] = [
                 icon: "place",
                 label: "Accessibilité aux autres services de santé",
                 url: "/sae2",
+            },
+            {
+                id:105,
+                nb:1,
+                icon: "place",
+                label: "Data",
+                url: "/data",
             }
         ]
     },

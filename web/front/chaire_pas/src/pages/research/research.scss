@@ -3,11 +3,15 @@ h1 {
     padding-bottom: 20px;
 }
 
-.paragraph-indent {
+.indent {
     padding-left: 20px;
 }
 
-.paragraph-indent > ul {
+ul {
     padding-left: 40px;
+}
+
+.container > p {
+    text-align: justify;
 }
 
