@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { CommonService } from '../common.service';
 
@@ -11,4 +11,5 @@ import { CommonService } from '../common.service';
 export class Banner {
   title = environment.title;
   service = inject(CommonService);
+  isWhite = input<boolean>(false);
 }

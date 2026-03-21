@@ -2,13 +2,25 @@
   <app-fullscreen></app-fullscreen>
 }
 @else {
-  <header [class]="service.isMobile() ? 'mobile-header' : 'header'" >
-    <app-banner></app-banner>
-    <mat-toolbar [class]="service.isMobile() ? 'mobile-toolbar' : 'toolbar'">
+  @if(activeMenu() == 0 && !service.isMobile()) {
+    <div class="hero" [class.shrunk]="isHeroShrunk()">
+      <div class="hero-bg" style="background-image: url('img/banner-light.jpg');"></div>
+      <!-- <div class="hero-content">
+          <a routerLink="/apl" (click)="changeMenu(1)">
+            Votre carte de France<br>d'Accessibilité aux soins
+            <br>
+            <img src="img/france_apl_10_transparent.png" matTooltip="Accessibilité aux soins de premiers recours" style="height: 200px;display: inline;">
+          </a>
+      </div> -->
+    </div>
+  }
+  <header [class]="service.isMobile() ? 'mobile-header' : 'header'"  [class.transparent]="!isHeroShrunk()">
+    <app-banner [isWhite]="isWhite()"></app-banner>
+    <div [class]="service.isMobile() ? 'mobile-toolbar' : 'toolbar'">
       <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
-    </mat-toolbar>
+    </div>
   </header>
-  <div [class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'"></div>
+  <div [class]="spacer()"></div> <!--[class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'-->
   <router-outlet />
   <app-footer></app-footer>
 }

@@ -1,14 +1,16 @@
 
 .banner {
     height: 200px;
-    background-position: right 0% top 15%;
+    background-position: right 0% top 0px;
     background-size: 100% auto;
     background-repeat: no-repeat;
+    opacity: 1;
 }
 
 .mobile-banner {
     height: 100px;
-    background-position: 90.0% 20%;
+    background-position: 90.0% 10%;
+    //background-image: linear-gradient(rgba(0,0,0,0.4)), url('/img/banner.jpg')
 }
 
 .logo {
@@ -53,7 +55,7 @@
     max-width: 500px;
     line-height: 1.1;
     padding: 54px 0px !important;
-    color: #ffffff;
+    color:#00283F;
     font-weight: 1000;
     //font-family: 'Patua One';
 }
@@ -65,7 +67,7 @@
     display: block;
     max-width: 300px;
     padding: 25px 0px;
-    color: #ffffff;
+    color: #00283F;
     font-weight: 1000;
 }
 

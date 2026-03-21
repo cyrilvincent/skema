@@ -3,5 +3,4 @@ SAE quand trop d'info afficher les données de l'tablissement et non ceux de l'i
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
-image en gros et Menu et logo qui reste comme dans la page accueil SKEMA : https://www.skema.edu/en
 

@@ -15,6 +15,7 @@ export class CommonService {
   loading = computed(() => this._loading());
   error = computed(() => this._error());
   _breakpointObserver = inject(BreakpointObserver);
+  homeEvent = signal<number | null>(null);
   
   fetchLoading() {
     this._loading.set(true);

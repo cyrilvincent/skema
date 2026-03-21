@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { RouterLinkWithHref, RouterLink } from '@angular/router';
 import { MenuService } from './menu-service';
 import { MatIconModule } from "@angular/material/icon";
@@ -21,6 +21,7 @@ export class Menu {
 
   async changeMenu(nb: number) {
     this.service.changeMenu(nb);
+    console.log("menu: "+this.activeMenu());
     this.menuChangedEvent.emit(nb);
     this.hamburgerOn.set(false);
     await this.commonService.delay(200);

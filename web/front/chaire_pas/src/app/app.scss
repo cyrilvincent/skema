@@ -1,6 +1,14 @@
+.top-spacer-shrunk {
+    height: 80vh;
+}
+
 .top-spacer {
     height: 270px;
 }
+
+.mobile-top-spacer-shrunk {
+    height: calc(120px + 40vh);
+} 
 
 .mobile-top-spacer {
     height: 120px;
@@ -8,17 +16,20 @@
 
 header {
     display: block;
-    unicode-bidi: isolate;
 }
 
 .header {
     position: fixed; 
-    z-index: 99;
+    z-index: 999;
     left: 0px;
     top: 0px;
     height: 245px;
     right: 0px;
-    background: white;
+    background: #fff;
+
+    &.transparent {
+      background: transparent;
+    }
 }
 
 .mobile-header {
@@ -26,21 +37,76 @@ header {
     z-index: 99;
     left: 0px;
     top: 0px;
-    height: 100px;
+    height: 150px;
     right: 0px;
     background: white;
 }
 
 .toolbar {
     justify-content: center;
-    background-color: #fff;
+    //background-color: #fff;
+    //background-color: transparent;
     border-bottom: 1px solid rgba(116, 116, 116, 0.15);
 }
 
 .mobile-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     background-color: #fff;
+    opacity: 1;
+    
     border-bottom: 1px solid rgba(116, 116, 116, 0.15);
+    display: block;
 }
+
+.hero {
+    position: fixed;  // ← plus dans le flux, n'affecte plus la hauteur de page
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 98;       // sous le header (z-index: 99)
+    transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.shrunk {
+      height: 0;
+      pointer-events: none;
+
+      .hero-content {
+        position: fixed;
+        background-position: right 0% top 300px;
+        opacity: 1;
+        transform: translateY(-30px);
+      }
+    }
+
+     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+
+    .hero-content {
+      padding-top: 350px;
+      padding-left: 200px;
+      opacity: 1 !important;
+      transform: translateY(-30px);
+      text-transform: uppercase;
+      text-align: left;
+    }
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-position: right 0% top 0px;
+  //background-size: cover;
+  background-size: 100% auto;
+  //background-position: center;
+  background-repeat: no-repeat;
+  opacity: 1;
+}
+
 
 
 

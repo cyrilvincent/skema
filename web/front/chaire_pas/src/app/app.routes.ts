@@ -11,7 +11,6 @@ import { Members } from '../pages/members/members';
 import { Partners } from '../pages/partners/partners';
 import { Legal } from '../shared/footer/legal/legal';
 import { Cookies } from '../shared/footer/cookies/cookies';
-import { HeroHeaderComponent } from '../pages/hero/hero-header.component';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -111,10 +110,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('../pages/observatoire/data/data').then((m) => m.Data),
   },
-  {
-    path: 'hero',
-    title: "Hero: "+environment.title,
-    component: HeroHeaderComponent,
-  }
 
 ]
