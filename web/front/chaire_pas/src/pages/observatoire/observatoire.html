@@ -5,7 +5,7 @@
     <br>
     <p>Cet observatoire s'appuie sur une plateforme de données géolocalisées unique développée depuis 6 ans.</p>
     <br>
-    <p><b>Pour les soins de premier recours</b> (médecine de ville), l'indicateur retenu est l'<b>APL</b> (Accessibilité Potentielle Localisée – TODO lien vers le document méthodologique), qui mesure la facilité avec laquelle les habitants d'un territoire peuvent accéder à un professionnel de santé. Il tient compte du nombre de professionnels accessibles à proximité, du temps de trajet pour les consulter, ainsi que des besoins de la population locale.</p>
+    <p><b>Pour les soins de premier recours</b> (médecine de ville), l'indicateur retenu est l'<a routerLink="/apl"><b>APL</b> (Accessibilité Potentielle Localisée)</a>, qui mesure la facilité avec laquelle les habitants d'un territoire peuvent accéder à un professionnel de santé. Il tient compte du nombre de professionnels accessibles à proximité, du temps de trajet pour les consulter, ainsi que des besoins de la population locale.</p>
     <div style="text-align:center;">
         <a routerLink="/apl" (click)="menuService.changeMenu(1)">
             <img src="img/france_apl_10.png" matTooltip="Accès aux calcul des APL pour les généralistes" style="height: 200px;display: inline;">
@@ -19,7 +19,7 @@
         </a> 
     </div>
     <br>
-    <p><b>Autres services de santé TODO</b>. L’observatoire va s’enrichir au fil du temps en intégrant des informations sur l’accessibilité à d’autres services de santé (comme les pharmacies, EHPAD,…).</p>
+    <p><b>Autres services de santé</b>. L’observatoire va s’enrichir au fil du temps en intégrant des informations sur l’accessibilité à d’autres services de santé (comme les pharmacies, EHPAD,…).</p>
     <div style="text-align:center;">
         <a routerLink="/sae2" (click)="menuService.changeMenu(1)">
             <img src="img/france_sae_pharma.png" matTooltip="Accès aux calcul des temps d'accès pour les pharmacies" style="height: 200px;display: inline;">

@@ -1,0 +1,5 @@
+Il faudrait trouver le moyen pour que le logo de l'Université soit plus visible OK ainsi que les sections du site qui sont trop masqués par l'image
+OK Il faudrait aussi justifier le texte de la partie data 
+OK et enlever le double point dans l'onglet Axes de recherche à la fin de la phrase: "Efficacité des politiques publiques de limitations des dépassements d'honoraires..".
+OK Si possible également enlever les TO DO de la page Observatoire en ajoutant le lien vers le calcul de l'indicateur de l'APL et Autres services de Santé.
+OK Il faudrait aussi rajouter les liens vers les études de l'UFC Que-Choisir qui ne sont pas présents et étaient présents sur le site initial de la Chaire.

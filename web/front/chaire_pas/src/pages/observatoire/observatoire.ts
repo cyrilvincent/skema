@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from "@angular/router";
 import { MenuService } from '../../shared/menu/menu-service';
-import { CommonService } from '../../shared/common.service';
 import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
@@ -13,6 +12,5 @@ import { MatTooltip } from "@angular/material/tooltip";
 export class Observatoire {
 
   menuService = inject(MenuService);
-  commonService = inject(CommonService);
 
 }

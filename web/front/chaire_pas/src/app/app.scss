@@ -1,5 +1,5 @@
 .top-spacer-shrunk {
-    height: 80vh;
+    height: 60vh;
 }
 
 .top-spacer {
@@ -66,7 +66,7 @@ header {
     top: 0;
     left: 0;
     right: 0;
-    height: 100vh;
+    height: 80vh;
     overflow: hidden;
     z-index: 98;       // sous le header (z-index: 99)
     transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
@@ -75,21 +75,22 @@ header {
       height: 0;
       pointer-events: none;
 
-      .hero-content {
-        position: fixed;
-        background-position: right 0% top 300px;
-        opacity: 1;
-        transform: translateY(-30px);
-      }
+    //   .hero-content {
+    //     position: absolute;
+    //     background-position: right 0% top -500px;
+    //     opacity: 1;
+    //     transform: translateY(-30px);
+    //   }
     }
 
      mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 
     .hero-content {
-      padding-top: 350px;
+    position: fixed;
+      padding-top: 229px;
       padding-left: 200px;
-      opacity: 1 !important;
+      //opacity: 1 !important;
       transform: translateY(-30px);
       text-transform: uppercase;
       text-align: left;

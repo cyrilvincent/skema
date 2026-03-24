@@ -20,12 +20,10 @@ export class App {
   route = inject(ActivatedRoute);
   fullscreen = signal<boolean>(false);
   service = inject(CommonService);
-  // isScrolled = signal(false);
   spacer = signal(this.getSpacer());
   isWhite = computed<boolean>(() => this.service.isMobile() || this.isHeroShrunk() || this.activeMenu()!=0)
   menuService = inject(MenuService);
   isHeroShrunk = signal(false);
-  heroHeight = signal('100vh');
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);

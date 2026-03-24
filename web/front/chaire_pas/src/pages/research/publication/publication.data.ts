@@ -109,6 +109,7 @@ export const studies: PublicationDTO[] = [
         year: 2024,
         title: "Etude sur les Dépassements d'honoraires",
         publisher: "UFC que Choisir",
+        url: "https://www.quechoisir.org/action-ufc-que-choisir-depassements-d-honoraires-stop-a-la-medecine-specialisee-a-deux-vitesses-n117134/",
         type: "S"
     },
     {
@@ -116,6 +117,7 @@ export const studies: PublicationDTO[] = [
         year: 2023,
         title: "Etude sur l'aggravation de l'accès aux soins",
         publisher: "UFC que Choisir",
+        url: "https://www.quechoisir.org/action-ufc-que-choisir-aggravation-de-l-acces-aux-soins-l-ufc-que-choisir-attaque-l-etat-pour-inaction-n113418/",
         type: "S"
     },
     {
@@ -123,6 +125,7 @@ export const studies: PublicationDTO[] = [
         year: 2023,
         title: "Etude sur la tension dans les services d'urgences",
         publisher: "UFC que Choisir",
+        url: "https://www.quechoisir.org/action-ufc-que-choisir-acces-aux-soins-la-medecine-hospitaliere-et-de-ville-en-etat-d-urgence-vitale-n106898/",
         type: "S"
     },
     {
@@ -130,6 +133,7 @@ export const studies: PublicationDTO[] = [
         year: 2022,
         title: "Etude sur le fracture sanitaire et les déserts médicaux",
         publisher: "UFC que Choisir",
+        url: "https://www.quechoisir.org/action-ufc-que-choisir-l-ufc-que-choisir-devoile-la-carte-de-l-intolerable-fracture-sanitaire-les-pouvoirs-publics-vont-ils-engin-agir-pour-la-resorber-n103835/",
         type: "S"
     },
 ]
