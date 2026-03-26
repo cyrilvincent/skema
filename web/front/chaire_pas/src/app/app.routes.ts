@@ -11,6 +11,7 @@ import { Members } from '../pages/members/members';
 import { Partners } from '../pages/partners/partners';
 import { Legal } from '../shared/footer/legal/legal';
 import { Cookies } from '../shared/footer/cookies/cookies';
+import { Studies } from '../pages/research/studies/studies';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -71,6 +72,11 @@ export const routes: Routes = [
     path: 'publication',
     title: "Publications: "+environment.title,
     component: Publication,
+  },
+  {
+    path: 'studies',
+    title: "Etudes: "+environment.title,
+    component: Studies,
   },
   {
     path: 'members',

@@ -16,7 +16,12 @@
             <ul [class]="commonService.isMobile() ? 'mobile-menu-container' : 'menu-container'">
                 @for (m of service.menu; track m.id) {
                     <li [id]="activeMenu()==m.nb ? 'active' : ''">
-                        <a [routerLink]="m.url" class="menu-item" (click)="changeMenu(m.nb)">@if(m.icon == "person"){<mat-icon [style]="m.style">{{m.icon}}</mat-icon>}{{m.label}}</a>
+                        @if (m.url) {
+                            <a [routerLink]="m.url" class="menu-item" (click)="changeMenu(m.nb)">@if(m.icon == "person"){<mat-icon [style]="m.style">{{m.icon}}</mat-icon>}{{m.label}}</a>
+                        }
+                        @else {
+                            <a class="menu-item">{{m.label}}</a>
+                        }
                         @if (m.subMenuItems) {
                             <ul [class]="commonService.isMobile() ? 'mobile-sub-menu' : 'sub-menu'" [class.clicked]="clicked()" (mouseover)="clicked.set(false)">
                                 @for (sm of m.subMenuItems; track sm.id) {

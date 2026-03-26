@@ -16,7 +16,7 @@ export class Publication {
   constructor() {
     this.service.getPublications();
     this.service.getWorks();
-    this.service.getStudies();
+    //this.service.getStudies();
   }
 
 }

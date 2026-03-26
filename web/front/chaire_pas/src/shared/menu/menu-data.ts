@@ -22,43 +22,36 @@ export const data: MenuItem[] = [
         nb:1,
         icon: "travel_explore",
         label: "L'observatoire",
-        url: "/observatoire",
+        // url: "/observatoire",
         subMenuItems: [
-            {
-                id:101,
-                nb:1,
-                icon: "travel_explore",
-                label: "L'observatoire",
-                url: "/observatoire",
-            },
+            // {
+            //     id:101,
+            //     nb:1,
+            //     icon: "travel_explore",
+            //     label: "L'observatoire",
+            //     url: "/observatoire",
+            // },
             {
                 id:102,
                 nb:1,
                 icon: "map",
-                label: "Accessibilité aux soins de premier recours",
+                label: "Professionnels de santé",
                 url: "/apl",
             },
             {
                 id:103,
                 nb:1,
                 icon: "place",
-                label: "Accessibilité aux soins hospitaliers",
+                label: "Services hospitaliers",
                 url: "/sae",
             },
             {
                 id:104,
                 nb:1,
                 icon: "place",
-                label: "Accessibilité aux autres services de santé",
+                label: "Autres services de santé",
                 url: "/sae2",
             },
-            {
-                id:105,
-                nb:1,
-                icon: "place",
-                label: "Data",
-                url: "/data",
-            }
         ]
     },
     {
@@ -87,9 +80,15 @@ export const data: MenuItem[] = [
                 nb:2,
                 icon: "place",
                 label: "Etudes",
-                url: "/publication",
-                fragment: "studies"
+                url: "/studies",
             },
+            {
+                id:204,
+                nb:2,
+                icon: "place",
+                label: "Données",
+                url: "/data",
+            }
         ]
     },
     {
