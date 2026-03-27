@@ -97,6 +97,7 @@ export class GeoDataviz implements OnInit {
     s += `APL ${year}: ${df_year["apl"]![i].toFixed(1)}<br>`;
     //s += `(Δ${this.firstYear()} ${this.variation(df_year["apl"]![i], this.years()[this.firstYear()]["apl"]![i])}%)<br>`
     s += `  Δ à la moyenne nationale: ${this.variation(df_year["apl"]![i], this.df()["meanws"][+year-(+this.firstYear())])}%<br>`
+    s += `  Δ 2020: ${this.variation(df_year["apl"]![i], this.df()["years"]["2020"]["apl"]![i])}%<br>`
     s += `Nb ETP: ${df_year["nb"]![i].toFixed(1)}<br><br>`
     return s;
   }
@@ -260,7 +261,8 @@ export class GeoDataviz implements OnInit {
       z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "time_hc"],
       zmin: this.getZMin(),
       zmax: this.getZMax(),
-      hoverinfo: "text",
+      //hoverinfo: "text",
+      hoverinfo: this.type() == "APL" || (this.years()[this.firstYear()].etab!["lon"].length < 40) || !this.showLabel() ? "text" : "skip",
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
@@ -401,6 +403,8 @@ export class GeoDataviz implements OnInit {
 
   getScatterSize(passus: number[]): number[] {
     if(this.dto() != null) {
+      if (this.dto()!.id == 5) return passus.map(_ => 7);
+      if (this.dto()!.id == 4) return passus.map(_ => 3);
       let coef = 0;
       let c = 2;
       if (this.dto()!.id <= 2) coef = 8/30000;
@@ -411,7 +415,7 @@ export class GeoDataviz implements OnInit {
     return [];
   }
 
-  getScatterColor(tensions: number[]): string[] {
+  getTensionScatterColor(tensions: number[]): string[] {
     if(this.dto() != null) {
       return tensions.map(t => {
         let r = 127;
@@ -426,26 +430,64 @@ export class GeoDataviz implements OnInit {
           r = this.clip(Math.round((t-b)*a+127.5), 0, 255);
           g = 255 - this.clip(Math.round((t-b)*a+127.5), 0, 255);
         }
-        return `rgb(${r},${g},0, 255)`;
+        return `rgb(${r},${g},0,255)`;
       })
     }
     return [];
   }
 
-  getScatterGeoText(etab: EtabDTO): string[] {
-    return  etab["rs"].map((r, i) => {
-      let s = " "+r;
-      if (this.dto()!.id <= 3) {
-        s += `<br>
-NB passage ${etab["year"][i]}: ${etab["passu"][i] < 0 || etab["passu"][i] == null ? "N/A" : etab["passu"][i]}<br>
-ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>
-Dont salarié: ${etab["etpsal"][i] < 0 ? "N/A" : etab["etpsal"][i].toFixed(1)}<br>
-Dont libéraux: ${etab["efflib"][i] < 0 ? "N/A" : etab["efflib"][i].toFixed(1)}<br>
-Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passage/ETP
-        `;
+    getEhpadScatterColor(p1: number[], p1_mean: number[]): string[] {
+    if(this.dto() != null) {
+      let i = 0;
+      return p1.map(p => {
+        let r = 127;
+        let g = 127;
+        if (p != -1) {
+          const ratio = p / p1_mean[i];
+          r = this.clip(Math.round(127.5 * ratio), 0, 255);
+          g = 255 - r;
+        }
+        i++;
+        const rgb = `rgb(${r},${g},0,255)`;
+        return rgb;
+      })
+    }
+    return [];
+  }
+
+
+
+  getScatterGeoText(i: number, etab: EtabDTO, year: string): string {
+    let s = etab["rs"][i];
+    if (this.dto()!.id <= 3) {
+      s += "<br>";
+      s += `NB passage ${etab["year"][i]}: ${etab["passu"][i] < 0 || etab["passu"][i] == null ? "N/A" : etab["passu"][i]}<br>`;
+      s += `ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>`
+      s += `Dont salarié: ${etab["etpsal"][i] < 0 ? "N/A" : etab["etpsal"][i].toFixed(1)}<br>`
+      s += `Dont libéraux: ${etab["efflib"][i] < 0 ? "N/A" : etab["efflib"][i].toFixed(1)}<br>`
+      s += `Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passage/ETP`
+    }
+    else if (this.dto()!.id == 5) {
+      s += "<br>";
+      s += `ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>`
+      const df_year = this.years()[year];
+      const p1 = df_year["p1"]![i];
+      if (p1 < 0) s+= "Prix en chambre seule: N/A";
+      else {
+        s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
+        s += `  Δ à la moyenne nationale: ${this.variation(p1, df_year["p1_mean"]![i])}%<br>`;
+        const p120 = this.years()["2020"]["p1"]![i];
+        s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%<br>`
       }
-      return s;
-    });
+    }
+    return s;
+  }
+
+  getScatterGeoTexts(year: string): string[] {
+    const df_year = this.years()[year];
+    const etab = df_year["etab"]!;
+    const s = etab["rs"].map((_, i) => this.getScatterGeoText(i, etab, year))
+    return s;
   }
 
   getScatterGeo(): Partial<Plotly.ScatterData> {
@@ -455,12 +497,15 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
       lat: etab["lat"],
       lon: etab["lon"],
       mode: 'markers',
-      hoverinfo: etab["lon"].length < 20 ? "text": "skip",
-      text: this.getScatterGeoText(etab),
+      //hoverinfo: etab["lon"].length < 20 ? "text": "skip",
+      hoverinfo: "text",
+      text: this.getScatterGeoTexts(this.firstYear()),
       name: 'APL',
       visible: true,     
       marker: {
-        color: this.getScatterColor(etab["tension"]),
+        color: this.dto()?.id != 5 ? 
+               this.getTensionScatterColor(etab["tension"]) : 
+               this.getEhpadScatterColor(this.years()[this.firstYear()]["p1"]!, this.years()[this.firstYear()]["p1_mean"]!),
         size: this.getScatterSize(etab["passu"]),
         // opacity: 1,
       }
@@ -532,11 +577,13 @@ Tension: ${etab["tension"][i] < 0 ? "N/A" : etab["tension"][i].toFixed(0)} passa
             text: this.getTexts()[+year - +this.firstYear()],
           },
           {
-            text: this.type() == "APL" ? df_year["apl"]!.map(a => `${a.toFixed(0)}`) : this.getScatterGeoText(etab),
+            text: this.type() == "APL" ? df_year["apl"]!.map(a => `${a.toFixed(0)}`) : this.getScatterGeoTexts(year),
             lon: this.type() == "APL" ? df_year["lon"] : etab["lon"],
             lat: this.type() == "APL" ? df_year["lat"] : etab["lat"],
             marker: {
-              color: this.type() == "APL" ? undefined : this.getScatterColor(etab["tension"]),
+              color: this.type() == "APL" ? undefined : (this.dto()!.id != 5 ? 
+                                                         this.getTensionScatterColor(etab["tension"]) : 
+                                                         this.getEhpadScatterColor(this.years()[year]["p1"]!, this.years()[year]["p1_mean"]!)),
               size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"]),
             },
           },

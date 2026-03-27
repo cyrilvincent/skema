@@ -1,6 +1,7 @@
 Ehpad afficher + d'info
-SAE quand trop d'info afficher les données de l'etablissement et non ceux de l'iris
-psychologues
+    Mettre ix_ephad_finesset
+    sae/ehpad_france.sql
+en cours psychologues
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 

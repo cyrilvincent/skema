@@ -195,6 +195,7 @@ class SAEService(APLService):
             join adresse_norm an on an.id=ar.adresse_norm_id
             join iris.iris i on i.code=an.geo_iris
             join date_source ds on eds.date_source_id=ds.id
+            --left join ehpad eh on eh.finesset=e.nofinesset
             where e.categretab=4401
             and an.geo_iris in {self.get_tuple(iris_list)}
             order by ds.annee, e.nofinesset
@@ -224,6 +225,18 @@ class SAEService(APLService):
         first_year = df.iloc[0]["year"]
         for year in range(4, first_year):
             df = self.clone_df_year(df, first_year, year)
+        return df
+
+    def get_ehpad_by_finesss(self, finesss: list[str]):
+        sql = f"""
+        select e.finesset fi, e.prixhebpermcs p1, ef.prixhebpermcs p1_mean, ds.annee+2000 as year
+        from public.ehpad e
+        join date_source ds on ds.id=e.datesource_id
+        join sae.ehpad_france ef on ef.year=ds.annee+2000
+        where e.finesset in {self.get_tuple(finesss)}
+        order by ds.annee, e.finesset
+        """
+        df = pd.read_sql(sql, config.connection_string)
         return df
 
     def get_sae_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
@@ -262,6 +275,12 @@ class SAEService(APLService):
             rows_2017 = gdf[gdf['year'] == 2017].copy()
             rows_2018 = rows_2017.assign(year=2018)
             gdf = pd.concat([gdf, rows_2018], ignore_index=True)
+        return gdf
+
+    def merge_ehpad(self, gdf: pd.DataFrame) -> pd.DataFrame:
+        finesss = gdf["fi"].unique()
+        ehpads = self.get_ehpad_by_finesss(finesss)
+        gdf = gdf.merge(ehpads, on=["year", "fi"], how="left")
         return gdf
 
     def group_sae_by_commune(self, sae: pd.DataFrame) -> pd.DataFrame:
@@ -315,6 +334,10 @@ class SAEService(APLService):
         if "tp60" in gdf:
             cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p",
                      "pop65p_ratio_france"]
+        if "p1" in gdf:
+            cols += ["p1", "p1_mean"]
+            gdf["p1"] = gdf["p1"].fillna(-1)
+            gdf["p1_mean"] = gdf["p1_mean"].fillna(-1)
         export = gdf[cols]
         etab_df["etpsal"] = etab_df["etpsal"].fillna(-1)
         etab_df["efflib"] = etab_df["efflib"].fillna(-1)
@@ -370,6 +393,8 @@ class SAEService(APLService):
         gdf_merged = self.df_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        if specialite == 5:
+            gdf_merged = self.merge_ehpad(gdf_merged)
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
@@ -424,7 +449,7 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
+    export = s.compute_sae_iris("CC-38185", 5, 60, "HC", "HD")
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")

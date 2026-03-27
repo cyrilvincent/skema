@@ -85,6 +85,8 @@ export interface GeoYearDTO {
     gi_france?: number[];
     pop65p_ratio_france?: number[];
     pop_year?: number[];
+    p1?: number[];
+    p1_mean?: number[];
 }
 
 export interface GeoDTO {
