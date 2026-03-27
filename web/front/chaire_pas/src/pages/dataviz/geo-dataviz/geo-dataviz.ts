@@ -469,7 +469,6 @@ export class GeoDataviz implements OnInit {
     }
     else if (this.dto()!.id == 5) {
       s += "<br>";
-      s += `ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>`
       const df_year = this.years()[year];
       const p1 = df_year["p1"]![i];
       if (p1 < 0) s+= "Prix en chambre seule: N/A";

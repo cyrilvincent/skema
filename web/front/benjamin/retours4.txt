@@ -1,0 +1,42 @@
+ok 1.	Dans l'onglet Equipe: Pour Pierre-Alexis, il faut ajouter "Directeur du Consortium PRISME-SaFe"
+
+ok 2.	Dans l'onglet Publications, Ajouter dans les travaux en cours:
+
+"Implementation of discharge within 24 hours after birth in France: safety, satisfaction, and feasibility trial supported by a connected home monitoring application (NICE-BIRTH study)"
+Gauci P.A., Adrados C., Albouy C., Roy M., Walrave Y., Marioli S., Benamer L. & Delotte J.
+
+"Central sensitization in patients with chronic pelvic pain resistant to hormonal therapy: a cross-sectional study of prevalence and clinical correlates in a tertiary referral cohort"
+Alawi H., Cid M., Delotte J. & Gauci P.A. 
+
+OK    3. Dans l'onglet Axes de recherche, remplacer la bullet point:
+
+•	Efficacité des politiques publiques de limitations des dépassements d'honoraires.
+
+par
+•	
+•	Efficacité des politiques publiques visant à améliorer l’accès aux soins 
+
+
+OK    4. Dans l'onglet Nous soutenir :
+
+remplacer la phrase: "En soutenant la Chaire, vous contribuez au développement du premier observatoire local de l’accès aux soins, destiné à produire une information rigoureuse et visuelle sur l’évolution de l’offre de soins et son adéquation aux besoins des populations."  par
+
+ "En soutenant la Chaire, vous contribuez au développement d'un observatoire unique sur l’accès aux soins, destiné à produire une information rigoureuse et visuelle sur l’évolution de l’offre de soins et son adéquation aux besoins des populations."
+
+
+Merci par avance
+
+Benjamin
+
+Benjamin MONTMARTIN
+Professor - Director of the Chair for Prevention & Access to Healthcare
++33 4 93 95 45 32
+60 rue Fédor Dostoïevski
+06902 Sophia Antipolis France
+ 
+ At Home Worldwide
+	    
+
+
+ 
+

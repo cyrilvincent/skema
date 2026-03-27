@@ -1,7 +1,3 @@
-Ehpad afficher + d'info
-    Mettre ix_ephad_finesset
-    sae/ehpad_france.sql
-en cours psychologues
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
 
@@ -9,12 +5,3 @@ Server : Linux + Repasser en lazy
 •	finaliser le contenu du site/ergonomie du site (je vais faire valider les mentions légales, ect...)
 •	préparer le pdf sur l'apl
 •	calculs apl 2026 + updates dataset INSEE ect...
-
-
-Psychologues serveur :
-ok Ajouter specialite 28
-ok Ajouter profession 99
-ok Ajouter profession_code_profession 99 93
-ok Tester
-en cours faire tourner apl_france.py
-ok ajouter specialite 28 dans le front dataviz.data.ts

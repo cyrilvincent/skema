@@ -85,6 +85,18 @@ export const works: PublicationDTO[] = [
         authors: "Montmartin B., Laffineur C. & Gauci P.A",
         type: "W"
     },
+        {
+        id:16,
+        title: "Implementation of discharge within 24 hours after birth in France: safety, satisfaction, and feasibility trial supported by a connected home monitoring application (NICE-BIRTH study)",
+        authors: "Gauci P.A., Adrados C., Albouy C., Roy M., Walrave Y., Marioli S., Benamer L. & Delotte J.Montmartin B., Laffineur C. & Gauci P.A",
+        type: "W"
+    },
+        {
+        id:17,
+        title: "Central sensitization in patients with chronic pelvic pain resistant to hormonal therapy: a cross-sectional study of prevalence and clinical correlates in a tertiary referral cohort",
+        authors: "Alawi H., Cid M., Delotte J. & Gauci P.A.",
+        type: "W"
+    },
 ]
 
 export const studies: PublicationDTO[] = [

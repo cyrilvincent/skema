@@ -147,7 +147,7 @@ for with_s in [True]: #[True, False]
             for source in ["PA"]:  # ["PA", "PS"]:
                 for year in range(20, 26):
                     pop_iris = get_pop_iris(year)
-                    for specialite in [10]: #range(1, 28):
+                    for specialite in [10]: #range(1, 29):
                         iriss = get_iriss(year, specialite)
                         for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
                             if ((time > 30 and accessibilite_exp < -0.08) or

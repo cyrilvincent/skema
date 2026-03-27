@@ -169,12 +169,12 @@ const apl_specialites: Specialite[] = [
     shortLabel: "Dentiste",
     time: 30
   },
-  {
-    id: 28,
-    label: "Psychologue",
-    shortLabel: "Psychologue",
-    time: 30
-  },
+  // {
+  //   id: 28,
+  //   label: "Psychologue",
+  //   shortLabel: "Psychologue",
+  //   time: 30
+  // },
 ]
 
 export const specialites: {[key: string]: Specialite[]} = {
