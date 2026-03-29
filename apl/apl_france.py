@@ -201,9 +201,8 @@ for with_s in [True]: #[True, False]
                             ratio_mean = np.mean(ratio)
                             # print(ratio_mean)
                             iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
-                            if specialite == 5:
+                            if specialite in [5, 22]:
                                 iris_matrix_pop_df["pop_gp"] /= 2
-
 
                             # In[22]:
 

@@ -69,8 +69,8 @@ const apl_specialites: Specialite[] = [
   },
   {
     id: 6,
-    label: "Opthtalmogue",
-    shortLabel: "Opthtalmo",
+    label: "Ophtalmologue",
+    shortLabel: "Ophtalmo",
     time: 45
   },
   {
@@ -99,8 +99,8 @@ const apl_specialites: Specialite[] = [
   },
   {
     id: 12,
-    label: "Chirugien",
-    shortLabel: "Chirugien",
+    label: "Chirurgien",
+    shortLabel: "Chirurgien",
     time: 45
   },
   {

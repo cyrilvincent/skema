@@ -16,7 +16,7 @@ import plotly.io as pio
 print(config.version)
 print(config.connection_string)
 
-gdf = gpd.read_file("contours-iris.gpkg")
+gdf = gpd.read_file("../contours-iris.gpkg")
 gdf = gdf[gdf["nom_commune"] == "Grenoble"].to_crs(epsg=4326)
 gdf_l93 = gdf.to_crs(2154)
 pts_l93 = gdf_l93.geometry.representative_point()
