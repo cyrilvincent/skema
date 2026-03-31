@@ -4,7 +4,7 @@
         <p>
             <b>"{{p.title}}". @if(p.year) {({{p.year}})}</b>
         </p>
-        <p style="text-transform: uppercase">{{p.authors}}.</p>
+        <p style="text-transform: uppercase">{{p.authors}}</p>
         @if(p.source) {<p>{{p.source}} @if(p.url) {<a [href]="p.url" target="_blank" rel="noreferrer"><mat-icon>launch</mat-icon></a>}</p>}
         <br>
     }
@@ -13,7 +13,7 @@
         <p>
             <b>"{{p.title}}".</b>
         </p>
-        <p style="text-transform: uppercase">{{p.authors}}.</p>
+        <p style="text-transform: uppercase">{{p.authors}}</p>
         <br>
     }
 </div>

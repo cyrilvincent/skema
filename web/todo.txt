@@ -4,6 +4,4 @@ Server : Linux + Repasser en lazy
 •	finaliser le contenu du site/ergonomie du site (je vais faire valider les mentions légales, ect...)
 •	préparer le pdf sur l'apl
 •	calculs apl 2026 + updates dataset INSEE ect...
-
-APL : Overrrepresentation Geriatre (14) = + 60 ans
-    Refaire tourner specialite=22 pour toutes les années (sage femme) et 14 (geriatre)
+http://localhost:4200/

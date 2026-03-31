@@ -1,0 +1,74 @@
+<svg width="800" viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <clipPath id="clip-overlap">
+    <circle cx="320" cy="210" r="130"/>
+  </clipPath>
+</defs>
+
+<!-- Fond blanc -->
+<rect width="680" height="560" fill="white"/>
+
+<!-- Zone offre -->
+<circle cx="250" cy="210" r="130" fill="#B5D4F4" stroke="#185FA5" stroke-width="1.8" opacity="0.7"/>
+
+<!-- Zone patientèle -->
+<circle cx="390" cy="210" r="130" fill="#C0DD97" stroke="#3B6D11" stroke-width="1.8" opacity="0.7"/>
+
+<!-- Chevauchement -->
+<circle cx="250" cy="210" r="130" fill="#378ADD" clip-path="url(#clip-overlap)" opacity="0.3"/>
+<circle cx="390" cy="210" r="130" fill="#639922" clip-path="url(#clip-overlap)" opacity="0.25"/>
+
+<!-- Labels zones -->
+<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="185" y="112" text-anchor="middle" fill="#0C447C">Zone de recours</text>
+<text font-family="Arial, sans-serif" font-size="12" x="185" y="130" text-anchor="middle" fill="#0C447C">Accessibilité du professionel de santé</text>
+
+<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="455" y="112" text-anchor="middle" fill="#27500A">Zone patientèle</text>
+<text font-family="Arial, sans-serif" font-size="12" x="455" y="130" text-anchor="middle" fill="#27500A">Accessibilité du patient</text>
+
+<!-- Zone commune -->
+<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="320" y="198" text-anchor="middle" fill="#2C2C2A">Zone</text>
+<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="320" y="218" text-anchor="middle" fill="#2C2C2A">commune</text>
+
+<!-- Icône médecin -->
+<rect x="228" y="192" width="16" height="4" rx="2" fill="#0C447C"/>
+<rect x="234" y="186" width="4" height="16" rx="2" fill="#0C447C"/>
+<circle cx="236" cy="200" r="20" fill="none" stroke="#0C447C" stroke-width="1" opacity="0.5"/>
+<text font-family="Arial, sans-serif" font-size="12" x="236" y="232" text-anchor="middle" fill="#0C447C">Offre S</text>
+
+<!-- Points patients -->
+<circle cx="382" cy="182" r="5" fill="#3B6D11"/>
+<circle cx="408" cy="205" r="5" fill="#3B6D11"/>
+<circle cx="374" cy="222" r="5" fill="#3B6D11"/>
+<circle cx="420" cy="188" r="5" fill="#3B6D11"/>
+<circle cx="396" cy="238" r="5" fill="#3B6D11"/>
+<text font-family="Arial, sans-serif" font-size="12" x="400" y="262" text-anchor="middle" fill="#27500A">Population P</text>
+
+<!-- Légende -->
+<rect x="240" y="355" width="14" height="14" rx="3" fill="#378ADD" opacity="0.55"/>
+<text font-family="Arial, sans-serif" font-size="12" x="260" y="367" fill="#444441">Zone commune : seule zone prise en compte dans les deux étapes</text>
+
+<!-- Séparateur -->
+<line x1="40" y1="388" x2="640" y2="388" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="4 4"/>
+
+<!-- Étape 1 -->
+<rect x="40" y="400" width="272" height="118" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+<text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="56" y="422" fill="#0C447C">Étape 1 — Ratio offre/demande</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="442" fill="#042C53">Pour chaque point d'offre j :</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="460" fill="#042C53">  Rj = Sj ÷ Σ Pk</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="478" fill="#042C53">  (k dans la zone du médecin)</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="498" fill="#185FA5">→ Ratio médecin / habitants</text>
+
+<!-- Flèche -->
+<line x1="316" y1="459" x2="348" y2="459" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- Étape 2 -->
+<rect x="352" y="400" width="288" height="118" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+<text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="368" y="422" fill="#173404">Étape 2 — Score d'accessibilité</text>
+<text font-family="Arial, sans-serif" font-size="12" x="368" y="442" fill="#173404">Pour chaque patient i :</text>
+<text font-family="Arial, sans-serif" font-size="12" x="368" y="460" fill="#173404">  Ai = Σ Rj</text>
+<text font-family="Arial, sans-serif" font-size="12" x="368" y="478" fill="#173404">  (j dans la zone du patient)</text>
+<text font-family="Arial, sans-serif" font-size="12" x="368" y="498" fill="#3B6D11">→ Score d'accès aux soins</text>
+</svg>

@@ -22,7 +22,7 @@ export const publications: PublicationDTO[] = [
     {
         id:2,
         title: "Socioeconomic determinants of pandemics: a spatial methodological approach with evidence from COVID-19 in Nice, France",
-        authors: "BAILLY, L., BELGAIED, R., JOBERT, T. et MONTMARTIN, B.",
+        authors: "BAILLY, L., BELGAIED, R., JOBERT, T. & MONTMARTIN, B.",
         year: 2025,
         source: "Geospatial Health, 20(2)",
         url: "https://www.geospatialhealth.net/gh/article/view/1383",
@@ -31,7 +31,7 @@ export const publications: PublicationDTO[] = [
     {
         id:3,
         title: "Balancing health and sustainability: Optimizing investments in organic vs. conventional agriculture through pesticide reduction",
-        authors: "BARGNA, L., LA TORRE, D., MAGGISTRO, R. et MONTMARTIN, B.",
+        authors: "BARGNA, L., LA TORRE, D., MAGGISTRO, R. & MONTMARTIN, B.",
         year: 2026,
         source: "Journal of Economic Behavior and Organization, 243, pp. 107442",
         url: "https://www.sciencedirect.com/science/article/abs/pii/S0167268126000302",
@@ -82,13 +82,13 @@ export const works: PublicationDTO[] = [
     {
         id:9,
         title: "Where patients live matters: Linking environmental exposure, healthcare access, and income to IVF success",
-        authors: "Montmartin B., Laffineur C. & Gauci P.A",
+        authors: "Montmartin B., Laffineur C. & Gauci P.A.",
         type: "W"
     },
         {
         id:16,
         title: "Implementation of discharge within 24 hours after birth in France: safety, satisfaction, and feasibility trial supported by a connected home monitoring application (NICE-BIRTH study)",
-        authors: "Gauci P.A., Adrados C., Albouy C., Roy M., Walrave Y., Marioli S., Benamer L. & Delotte J.Montmartin B., Laffineur C. & Gauci P.A",
+        authors: "Gauci P.A., Adrados C., Albouy C., Roy M., Walrave Y., Marioli S., Benamer L. & Delotte J.",
         type: "W"
     },
         {
