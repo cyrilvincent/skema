@@ -6,6 +6,7 @@ Projet 2 = Doctolib scraper
 Projet 3 = New PS (downloader + parser)
     https://www.data.gouv.fr/datasets/annuaire-sante-ameli
     URL stable : https://www.data.gouv.fr/api/1/datasets/r/432983b9-2e6f-473a-b35a-20403c300a5f
+    Pas urgent
 Projet 4 = Divers
     Ameli 24 + MAJ du apl/ps_stats + filo 22 + filo<18 + pop22 + damir25 (auto normalement)
 Projet 5 = CMS
@@ -13,7 +14,8 @@ Projet 6 = Nominatim OSM en local
     OSMMatcher blacklisté, changé un peu le score matcher le cas échéant
     https://nominatim.org/release-docs/latest/admin/Installation/
     https://github.com/mediagis/nominatim-docker
-Projet 7 = APL Psychologue
-    Non présent dans DAMIR
-Projet 8 = Documentation APL (& SAE ?)
+    Urgent
+Projet 7 = Documentation APL (& SAE ?)
+    En cours
+
 

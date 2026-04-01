@@ -331,7 +331,7 @@ export class GeoDataviz implements OnInit {
         zoom: this.getZoom(),
       },
       autosize: true,
-      height: this.fullscreen() ? undefined : 600,
+      height: this.fullscreen() ? undefined : 500,
       //width: 1200,
       margin: {l: 10, r: 120, t: 30, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',

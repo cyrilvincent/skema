@@ -148,6 +148,8 @@ for with_s in [True]: #[True, False]
                 for year in range(20, 26):
                     pop_iris = get_pop_iris(year)
                     for specialite in [10]: #range(1, 29):
+                        if specialite in [9, 14, 18, 20, 26, 28]:
+                            continue
                         iriss = get_iriss(year, specialite)
                         for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
                             if ((time > 30 and accessibilite_exp < -0.08) or
@@ -195,24 +197,16 @@ for with_s in [True]: #[True, False]
 
                             iris_matrix_pop_df["pop_gp"] = sum(w * iris_matrix_pop_df[c] for w, c in zip(weights, cols))
                             iris_matrix_pop_df=iris_matrix_pop_df.sort_values(by='iris2')
-                            # iris_matrix_pop_df.head(5)
                             test_pop = iris_matrix_pop_df.drop_duplicates(subset=['iris2'])
                             ratio = test_pop["pop_gp"] / (test_pop["pop"] + 1)
                             ratio_mean = np.mean(ratio)
                             # print(ratio_mean)
-                            iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
-                            if specialite in [5, 22]:
+                            if specialite not in [7, 14]:  # Pédiatre & Gériatre
+                                iris_matrix_pop_df["pop_gp"] = iris_matrix_pop_df["pop_gp"] / ratio_mean
+                            if specialite in [5, 22]:  # Gyneco, sage femme
                                 iris_matrix_pop_df["pop_gp"] /= 2
 
-                            # In[22]:
-
-
                             matrix_df = iris_matrix_pop_df[["iris1","iris2","km","time","accessibilite_weight","pop_gp","pop","type_iris"]]
-                            matrix_df.head(5)
-
-
-                            # In[24]:
-
 
                             matrix_df["iris"] = matrix_df["iris1"].copy()
                             matrix_df = matrix_df.sort_values(by='iris2')

@@ -3,7 +3,7 @@
 }
 
 .top-spacer {
-    height: 270px;
+    height: 220px;
 }
 
 .mobile-top-spacer-shrunk {
@@ -23,7 +23,7 @@ header {
     z-index: 999;
     left: 0px;
     top: 0px;
-    height: 245px;
+    height: 195px;
     right: 0px;
     background: #fff;
 
@@ -69,7 +69,7 @@ header {
     height: 80vh;
     overflow: hidden;
     z-index: 98;       // sous le header (z-index: 99)
-    transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
     &.shrunk {
       height: 0;
@@ -83,8 +83,8 @@ header {
     //   }
     }
 
-     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+     mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 
     .hero-content {
     position: fixed;

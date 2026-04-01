@@ -5,3 +5,8 @@ Server : Linux + Repasser en lazy
 •	préparer le pdf sur l'apl
 •	calculs apl 2026 + updates dataset INSEE ect...
 http://localhost:4200/
+30 min généraliste, 45 pour les autres
+Griser CSV et GEOJSON
+Reduire la bannière de 40px
+Je n'ai pas les gériatres
+Ok Refaire tourner overrepresentation + les pédiatres (7)

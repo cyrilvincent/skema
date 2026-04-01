@@ -17,13 +17,13 @@
       </div>
     </div>
   }
-  <header [class]="service.isMobile() ? 'mobile-header' : 'header'"  [class.transparent]="!isHeroShrunk()">
+  <header [class]="service.isMobile() ? 'mobile-header' : 'header'"  [class.transparent]="!isHeroShrunk() && this.activeMenu() == 0">
     <app-banner [isWhite]="isWhite()"></app-banner>
     <div [class]="service.isMobile() ? 'mobile-toolbar' : 'toolbar'">
       <app-menu (menuChangedEvent)="menuChanged($event)"></app-menu> 
     </div>
   </header>
-  <div [class]="spacer()"></div> <!--[class]="service.isMobile() ? 'mobile-top-spacer' : 'top-spacer'-->
+  <div [class]="spacer()"></div>
   <router-outlet />
   <app-footer></app-footer>
 }

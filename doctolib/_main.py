@@ -8,10 +8,10 @@ from logger_wrapper import LoggerWrapper
 
 
 input = Input(
-    # doctolib_search_url = "https://www.doctolib.fr/medecin-generaliste/grenoble", #Url to your search
-    doctolib_search_url = "https://www.doctolib.fr/dermatologue/grenoble", #Url to your search
-    # search_name = "médecin_généraliste", #Your search name
-    search_name = "dermatologue2",
+    doctolib_search_url = "https://www.doctolib.fr/medecin-generaliste/grenoble", #Url to your search
+    # doctolib_search_url = "https://www.doctolib.fr/dermatologue/grenoble", #Url to your search
+    search_name = "médecin_généraliste", #Your search name
+    # search_name = "dermatologue2",
 )
 
 parameters = Parameters(

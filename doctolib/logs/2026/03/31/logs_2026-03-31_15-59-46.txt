@@ -1,0 +1,30 @@
+2026-03-31 15:59:46,675 - INFO: Logging Started
+2026-03-31 15:59:46,675 - DEBUG: scrapper init
+2026-03-31 15:59:47,343 - DEBUG: wrapper created for : browser.new_context()
+2026-03-31 15:59:47,343 - DEBUG: wrapper created for : browser.new_page()
+2026-03-31 15:59:47,354 - DEBUG: wrapper created for : bs_context.new_page()
+2026-03-31 15:59:47,970 - DEBUG: wrapper created for : page.goto()
+2026-03-31 15:59:47,970 - INFO: Scraper Entered
+2026-03-31 15:59:47,970 - INFO: Going to site : https://www.doctolib.fr/dermatologue/grenoble.json
+2026-03-31 15:59:49,019 - INFO: Scraper Exited
+2026-03-31 15:59:49,021 - ERROR: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\_main.py", line 46, in main
+    docs_links = scraper.gather_doctors_links()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 219, in gather_doctors_links
+    current_data = self.json_from_html(self.page.content())["data"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\conta\git-CVC\Skema\git-skema\doctolib\scraper.py", line 187, in json_from_html
+    data = json.loads(pre.get_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\conta\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\conta\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\conta\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-03-31 15:59:49,023 - INFO: Program Finished

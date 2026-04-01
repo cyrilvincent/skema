@@ -1,4 +1,4 @@
-  <div style="height: 100vh" #myPlot>
+  <div #myPlot>
     @if(visible() && plotlyReady()) {
       <plotly-plot #plotEl
         [data]="data()"
