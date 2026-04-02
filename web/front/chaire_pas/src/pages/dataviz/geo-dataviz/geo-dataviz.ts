@@ -424,6 +424,7 @@ export class GeoDataviz implements OnInit {
       return tensions.map(t => {
         let r = 127;
         let g = 127;
+        let b = 0
         if (t != -1) {
           let a = 0.1;
           let b = 3000;
@@ -434,13 +435,14 @@ export class GeoDataviz implements OnInit {
           r = this.clip(Math.round((t-b)*a+127.5), 0, 255);
           g = 255 - this.clip(Math.round((t-b)*a+127.5), 0, 255);
         }
-        return `rgb(${r},${g},0,255)`;
+        else r = g = b = 255;
+        return `rgb(${r},${g},${b},255)`;
       })
     }
     return [];
   }
 
-    getEhpadScatterColor(p1: number[], p1_mean: number[]): string[] {
+  getEhpadScatterColor(p1: number[], p1_mean: number[]): string[] {
     if(this.dto() != null) {
       let i = 0;
       return p1.map(p => {
@@ -496,7 +498,8 @@ export class GeoDataviz implements OnInit {
   getScatterGeo(): Partial<Plotly.ScatterData> {
     const etab = this.years()[this.firstYear()]["etab"]!;
     const scatter: Partial<Plotly.ScatterData> = {
-      type: 'scattergeo',
+      //type: 'scattergeo',
+      type: this.mapType() == "choropleth" ? "scattergeo" : "scattermap",
       lat: etab["lat"],
       lon: etab["lon"],
       mode: 'markers',
@@ -510,6 +513,12 @@ export class GeoDataviz implements OnInit {
                this.getTensionScatterColor(etab["tension"]) : 
                this.getEhpadScatterColor(this.years()[this.firstYear()]["p1"]!, this.years()[this.firstYear()]["p1_mean"]!),
         size: this.getScatterSize(etab["passu"]),
+        opacity: 1,
+        line: {
+          color: 'white',
+          width: 1
+        }
+        
         // opacity: 1,
       }
     };

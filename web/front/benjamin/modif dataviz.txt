@@ -3,12 +3,11 @@ Modifications à apporter sur la dataviz
 OK 1) Assurer que le visuel des cartes soit possible en entier sans passer le plein écran  (réduire la bannière sans réduire le titre et les logos). Jouer sur la taille de la colorbar éventuellement. 
 OK 2) Ajouter le titre de la spécialité étudiée sur la carte
 3) Ajouter les caractéristiques socio-éco au niveau des communes
-4) paramètres par défaut: Pour généralistes /Chirurgiens-dentistes/Infirmiers --> 30 mins
-Pour les autres 45 mins
+OK 4) paramètres par défaut: Pour généralistes /Chirurgiens-dentistes/Infirmiers --> 30 mins Pour les autres 45 mins
 OK 5) remplacer chirurgien-dentaire par chirurgien-dentiste
 OK 6) bien vérifier que toutes les professions ajouter sont bien représentés / aux données de la CNAM (il me semblait que les dermato étaient pas top non?)
-7) Pour les données urgences mettre le rond en couleur blanche quand pas d'info sur le nb ETP
-8) Pareil quand pas d'infos pour les ephad mettre les ronds en blanc
-9) Quand on passe en option map, plus aucune info ne s'affiche. Ce serait mieux de pouvoir garder toutes les infos
+OK 7) Pour les données urgences mettre le rond en couleur blanche quand pas d'info sur le nb ETP
+OK 8) Pareil quand pas d'infos pour les ephad mettre les ronds en blanc
+OK bof 9) Quand on passe en option map, plus aucune info ne s'affiche. Ce serait mieux de pouvoir garder toutes les infos
 OK 10) bien vérifier que les données pour certaines spécialités médicales tiennent compte de la demande potentielle effective, i.e, population de femmes pour gynéco et sage-femmes, enfants uniquement pour pédiatre, personnes de plus de 65 ans pour gériatre
 	Gériatre non présents, déjà fait pour gyneco et sage femme, j'ai refait tourner les pédiatres pour ne prendre en compte que les enfants
