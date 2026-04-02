@@ -18,6 +18,7 @@ export class Fullscreen {
   service = inject(GeoService);
   label = signal<string>("");
   geoType = signal("iris");
+  sae2 = signal<boolean>(false);
 
   constructor() {
     const usp = new URLSearchParams(window.location.search);
@@ -35,6 +36,7 @@ export class Fullscreen {
     this.type.set(usp.get("type")!);
     this.label.set(usp.get("label")!);
     this.geoType.set(usp.get("geoType")!);
+    this.sae2.set(usp.get("sae2") == "true");
     console.log("DTO "+this.type());
     console.log(this.dto());
   }

@@ -1,7 +1,7 @@
 Modifications à apporter sur la dataviz
 
 OK 1) Assurer que le visuel des cartes soit possible en entier sans passer le plein écran  (réduire la bannière sans réduire le titre et les logos). Jouer sur la taille de la colorbar éventuellement. 
-2) Ajouter le titre de la spécialité étudiée sur la carte
+A VERIF 2) Ajouter le titre de la spécialité étudiée sur la carte
 3) Ajouter les caractéristiques socio-éco au niveau des communes
 4) paramètres par défaut: Pour généralistes /Chirurgiens-dentistes/Infirmiers --> 30 mins
 Pour les autres 45 mins

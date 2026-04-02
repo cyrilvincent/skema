@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, injec
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
+import { specialites } from '../dataviz.data';
 //import Plotly from 'plotly.js-dist-min'
 
 @Component({
@@ -36,6 +37,8 @@ export class GeoDataviz implements OnInit {
   mapType = signal<string>("choropleth");
   zooms: { [key: string]: number } = {"CC": 11, "CP": 11, "CA": 8, "CE": 8, "CD": 7, "CR": 6, "CF": 4};
   @ViewChild('myPlot') plotEl!: ElementRef;
+  sae2 = input<boolean>(false);
+  specialites = computed(() => this.sae2() ? specialites["SAE2"] : specialites[this.type()]);
   //Plotly: any = null; for lazy loading
 
   constructor() {
@@ -297,7 +300,8 @@ export class GeoDataviz implements OnInit {
     const codes: { [key: string]: string } = {"CC": "Commune de", "CD": "Département", "CR": "Région", "CP": "Commune(s) de", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"};
     if(this.dto() != null) {
       const code = this.dto()!.code.slice(0, 2);
-      let s = codes[code];
+      let s = this.specialites().find(s => s.id == this.dto()!.id)!.label + "<br>";
+      s += codes[code];
       if (code != "CF") s += " "+this.label();
       return s;
     }
@@ -331,7 +335,7 @@ export class GeoDataviz implements OnInit {
         zoom: this.getZoom(),
       },
       autosize: true,
-      height: this.fullscreen() ? undefined : 500,
+      height: this.fullscreen() ? window.innerHeight * 0.98 : 500,
       //width: 1200,
       margin: {l: 10, r: 120, t: 30, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
