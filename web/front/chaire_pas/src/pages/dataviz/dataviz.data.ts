@@ -149,13 +149,13 @@ const apl_specialites: Specialite[] = [
     id: 23,
     label: "Masseur-Kinésithérapeute",
     shortLabel: "Kine",
-    time: 30
+    time: 45
   },
   {
     id: 24,
     label: "Pédicure-podologue",
     shortLabel: "Podologue",
-    time: 30
+    time: 45
   },
   {
     id: 25,
@@ -165,7 +165,7 @@ const apl_specialites: Specialite[] = [
   },
   {
     id: 27,
-    label: "Chirurgien-dentaire",
+    label: "Chirurgien-dentiste",
     shortLabel: "Dentiste",
     time: 30
   },

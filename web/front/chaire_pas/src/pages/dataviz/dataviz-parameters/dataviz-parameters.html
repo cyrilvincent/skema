@@ -70,8 +70,8 @@
                 <mat-icon>grid_on</mat-icon> Rendu: 
                 <mat-button-toggle-group name="render" [formControl]="renderTypeControl">
                     <mat-button-toggle value="dataviz">Visualisation</mat-button-toggle>
-                    <mat-button-toggle value="csv">CSV</mat-button-toggle>
-                    <mat-button-toggle value="json">GEOJSON</mat-button-toggle>
+                    <mat-button-toggle value="csv" [disabled]="true">CSV</mat-button-toggle>
+                    <mat-button-toggle value="json" [disabled]="true">GEOJSON</mat-button-toggle>
                 </mat-button-toggle-group>
                 <mat-icon matTooltip="Visualisation des données dans un graphique géographique ou téléchargement du CSV ou téléchargement du GEOJSON">help</mat-icon>
             </p>

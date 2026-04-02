@@ -59,7 +59,17 @@ export class DatavizParameters {
     this.specialiteControl = new FormControl<Specialite | null>(this.type() == "APL" ? this.generaliste() : this.specialites()[0]);
     this.selectedSpecialite = signal<Specialite>(this.type() == "APL" ? this.generaliste() : this.specialites()[0]);
     this.specialiteControl.valueChanges.subscribe(
-      p => this.selectedSpecialite.set(p!)
+      p => {
+        this.selectedSpecialite.set(p!);
+        if (this.type() == "APL") {
+          if (p!.time != this.time()) {
+            this.timeControl.setValue(p!.time);
+            if (p!.time == 30 && this.exp() != -0.12) this.expControl.setValue(-0.12)
+            else if (p!.time == 45 && this.exp() != -0.08) this.expControl.setValue(-0.08);
+            console.log(`Time: ${this.time()}, exp: ${this.exp()}`)
+          }
+        }
+      }
     )
     this.timeControl.valueChanges.subscribe(
       t => {
