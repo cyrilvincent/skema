@@ -16,6 +16,6 @@ Salut. Je viens de détecter un bug sur la dataviz lorsqu'on utilise la moyenne 
 
 Sage femme : Le pb du max c'est pour la visualisation seulement oui. Sinon il y a le point 10 du doc et aussi une demande que je t'avais fait sur slack pour le calcul en lui même de l'indicateur: "Si tu prends Nice Saint-Agustin (IRIS tu as deux ETP et un APL de 16.5). Si tu prends l'iris Paul Montel tu as 0 ETP et un APL de 16.6. Je sais que ça dépend de la taille de la population mais quand même ça fait très bizarre. Tu peux vérifier que y'a pas un bug quand même stp"
 
-pour 2024 à Nice les prix sont quasi les mêmes pour tous les établissements
-Bug ehpad nice commune (il manque des p1)
-Bug tous les SAE France : NaN en back
+OK pour 2024 à Nice les prix sont quasi les mêmes pour tous les établissements
+OK Bug ehpad nice commune (il manque des p1)
+OK Bug tous les SAE France : NaN en back

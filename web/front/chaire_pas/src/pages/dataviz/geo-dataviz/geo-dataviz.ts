@@ -444,15 +444,17 @@ export class GeoDataviz implements OnInit {
     return [];
   }
 
-  getEhpadScatterColor(p1: number[], p1_mean: number[]): string[] {
+  getEhpadScatterColor(p1: number[] | undefined, p1_mean: number[] | undefined): string[] {
     if(this.dto() != null) {
       let i = 0;
       if (p1) {
+        const mean = p1_mean!.find(p => p > 0);
         return p1.map(p => {
+          if (p == -1 || !mean) return "rgb(255,255,255,255)";
           let r = 127;
           let g = 127;
           if (p != -1) {
-            const ratio = p / p1_mean[i];
+            const ratio = p / mean;
             r = this.clip(Math.round(127.5 * ratio), 0, 255);
             g = 255 - r;
           }
@@ -480,15 +482,18 @@ export class GeoDataviz implements OnInit {
     }
     else if (this.dto()!.id == 5) {
       s += "<br>";
-      const df_year = this.years()[year];
-      if ( df_year["p1"]) {
-        const p1 = df_year["p1"]![i];
+      if (etab["p1"]) {
+        const p1 = etab["p1"]![i];
         if (!p1 || p1 < 0) s+= "Prix en chambre seule: N/A";
         else {
           s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
-          s += `  Δ à la moyenne nationale: ${this.variation(p1, df_year["p1_mean"]![i])}%<br>`;
-          const p120 = this.years()["2020"]["p1"]![i];
-          s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%<br>`
+          s += `  Δ à la moyenne nationale: ${this.variation(p1, etab["p1_mean"]![i])}%${etab["p1_mean"]![i]}<br>`;
+          const etab20 = this.years()["2020"]["etab"]!
+          const i20 = etab20["fi"].indexOf(etab["fi"][i])
+          if (i20 >= 0 && etab20["p1"]) {
+            const p120 = etab20["p1"]![i20]
+            s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%`
+          }
         }
       }
     }
@@ -518,7 +523,7 @@ export class GeoDataviz implements OnInit {
       marker: {
         color: this.dto()?.id != 5 ? 
                this.getTensionScatterColor(etab["tension"]) : 
-               this.getEhpadScatterColor(this.years()[this.firstYear()]["p1"]!, this.years()[this.firstYear()]["p1_mean"]!),
+               this.getEhpadScatterColor(etab["p1"], etab["p1_mean"]),
         size: this.getScatterSize(etab["passu"]),
         opacity: 1,
         line: {
@@ -602,7 +607,7 @@ export class GeoDataviz implements OnInit {
             marker: {
               color: this.type() == "APL" ? undefined : (this.dto()!.id != 5 ? 
                                                          this.getTensionScatterColor(etab["tension"]) : 
-                                                         this.getEhpadScatterColor(this.years()[year]["p1"]!, this.years()[year]["p1_mean"]!)),
+                                                         this.getEhpadScatterColor(etab["p1"], etab["p1_mean"])),
               size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"]),
             },
           },

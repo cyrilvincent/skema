@@ -222,9 +222,10 @@ class SAEService(APLService):
 
     def get_filo_by_iriss(self, iriss: list[str]) -> pd.DataFrame:
         df = super().get_filo_by_iriss(iriss)
-        first_year = df.iloc[0]["year"]
-        for year in range(4, first_year):
-            df = self.clone_df_year(df, first_year, year)
+        if len(df) > 0:
+            first_year = df.iloc[0]["year"]
+            for year in range(4, first_year):
+                df = self.clone_df_year(df, first_year, year)
         return df
 
     def get_ehpad_by_finesss(self, finesss: list[str]):
@@ -277,11 +278,11 @@ class SAEService(APLService):
             gdf = pd.concat([gdf, rows_2018], ignore_index=True)
         return gdf
 
-    def merge_ehpad(self, gdf: pd.DataFrame) -> pd.DataFrame:
-        finesss = gdf["fi"].dropna().unique()
+    def merge_ehpad(self, etab_df: pd.DataFrame) -> pd.DataFrame:
+        finesss = etab_df["fi"].dropna().unique()
         ehpads = self.get_ehpad_by_finesss(finesss)
-        gdf = gdf.merge(ehpads, on=["year", "fi"], how="left")
-        return gdf
+        etab_df = etab_df.merge(ehpads, on=["year", "fi"], how="left")
+        return etab_df
 
     def group_sae_by_commune(self, sae: pd.DataFrame) -> pd.DataFrame:
         sae = sae.sort_values(by=["year", "iris"])
@@ -333,17 +334,13 @@ class SAEService(APLService):
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'code_iris', 'nom_iris', "geometry",
                 "km", "time_hc", "time_hp", "rs", "fi", "pop"]
         if "tp60" in gdf:
-            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p",
+            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year",
                      "pop65p_ratio_france"]
-        if "p1" in gdf:
-            cols += ["p1", "p1_mean"]
-            gdf["p1"] = gdf["p1"].fillna(-1)
-            gdf["p1_mean"] = gdf["p1_mean"].fillna(-1)
-        if "tp60" in gdf:
             gdf["tp60"] = gdf["tp60"].fillna(0)
             gdf["med"] = gdf["med"].fillna(0)
             gdf["gi"] = gdf["gi"].fillna(0)
         if "pop65p" in gdf:
+            cols += ["pop65p"]
             gdf["pop65p"] = gdf["pop65p"].fillna(0)
         export = gdf[cols]
         print(f"NaN cols: {export.columns[export.isna().any()]}")
@@ -354,6 +351,10 @@ class SAEService(APLService):
         etab_df["passu"] = etab_df["passu"].fillna(-1)
         etab_df["has_pdata"] = etab_df["has_pdata"].fillna(False)
         cols = ["year", "fi", "passu", "has_pdata", "etp", "efflib", "etpsal", "rs", "lon", "lat", "tension"]
+        if "p1" in etab_df:
+            cols += ["p1", "p1_mean"]
+            etab_df["p1"] = etab_df["p1"].fillna(-1)
+            etab_df["p1_mean"] = etab_df["p1_mean"].fillna(-1)
         export_etab = etab_df[cols]
         for year in years:
             meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
@@ -396,13 +397,13 @@ class SAEService(APLService):
         etab_df = self.get_sae_by_bor(bor, gdf)
         etab_df = self.etab_tension(etab_df)
         etab_df = self.etab_corrections(bor, etab_df)
+        if specialite == 5:
+            etab_df = self.merge_ehpad(etab_df)
         print(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_iris_gdf_apl(gdf, sae)
         gdf_merged = self.df_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
-        if specialite == 5:
-            gdf_merged = self.merge_ehpad(gdf_merged)
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
@@ -431,11 +432,11 @@ class SAEService(APLService):
         etab_df = self.get_sae_commune_by_bor(bor, gdf)
         etab_df = self.etab_tension(etab_df)
         etab_df = self.df_corrections(bor, etab_df)
+        if specialite == 5:
+            etab_df = self.merge_ehpad(etab_df)
         print(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_commune_gdf_apl(gdf, sae)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
-        if specialite == 5:
-            gdf_merged = self.merge_ehpad(gdf_merged)
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_sae_by_commune(gdf_merged)

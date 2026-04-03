@@ -41,7 +41,7 @@ class APLService:
         elif len(l) == 1:
             return f"('{l[0]}')"
         else:
-            return "()"
+            return "('EMPTY42')"
 
     def check_time_type(self, time_type: str):
         if time_type not in ["HC", "HP"]:
@@ -369,9 +369,17 @@ class APLService:
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
                 'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry"]
         if "tp60" in gdf:
-            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year", "pop65p",
+            cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year",
                      "pop65p_ratio_france"]
+            gdf["tp60"] = gdf["tp60"].fillna(0)
+            gdf["med"] = gdf["med"].fillna(0)
+            gdf["gi"] = gdf["gi"].fillna(0)
+        if "pop65p" in gdf:
+            cols += ["pop65p"]
+            gdf["pop65p"] = gdf["pop65p"].fillna(0)
         export = gdf[cols]
+        print(f"NaN cols: {export.columns[export.isna().any()]}")
+        export = export.dropna()
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
             dico["meanws"].append(meanw)

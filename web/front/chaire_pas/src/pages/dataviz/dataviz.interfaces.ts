@@ -51,6 +51,8 @@ export interface EtabDTO {
     lon: number[];
     lat: number[];
     tension: number[];
+    p1?: number[];
+    p1_mean?: number[];
 }
 
 export interface GeoYearDTO {
@@ -85,8 +87,6 @@ export interface GeoYearDTO {
     gi_france?: number[];
     pop65p_ratio_france?: number[];
     pop_year?: number[];
-    p1?: number[];
-    p1_mean?: number[];
 }
 
 export interface GeoDTO {
