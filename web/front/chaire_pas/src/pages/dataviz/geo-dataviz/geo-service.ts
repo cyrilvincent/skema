@@ -84,7 +84,11 @@ export class GeoService  extends CommonService {
     console.log(dto);
     this.fetchLoading();
     this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({
-      next: (res) => { this._geoTupleDTO.set(res); console.log(res); },
+      next: (res) => { 
+        console.log("fetchSAE");
+        console.log(res);
+        this._geoTupleDTO.set(res); 
+      },
       error: (err) => {
         if(err.status == 404) console.log("Not found "+dto.code);
         else this.catchError(err);

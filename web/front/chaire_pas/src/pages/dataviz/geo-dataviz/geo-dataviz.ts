@@ -84,8 +84,10 @@ export class GeoDataviz implements OnInit {
   }
 
   variation(a: number, b: number, delta=1): string {
-    return ((a - b) * 100 / (b + 0.01)).toFixed(delta);
+    const result = ((a - b) * 100 / (b + 0.01)).toFixed(delta);
+    return result;
   }
+
 
   getCommuneIrisText(i: number, df_year: GeoYearDTO): string {
     return `<b>${df_year["nom_commune"][i]} - ${df_year["nom_iris"][i]} (${df_year["code_iris"][i]})</b><br><br>`;
@@ -158,20 +160,20 @@ export class GeoDataviz implements OnInit {
   getAplTexts(i: number, df_year: GeoYearDTO, year: string, isIris: boolean): string {
     let s = isIris ? this.getCommuneIrisText(i, df_year) : this.getCommuneText(i, df_year);
     s += this.getAplText(i, df_year, year);
-    if (isIris) {
+    //if (isIris) {
       s += this.getPopText(i, df_year);
       s += this.getFiloText(i, df_year);
-    }
+    //}
     return s
   }
 
   getSaeTexts(i: number, df_year: GeoYearDTO, year: string, isIris: boolean): string {
     let s = isIris ? this.getCommuneIrisText(i, df_year) : this.getCommuneText(i, df_year);
     s += this.getEtablissementText(i, df_year, year);
-    if (isIris) {
+    //if (isIris) {
       s += this.getPopText(i, df_year);
       s += this.getFiloText(i, df_year);
-    }
+    //}
     return s
   }
 
@@ -445,18 +447,21 @@ export class GeoDataviz implements OnInit {
   getEhpadScatterColor(p1: number[], p1_mean: number[]): string[] {
     if(this.dto() != null) {
       let i = 0;
-      return p1.map(p => {
-        let r = 127;
-        let g = 127;
-        if (p != -1) {
-          const ratio = p / p1_mean[i];
-          r = this.clip(Math.round(127.5 * ratio), 0, 255);
-          g = 255 - r;
-        }
-        i++;
-        const rgb = `rgb(${r},${g},0,255)`;
-        return rgb;
-      })
+      if (p1) {
+        return p1.map(p => {
+          let r = 127;
+          let g = 127;
+          if (p != -1) {
+            const ratio = p / p1_mean[i];
+            r = this.clip(Math.round(127.5 * ratio), 0, 255);
+            g = 255 - r;
+          }
+          i++;
+          const rgb = `rgb(${r},${g},0,255)`;
+          return rgb;
+        })
+      }
+      return [];
     }
     return [];
   }
@@ -476,13 +481,15 @@ export class GeoDataviz implements OnInit {
     else if (this.dto()!.id == 5) {
       s += "<br>";
       const df_year = this.years()[year];
-      const p1 = df_year["p1"]![i];
-      if (p1 < 0) s+= "Prix en chambre seule: N/A";
-      else {
-        s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
-        s += `  Δ à la moyenne nationale: ${this.variation(p1, df_year["p1_mean"]![i])}%<br>`;
-        const p120 = this.years()["2020"]["p1"]![i];
-        s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%<br>`
+      if ( df_year["p1"]) {
+        const p1 = df_year["p1"]![i];
+        if (!p1 || p1 < 0) s+= "Prix en chambre seule: N/A";
+        else {
+          s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
+          s += `  Δ à la moyenne nationale: ${this.variation(p1, df_year["p1_mean"]![i])}%<br>`;
+          const p120 = this.years()["2020"]["p1"]![i];
+          s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%<br>`
+        }
       }
     }
     return s;

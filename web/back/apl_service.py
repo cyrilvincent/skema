@@ -328,8 +328,21 @@ class APLService:
         apl["nb_sum"] = apl['nb'].fillna(0).groupby([apl["code_commune"], apl["year"]]).transform('sum')
         apl[f"apl_meanw"] = ((apl["apl"].fillna(0) * apl["pop"])
                              .groupby([apl["code_commune"], apl["year"]]).transform('sum') / apl["pop_sum"])
+        apl = self.group_filo_pop_by_commune(apl)
         apl = apl.drop_duplicates(subset=['year', "code_commune"])
         return apl
+
+    def group_filo_pop_by_commune(self, df: pd.DataFrame) -> pd.DataFrame:
+        if "pop65p" in df and "gi" in df:
+            df = df.sort_values(by=["year", "iris"])
+            df["pop65p"] = df['pop65p'].fillna(0).groupby([df["code_commune"], df["year"]]).transform('sum')
+            df[f"med"] = ((df["med"].fillna(0) * df["pop"])
+                          .groupby([df["code_commune"], df["year"]]).transform('sum') / df["pop_sum"])
+            df[f"gi"] = ((df["gi"].fillna(0) * df["pop"])
+                         .groupby([df["code_commune"], df["year"]]).transform('sum') / df["pop_sum"])
+            df[f"tp60"] = ((df["tp60"].fillna(0) * df["pop"])
+                           .groupby([df["code_commune"], df["year"]]).transform('sum') / df["pop_sum"])
+        return df
 
     def gdf_merge_add_columns(self, gdf: pd.DataFrame) -> pd.DataFrame:
         if "apl_meanw" in gdf.columns:
@@ -381,11 +394,13 @@ class APLService:
         return gdf
 
     def merge_filo(self, gdf: pd.DataFrame) -> pd.DataFrame:
-        iriss = gdf["code_iris"].unique()
+        key = "code_iris" if "code_iris" in gdf else "iris_string"
+        iriss = gdf[key].dropna().unique()
         filo = self.get_filo_by_iriss(iriss)
+        filo["iris_string"] = filo["code_iris"]
         if (gdf["year"] > 2000).any():
             filo["year"] = filo["year"] + 2000
-        gdf = gdf.merge(filo, on=["year", "code_iris"], how="left")
+        gdf = gdf.merge(filo, on=["year", key], how="left")
         gdf["filo_year"] = gdf["filo_year"].fillna(0)
         gdf["tp60"] = gdf["tp60"].fillna(0)
         gdf["med"] = gdf["med"].fillna(0)
@@ -396,7 +411,7 @@ class APLService:
         return gdf
 
     def merge_pop(self, gdf: pd.DataFrame) -> pd.DataFrame:
-        iriss = gdf["code_iris"].unique()
+        iriss = gdf["code_iris"].dropna().unique()
         pop = self.get_pop_by_iriss(iriss)
         if "pop" in gdf.columns:
             pop = pop.drop("pop", axis=1)
@@ -475,6 +490,8 @@ class APLService:
         print(f"Found {len(gdf)} gdfs")
         gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
         print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_apl_by_commune(gdf_merged)
         gdf_commune = self.gdf_merge_add_columns(gdf_commune)
         export = self.get_export(code, studies_df, gdf_commune)
@@ -499,13 +516,12 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = APLService()
     time.sleep(1)
-    export = s.compute_iris("CC-38185", 10, 30, "HC", -0.12, "HD")  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
+    # export = s.compute_iris("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    # export = s.compute_commune("CC-38205", 10, 30, "HC", -0.12, "HD")  # Ne fonctionne pas pour Autrans 38021
-    # s = json.dumps(export)
-    # print(s[:5000])
-    # df = s.get_pop_by_iriss(["381850102"])
-    # print(df)
+    export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)  # Ne fonctionne pas pour Autrans 38021
+    s = json.dumps(export)
+    print(s[:5000])
+
 
 

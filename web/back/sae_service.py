@@ -278,7 +278,7 @@ class SAEService(APLService):
         return gdf
 
     def merge_ehpad(self, gdf: pd.DataFrame) -> pd.DataFrame:
-        finesss = gdf["fi"].unique()
+        finesss = gdf["fi"].dropna().unique()
         ehpads = self.get_ehpad_by_finesss(finesss)
         gdf = gdf.merge(ehpads, on=["year", "fi"], how="left")
         return gdf
@@ -296,6 +296,7 @@ class SAEService(APLService):
         sae["etp_sum"] = sae["etp"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
         sae["tension_sum"] = sae["passu_sum"] / sae["etp_sum"]
         sae["pop_sum"] = sae["pop"].fillna(0).groupby([sae["code_commune"], sae["year"]]).transform('sum')
+        sae = self.group_filo_pop_by_commune(sae)
         sae = sae.drop_duplicates(subset=['year', "code_commune"])
         return sae
     
@@ -338,7 +339,14 @@ class SAEService(APLService):
             cols += ["p1", "p1_mean"]
             gdf["p1"] = gdf["p1"].fillna(-1)
             gdf["p1_mean"] = gdf["p1_mean"].fillna(-1)
+        if "tp60" in gdf:
+            gdf["tp60"] = gdf["tp60"].fillna(0)
+            gdf["med"] = gdf["med"].fillna(0)
+            gdf["gi"] = gdf["gi"].fillna(0)
+        if "pop65p" in gdf:
+            gdf["pop65p"] = gdf["pop65p"].fillna(0)
         export = gdf[cols]
+        print(f"NaN cols: {export.columns[export.isna().any()]}")
         etab_df["etpsal"] = etab_df["etpsal"].fillna(-1)
         etab_df["efflib"] = etab_df["efflib"].fillna(-1)
         etab_df["etp"] = etab_df["etp"].fillna(-1)
@@ -426,6 +434,10 @@ class SAEService(APLService):
         print(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_commune_gdf_apl(gdf, sae)
         print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
+        if specialite == 5:
+            gdf_merged = self.merge_ehpad(gdf_merged)
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_sae_by_commune(gdf_merged)
         gdf_commune = self.df_corrections(bor, gdf_commune)
         gdf_commune = self.gdf_commune_add_columns(gdf_commune)
@@ -449,11 +461,11 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    export = s.compute_sae_iris("CC-38185", 5, 60, "HC", "HD")
+    # export = s.compute_sae_iris("CC-38185", 5, 60, "HC", "HD")
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    # export = s.compute_sae_commune("CC-38185", 1, 60, "HC", "HD")
+    export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
     print(export)
 
 
