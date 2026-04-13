@@ -12,10 +12,23 @@ OK bof 9) Quand on passe en option map, plus aucune info ne s'affiche. Ce serait
 OK 10) bien vérifier que les données pour certaines spécialités médicales tiennent compte de la demande potentielle effective, i.e, population de femmes pour gynéco et sage-femmes, enfants uniquement pour pédiatre, personnes de plus de 65 ans pour gériatre
 	Gériatre non présents, déjà fait pour gyneco et sage femme, j'ai refais tourner les pédiatres pour ne prendre en compte que les enfants
 
+Même pb que pour psycho
 Salut. Je viens de détecter un bug sur la dataviz lorsqu'on utilise la moyenne locale. Fait par ex les sage-femmes dans le 06. Tu verras que tout est en bleu sauf sur la carte 2025 avec un indicateur qui explose. Je pense qu'il ne faut pas mettre le max comme borne haute du coup
 
+Paul montel = Faible pop + proche du parc des sports avec ETP + proche  Saint Augustin
+Calcul détaillé à faire
 Sage femme : Le pb du max c'est pour la visualisation seulement oui. Sinon il y a le point 10 du doc et aussi une demande que je t'avais fait sur slack pour le calcul en lui même de l'indicateur: "Si tu prends Nice Saint-Agustin (IRIS tu as deux ETP et un APL de 16.5). Si tu prends l'iris Paul Montel tu as 0 ETP et un APL de 16.6. Je sais que ça dépend de la taille de la population mais quand même ça fait très bizarre. Tu peux vérifier que y'a pas un bug quand même stp"
 
 OK pour 2024 à Nice les prix sont quasi les mêmes pour tous les établissements
 OK Bug ehpad nice commune (il manque des p1)
 OK Bug tous les SAE France : NaN en back
+
+J'ai mis les corrections des points 1 à 10 sur le serveur
+J'ai corrigé le bug des prix des ehpad (j'avais une mauvaise jointure)
+Concernant le point 10 j'ai modifié le calcul des pédiatres et sage femmes tu va voir que les APL des sages femme a été quasi x2 pour 30 minutes. Les calculs sont en cours pour les durées 45 et 60 minutes et seront fini pour demain matin
+Concernant le point 9 le marqueur n'est pas délimité par un trait blanc et ne se voit pas bien, c'est un problème connu du framework utilisé quand on a une map en fond
+Concernant le dataviz par commune : ca n'a pas été facile à faire car il y a des iris sans filo et du coup les moyennes pondérées posait problème
+Concernant le pb de normalisation locale : au lieu de max je peux mettre 2 * la moyenne locale, à voir
+Concernant les sages femmes j'ai exporté le calcul détaillé. Dans les APL d'une ville le nb d'ETP est fortement dilué dans la zone de patientèle qui est énorme. Le nb de pop compte pour beaucoup. Paul Montel a une faible population et est proche en temps de trajet de Saint Augustin & du parc des sports, ca zone patientèle recoupe 2 zone d'offre de soins. Pour lies IRIS juste à l'est de Paul Montel le trajet vers le Parc des sports est un peu plus long, on passe de 1 minutes à 4 minutes. Je pourrais te faire voir le calcul détaillé juste pour ces 2 IRIS mais il n'est pas simple car la zone de recours regroupe 365 IRIS
+Si on augmente la durée en baissant l'exponentielle ces différences sont complètements gommées
+Je suis en train d'écrire la doc APL et de reprendre ligne par ligne le calcul pour le confronter à la doc, s'il y a un delta je le verrais

@@ -26,7 +26,7 @@ export class GeoDataviz implements OnInit {
   firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading replace previous line
-  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
+  data = computed<any[]>(() =>  this.showLabel() || true ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
@@ -450,7 +450,7 @@ export class GeoDataviz implements OnInit {
       if (p1) {
         const mean = p1_mean!.find(p => p > 0);
         return p1.map(p => {
-          if (p == -1 || !mean) return "rgb(255,255,255,255)";
+          if (p == -1 || !mean || mean < 0) return "rgb(255,255,255,255)";
           let r = 127;
           let g = 127;
           if (p != -1) {
