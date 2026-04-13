@@ -238,6 +238,7 @@ class SAEService(APLService):
         order by ds.annee, e.finesset
         """
         df = pd.read_sql(sql, config.connection_string)
+        df = df.drop_duplicates(["year", "fi"])
         return df
 
     def get_sae_by_bor(self, bor: str, gdf: pd.DataFrame) -> pd.DataFrame:
@@ -370,7 +371,7 @@ class SAEService(APLService):
                     dico_year[col] = export_year[col].values.tolist()
             for col in export_etab.columns:
                 etab_year[col] = export_etab_year[col].values.tolist()
-            if len(etab_year["rs"]) > 5000:  # 576 urgence_gen in france
+            if len(etab_year["rs"]) > 500:  # 576 urgence_gen in france
                 for col in export_etab.columns:
                     etab_year[col] = []
             dico_year["etab"] = etab_year
