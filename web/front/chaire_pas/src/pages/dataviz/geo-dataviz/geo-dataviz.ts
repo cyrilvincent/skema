@@ -24,9 +24,10 @@ export class GeoDataviz implements OnInit {
   df = computed<GeoDTO>(() => this.values()[0]);
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
   firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
+  sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading replace previous line
-  data = computed<any[]>(() =>  this.showLabel() || true ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
+  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
@@ -76,6 +77,7 @@ export class GeoDataviz implements OnInit {
       console.log("onInputDTOchanged "+ this.geoType());
       console.log(dto);
       this.service.fetch(dto, this.type(), this.geoType());
+      this.sliderYear.set(this.firstYear());
     }
   }
 
@@ -262,12 +264,12 @@ export class GeoDataviz implements OnInit {
   getGeo() {
     const geo = {
       type: this.mapType(),
-      locations: this.years()[this.firstYear()]["fid"],
-      z: this.years()[this.firstYear()][this.type() == "APL" ? "apl": "time_hc"],
+      locations: this.years()[this.sliderYear()]["fid"],
+      z: this.years()[this.sliderYear()][this.type() == "APL" ? "apl": "time_hc"],
       zmin: this.getZMin(),
       zmax: this.getZMax(),
       //hoverinfo: "text",
-      hoverinfo: this.type() == "APL" || (this.years()[this.firstYear()].etab!["lon"].length < 40) || !this.showLabel() ? "text" : "skip",
+      hoverinfo: this.type() == "APL" || (this.years()[this.sliderYear()].etab!["lon"].length < 40) || !this.showLabel() ? "text" : "skip",
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",
@@ -339,7 +341,7 @@ export class GeoDataviz implements OnInit {
       autosize: true,
       height: this.fullscreen() ? window.innerHeight * 0.98 : 500,
       //width: 1200,
-      margin: {l: 10, r: 120, t: 30, b: 20},
+      margin: {l: 10, r: 120, t: 80, b: 20},
       paper_bgcolor: 'rgb(255,255,255)',
       sliders: this.getSliders(),
       updatemenus: [{
@@ -394,9 +396,9 @@ export class GeoDataviz implements OnInit {
   getScatter(): Partial<Plotly.ScatterData> {
     const scatter: Partial<Plotly.ScatterData> = {
       type: 'scattergeo',
-      lat: this.years()[this.firstYear()]["lat"],
-      lon: this.years()[this.firstYear()]["lon"],
-      text: this.years()[this.firstYear()][this.type()=="APL" ? "apl" : "time_hc"]!.map((a, i) => `${a.toFixed(0)}`),
+      lat: this.years()[this.sliderYear()]["lat"],
+      lon: this.years()[this.sliderYear()]["lon"],
+      text: this.years()[this.sliderYear()][this.type()=="APL" ? "apl" : "time_hc"]!.map((a, i) => `${a.toFixed(0)}`),
       mode: 'text',
       textposition: 'middle center',
       textfont: { family: 'Arial', size: 12, color: '#000000' },
@@ -508,7 +510,7 @@ export class GeoDataviz implements OnInit {
   }
 
   getScatterGeo(): Partial<Plotly.ScatterData> {
-    const etab = this.years()[this.firstYear()]["etab"]!;
+    const etab = this.years()[this.sliderYear()]["etab"]!;
     const scatter: Partial<Plotly.ScatterData> = {
       //type: 'scattergeo',
       type: this.mapType() == "choropleth" ? "scattergeo" : "scattermap",
@@ -517,7 +519,7 @@ export class GeoDataviz implements OnInit {
       mode: 'markers',
       //hoverinfo: etab["lon"].length < 20 ? "text": "skip",
       hoverinfo: "text",
-      text: this.getScatterGeoTexts(this.firstYear()),
+      text: this.getScatterGeoTexts(this.sliderYear()),
       name: 'APL',
       visible: true,     
       marker: {
@@ -616,6 +618,11 @@ export class GeoDataviz implements OnInit {
       frames.push(frame);
     }
     return frames;
+  }
+
+  onSliderChange(event: any) {
+    this.sliderYear.set(event.step.label);
+    console.log("Slider "+this.sliderYear())
   }
 
   getConfig(): Partial<Plotly.Config> {

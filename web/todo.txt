@@ -6,4 +6,5 @@ Server : Linux + Repasser en lazy
 •	calculs apl 2026 + updates dataset INSEE ect...
 http://localhost:4200/
 filosofi commune
-titre qui se fond sur la map
+rond blanc en mode map
+Quand on passe en mode map ca repasse à la 1ère année
