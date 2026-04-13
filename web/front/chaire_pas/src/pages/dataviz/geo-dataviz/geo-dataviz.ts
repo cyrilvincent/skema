@@ -27,7 +27,8 @@ export class GeoDataviz implements OnInit {
   sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading replace previous line
-  data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
+  //data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
+  data = computed<any[]>(() => this.getData());
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
   normColorBar = signal<boolean>(true);
@@ -58,6 +59,16 @@ export class GeoDataviz implements OnInit {
     // console.log(this.Plotly);
     // this.config.set(this.getConfig());
     // this.plotlyReady.set(true);
+  }
+
+  getData(): any[] {
+    if (this.showLabel()) {
+      if (this.type() == "APL") return [this.getGeo(), this.getScatter() as any]
+      // if (this.mapType() == "choropleth") return [this.getGeo(), this.getScatterGeo() as any]
+      // return [this.getGeo(), this.getScatterGeo(2) as any, this.getScatterGeo() as any]
+      return [this.getGeo(), this.getScatterGeo() as any]
+    }
+    return [this.getGeo()];
   }
 
   autoPlay() {
@@ -409,7 +420,7 @@ export class GeoDataviz implements OnInit {
     return scatter;
   }
 
-  getScatterSize(passus: number[]): number[] {
+  getScatterSize(passus: number[], enlarge=0): number[] {
     if(this.dto() != null) {
       if (this.dto()!.id == 5) return passus.map(_ => 7);
       if (this.dto()!.id == 4) return passus.map(_ => 3);
@@ -418,18 +429,18 @@ export class GeoDataviz implements OnInit {
       if (this.dto()!.id <= 2) coef = 8/30000;
       else if (this.dto()!.id == 3) coef = 6/100;
       if (this.dto()!.id <= 3) c=3;
-      return passus.map(p => p<0 ? c : c+p*coef)
+      return passus.map(p => p<0 ? c : c+p*coef+enlarge)
     }
     return [];
   }
 
-  getTensionScatterColor(tensions: number[]): string[] {
+  getTensionScatterColor(tensions: number[], enlarge=0): string[] {
     if(this.dto() != null) {
       return tensions.map(t => {
         let r = 127;
         let g = 127;
         let b = 0
-        if (t != -1) {
+        if (t != -1 && enlarge == 0) {
           let a = 0.1;
           let b = 3000;
           if (this.dto()!.id > 2) {
@@ -446,13 +457,13 @@ export class GeoDataviz implements OnInit {
     return [];
   }
 
-  getEhpadScatterColor(p1: number[] | undefined, p1_mean: number[] | undefined): string[] {
+  getEhpadScatterColor(p1: number[] | undefined, p1_mean: number[] | undefined, enlarge=0): string[] {
     if(this.dto() != null) {
       let i = 0;
       if (p1) {
         const mean = p1_mean!.find(p => p > 0);
         return p1.map(p => {
-          if (p == -1 || !mean || mean < 0) return "rgb(255,255,255,255)";
+          if (p == -1 || !mean || mean < 0 || enlarge != 0) return "rgb(255,255,255,255)";
           let r = 127;
           let g = 127;
           if (p != -1) {
@@ -509,7 +520,7 @@ export class GeoDataviz implements OnInit {
     return s;
   }
 
-  getScatterGeo(): Partial<Plotly.ScatterData> {
+  getScatterGeo(enlarge=0): Partial<Plotly.ScatterData> {
     const etab = this.years()[this.sliderYear()]["etab"]!;
     const scatter: Partial<Plotly.ScatterData> = {
       //type: 'scattergeo',
@@ -524,10 +535,11 @@ export class GeoDataviz implements OnInit {
       visible: true,     
       marker: {
         color: this.dto()?.id != 5 ? 
-               this.getTensionScatterColor(etab["tension"]) : 
-               this.getEhpadScatterColor(etab["p1"], etab["p1_mean"]),
-        size: this.getScatterSize(etab["passu"]),
+               this.getTensionScatterColor(etab["tension"], enlarge) : 
+               this.getEhpadScatterColor(etab["p1"], etab["p1_mean"], enlarge),
+        size: this.getScatterSize(etab["passu"], enlarge),
         opacity: 1,
+        //symbol: 'circle-stroked',
         line: {
           color: 'white',
           width: 1

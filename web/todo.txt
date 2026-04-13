@@ -7,4 +7,11 @@ Server : Linux + Repasser en lazy
 http://localhost:4200/
 filosofi commune
 rond blanc en mode map
-Quand on passe en mode map ca repasse à la 1ère année
+    Pourquoi ça ne marche PAS en scattermapbox / scattermap
+    En mode scattermapbox (ou le nouveau scattermap basé sur MapLibre), Plotly s’appuie sur Mapbox GL / WebGL pour le rendu.
+    Et là, point clé :
+    Mapbox ne gère pas le stroke des cercles (circle-stroke-*) pour les marqueurs Plotly.
+    Résultat :
+    marker.line.color
+    marker.line.width
+    👉 sont ignorés, même s’ils sont acceptés par l’API.
