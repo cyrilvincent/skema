@@ -122,10 +122,10 @@ export class GeoDataviz implements OnInit {
       Plotly.animate(el, [this.frames()[step].name!], {
         mode: 'immediate',
         frame: { duration: 0, redraw: true },
-        transition: { duration: 300 }
+        transition: { duration: interval / 10 }
       });
       this.currentStep.update(s => s + 1);
-    }, 1000);
+    }, interval);
     this.isPlaying.set(true);
   }
 
