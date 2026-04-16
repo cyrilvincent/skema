@@ -26,7 +26,7 @@ export class GeoDataviz implements OnInit {
   firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading replace previous line
+  config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading gituhub 22/02/2026
   //data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   data = computed<any[]>(() => this.getData());
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
@@ -83,6 +83,11 @@ export class GeoDataviz implements OnInit {
     }
   }
 
+  onSliderChange(event: any) {
+    this.sliderYear.set(event.step.label);
+    console.log("Slider "+this.sliderYear())
+  }
+
   onInputDTOChanged(dto: GeoInputDTO | null) {
     if (dto != null) {
       console.log("onInputDTOchanged "+ this.geoType());
@@ -100,7 +105,6 @@ export class GeoDataviz implements OnInit {
     const result = ((a - b) * 100 / (b + 0.01)).toFixed(delta);
     return result;
   }
-
 
   getCommuneIrisText(i: number, df_year: GeoYearDTO): string {
     return `<b>${df_year["nom_commune"][i]} - ${df_year["nom_iris"][i]} (${df_year["code_iris"][i]})</b><br><br>`;
@@ -457,13 +461,13 @@ export class GeoDataviz implements OnInit {
     return [];
   }
 
-  getEhpadScatterColor(p1: number[] | undefined, p1_mean: number[] | undefined, enlarge=0): string[] {
+  getEhpadPharmaScatterColor(p1: number[] | undefined, p1_mean: number[] | undefined, enlarge=0): string[] {
     if(this.dto() != null) {
       let i = 0;
       if (p1) {
         const mean = p1_mean!.find(p => p > 0);
         return p1.map(p => {
-          if (p == -1 || !mean || mean < 0 || enlarge != 0) return "rgb(255,255,255,255)";
+          if (p == -1 || !mean || mean < 0 || enlarge != 0 || this.dto()!.id == 4) return "rgb(127,127,127,255)";
           let r = 127;
           let g = 127;
           if (p != -1) {
@@ -534,9 +538,9 @@ export class GeoDataviz implements OnInit {
       name: 'APL',
       visible: true,     
       marker: {
-        color: this.dto()?.id != 5 ? 
+        color: ![4, 5].includes(this.dto()!.id) ? 
                this.getTensionScatterColor(etab["tension"], enlarge) : 
-               this.getEhpadScatterColor(etab["p1"], etab["p1_mean"], enlarge),
+               this.getEhpadPharmaScatterColor(etab["p1"], etab["p1_mean"], enlarge),
         size: this.getScatterSize(etab["passu"], enlarge),
         opacity: 1,
         //symbol: 'circle-stroked',
@@ -619,9 +623,9 @@ export class GeoDataviz implements OnInit {
             lon: this.type() == "APL" ? df_year["lon"] : etab["lon"],
             lat: this.type() == "APL" ? df_year["lat"] : etab["lat"],
             marker: {
-              color: this.type() == "APL" ? undefined : (this.dto()!.id != 5 ? 
+              color: this.type() == "APL" ? undefined : (![4, 5].includes(this.dto()!.id) ? 
                                                          this.getTensionScatterColor(etab["tension"]) : 
-                                                         this.getEhpadScatterColor(etab["p1"], etab["p1_mean"])),
+                                                         this.getEhpadPharmaScatterColor(etab["p1"], etab["p1_mean"])),
               size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"]),
             },
           },
@@ -630,11 +634,6 @@ export class GeoDataviz implements OnInit {
       frames.push(frame);
     }
     return frames;
-  }
-
-  onSliderChange(event: any) {
-    this.sliderYear.set(event.step.label);
-    console.log("Slider "+this.sliderYear())
   }
 
   getConfig(): Partial<Plotly.Config> {

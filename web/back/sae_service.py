@@ -390,6 +390,9 @@ class SAEService(APLService):
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         print(f"Compute IRIS SAE for {code} {bor}")
+        export = self.load_pickle("sae", code, specialite, time, time_type, 0, resolution, False)
+        if export is not None:
+            return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
@@ -408,6 +411,7 @@ class SAEService(APLService):
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
+        self.save_pickle(export, "sae", code, specialite, time, time_type, 0, resolution, False)
         return export
 
     def compute_sae_iris_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:

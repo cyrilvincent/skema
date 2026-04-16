@@ -1,5 +1,6 @@
 import datetime
 import json
+import pickle
 import threading
 import time
 import warnings
@@ -11,6 +12,7 @@ from service_error import ServiceError
 import re
 import pandas as pd
 import config
+import os.path
 
 
 class APLService:
@@ -447,6 +449,39 @@ class APLService:
         self.corrections(apl)
         return apl, studies_df
 
+    def save_pickle(self,
+                    export:  tuple[dict, any],
+                    apl_or_sae: str,
+                    code: str,
+                    specialite: int,
+                    time: int,
+                    time_type: str,
+                    aexp: float,
+                    resolution: str,
+                    with_sal: bool):
+        path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+        if not os.path.exists(path):
+            with open(path, "wb") as f:
+                print(f"Save {path}")
+                pickle.dump(export, f)
+
+    def load_pickle(self,
+                    apl_or_sae: str,
+                    code: str,
+                    specialite: int,
+                    time: int,
+                    time_type: str,
+                    aexp: float,
+                    resolution: str,
+                    with_sal: bool) -> tuple[dict, any] | None:
+        path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                print(f"Load {path}")
+                export: tuple[dict, any] = pickle.load(f)
+                return export
+        return None
+
     def compute_iris(self,
                      code: str,
                      specialite: int,
@@ -456,6 +491,9 @@ class APLService:
                      resolution: str,
                      with_sal: bool) -> tuple[dict, any]:
         print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
+        export = self.load_pickle("apl", code, specialite, time, time_type, aexp, resolution, with_sal)
+        if export is not None:
+            return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
@@ -468,6 +506,7 @@ class APLService:
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
+        self.save_pickle(export, "apl", code, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
     def compute_iris_csv(self,
