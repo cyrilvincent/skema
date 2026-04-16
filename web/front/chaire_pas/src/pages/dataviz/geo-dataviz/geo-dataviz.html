@@ -5,8 +5,7 @@
         [layout]="layout()"
         [config]="config()"
         [frames]="frames()"
-        (animated)="autoPlay()"
-        (sliderChange)="onSliderChange($event)"
+        (buttonClicked)="onSliderClicked($event)"
         [useResizeHandler]="true" [style]="{position: 'relative', width: '100%', height: '100%'}">
       </plotly-plot>
     }

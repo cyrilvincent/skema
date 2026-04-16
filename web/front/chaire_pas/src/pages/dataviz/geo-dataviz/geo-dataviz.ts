@@ -41,11 +41,15 @@ export class GeoDataviz implements OnInit {
   @ViewChild('myPlot') plotEl!: ElementRef;
   sae2 = input<boolean>(false);
   specialites = computed(() => this.sae2() ? specialites["SAE2"] : specialites[this.type()]);
+  @ViewChild(PlotlyComponent) plot!: PlotlyComponent
+  isPlaying = signal(false);
+  animInterval: any = null;
+  currentStep = signal(0);
   //Plotly: any = null; for lazy loading
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
-    effect(() => this.onValuesChanged(this.values()));
+    //effect(() => this.onValuesChanged(this.values()));
   }
 
   async ngOnInit() {
@@ -71,21 +75,64 @@ export class GeoDataviz implements OnInit {
     return [this.getGeo()];
   }
 
-  autoPlay() {
-    const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
-    const frames = el._transitionData._frames;
-    const activeStep = el._fullLayout.sliders[0].active;
-    const lastIndex = frames.length - 1;
-    const active = (el as any).layout.updatemenus[0].active
-    if (activeStep === lastIndex && active <= 1) {
-      const buttons = this.plotEl.nativeElement.querySelectorAll('.updatemenu-button');
-      setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), active == 0 ? 1000 : 400);
+  // autoPlay() {
+  //   //         (animated)="autoPlay()"
+  //   //    (sliderChange)="onSliderChange($event)"
+  //   // const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
+  //   // const frames = el._transitionData._frames;
+  //   // const activeStep = el._fullLayout.sliders[0].active;
+  //   // const lastIndex = frames.length - 1;
+  //   // const active = (el as any).layout.updatemenus[0].active
+  //   // if (activeStep === lastIndex && active <= 1) {
+  //   //   const buttons = this.plotEl.nativeElement.querySelectorAll('.updatemenu-button');
+  //   //   setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), active == 0 ? 1000 : 400);
+  //   // }
+  // }
+
+  // onSliderChange(event: any) {
+  //   // this.sliderYear.set(event.step.label);
+  //   // console.log("Slider "+this.sliderYear())
+  // }
+
+  onSliderClicked(event: any) {
+    if (event.active == 2) {
+      console.log("Pause")
+      this.pause()
+    }
+    else if (event.active == 0) {
+      console.log("Play")
+      this.pause();
+      this.play(1000);
+    }
+    else if (event.active == 1) {
+      console.log("FastForward")
+      this.pause();
+      this.play(400)
     }
   }
 
-  onSliderChange(event: any) {
-    this.sliderYear.set(event.step.label);
-    console.log("Slider "+this.sliderYear())
+  play(interval: number) {
+    const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
+    this.animInterval = setInterval(() => {
+      const step = this.currentStep();
+      if (step >= this.frames().length) {
+        this.currentStep.set(0);
+        return;
+      }
+      Plotly.animate(el, [this.frames()[step].name!], {
+        mode: 'immediate',
+        frame: { duration: 0, redraw: true },
+        transition: { duration: 300 }
+      });
+      this.currentStep.update(s => s + 1);
+    }, 1000);
+    this.isPlaying.set(true);
+  }
+
+  pause() {
+    clearInterval(this.animInterval);
+    this.animInterval = null;
+    this.isPlaying.set(false);
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -97,9 +144,9 @@ export class GeoDataviz implements OnInit {
     }
   }
 
-  onValuesChanged(v: GeoTupleDTO) {
-    const meanws = this.df()["meanws"]
-  }
+  // onValuesChanged(v: GeoTupleDTO) {
+  //   const meanws = this.df()["meanws"]
+  // }
 
   variation(a: number, b: number, delta=1): string {
     const result = ((a - b) * 100 / (b + 0.01)).toFixed(delta);
@@ -370,37 +417,43 @@ export class GeoDataviz implements OnInit {
         buttons: [
           {
             label: '▶',
-            method: 'animate',
-            args: [
-              null,
-              {
-                fromcurrent: true,
-                mode: 'immediate',
-                transition: { duration: 300, easing: 'linear' },
-                frame: { duration: 1000, redraw: true },
-              },
-            ],
+            method: "skip",
+            args: [],
+            //method: 'animate',
+            // args: [
+            //   null,
+            //   {
+            //     // fromcurrent: true,
+            //     // mode: 'immediate',
+            //     // transition: { duration: 300, easing: 'linear' },
+            //     // frame: { duration: 1000, redraw: true },
+            //   },
+            // ],
           },
           {
             label: '⏭',
-            method: 'animate',
-            args: [
-              null,
-              {
-                fromcurrent: true,
-                mode: 'immediate',
-                transition: { duration: 300, easing: 'linear' },
-                frame: { duration: 200, redraw: true },
-              },
-            ],
+            method: "skip",
+            args: [],
+            // method: 'animate',
+            // args: [
+            //   null,
+            //   {
+            //     fromcurrent: true,
+            //     mode: 'immediate',
+            //     transition: { duration: 300, easing: 'linear' },
+            //     frame: { duration: 200, redraw: true },
+            //   },
+            // ],
           },
           {
             label: '⏸',
-            method: 'animate',
-            args: [
-              [null],
-              { mode: 'immediate', frame: { duration: 0, redraw: true } },
-            ],
+            method: "skip",
+            args: [],
+            // method: 'animate',
+            // args: [
+            //   [null],
+            //   { mode: 'immediate',} //frame: { duration: 0, redraw: true } },
+            // ],
           },
         ],
       }]
