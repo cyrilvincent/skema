@@ -6,3 +6,7 @@ Server : Linux + Repasser en lazy
 •	calculs apl 2026 + updates dataset INSEE ect...
 http://localhost:4200/
 filosofi commune
+
++ devant %
+
+

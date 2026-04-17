@@ -41,7 +41,6 @@ export class GeoDataviz implements OnInit {
   @ViewChild('myPlot') plotEl!: ElementRef;
   sae2 = input<boolean>(false);
   specialites = computed(() => this.sae2() ? specialites["SAE2"] : specialites[this.type()]);
-  @ViewChild(PlotlyComponent) plot!: PlotlyComponent
   isPlaying = signal(false);
   animInterval: any = null;
   currentStep = signal(0);
@@ -95,11 +94,7 @@ export class GeoDataviz implements OnInit {
   // }
 
   onSliderClicked(event: any) {
-    if (event.active == 2) {
-      console.log("Pause")
-      this.pause()
-    }
-    else if (event.active == 0) {
+    if (event.active == 0) {
       console.log("Play")
       this.pause();
       this.play(1000);
@@ -108,6 +103,10 @@ export class GeoDataviz implements OnInit {
       console.log("FastForward")
       this.pause();
       this.play(400)
+    }
+    else if (event.active == 2) {
+      console.log("Pause")
+      this.pause()
     }
   }
 
@@ -130,9 +129,11 @@ export class GeoDataviz implements OnInit {
   }
 
   pause() {
-    clearInterval(this.animInterval);
-    this.animInterval = null;
-    this.isPlaying.set(false);
+    if (this.isPlaying()) {
+      clearInterval(this.animInterval);
+      this.animInterval = null;
+      this.isPlaying.set(false);
+    }
   }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
@@ -149,7 +150,14 @@ export class GeoDataviz implements OnInit {
   // }
 
   variation(a: number, b: number, delta=1): string {
-    const result = ((a - b) * 100 / (b + 0.01)).toFixed(delta);
+    let result = ((a - b) * 100 / (b + 0.01)).toFixed(delta);
+    if (a > b) result = "+" + result;
+    return result;
+  }
+
+  difference(a: number, b: number, delta=1): string {
+    let result = (a - b).toFixed(delta);
+    if (a > b) result = "+" + result;
     return result;
   }
 
@@ -178,7 +186,7 @@ export class GeoDataviz implements OnInit {
     if (df_year["pop65p"]![i] != 0) {
       s += `<br>Proportion de +65 ans: ${(df_year["pop65p"]![i]*100/(df_year["pop"]![i]+0.01)).toFixed(1)}%<br>`;
       //s += `(Δ${this.firstYear()} ${this.variation(df_year["pop65p"]![i], this.years()[this.firstYear()]["pop65p"]![i])}%)<br>`;
-      s += `  Δ à la moyenne nationale de ${((df_year["pop_year"]![i]+2000))}: ${(((df_year["pop65p"]![i]/(df_year["pop"]![i]+0.01))-df_year["pop65p_ratio_france"]![i])*100).toFixed(1)}%`;
+      s += `  Δ à la moyenne nationale de ${((df_year["pop_year"]![i]+2000))}: ${this.difference(df_year["pop65p"]![i]*100/(df_year["pop"]![i]+0.01), df_year["pop65p_ratio_france"]![i]*100)}pp`;
     }
     return s;
   }
@@ -189,7 +197,7 @@ export class GeoDataviz implements OnInit {
     else {
       s += `${df_year["tp60"]![i].toFixed(1)}%<br>`;
       //s += `(Δ${this.firstYear()} ${this.variation(df_year["tp60"]![i], this.years()[this.firstYear()]["tp60"]![i])}%)<br>`
-      s += `  Δ à la moyenne nationale de ${((df_year["filo_year"]![i]+2000))}: ${(df_year["tp60"]![i]-df_year["tp60_france"]![i]).toFixed(1)}%<br>`;
+      s += `  Δ à la moyenne nationale de ${((df_year["filo_year"]![i]+2000))}:  ${this.difference(df_year["tp60"]![i], df_year["tp60_france"]![i])}pp<br>`;
     }
     s += "Revenu médian: ";
     if (df_year["med"]![i] == 0) s+= "N/A<br>"
@@ -198,12 +206,12 @@ export class GeoDataviz implements OnInit {
       //s += `(Δ${this.firstYear()} ${this.variation(df_year["med"]![i], this.years()[this.firstYear()]["med"]![i])}%)<br>`;
       s += `  Δ à la moyenne nationale de ${((df_year["filo_year"]![i]+2000))}: ${this.variation(df_year["med"]![i],df_year["med_france"]![i])}%<br>`;
     }
-    s += "Gini: ";
+    s += "Indice de Gini: ";
     if (df_year["med"]![i] == 0) s+= "N/A<br>"
     else {
       s += `${(df_year["gi"]![i]*100).toFixed(1)}%<br>`;
       //s += `(Δ${this.firstYear()} ${this.variation(df_year["gi"]![i], this.years()[this.firstYear()]["gi"]![i])}%)<br>`;
-      s += `  Δ à la moyenne nationale de ${((df_year["filo_year"]![i]+2000))}: ${((df_year["gi"]![i]-df_year["gi_france"]![i])*100).toFixed(1)}%<br>`;
+      s += `  Δ à la moyenne nationale de ${((df_year["filo_year"]![i]+2000))}: ${this.difference(df_year["gi"]![i] * 100, df_year["gi_france"]![i] * 100)}pp<br>`;
     }
     return s;
   }
@@ -383,7 +391,7 @@ export class GeoDataviz implements OnInit {
     const layout: Partial<Plotly.Layout> = {
       title: {text: this.getTitle()},
       geo: {
-        projection: { type: 'mercator', scale: 2, },
+        projection: { type: 'mercator', scale: 1, },
         center: {lon: this.df()["center_lon"], lat: this.df()["center_lat"] },
         fitbounds: "locations",
         showcoastlines: false,
@@ -557,7 +565,7 @@ export class GeoDataviz implements OnInit {
         if (!p1 || p1 < 0) s+= "Prix en chambre seule: N/A";
         else {
           s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
-          s += `  Δ à la moyenne nationale: ${this.variation(p1, etab["p1_mean"]![i])}%${etab["p1_mean"]![i]}<br>`;
+          s += `  Δ à la moyenne nationale: ${this.variation(p1, etab["p1_mean"]![i])}%<br>`;
           const etab20 = this.years()["2020"]["etab"]!
           const i20 = etab20["fi"].indexOf(etab["fi"][i])
           if (i20 >= 0 && etab20["p1"]) {
