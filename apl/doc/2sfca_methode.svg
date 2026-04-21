@@ -56,10 +56,10 @@
 <!-- Étape 1 -->
 <rect x="40" y="400" width="272" height="118" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
 <text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="56" y="422" fill="#0C447C">Étape 1 — Ratio offre/demande</text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="442" fill="#042C53">Pour chaque point d'offre j :</text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="460" fill="#042C53">  Rj = Sj ÷ Σ Pk</text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="478" fill="#042C53">  (k dans la zone du médecin)</text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="498" fill="#185FA5">→ Ratio médecin / habitants</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="442" fill="#042C53">Pour chaque IRIS j d'offre de soins :</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="460" fill="#042C53">  Rjs = Ratio offre / demande</text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="478" fill="#042C53"></text>
+<text font-family="Arial, sans-serif" font-size="12" x="56" y="498" fill="#185FA5">→ Ratio PSis / Population ajustée (Pis)</text>
 
 <!-- Flèche -->
 <line x1="316" y1="459" x2="348" y2="459" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -68,7 +68,7 @@
 <rect x="352" y="400" width="288" height="118" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
 <text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="368" y="422" fill="#173404">Étape 2 — Score d'accessibilité</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="442" fill="#173404">Pour chaque patient i :</text>
-<text font-family="Arial, sans-serif" font-size="12" x="368" y="460" fill="#173404">  Ai = Σ Rj</text>
+<text font-family="Arial, sans-serif" font-size="12" x="368" y="460" fill="#173404">  Ais = Σ Rjs</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="478" fill="#173404">  (j dans la zone du patient)</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="498" fill="#3B6D11">→ Score d'accès aux soins</text>
 </svg>
