@@ -1,8 +1,11 @@
 import asyncio
+import os
+import time
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, PageElement
 import json
-
+import datetime
+import re
 
 class UrlDTO:
 
@@ -23,10 +26,15 @@ class PSDoctolibDTO:
     nick: str
     speciality: str
     city: str
-    type: str | None
-    street: str | None
-    cp: str | None
-    locality: str | None
+    type: str | None = None
+    street: str | None = None
+    cp: str | None = None
+    locality: str | None = None
+    rdv_text: str | None = None
+    rdv_date: datetime.date | None = None
+    now = datetime.date.today()
+    rdv_days: int | None = None
+    rdv_type = 0
 
     def __init__(self, speciality):
         self.speciality = speciality
@@ -109,20 +117,25 @@ class DoctolibParser:
         self.dto: UrlDTO | None = None
         self.html: BeautifulSoup | None = None
         self.json = {}
+        self.months = {"janvier": 1, "février": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6,
+                       "juillet": 7, "août": 8, "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12}
 
-    def load(self, name: str, dto: UrlDTO):
+    def load(self, name: str, dto: UrlDTO) -> bool:
         self.name = name
         self.dto = dto
         path = f"{self.dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
-        print(f"Loading {path}")
-        with open(path, "r", encoding="utf-8") as f:
-            self.content = f.read()
-        self.html = BeautifulSoup(self.content, features="lxml")
+        if os.path.isfile(path):
+            print(f"Loading {path}")
+            with open(path, "r", encoding="utf-8") as f:
+                self.content = f.read()
+            self.html = BeautifulSoup(self.content, features="lxml")
+            return True
+        return False
 
     def find_json(self):
         node = self.html.find("script", attrs={"data-id": "removable-json-ld"})
         self.json = json.loads(node.text)
-        self.save_json()
+        # self.save_json()
 
     def find_h2_dr(self) -> list[PSDoctolibDTO]:
         pss: list[PSDoctolibDTO] = []
@@ -139,7 +152,7 @@ class DoctolibParser:
                     ps.nick = self.get_nick_from_url(ps.url)
                     ps.city = self.get_city_from_url(ps.url)
                     self.join_ps_json(ps)
-                    # node.parent.parent.parent.parent.parent.parent.parent.find("div", attrs={"data-test-id": "availabilities-container"}).findAll("span", attrs={"data-design-system-component":"Text", "data-design-system":"oxygen"})
+                    self.get_rdv(node, ps)
                     pss.append(ps)
         return pss
 
@@ -184,28 +197,139 @@ class DoctolibParser:
                 return item["item"]
         return None
 
+    def get_rdv(self, node: PageElement, ps: PSDoctolibDTO):
+        ancestor = node.parent.parent.parent.parent.parent.parent.parent
+        div = ancestor.find("div", attrs={"data-test-id": "availabilities-container"})
+        if div is not None:
+            if "Ce soignant réserve" in div.get_text():
+                ps.rdv_type = 1
+            elif "Aucune disponibilité" in div.get_text():
+                ps.rdv_type = 2
+            else:
+                ps.rdv_type = 3
+                spans = div.find_all("span", attrs={"data-design-system-component": "Text", "data-design-system": "oxygen"})
+                if len(spans) > 0:
+                    ps.rdv_text = spans[0].text
+                    if ps.rdv_text is not None:
+                        text = ps.rdv_text
+                        text = text.replace("Matin", "").replace("Après-midi", "")
+                        ps.rdv_date = self.get_date_from_text(text)
+                        if ps.rdv_date is not None:
+                            ps.rdv_days = (ps.rdv_date - ps.now).days
 
-async def test(dto):
-    s = DoctolibScraper()
-    # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 14, "KIRSTEN")
-    async with async_playwright() as p:
-        await s.launch(p)
-        await s.goto_home(dto)
-        await s.accept_cookies()
-        await s.goto_end()
-        await s.get_content()
-        s.test_last_name(dto)
-        s.save("out", "home", dto)
+    def get_date_from_text(self, text: str) -> datetime.date | None:
+        short_regex = r"^\w{3}\. (\d?\d$)"
+        groups = re.match(short_regex, text)
+        today = datetime.date.today()
+        if groups is not None:
+            day = int(groups[1])
+            month = today.month
+            year = today.year
+            if day < today.day:
+                month += 1
+                if month > 12:
+                    month = 1
+                    year += 1
+            return datetime.date(year, month, day)
+        long_regex = r"^\w+\s(\d?\d)\s(\w+)$"
+        groups = re.match(long_regex, text)
+        if groups is not None:
+            day = int(groups[1])
+            month = int(self.months[groups[2]])
+            year = today.year if month >= today.month else today.year + 1
+            return datetime.date(year, month, day)
+        return None
+
+    def has_next_page(self) -> bool:
+        node = self.html.find("a", href=lambda h: h and f"page={dto.page + 1}" in h)
+        print(node)
+        return node is not None
+
+
+class DoctolibEngine:
+
+    def __init__(self, player: Playwright):
+        self.player = player
+        self.scraper = DoctolibScraper()
+
+    async def scrap_home(self, dto):
+        await self.scraper.launch(self.player)
+        await self.scraper.goto_home(dto)
+        await self.scraper.accept_cookies()
+        await self.scraper.goto_end()
+        await self.scraper.get_content()
+        self.scraper.test_last_name(dto)
+        self.scraper.save("out", "home", dto)
+
+    async def scrap_page(self, dto):
+        await self.scraper.goto_home(dto)
+        await self.scraper.goto_end()
+        await self.scraper.get_content()
+        self.scraper.save("out", "home", dto)
+
+
+class DoctolibWorkflow:
+
+    def __init__(self):
+        self.parser = DoctolibParser()
+
+    async def go(self, dto: UrlDTO):
+        async with async_playwright() as p:
+            e = DoctolibEngine(p)
+            await e.scrap_home(dto)
+            while True:
+                self.parser.load("home", dto)
+                if self.parser.has_next_page():
+                    time.sleep(4)
+                    dto.page += 1
+                    await e.scrap_page(dto)
+                else:
+                    break
+
+    def parse_all(self, dto: UrlDTO):
+        dto.page = 1
+        while True:
+            ok = self.parser.load("home", dto)
+            if not ok:
+                break
+            w.parser.find_json()
+            pss = w.parser.find_h2_dr()
+            for ps in pss:
+                print(ps)
+                print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
+            dto.page += 1
+
+
 
 if __name__ == '__main__':
-    dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
-    # asyncio.run(test(dto))
-    p = DoctolibParser()
-    p.load("home", dto)
-    p.find_json()
-    pss = p.find_h2_dr()
-    for ps in pss:
-        print(ps)
-    # print(p.content)
-    # Rechercher <script data-id="removable-json-ld"
+    # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 14, "KIRSTEN")
+    # dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
+    dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
+    w = DoctolibWorkflow()
+    # asyncio.run(w.go(dto))
+    w.parse_all(dto)
+
+    # dto.page = 3
+    # w.parser.load("home", dto)
+    # w.parser.find_json()
+    # pss = w.parser.find_h2_dr()
+    # for ps in pss:
+    #     print(ps)
+    #     print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
+    # print(w.parser.has_next_page())
+
+    # async with async_playwright() as p:
+    #     e = DoctolibEngine(p)
+    #     asyncio.run(e.scrap_home(dto))
+        # p = DoctolibParser()
+        # while True:
+        #     asyncio.run(scrap_home(dto))
+        #     p.load("home", dto)
+        #     if p.has_next_page():
+        #         dto.page += 1
+        #         time.sleep(4)
+        #     else:
+        #         break
+        #
+
 

@@ -7,8 +7,6 @@ Server : Linux + Repasser en lazy
 http://localhost:4200/
 filosofi commune
 
-iris = 48514
-48569 iris traités
 
 
 
