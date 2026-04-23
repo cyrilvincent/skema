@@ -53,6 +53,7 @@ class DoctolibScraper:
         self.context: BrowserContext | None = None
         self.page: Page | None = None
         self.home_url = "https://www.doctolib.fr/search?keyword={keyword}&location={location}&page={page}"
+        self.url = "https://www.doctolib.fr"
         self.content = ""
 
     async def launch(self, manager: Playwright):
@@ -68,13 +69,19 @@ class DoctolibScraper:
             url += f"&availabilitiesBefore={dto.avaibilities}"
         return url
 
-    async def goto_home(self, dto: UrlDTO):
-        url = self.get_url_by_dto(dto)
+    async def goto(self, url: str):
         print(f"Load {url}")
         await self.page.goto(url)
         await self.page.wait_for_selector("footer")
         print("Loaded")
         await self.page.wait_for_timeout(100)
+
+    async def goto_home(self, dto: UrlDTO):
+        url = self.get_url_by_dto(dto)
+        await self.goto(url)
+
+    async def goto_ps(self, dto: PSDoctolibDTO):
+        await self.goto(self.url + dto.url)
 
     async def accept_cookies(self):
         print("Accept Cookies")
@@ -103,6 +110,12 @@ class DoctolibScraper:
 
     def save(self, dir: str, name: str, dto: UrlDTO):
         path = f"{dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
+        print(f"Saving {path}")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(self.content)
+
+    def save_ps(self, dir: str, dto: PSDoctolibDTO):
+        path = f"{dir}/ps_{dto.nick}_{dto.speciality}.html"
         print(f"Saving {path}")
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.content)
@@ -252,20 +265,28 @@ class DoctolibEngine:
         self.player = player
         self.scraper = DoctolibScraper()
 
-    async def scrap_home(self, dto):
+    async def scrap_home_light(self, dto: UrlDTO):
         await self.scraper.launch(self.player)
         await self.scraper.goto_home(dto)
         await self.scraper.accept_cookies()
+
+    async def scrap_home(self, dto: UrlDTO):
+        await self.scrap_home_light(dto)
         await self.scraper.goto_end()
         await self.scraper.get_content()
         self.scraper.test_last_name(dto)
         self.scraper.save("out", "home", dto)
 
-    async def scrap_page(self, dto):
+    async def scrap_page(self, dto: UrlDTO):
         await self.scraper.goto_home(dto)
         await self.scraper.goto_end()
         await self.scraper.get_content()
         self.scraper.save("out", "home", dto)
+
+    async def scrap_ps(self, dto: PSDoctolibDTO):
+        await self.scraper.goto_ps(dto)
+        await self.scraper.get_content()
+        self.scraper.save_ps("out", dto)
 
 
 class DoctolibWorkflow:
@@ -299,6 +320,22 @@ class DoctolibWorkflow:
                 print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
             dto.page += 1
 
+    async def scrap_pss(self, dto: UrlDTO):
+        async with async_playwright() as p:
+            e = DoctolibEngine(p)
+            await e.scrap_home_light(dto)
+            dto.page = 1
+            while True:
+                ok = self.parser.load("home", dto)
+                if not ok:
+                    break
+                self.parser.find_json()
+                pss = self.parser.find_h2_dr()
+                for ps in pss:
+                    time.sleep(3.5)
+                    await e.scrap_ps(ps)
+                dto.page += 1
+
 
 
 if __name__ == '__main__':
@@ -307,7 +344,9 @@ if __name__ == '__main__':
     dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
     w = DoctolibWorkflow()
     # asyncio.run(w.go(dto))
-    w.parse_all(dto)
+    # w.parse_all(dto)
+    # asyncio.run(w.scrap_pss(dto))
+
 
     # dto.page = 3
     # w.parser.load("home", dto)
