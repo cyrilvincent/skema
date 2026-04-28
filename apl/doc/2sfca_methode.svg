@@ -30,7 +30,7 @@
 
 <!-- Zone commune -->
 <text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="320" y="198" text-anchor="middle" fill="#2C2C2A">Zone</text>
-<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="320" y="218" text-anchor="middle" fill="#2C2C2A">commune</text>
+<text font-family="Arial, sans-serif" font-size="14" font-weight="600" x="320" y="218" text-anchor="middle" fill="#2C2C2A">IRIS</text>
 
 <!-- Icône médecin -->
 <rect x="228" y="192" width="16" height="4" rx="2" fill="#0C447C"/>
@@ -48,7 +48,7 @@
 
 <!-- Légende -->
 <rect x="240" y="355" width="14" height="14" rx="3" fill="#378ADD" opacity="0.55"/>
-<text font-family="Arial, sans-serif" font-size="12" x="260" y="367" fill="#444441">Zone commune : seule zone prise en compte dans les deux étapes</text>
+<text font-family="Arial, sans-serif" font-size="12" x="260" y="367" fill="#444441">Zone IRIS : seule zone prise en compte dans les deux étapes</text>
 
 <!-- Séparateur -->
 <line x1="40" y1="388" x2="640" y2="388" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="4 4"/>
@@ -57,9 +57,9 @@
 <rect x="40" y="400" width="272" height="118" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
 <text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="56" y="422" fill="#0C447C">Étape 1 — Ratio offre/demande</text>
 <text font-family="Arial, sans-serif" font-size="12" x="56" y="442" fill="#042C53">Pour chaque IRIS j d'offre de soins :</text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="460" fill="#042C53">  Rjs = Ratio offre / demande</text>
+<text font-family="Cambria, sans-serif" font-size="12" x="56" y="460" fill="#042C53" font-style = "italic">  Rjs = Ratio offre / demande</text>
 <text font-family="Arial, sans-serif" font-size="12" x="56" y="478" fill="#042C53"></text>
-<text font-family="Arial, sans-serif" font-size="12" x="56" y="498" fill="#185FA5">→ Ratio PSis / Population ajustée (Pis)</text>
+<text font-family="Cambria, sans-serif" font-size="12" x="56" y="498" fill="#185FA5" font-style = "italic">→ Ratio PSis / Population ajustée (NBis)</text>
 
 <!-- Flèche -->
 <line x1="316" y1="459" x2="348" y2="459" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -68,7 +68,7 @@
 <rect x="352" y="400" width="288" height="118" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
 <text font-family="Arial, sans-serif" font-size="13" font-weight="600" x="368" y="422" fill="#173404">Étape 2 — Score d'accessibilité</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="442" fill="#173404">Pour chaque patient i :</text>
-<text font-family="Arial, sans-serif" font-size="12" x="368" y="460" fill="#173404">  Ais = Σ Rjs</text>
+<text font-family="Cambria" font-style="italic" font-size="12" x="368" y="460" fill="#173404">  Ais = Σ Rjs</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="478" fill="#173404">  (j dans la zone du patient)</text>
 <text font-family="Arial, sans-serif" font-size="12" x="368" y="498" fill="#3B6D11">→ Score d'accès aux soins</text>
 </svg>

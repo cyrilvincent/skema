@@ -8,7 +8,7 @@ Projet 3 = New PS (downloader + parser)
     URL stable : https://www.data.gouv.fr/api/1/datasets/r/432983b9-2e6f-473a-b35a-20403c300a5f
     non urgent
 Projet 4 = APL 26
-    Ameli 24 + MAJ du apl/ps_stats + filo 22 + filo<18 + pop22 + damir25 (auto normalement)
+    Ameli 24 + MAJ du apl/ps_stats + filo 22 + filo<18 + pop22 + damir25 (auto normalement), modifier overrepresentation pour les pédiatres 18/24 1/20 transférer à 0-2
 Projet 5 = CMS
 Projet 6 = Nominatim OSM en local
     OSMMatcher blacklisté, changer un peu le score matcher le cas échéant

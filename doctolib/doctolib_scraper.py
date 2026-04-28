@@ -17,6 +17,17 @@ class UrlDTO:
         self.last_name = last_name
 
 
+class TarifDoctolibDTO:
+
+    label: str
+    tarif_string: str
+    tarif: float | None = None
+    tarif_max: float | None = None
+
+    def __repr__(self):
+        return f"Tarif {self.label} {"None" if self.tarif is None else self.tarif}€"
+
+
 class PSDoctolibDTO:
 
     id: int
@@ -35,6 +46,12 @@ class PSDoctolibDTO:
     now = datetime.date.today()
     rdv_days: int | None = None
     rdv_type = 0
+    convention: str | None = None
+    carte_vitale: bool | None = None
+    address_name: str | None = None
+    address: str | None = None
+    tarifs: list[TarifDoctolibDTO] = []
+
 
     def __init__(self, speciality):
         self.speciality = speciality
@@ -133,10 +150,7 @@ class DoctolibParser:
         self.months = {"janvier": 1, "février": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6,
                        "juillet": 7, "août": 8, "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12}
 
-    def load(self, name: str, dto: UrlDTO) -> bool:
-        self.name = name
-        self.dto = dto
-        path = f"{self.dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
+    def _load(self, path: str) -> bool:
         if os.path.isfile(path):
             print(f"Loading {path}")
             with open(path, "r", encoding="utf-8") as f:
@@ -144,6 +158,12 @@ class DoctolibParser:
             self.html = BeautifulSoup(self.content, features="lxml")
             return True
         return False
+
+    def load(self, name: str, dto: UrlDTO) -> bool:
+        self.name = name
+        self.dto = dto
+        path = f"{self.dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
+        return self._load(path)
 
     def find_json(self):
         node = self.html.find("script", attrs={"data-id": "removable-json-ld"})
@@ -259,6 +279,72 @@ class DoctolibParser:
         return node is not None
 
 
+class DoctolibPSParser(DoctolibParser):
+
+    def __init__(self, dir="out"):
+        super().__init__(dir)
+        self.name = "ps"
+        self.dto: PSDoctolibDTO | None = None
+
+    def load(self, dto: PSDoctolibDTO) -> bool:
+        self.dto = dto
+        path = f"{self.dir}/ps_{dto.nick}_{dto.speciality}.html"
+        return self._load(path)
+
+    def find_infos(self):
+        node = self.html.find(string=lambda t: t and "Tarifs et remboursement" in t)
+        if node is not None:
+            parent = node.parent
+            print(parent)
+            p = parent.find("p")
+            if p is not None:
+                if "dépassement" in p.text:
+                    self.dto.convention = "C2"
+                elif "secteur 1" in p.text:
+                    self.dto.convention = "C1"
+                elif "secteur 2" in p.text:
+                    self.dto.convention = "C3"
+                elif "non" in p.text:
+                    self.dto.convention = "NC"
+            if parent.parent.find(string="Carte Vitale acceptée"):
+                self.dto.carte_vitale = True
+            elif parent.parent.finf(string="Carte Vitale non acceptée"):
+                self.dto.carte = False
+        node = self.html.find(string="Carte et informations d'accès")
+        if node is not None:
+            parent = node.parent.parent
+            h2 = parent.find("h2", class_="dl-profile-practice-name")
+            if h2 is not None:
+                self.dto.address_name = h2.text
+            div = parent.find("div", id=True)
+            if div is not None:
+                self.dto.address = div.text
+        self.find_tarifs()
+
+    def find_tarifs(self):
+        nodes = self.html.find_all("div", class_="dl-profile-fee")
+        for node in nodes:
+            name = node.find("span", class_="dl-profile-fee-name")
+            if name is not None:
+                tarif = TarifDoctolibDTO()
+                tarif.label = name.text
+                tag = node.find("span", class_="dl-profile-fee-tag")
+                tarif.tarif_string = tag.text
+                regex = r"\d+"
+                groups = re.findall(regex, tarif.tarif_string)
+                if len(groups) > 0:
+                    tarif.tarif = float(groups[0])
+                    if len(groups) > 1:
+                        tarif.tarif_max = float(groups[1])
+                self.dto.tarifs.append(tarif)
+                print(tarif)
+
+
+
+
+
+
+
 class DoctolibEngine:
 
     def __init__(self, player: Playwright):
@@ -347,6 +433,12 @@ if __name__ == '__main__':
     # w.parse_all(dto)
     # asyncio.run(w.scrap_pss(dto))
 
+    pps = DoctolibPSParser()
+    ps_dto = PSDoctolibDTO("dermatologue")
+    ps_dto.nick = "buhas-buhas"
+    pps.load(ps_dto)
+    pps.find_infos()
+
 
     # dto.page = 3
     # w.parser.load("home", dto)
@@ -356,19 +448,3 @@ if __name__ == '__main__':
     #     print(ps)
     #     print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
     # print(w.parser.has_next_page())
-
-    # async with async_playwright() as p:
-    #     e = DoctolibEngine(p)
-    #     asyncio.run(e.scrap_home(dto))
-        # p = DoctolibParser()
-        # while True:
-        #     asyncio.run(scrap_home(dto))
-        #     p.load("home", dto)
-        #     if p.has_next_page():
-        #         dto.page += 1
-        #         time.sleep(4)
-        #     else:
-        #         break
-        #
-
-

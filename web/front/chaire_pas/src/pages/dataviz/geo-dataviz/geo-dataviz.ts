@@ -515,7 +515,7 @@ export class GeoDataviz implements OnInit {
           r = this.clip(Math.round((t-b)*a+127.5), 0, 255);
           g = 255 - this.clip(Math.round((t-b)*a+127.5), 0, 255);
         }
-        else r = g = b = 255;
+        else r = g = b = 127;
         return `rgb(${r},${g},${b},255)`;
       })
     }
