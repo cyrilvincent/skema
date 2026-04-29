@@ -56,7 +56,7 @@ class RPPSStructureParser(BaseParser):
 
     def update(self, e: Structure):
         if e.siret is not None:
-            self.entities[e.key].siret = e.siret
+            self.entities[e.key].siren = e.siret
         if e.siren is not None:
             self.entities[e.key].siren = e.siren
         if e.licence is not None:

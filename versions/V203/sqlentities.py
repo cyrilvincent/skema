@@ -268,7 +268,7 @@ class Etablissement(Base):
                and self.rs == other.rs and self.rslongue == other.rslongue \
                and self.complrs == other.complrs and self.mft == other.mft \
                and self.categetab == other.categetab and self.categretab == other.categretab \
-               and self.sph == other.sph and self.siret == other.siret \
+               and self.sph == other.sph and self.siret == other.siren \
                and self.telephone == other.telephone and self.datemaj == other.datemaj \
                and self.codeape == other.codeape and self.cog == other.cog \
 

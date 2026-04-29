@@ -324,7 +324,7 @@ class Etablissement(Base):
         return self.nofinesset == other.nofinesset and self.nofinessej == other.nofinessej \
                and self.rs == other.rs and self.rslongue == other.rslongue \
                and self.complrs == other.complrs and self.mft == other.mft \
-               and self.sph == other.sph and self.siret == other.siret \
+               and self.sph == other.sph and self.siret == other.siren \
                and self.telephone == other.telephone and self.datemaj == other.datemaj \
                and self.codeape == other.codeape
                 # and self.categetab == other.categetab and self.categretab == other.categretab \
@@ -779,7 +779,7 @@ class Structure(Base):
 
     def equals(self, other):
         return self.type == other.type and self.id_technique == other.id_technique \
-            and self.id_national == other.id_national and self.siret == other.siret \
+            and self.id_national == other.id_national and self.siret == other.siren \
             and self.siren == other.siren and self.licence == other.licence \
             and self.date_fermeture == other.date_fermeture and self.date_maj == other.date_maj \
             and self.raison_sociale == other.raison_sociale and self.enseigne == other.enseigne

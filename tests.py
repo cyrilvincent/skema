@@ -700,7 +700,7 @@ class ICIPTests(TestCase):
         self.assertEqual("R10000000586941", e.id_technique)
         self.assertEqual("410000464692001", e.id_national)
         self.assertEqual("10000464692001", e.rpps)
-        self.assertIsNone(e.siret)
+        self.assertIsNone(e.siren)
         self.assertEqual(datetime.date(1994,1,17), e.date_ouverture)
         self.assertEqual(datetime.date(2015, 12, 30), e.date_maj)
         self.assertEqual("70", e.categorie_juridique_id)

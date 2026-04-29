@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup, PageElement
 import json
 import datetime
 import re
+from sqlentities import PS, Tarif, Context
+
 
 class UrlDTO:
 
@@ -15,49 +17,6 @@ class UrlDTO:
         self.page = page
         self.avaibilities = avaibilities
         self.last_name = last_name
-
-
-class TarifDoctolibDTO:
-
-    label: str
-    tarif_string: str
-    tarif: float | None = None
-    tarif_max: float | None = None
-
-    def __repr__(self):
-        return f"Tarif {self.label} {"None" if self.tarif is None else self.tarif}€"
-
-
-class PSDoctolibDTO:
-
-    id: int
-    pid: str
-    name: str
-    url: str
-    nick: str
-    speciality: str
-    city: str
-    type: str | None = None
-    street: str | None = None
-    cp: str | None = None
-    locality: str | None = None
-    rdv_text: str | None = None
-    rdv_date: datetime.date | None = None
-    now = datetime.date.today()
-    rdv_days: int | None = None
-    rdv_type = 0
-    convention: str | None = None
-    carte_vitale: bool | None = None
-    address_name: str | None = None
-    address: str | None = None
-    tarifs: list[TarifDoctolibDTO] = []
-
-
-    def __init__(self, speciality):
-        self.speciality = speciality
-
-    def __repr__(self):
-        return f"PS {self.pid} {self.type} {self.nick} {self.speciality} {self.city}"
 
 
 class DoctolibScraper:
@@ -97,7 +56,7 @@ class DoctolibScraper:
         url = self.get_url_by_dto(dto)
         await self.goto(url)
 
-    async def goto_ps(self, dto: PSDoctolibDTO):
+    async def goto_ps(self, dto: PS):
         await self.goto(self.url + dto.url)
 
     async def accept_cookies(self):
@@ -131,7 +90,7 @@ class DoctolibScraper:
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.content)
 
-    def save_ps(self, dir: str, dto: PSDoctolibDTO):
+    def save_ps(self, dir: str, dto: PS):
         path = f"{dir}/ps_{dto.nick}_{dto.speciality}.html"
         print(f"Saving {path}")
         with open(path, "w", encoding="utf-8") as f:
@@ -170,11 +129,11 @@ class DoctolibParser:
         self.json = json.loads(node.text)
         # self.save_json()
 
-    def find_h2_dr(self) -> list[PSDoctolibDTO]:
-        pss: list[PSDoctolibDTO] = []
+    def find_h2_dr(self) -> list[PS]:
+        pss: list[PS] = []
         nodes = self.html.find_all("h2")
         for node in nodes:
-            ps = PSDoctolibDTO(dto.keyword)
+            ps = PS(dto.keyword)
             ps.name = node.text
             if "href" in node.parent.attrs.keys():
                 ps.url = node.parent.attrs["href"]
@@ -189,7 +148,7 @@ class DoctolibParser:
                     pss.append(ps)
         return pss
 
-    def join_ps_json(self, ps: PSDoctolibDTO):
+    def join_ps_json(self, ps: PS):
         item = self.get_item_json_by_pid(ps.pid)
         if item is not None:
             ps.type = item["@type"]
@@ -230,7 +189,7 @@ class DoctolibParser:
                 return item["item"]
         return None
 
-    def get_rdv(self, node: PageElement, ps: PSDoctolibDTO):
+    def get_rdv(self, node: PageElement, ps: PS):
         ancestor = node.parent.parent.parent.parent.parent.parent.parent
         div = ancestor.find("div", attrs={"data-test-id": "availabilities-container"})
         if div is not None:
@@ -284,9 +243,9 @@ class DoctolibPSParser(DoctolibParser):
     def __init__(self, dir="out"):
         super().__init__(dir)
         self.name = "ps"
-        self.dto: PSDoctolibDTO | None = None
+        self.dto: PS | None = None
 
-    def load(self, dto: PSDoctolibDTO) -> bool:
+    def load(self, dto: PS) -> bool:
         self.dto = dto
         path = f"{self.dir}/ps_{dto.nick}_{dto.speciality}.html"
         return self._load(path)
@@ -295,7 +254,6 @@ class DoctolibPSParser(DoctolibParser):
         node = self.html.find(string=lambda t: t and "Tarifs et remboursement" in t)
         if node is not None:
             parent = node.parent
-            print(parent)
             p = parent.find("p")
             if p is not None:
                 if "dépassement" in p.text:
@@ -308,7 +266,7 @@ class DoctolibPSParser(DoctolibParser):
                     self.dto.convention = "NC"
             if parent.parent.find(string="Carte Vitale acceptée"):
                 self.dto.carte_vitale = True
-            elif parent.parent.finf(string="Carte Vitale non acceptée"):
+            elif parent.parent.find(string="Carte Vitale non acceptée"):
                 self.dto.carte = False
         node = self.html.find(string="Carte et informations d'accès")
         if node is not None:
@@ -320,13 +278,14 @@ class DoctolibPSParser(DoctolibParser):
             if div is not None:
                 self.dto.address = div.text
         self.find_tarifs()
+        self.find_legals()
 
     def find_tarifs(self):
         nodes = self.html.find_all("div", class_="dl-profile-fee")
         for node in nodes:
             name = node.find("span", class_="dl-profile-fee-name")
             if name is not None:
-                tarif = TarifDoctolibDTO()
+                tarif = Tarif()
                 tarif.label = name.text
                 tag = node.find("span", class_="dl-profile-fee-tag")
                 tarif.tarif_string = tag.text
@@ -339,10 +298,20 @@ class DoctolibPSParser(DoctolibParser):
                 self.dto.tarifs.append(tarif)
                 print(tarif)
 
-
-
-
-
+    def find_legals(self):
+        node = self.html.find(string="Informations légales")
+        if node is not None:
+            node = node.parent.parent
+            rpps = node.find(string="Numéro RPPS")
+            if rpps is not None:
+                self.dto.rpps = rpps.parent.parent.find_all("p")[-1].text
+                print(f"RPPS: {self.dto.rpps}")
+            adeli = node.find(string="Numéro ADELI")
+            if adeli is not None:
+                self.dto.adeli = adeli.parent.parent.find_all("p")[-1].text
+            siren = node.find(string="SIREN")
+            if siren is not None:
+                self.dto.siren = siren.parent.parent.find_all("p")[-1].text
 
 
 class DoctolibEngine:
@@ -369,7 +338,7 @@ class DoctolibEngine:
         await self.scraper.get_content()
         self.scraper.save("out", "home", dto)
 
-    async def scrap_ps(self, dto: PSDoctolibDTO):
+    async def scrap_ps(self, dto: PS):
         await self.scraper.goto_ps(dto)
         await self.scraper.get_content()
         self.scraper.save_ps("out", dto)
@@ -393,19 +362,6 @@ class DoctolibWorkflow:
                 else:
                     break
 
-    def parse_all(self, dto: UrlDTO):
-        dto.page = 1
-        while True:
-            ok = self.parser.load("home", dto)
-            if not ok:
-                break
-            w.parser.find_json()
-            pss = w.parser.find_h2_dr()
-            for ps in pss:
-                print(ps)
-                print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
-            dto.page += 1
-
     async def scrap_pss(self, dto: UrlDTO):
         async with async_playwright() as p:
             e = DoctolibEngine(p)
@@ -422,9 +378,30 @@ class DoctolibWorkflow:
                     await e.scrap_ps(ps)
                 dto.page += 1
 
+    def parse_all(self, dto: UrlDTO):
+        dto.page = 1
+        while True:
+            ok = self.parser.load("home", dto)
+            if not ok:
+                break
+            w.parser.find_json()
+            pss = w.parser.find_h2_dr()
+            for ps in pss:
+                print(ps)
+                print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
+                self.parse_ps(ps)
+            dto.page += 1
+
+    def parse_ps(self, dto: PS):
+        pps = DoctolibPSParser()
+        pps.load(dto)
+        pps.find_infos()
 
 
 if __name__ == '__main__':
+    context = Context()
+    context.create()
+
     # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 14, "KIRSTEN")
     # dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
     dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
@@ -433,11 +410,14 @@ if __name__ == '__main__':
     # w.parse_all(dto)
     # asyncio.run(w.scrap_pss(dto))
 
-    pps = DoctolibPSParser()
-    ps_dto = PSDoctolibDTO("dermatologue")
-    ps_dto.nick = "buhas-buhas"
-    pps.load(ps_dto)
-    pps.find_infos()
+    # ps_dto = PS("dermatologue")
+    # ps_dto.nick = "buhas-buhas"
+    # ps_dto.nick = "abdallah-khemis"
+    # pps = DoctolibPSParser()
+    # pps.load(ps_dto)
+    # pps.find_infos()
+    # w.parse_ps(ps_dto)
+    w.parse_all(dto)
 
 
     # dto.page = 3
