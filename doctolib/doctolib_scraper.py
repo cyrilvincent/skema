@@ -1,17 +1,22 @@
+import argparse
 import asyncio
 import os
 import time
+import art
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
 from bs4 import BeautifulSoup, PageElement
 import json
 import datetime
 import re
+from sqlalchemy.orm import joinedload
+import config
 from sqlentities import PS, Tarif, Context
 
 
 class UrlDTO:
 
     def __init__(self, keyword: str, location: str, page=1, avaibilities=0, last_name=""):
+        super().__init__()
         self.keyword = keyword
         self.location = location
         self.page = page
@@ -137,10 +142,10 @@ class DoctolibParser:
             ps.name = node.text
             if "href" in node.parent.attrs.keys():
                 ps.url = node.parent.attrs["href"]
+                ps.short_url = f"https://www.doctolib.fr{ps.url[:ps.url.index("?")]}"
                 pid = self.get_pid_from_url(ps.url)
                 if pid is not None:
                     ps.pid = pid
-                    ps.id = int(pid[pid.rindex("-") + 1:])
                     ps.nick = self.get_nick_from_url(ps.url)
                     ps.city = self.get_city_from_url(ps.url)
                     self.join_ps_json(ps)
@@ -240,8 +245,9 @@ class DoctolibParser:
 
 class DoctolibPSParser(DoctolibParser):
 
-    def __init__(self, dir="out"):
+    def __init__(self, datesource_id: int, dir="out"):
         super().__init__(dir)
+        self.datesource_id = datesource_id
         self.name = "ps"
         self.dto: PS | None = None
 
@@ -287,14 +293,15 @@ class DoctolibPSParser(DoctolibParser):
             if name is not None:
                 tarif = Tarif()
                 tarif.label = name.text
+                tarif.datesource_id = self.datesource_id
                 tag = node.find("span", class_="dl-profile-fee-tag")
                 tarif.tarif_string = tag.text
-                regex = r"\d+"
+                regex = r'\d{1,3}(?:\s\d{3})*(?:,\d+)?'  # r"\d+(?:,\d+)?"
                 groups = re.findall(regex, tarif.tarif_string)
                 if len(groups) > 0:
-                    tarif.tarif = float(groups[0])
+                    tarif.tarif = float(groups[0].replace(",", ".").replace(" ", ""))
                     if len(groups) > 1:
-                        tarif.tarif_max = float(groups[1])
+                        tarif.tarif_max = float(groups[1].replace(",", ".").replace(" ", ""))
                 self.dto.tarifs.append(tarif)
                 print(tarif)
 
@@ -346,8 +353,25 @@ class DoctolibEngine:
 
 class DoctolibWorkflow:
 
-    def __init__(self):
+    def __init__(self, context):
         self.parser = DoctolibParser()
+        self.context = context
+        self.datesource_id = (datetime.date.today().year - 2000) * 100 + datetime.date.today().month
+        self.pss: dict[str, PS] = {}
+        self.tarifs: dict[tuple[int, str], Tarif] = {}  # ps_id, label
+        self.nb_ram = 0
+        self.ps_results: list[PS] = []
+
+    def make_cache(self):
+        print("Making cache")
+        l: list[PS] = (self.context.session.query(PS).options(joinedload(PS.tarifs)).all())
+        for e in l:
+            self.pss[e.nick] = e
+            self.nb_ram += 1
+        l: list[Tarif] = self.context.session.query(Tarif).filter(Tarif.datesource_id == self.datesource_id).all()
+        for e in l:
+            self.tarifs[e.key] = e
+            self.nb_ram += 1
 
     async def go(self, dto: UrlDTO):
         async with async_playwright() as p:
@@ -380,6 +404,7 @@ class DoctolibWorkflow:
 
     def parse_all(self, dto: UrlDTO):
         dto.page = 1
+        self.ps_results = []
         while True:
             ok = self.parser.load("home", dto)
             if not ok:
@@ -390,26 +415,48 @@ class DoctolibWorkflow:
                 print(ps)
                 print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
                 self.parse_ps(ps)
+                # ps.url_dto = dto move to scraper not in bd
+                self.ps_results.append(ps)
             dto.page += 1
 
     def parse_ps(self, dto: PS):
-        pps = DoctolibPSParser()
+        pps = DoctolibPSParser(self.datesource_id)
         pps.load(dto)
         pps.find_infos()
 
+    def commit(self):
+        print("Commit")
+        for ps in self.ps_results:
+            if ps.nick not in self.pss.keys():
+                self.pss[ps.nick] = ps
+                self.context.session.add(ps)
+        self.context.session.commit()
+
 
 if __name__ == '__main__':
+    art.tprint(config.name, "big")
+    print("Doctolib Scraper")
+    print("================")
+    print(f"V{config.version}")
+    print(config.copyright)
+    print()
+    parser = argparse.ArgumentParser(description="PS Parser")
+    parser.add_argument("-e", "--echo", help="Sql Alchemy echo", action="store_true")
+    args = parser.parse_args()
     context = Context()
-    context.create()
+    context.create(echo=args.echo)
 
     # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 14, "KIRSTEN")
     # dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
     dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
-    w = DoctolibWorkflow()
+    w = DoctolibWorkflow(context)
+    w.make_cache()
     # asyncio.run(w.go(dto))
-    # w.parse_all(dto)
     # asyncio.run(w.scrap_pss(dto))
+    w.parse_all(dto)
+    w.commit()
 
+    # Debug for one PS
     # ps_dto = PS("dermatologue")
     # ps_dto.nick = "buhas-buhas"
     # ps_dto.nick = "abdallah-khemis"
@@ -417,9 +464,8 @@ if __name__ == '__main__':
     # pps.load(ps_dto)
     # pps.find_infos()
     # w.parse_ps(ps_dto)
-    w.parse_all(dto)
 
-
+    # Debug for one home page
     # dto.page = 3
     # w.parser.load("home", dto)
     # w.parser.find_json()
@@ -428,3 +474,12 @@ if __name__ == '__main__':
     #     print(ps)
     #     print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
     # print(w.parser.has_next_page())
+
+    # If scraping date != parsing date
+    # update doctolib.ps
+    # set now = '2026-04-23'
+    # where now is not null
+    #
+    # update doctolib.ps
+    # set rdv_days = rdv_days + 7
+    # where rdv_days is not null

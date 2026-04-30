@@ -49,33 +49,14 @@ class Context:
 # ps -* tarif
 
 
-class UrlDTO(Base):
-    __tablename__ = "url_dto"
-
-    id = Column(Integer, primary_key=True)
-    keyword = Column(String(255), nullable=False)
-    location = Column(String(255), nullable=False)
-    page = Column(Integer, nullable=False)
-    avaibilities = Column(Integer)
-
-    __table_args__ = ({"schema": "doctolib"},)
-
-    def __init__(self, keyword: str, location: str, page=1, avaibilities=0, last_name=""):
-        super().__init__()
-        self.keyword = keyword
-        self.location = location
-        self.page = page
-        self.avaibilities = avaibilities
-        self.last_name = last_name
-
-
 class PS(Base):
     __tablename__ = "ps"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     url = Column(String(255), nullable=False)
-    pid = Column(String(255), nullable=False, unique=True)
+    short_url = Column(String(255), nullable=False)
+    pid = Column(String(255), nullable=False)
     nick = Column(String(255), nullable=False, unique=True)
     speciality = Column(String(255), nullable=False)
     type = Column(String(50))
@@ -95,8 +76,6 @@ class PS(Base):
     rpps = Column(String(50))
     adeli = Column(String(50))
     siren = Column(String(50))
-    url_dto: UrlDTO = relationship("UrlDTO", backref="pss")
-    url_dto_id = Column(Integer, ForeignKey('doctolib.url_dto.id'), nullable=False, index=True)
 
     __table_args__ = ({"schema": "doctolib"},)
 
@@ -117,11 +96,16 @@ class Tarif(Base):
     label = Column(String(255), nullable=False)
     tarif = Column(Float)
     tarif_max = Column(Float)
+    tarif_string = Column(String(255))
     datesource_id = Column(Integer, nullable=False)
     ps: PS = relationship("PS", backref="tarifs")
     ps_id = Column(Integer, ForeignKey('doctolib.ps.id'), nullable=False, index=True)
 
     __table_args__ = ({"schema": "doctolib"},)
+
+    @property
+    def key(self):
+        return self.ps_id, self.label
 
     def __repr__(self):
         return f"{self.label} {"None" if self.tarif is None else self.tarif}€"
