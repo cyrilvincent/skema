@@ -5,6 +5,9 @@ import geopandas as gpd
 import threading
 import time
 import pickle
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CommuneLoader(threading.Thread):
@@ -27,17 +30,18 @@ class CommuneLoader(threading.Thread):
         with CommuneLoader.lock:
             if CommuneLoader._instance is None:
                 CommuneLoader._instance = CommuneLoader()
+                logger.info("Starting CommuneLoader singleton")
                 CommuneLoader._instance.start()
         return CommuneLoader._instance
 
     def load_gdf(self, nb: int, associee: bool) -> pd.DataFrame:
         file = self.commune_file.replace("{nb}", str(nb))
-        print(f"Loading {file}")
+        logger.info(f"Loading {file}")
         gdf = gpd.read_file(file)
         gdf["associee"] = False
         if associee:
             file = self.associee_file.replace("{nb}", str(nb))
-            print(f"Loading {file}")
+            logger.info(f"Loading {file}")
             gdfa = gpd.read_file(file)
             gdfa["associee"] = True
             gdf = pd.concat([gdf, gdfa], ignore_index=True)
@@ -46,7 +50,7 @@ class CommuneLoader(threading.Thread):
         gdf["lon"] = gdf["geometry"].centroid.y
         gdf["lat"] = gdf["geometry"].centroid.x
         duration = time.perf_counter() - self.time0
-        print(f"Found {len(gdf)} communes in {duration:.0f}s")
+        logger.info(f"Found {len(gdf)} communes in {duration:.0f}s")
         return gdf
 
     def load_gdfs(self):
@@ -60,17 +64,17 @@ class CommuneLoader(threading.Thread):
 
     def save(self):
         with open(self.pickle_file, "wb") as f:
-            print(f"Saving {self.pickle_file}")
+            logger.info(f"Saving {self.pickle_file}")
             pickle.dump(self.gdfs, f)
 
     def load_pickle_or_gdfs(self):
         if os.path.exists(self.pickle_file):
             with open(self.pickle_file, "rb") as f:
-                print(f"Loading {self.pickle_file}")
+                logger.info(f"Loading {self.pickle_file}")
                 self.gdfs = pickle.load(f)
         else:
             self.load_gdfs()
-        print(f"Found {len(self.gdfs["HD"])} communes")
+        logger.info(f"Found {len(self.gdfs["HD"])} communes")
 
 
 if __name__ == '__main__':

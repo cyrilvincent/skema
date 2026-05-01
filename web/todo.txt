@@ -1,13 +1,9 @@
 Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 Server : Linux + Repasser en lazy
-•	finaliser/valider la dataviz
-•	finaliser le contenu du site/ergonomie du site (je vais faire valider les mentions légales, ect...)
-•	préparer le pdf sur l'apl
-•	calculs apl 2026 + updates dataset INSEE ect...
 http://localhost:4200/
 filosofi commune
-
 copier les 2 mentions légales de univ et skema
+Les pickles risquent de ne pas fonctionner sous linux : d'après copilot si même version python ca va fonctionner : pb pour indexer => il suffit d'exporter iris.commune et distinct(code_postal, code_insee) from ban
 
 
 

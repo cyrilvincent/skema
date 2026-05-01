@@ -4,18 +4,19 @@ import config
 import threading
 import time
 import pickle
-import datetime
 import os
 from collections import OrderedDict
 from iris_loader import IrisLoader
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Indexer(threading.Thread):
 
     _instance = None
     lock = threading.RLock()
 
-    def __init__(self, nb_limit=99, commune_length_limit=255):  # faire les 2 pickles d'un coup C et I
+    def __init__(self, nb_limit=99, commune_length_limit=255):
         super().__init__()
         self.time0 = time.perf_counter()
         self.nb_limit = nb_limit
@@ -37,6 +38,7 @@ class Indexer(threading.Thread):
         with Indexer.lock:
             if Indexer._instance is None:
                 Indexer._instance = Indexer()
+                logger.info("Starting Indexer singleton")
                 Indexer._instance.start()
         return Indexer._instance
 
@@ -186,11 +188,11 @@ class Indexer(threading.Thread):
     def load_or_index(self):
         if os.path.exists(self.file):
             with open(self.file, "rb") as f:
-                print(f"Loading {self.file}")
+                logger.info(f"Loading {self.file}")
                 self.db = pickle.load(f)
         else:
             self.indexer()
-        print(f"Found {len(self.db)} indexes")
+        logger.info(f"Found {len(self.db)} indexes")
 
     def indexer(self):
         print("Starting indexer")

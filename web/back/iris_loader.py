@@ -4,6 +4,9 @@ import threading
 import time
 import pickle
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class IrisLoader(threading.Thread):
@@ -22,6 +25,7 @@ class IrisLoader(threading.Thread):
         with IrisLoader.lock:
             if IrisLoader._instance is None:
                 IrisLoader._instance = IrisLoader()
+                logger.info("Starting IrisLoader singleton")
                 IrisLoader._instance.start()
         return IrisLoader._instance
 
@@ -47,12 +51,12 @@ class IrisLoader(threading.Thread):
         file = self.file.replace("gpkg", "pickle")
         if os.path.exists(file):
             with open(file, "rb") as f:
-                print(f"Loading {file}")
+                logger.info(f"Loading {file}")
                 self.gdf = pickle.load(f)
         else:
             self.load_gpkg()
             self.save()
-        print(f"Found {len(self.gdf)} iris")
+        logger.info(f"Found {len(self.gdf)} iris")
 
     def run(self):
         self.load()

@@ -86,7 +86,7 @@ class PS(Base):
         self.speciality = speciality
 
     def __repr__(self):
-        return f"PS {self.pid} {self.type} {self.nick} {self.speciality} {self.city}"
+        return f"PS {self.type} {self.nick} {self.speciality} {self.city}"
 
 
 class Tarif(Base):

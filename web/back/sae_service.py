@@ -6,6 +6,9 @@ from sqlalchemy import text
 import pandas as pd
 import config
 from apl_service import APLService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SAEService(APLService):
@@ -24,6 +27,7 @@ class SAEService(APLService):
     def factory():
         with SAEService.lock:
             if SAEService._instance is None:
+                logger.info("Starting SAEService singleton")
                 SAEService._instance = SAEService()
         return SAEService._instance
 
@@ -80,7 +84,7 @@ class SAEService(APLService):
         studies_df = self.get_sae_studies_by_years(bor, time, time_type, years)
         keys = studies_df["key"].to_list()
         sae = self.get_sae_by_keys(keys, type_code, id)
-        print(f"Found {len(sae) / len(years):.0f} sae by year")
+        logger.info(f"Found {len(sae) / len(years):.0f} sae by year")
         self.corrections(sae)
         return sae, studies_df
 
@@ -344,7 +348,7 @@ class SAEService(APLService):
             cols += ["pop65p"]
             gdf["pop65p"] = gdf["pop65p"].fillna(0)
         export = gdf[cols]
-        print(f"NaN cols: {export.columns[export.isna().any()]}")
+        logger.info(f"NaN cols: {export.columns[export.isna().any()]}")
         etab_df["etpsal"] = etab_df["etpsal"].fillna(-1)
         etab_df["efflib"] = etab_df["efflib"].fillna(-1)
         etab_df["etp"] = etab_df["etp"].fillna(-1)
@@ -382,14 +386,14 @@ class SAEService(APLService):
             first_year = gdf["year"].unique()[0]
         gdf_first_year = gdf[gdf["year"] == first_year]
         geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
-        print(f"Found {len(geojson["features"])} geojsons")
+        logger.info(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
 
     def compute_sae_iris(self, code: str, specialite: int, time: int, time_type: str, resolution: str)\
             -> tuple[dict, any]:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        print(f"Compute IRIS SAE for {code} {bor}")
+        logger.info(f"Compute IRIS SAE for {code} {bor}")
         export = self.load_pickle("sae", code, specialite, time, time_type, 0, resolution, False)
         if export is not None:
             return export
@@ -397,17 +401,17 @@ class SAEService(APLService):
         type_code, id = self.check_code(code)
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
-        print(f"Found {len(gdf)} gdfs")
+        logger.info(f"Found {len(gdf)} gdfs")
         etab_df = self.get_sae_by_bor(bor, gdf)
         etab_df = self.etab_tension(etab_df)
         etab_df = self.etab_corrections(bor, etab_df)
         if specialite == 5:
             etab_df = self.merge_ehpad(etab_df)
-        print(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        logger.info(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_iris_gdf_apl(gdf, sae)
         gdf_merged = self.df_corrections(bor, gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
-        print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        logger.info(f"Merged {len(gdf_merged) / len(years):.0f} gdf-saes by year")
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_sae_export(code, studies_df, gdf_merged, etab_df, years)
@@ -417,7 +421,7 @@ class SAEService(APLService):
     def compute_sae_iris_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        print(f"Compute IRIS SAE CSV for {code} {specialite}")
+        logger.info(f"Compute IRIS SAE CSV for {code} {specialite}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         sae, _ = self.get_sae(type_code, id, bor, time, time_type)
@@ -428,20 +432,20 @@ class SAEService(APLService):
             -> tuple[dict, any]:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        print(f"Compute Commune SAE for {code} {bor}")
+        logger.info(f"Compute Commune SAE for {code} {bor}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
-        print(f"Found {len(gdf)} gdfs")
+        logger.info(f"Found {len(gdf)} gdfs")
         etab_df = self.get_sae_commune_by_bor(bor, gdf)
         etab_df = self.etab_tension(etab_df)
         etab_df = self.df_corrections(bor, etab_df)
         if specialite == 5:
             etab_df = self.merge_ehpad(etab_df)
-        print(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        logger.info(f"Found {len(etab_df) / len(years):.0f} etab by year")
         gdf_merged = self.merge_commune_gdf_apl(gdf, sae)
-        print(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
+        logger.info(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_sae_by_commune(gdf_merged)
@@ -453,7 +457,7 @@ class SAEService(APLService):
     def compute_sae_commune_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        print(f"Compute Commune SAE CSV for {code} {specialite}")
+        logger.info(f"Compute Commune SAE CSV for {code} {specialite}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         sae, _ = self.get_sae(type_code, id, bor, time, time_type)

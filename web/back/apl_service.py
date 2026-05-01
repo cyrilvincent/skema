@@ -13,6 +13,9 @@ import re
 import pandas as pd
 import config
 import os.path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class APLService:
@@ -380,7 +383,7 @@ class APLService:
             cols += ["pop65p"]
             gdf["pop65p"] = gdf["pop65p"].fillna(0)
         export = gdf[cols]
-        print(f"NaN cols: {export.columns[export.isna().any()]}")
+        logger.info(f"NaN cols: {export.columns[export.isna().any()]}")
         export = export.dropna()
         for year in self.years:
             meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
@@ -393,7 +396,7 @@ class APLService:
             dico["years"][year + 2000] = dico_year
         gdf_first_year = gdf[gdf["year"] == self.first_year]
         geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
-        print(f"Found {len(geojson["features"])} geojsons")
+        logger.info(f"Found {len(geojson["features"])} geojsons")
         return dico, geojson
 
     def simplify(self, gdf: pd.DataFrame, resolution: str) -> pd.DataFrame:
@@ -445,7 +448,7 @@ class APLService:
         studies_df = self.get_studies_by_years(specialite, time, time_type, aexp, self.years, with_sal)
         keys = studies_df["key"].to_list()
         apl = self.get_apl_by_keys(keys, type_code, id, with_sal)
-        print(f"Found {len(apl) / len(self.years):.0f} apls by year")
+        logger.info(f"Found {len(apl) / len(self.years):.0f} apls by year")
         self.corrections(apl)
         return apl, studies_df
 
@@ -462,7 +465,7 @@ class APLService:
         path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
         if not os.path.exists(path):
             with open(path, "wb") as f:
-                print(f"Save {path}")
+                logger.info(f"Save {path}")
                 pickle.dump(export, f)
 
     def load_pickle(self,
@@ -477,7 +480,7 @@ class APLService:
         path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
         if os.path.exists(path):
             with open(path, "rb") as f:
-                print(f"Load {path}")
+                logger.info(f"Load {path}")
                 export: tuple[dict, any] = pickle.load(f)
                 return export
         return None
@@ -490,7 +493,7 @@ class APLService:
                      aexp: float,
                      resolution: str,
                      with_sal: bool) -> tuple[dict, any]:
-        print(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
+        logger.info(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         export = self.load_pickle("apl", code, specialite, time, time_type, aexp, resolution, with_sal)
         if export is not None:
             return export
@@ -498,9 +501,9 @@ class APLService:
         type_code, id = self.check_code(code)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
-        print(f"Found {len(gdf)} gdfs")
+        logger.info(f"Found {len(gdf)} gdfs")
         gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
-        print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        logger.info(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         gdf_merged = self.simplify(gdf_merged, resolution)
         gdf_merged = self.merge_filo(gdf_merged)
@@ -516,7 +519,7 @@ class APLService:
                          time_type: str,
                          aexp: float,
                          with_sal: bool) -> pd.DataFrame:
-        print(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
+        logger.info(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl["year"] = apl["year"]+2000
         return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
@@ -529,14 +532,14 @@ class APLService:
                         aexp: float,
                         resolution: str,
                         with_sal: bool) -> tuple[dict, any]:
-        print(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
+        logger.info(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
-        print(f"Found {len(gdf)} gdfs")
+        logger.info(f"Found {len(gdf)} gdfs")
         gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
-        print(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        logger.info(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_apl_by_commune(gdf_merged)
@@ -551,7 +554,7 @@ class APLService:
                             time_type: str,
                             aexp: float,
                             with_sal: bool) -> pd.DataFrame:
-        print(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
+        logger.info(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         apl = self.group_apl_by_commune(apl)
         apl["year"] = apl["year"]+2000

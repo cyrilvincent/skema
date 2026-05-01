@@ -312,7 +312,6 @@ class DoctolibPSParser(DoctolibParser):
             rpps = node.find(string="Numéro RPPS")
             if rpps is not None:
                 self.dto.rpps = rpps.parent.parent.find_all("p")[-1].text
-                print(f"RPPS: {self.dto.rpps}")
             adeli = node.find(string="Numéro ADELI")
             if adeli is not None:
                 self.dto.adeli = adeli.parent.parent.find_all("p")[-1].text
@@ -413,7 +412,8 @@ class DoctolibWorkflow:
             pss = w.parser.find_h2_dr()
             for ps in pss:
                 print(ps)
-                print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
+                if ps.rdv_text is not None:
+                    print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
                 self.parse_ps(ps)
                 # ps.url_dto = dto move to scraper not in bd
                 self.ps_results.append(ps)
@@ -450,10 +450,11 @@ if __name__ == '__main__':
     # dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
     dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
     w = DoctolibWorkflow(context)
-    w.make_cache()
-    # asyncio.run(w.go(dto))
+    # asyncio.run(w.go(dto))  # Do the scrap & parse_all & commit the same day
+    # time.sleep(4)  # Never test go + scrap_pss at the same time
     # asyncio.run(w.scrap_pss(dto))
-    w.parse_all(dto)
+    w.make_cache()
+    w.parse_all(dto)  # Never test parse_all & go & scrap_pss at the same time
     w.commit()
 
     # Debug for one PS

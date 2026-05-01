@@ -2,6 +2,9 @@ from collections import OrderedDict
 import threading
 from indexer import Indexer
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CommuneService:
@@ -18,6 +21,7 @@ class CommuneService:
     def factory():
         with CommuneService.lock:
             if CommuneService._instance is None:
+                logger.info("Starting CommuneService singleton")
                 CommuneService._instance = CommuneService()
         return CommuneService._instance
 
