@@ -1,11 +1,10 @@
 import art
 import psycopg2
-import sqlalchemy
 import config
 import pandas as pd
 import argparse
 import numpy as np
-from sqlentities import Context, DateSource
+from sqlentities import Context
 
 
 class PopIrisParser:
@@ -35,6 +34,11 @@ class PopIrisParser:
         self.dataframe = self.dataframe[["year", "iris_id"] + list(self.dataframe.columns[:-2])]
         if "modif_iris" in self.dataframe.columns:
             self.dataframe = self.dataframe.drop("modif_iris", axis=1)
+        to_remove = []
+        for c in self.dataframe.columns:
+            if "gsec" in c:
+                to_remove.append(c)
+        self.dataframe = self.dataframe.drop(to_remove, axis=1)
 
     def load(self, path: str):
         print(f"Load {path}")
@@ -79,4 +83,4 @@ if __name__ == '__main__':
     print(f"Database {context.db_name}: {new_db_size:.0f} MB")
     print(f"Database grows: {new_db_size - db_size:.0f} MB ({((new_db_size - db_size) / db_size) * 100:.1f}%)")
 
-    # data/iris/base-ic-evol-struct-pop-2020.CSV
+    # data/iris/base-ic-evol-struct-pop-2022.CSV

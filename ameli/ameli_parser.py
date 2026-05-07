@@ -131,4 +131,4 @@ if __name__ == '__main__':
     p.save(df)
 
 
-# data/ameli/2021_secteur-conventionnel-des-professionnels-de-sante-liberaux-par-departement_serie-annuelle.xls
+# data/ameli/2024_secteur-conventionnel-des-professionnels-de-sante-liberaux-par-departement_serie-annuelle.xls

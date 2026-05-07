@@ -134,7 +134,7 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = DamirDownloader(context, args.echo, args.fake_download, args.no_commit, args.force_download, args.no_parsing)
-    # d.scrap()
+    d.scrap()
     # d.scrap(start_year=datetime.date.today().year - 1)
     d.load()
     print(f"Nb new files: {d.nb_new_file}")

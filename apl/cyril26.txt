@@ -1,0 +1,30 @@
+1/ Import damir 25 : ok
+
+2/ damir_age_stats.sql : ok
+    Renommer apl.damir_age_stats_3 en apl.damir_age_stats : ok
+
+3/ Ameli 2024
+    ps_stats.ipynb : en cours
+    Vérifier les data ps_stats
+    Vérifier que apl.ps_libracces est à jour : ok
+    Modif apl_france pour ajouter personne_activite.month=5 pour 2026
+
+4/ INSEE - Structure de la population 2022
+    Importer base-ic-evol-struct-pop-20YY.CSV avec pop_iris_parser
+    Modifier apl_france.py yy=min(21, year)
+    Modifier overrepresentation
+
+5/ overrepresentation.ipynb
+    Renommer overrepresentation_2 en overrepresentation
+    Modifier apl_france.py yy=min(year, 24)
+
+6/ apl_france.py
+    Bien vérifier que toutes les dates sont à jour
+
+7/ Filosofi 2022
+    MAJ du back
+
+8/ Back : mettre 2026
+
+9/ Front : mettre 2026
+

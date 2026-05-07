@@ -133,7 +133,7 @@ export class DatavizParameters {
 
   isResolutionBlocked(res: string): boolean {
     const code = this.code()?.slice(0, 2);
-    if (res=="HD") return code == "CF" || code == "CR";
+    if (res=="HD") return code == "CF"; // || code == "CR";
     else if (res=="MD") return code == "CF" || code == "CC";
     return code != "CF" && code != "CR";
   }

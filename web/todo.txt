@@ -1,9 +1,9 @@
-Admin JWT : https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
-Server : Linux + Repasser en lazy
-http://localhost:4200/
 filosofi commune
 copier les 2 mentions légales de univ et skema
 Les pickles risquent de ne pas fonctionner sous linux : d'après copilot si même version python ca va fonctionner : pb pour indexer => il suffit d'exporter iris.commune et distinct(code_postal, code_insee) from ban
+Server : Linux + Repasser en lazy
+Urgence 42 en 18 et 19
+
 
 
 
