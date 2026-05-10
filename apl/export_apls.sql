@@ -21,6 +21,8 @@ JOIN (
 ) latest ON a.study_key = latest.key
 ORDER BY a.date
 
+-- idem pour apl_s
+
 -- Backup
 -- Etape 1
 -- Créer une table temporaire pour les exports

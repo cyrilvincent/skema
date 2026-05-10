@@ -386,14 +386,19 @@ class APLService:
         logger.info(f"NaN cols: {export.columns[export.isna().any()]}")
         export = export.dropna()
         for year in self.years:
-            meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
-            dico["meanws"].append(meanw)
-            export_year = export[export["year"] == year]
-            dico_year = {}
-            for col in export.columns:
-                if col != "geometry":
-                    dico_year[col] = export_year[col].values.tolist()
-            dico["years"][year + 2000] = dico_year
+            # meanw = studies_df[studies_df["year"] == year]["meanw"].iloc[0]
+            study_year = studies_df[studies_df["year"] == year]
+            if len(study_year) == 0:
+                logger.warning(f"Year {year} does not exist")
+            else:
+                meanw = study_year["meanw"].iloc[0]
+                dico["meanws"].append(meanw)
+                export_year = export[export["year"] == year]
+                dico_year = {}
+                for col in export.columns:
+                    if col != "geometry":
+                        dico_year[col] = export_year[col].values.tolist()
+                dico["years"][year + 2000] = dico_year
         gdf_first_year = gdf[gdf["year"] == self.first_year]
         geojson = gdf_first_year[["fid", "geometry"]].__geo_interface__
         logger.info(f"Found {len(geojson["features"])} geojsons")

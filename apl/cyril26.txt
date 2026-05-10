@@ -17,55 +17,75 @@
     Modifier apl_france.py yy=min(21, year) : ok
     Modifier overrepresentation sur serveur yy=min(year,21) : ok
 
-5/ overrepresentation.ipynb
+5/ overrepresentation.ipynb : ok
     Executer overrrepresentation : ok
     Renommer overrepresentation_2 en overrepresentation : ok
     Copier overrepresentation.ipynb depuis serveur : ok
     Modifier apl_france.py yy=min(year, 24) : ok
 
-6/ apl_france.py
+6/ apl_france.py : en cours
     Modifier for year in range(20, 26): ok
     Revérifier apl_france.py : ok
     Copier apl_france.py sur serveur : ok
-    Exécuter sur 10 et 7 : en coours 7
-        select a1.apl, a2.apl, abs(a1.apl-a2.apl)/(a1.apl+0.1)  variation from apl.apl_s a1
+    Exécuter sur 10 et 7 : ok
+        SELECT * FROM apl.apl_s_study
+        where specialite_id=7 and time=30 and time_type='HC' and exp=-0.12 and year=20
+        order by date desc
+        SELECT a1.apl, a2.apl, abs(a1.apl-a2.apl)/(a1.apl+0.1)  variation from apl.apl_s a1
         join apl.apl_s a2 on a1.study_key=958818660970 and a2.study_key=770986417496 and a1.iris=a2.iris
         and a1.iris_string like '%06'
         order by abs(a1.apl-a2.apl)/(a1.apl+0.1) desc
-    Executer pour tout
+    Executer pour tout : en cours
 
-7/ apl_service.py
+7/ apl_service.py : en cours
     self.last_year : ok
-    Afficher des dataviz en gardant les .pickle
-    git pull
-    Effacer les .pickle
-    Front rien à faire mais verif
-    Comparer avant & après pickle
+    Afficher des dataviz en gardant les .pickle : ok
+    git pull : ok
+    Effacer les .pickle : ok
+    Front rien à faire mais verif : todo
+    Comparer avant & après pickle : ok
 
-8/ filo_parser.py
-    Télécharger 2022
+8/ filo_parser.py : ok
+    Télécharger 2022 : pas dispo
     filo_parser.py
     filo_france.sql
-    Verif
+    modif apl_service.py (normalement rien à faire)
+    modif sae_service.py (normalement rien à faire)
+    verif
 
-9/ SAE
-    Importer SAE
+9/ SAE : ok
+    Importer SAE : pas dispo
     Verif
 
 10/ Etalab
-    Importer Etablissement
+    Importer Etablissement : normalement déjà fait
     Verif
 
-11/ sae_dist.py
-    Modifier for year in range
+11/ sae_dist.py : tenter de ne pas faire 25 : ok?
+    Modifier for year in range (adapter pour ehpad et pharma)
     Executer
     Executer l'update indiqué en fin de .py
 
-12/ sae_service.py
-    self.last_year
+12/ sae_service.py : tenter de ne pas faire 25 : ok?
+    self.last_year (créer un last_year_pharma_ehpad et un get_last_year puis modifier years_list)
     Effacer les .pickle
     Front rien à faire mais verif sauf ehpad
 
-13/ ehpad_france.sql
-    Executer
+13/ ehpad_parser.py
+    Import ehpad 25 : normalement déjà fait
+    Verif
+
+14/ ehpad_france.sql
+    Executer : normalement inutile
     Tester Ehpad
+
+15/ Préparer export
+    Préparer les tables à exporter
+    Index
+    ...
+
+Benj :
+    Word
+    pas_stats
+    filo absent
+    sae absent
