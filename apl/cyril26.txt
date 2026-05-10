@@ -94,3 +94,9 @@ Benj :
     sae absent
     + rapide pour apl
     bug 42 urg 2018 & 19 : ok
+    422790201 17 min en 18 & 19 vs 5 et 0 min en 18 & 19 au niveau dept (en bd c'est bon !)
+    SELECT * FROM sae.dist_study
+where year=2018 and bor='urgence_gen'
+    SELECT * FROM sae.dist
+where iris=422790201 and year=2018 and study_key=106503198758
+    Même bug en local
