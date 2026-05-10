@@ -170,7 +170,7 @@ class APLService:
         df = pd.read_sql(sql, config.connection_string)
         df["year"] = df["pop_year"]
         if len(df) > 0:
-            last_year = df.iloc[-1]["year"]
+            last_year = df.sort_values(by="year").iloc[-1]["year"]
             for year in range(last_year + 1, datetime.date.today().year - 2000 + 1):
                 df = self.clone_df_year(df, last_year, year)
         return df
