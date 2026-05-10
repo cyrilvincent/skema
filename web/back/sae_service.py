@@ -372,9 +372,9 @@ class SAEService(APLService):
         export_etab = etab_df[cols]
         for year in years:
             # meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
-            study_year = studies_df[studies_df["year"] == year]
+            study_year = studies_df[studies_df["year"] == year + 2000]
             if len(study_year) == 0:
-                logger.warning(f"Year {year} does not exist")
+                logger.warning(f"Year {year + 2000} does not exist")
             else:
                 meanw = study_year["meanw"].iloc[0]
                 if meanw is None:

@@ -289,7 +289,7 @@ class APLService:
         for year in years:
             result = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
             if len(result) == 0:
-                logger.warning(f"No value specialite {specialite} in {year}")
+                logger.warning(f"No value for specialite {specialite} in {year}")
             if df is None:
                 # df = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
                 df = result
