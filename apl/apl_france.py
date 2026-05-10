@@ -9,7 +9,7 @@ print(config.connection_string)
 pd.set_option('display.max_columns', None)
 pd.options.mode.copy_on_write = True
 
-pa_months = {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9}
+pa_months = {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9, 26: 5}
 
 
 def get_ps(year, specialite):
@@ -73,7 +73,7 @@ and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code
 """
     # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
-    print(sql)
+    # print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -87,7 +87,7 @@ def get_by_source(year, specialite, source):
 
 
 def get_pop_iris(year):
-    yy = min(21, year)
+    yy = min(22, year)  # MAJ en 26 pour 22
     sql = f"""
 select i.id iris, pi.iris iris_string, c.code code_commune, i.type type_iris, pi.pop, pi.pop0002, pi.pop0305, pi.pop0610, pi.pop1117, pi.pop1824, pi.pop2539, pi.pop4054, pi.pop5564, pi.pop6579, pi.pop80p
 from iris.pop_iris pi
@@ -122,7 +122,7 @@ join iris.commune c on c.id=i.commune_id
 
 
 def get_over(year, specialite, is_medecin):
-    yy = min(year, 24)
+    yy = min(year, 25)  # 24 => 25 en mai 26 (damir)
     if is_medecin:
         sql = f"""select o.* from apl.overrepresentation o
         join specialite s on s.psp_spe_snds=o.psp_spe_snds
@@ -138,20 +138,21 @@ def get_over(year, specialite, is_medecin):
     over = pd.read_sql(sql, config.connection_string)
     return over
 
-for with_s in [True]: #[True, False]
-    for time in [30]: #[30, 45, 60]:
-        for time_type in ["HC"]: #["HC", "HP"]:
+
+for with_s in [True]:  # [True, False]
+    for time in [30]:  # [30, 45, 60]:
+        for time_type in ["HC"]:  # ["HC", "HP"]:
             iris_matrix = get_iris_matrix(time, time_type)
             iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
             iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
             for source in ["PA"]:  # ["PA", "PS"]:
-                for year in range(20, 26):
+                for year in range(20, 27):  # Last year changed in 2605
                     pop_iris = get_pop_iris(year)
-                    for specialite in [10]: #range(1, 29):
+                    for specialite in [10]:  # range(1, 29):
                         if specialite in [9, 14, 18, 20, 26, 28]:
                             continue
                         iriss = get_iriss(year, specialite)
-                        for accessibilite_exp in [-0.12, -0.10, -0.08, -0.06, -0.04]:
+                        for accessibilite_exp in [-0.12]:  # [-0.12, -0.10, -0.08, -0.06, -0.04]:
                             if ((time > 30 and accessibilite_exp < -0.08) or
                                     (time == 30 and accessibilite_exp > -0.06) or
                                     (time > 45 and accessibilite_exp < -0.06)):
@@ -177,15 +178,10 @@ for with_s in [True]: #[True, False]
                             ps_df2 = ps_df.drop_duplicates(subset=['iris', 'nb'])
 
                             iris_matrix_pop_df = iris_matrix.merge(pop_iris, on="iris", how="left", suffixes=('', ''))
-                            iris_matrix_pop_df
 
                             accessibilite_fn = lambda x: np.exp(accessibilite_exp * x)
                             iris_matrix_pop_df["accessibilite_weight"] = accessibilite_fn(iris_matrix_pop_df["time"])
                             iris_matrix_pop_df.head(10)
-
-
-                            # In[18]:
-
 
                             cols = [col for col in iris_matrix_pop_df.columns if "pop" in col and col != "pop"]
 
@@ -212,9 +208,6 @@ for with_s in [True]: #[True, False]
                             matrix_df = matrix_df.sort_values(by='iris2')
                             matrix_merge_df = matrix_df.merge(ps_df2, on="iris", how="left", suffixes=('', ''))
                             matrix_merge_df
-
-
-                            # In[25]:
 
 
                             matrix_merge_df["nb"] = matrix_merge_df["nb"].fillna(0)

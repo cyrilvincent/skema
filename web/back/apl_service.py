@@ -27,7 +27,7 @@ class APLService:
         self.iris_loader: IrisLoader = IrisLoader.factory()
         self.commune_loader: CommuneLoader = CommuneLoader.factory()
         self.first_year = 20
-        self.last_year = 25
+        self.last_year = 26
         self.years = list(range(self.first_year, self.last_year + 1))
         self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
         warnings.filterwarnings('ignore', category=UserWarning)

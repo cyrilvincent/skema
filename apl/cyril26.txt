@@ -4,27 +4,68 @@
     Renommer apl.damir_age_stats_3 en apl.damir_age_stats : ok
 
 3/ Ameli 2024
+    Télécharger 2024_secteur-conventionnel-des-professionnels-de-sante-liberaux-par-departement_serie-annuelle : ok
+    ameli_parser : ok
+    ps_stats.ipynb modifier year=24 : ok
     ps_stats.ipynb : en cours
-    Vérifier les data ps_stats
+    Vérifier les data ps_stats : en cours mail benj
     Vérifier que apl.ps_libracces est à jour : ok
-    Modif apl_france pour ajouter personne_activite.month=5 pour 2026
+    Modif apl_france pour ajouter personne_activite.month=5 pour 2026 : ok
 
-4/ INSEE - Structure de la population 2022
-    Importer base-ic-evol-struct-pop-20YY.CSV avec pop_iris_parser
-    Modifier apl_france.py yy=min(21, year)
-    Modifier overrepresentation
+4/ INSEE - Structure de la population 2022 : ok
+    Importer base-ic-evol-struct-pop-20YY.CSV avec pop_iris_parser : ok
+    Modifier apl_france.py yy=min(21, year) : ok
+    Modifier overrepresentation sur serveur yy=min(year,21) : ok
 
 5/ overrepresentation.ipynb
-    Renommer overrepresentation_2 en overrepresentation
-    Modifier apl_france.py yy=min(year, 24)
+    Executer overrrepresentation : ok
+    Renommer overrepresentation_2 en overrepresentation : ok
+    Copier overrepresentation.ipynb depuis serveur : ok
+    Modifier apl_france.py yy=min(year, 24) : ok
 
 6/ apl_france.py
-    Bien vérifier que toutes les dates sont à jour
+    Modifier for year in range(20, 26): ok
+    Revérifier apl_france.py : ok
+    Copier apl_france.py sur serveur : ok
+    Exécuter sur 10 et 7 : en coours 7
+        select a1.apl, a2.apl, abs(a1.apl-a2.apl)/(a1.apl+0.1)  variation from apl.apl_s a1
+        join apl.apl_s a2 on a1.study_key=958818660970 and a2.study_key=770986417496 and a1.iris=a2.iris
+        and a1.iris_string like '%06'
+        order by abs(a1.apl-a2.apl)/(a1.apl+0.1) desc
+    Executer pour tout
 
-7/ Filosofi 2022
-    MAJ du back
+7/ apl_service.py
+    self.last_year : ok
+    Afficher des dataviz en gardant les .pickle
+    git pull
+    Effacer les .pickle
+    Front rien à faire mais verif
+    Comparer avant & après pickle
 
-8/ Back : mettre 2026
+8/ filo_parser.py
+    Télécharger 2022
+    filo_parser.py
+    filo_france.sql
+    Verif
 
-9/ Front : mettre 2026
+9/ SAE
+    Importer SAE
+    Verif
 
+10/ Etalab
+    Importer Etablissement
+    Verif
+
+11/ sae_dist.py
+    Modifier for year in range
+    Executer
+    Executer l'update indiqué en fin de .py
+
+12/ sae_service.py
+    self.last_year
+    Effacer les .pickle
+    Front rien à faire mais verif sauf ehpad
+
+13/ ehpad_france.sql
+    Executer
+    Tester Ehpad
