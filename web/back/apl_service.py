@@ -287,11 +287,16 @@ class APLService:
                              with_sal: bool) -> pd.DataFrame:
         df = None
         for year in years:
+            result = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
+            if len(result) == 0:
+                logger.warning(f"No value specialite {specialite} in {year}")
             if df is None:
-                df = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
+                # df = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
+                df = result
             else:
-                df = pd.concat([df, self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)],
-                               ignore_index=True)
+                # df = pd.concat([df, self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)],
+                #                ignore_index=True)
+                df = pd.concat([df, result], ignore_index=True)
         return df
 
     def get_apl_by_keys(self, keys: list[int], code: str, id: str, with_sal: bool):

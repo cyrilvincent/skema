@@ -138,6 +138,8 @@ for time in [60]:
             for bor in ["pharma"]:  # ["urgence_gen", "urgence_ped", "psy", "pharma", "ehpad"]:
                 if bor not in ["pharma", "ehpad"] and year < 2013:
                     continue
+                if bor not in ["pharma", "ehpad"] and year == 2025:  # Not used for the moment
+                    continue
                 pop_iris = get_pop_iris(year)
                 print(f"Compute dist {bor} in {year} in {time}min {time_type}")
                 ps_df = get_sae_by_bor(year, bor)

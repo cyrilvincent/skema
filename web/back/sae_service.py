@@ -20,6 +20,7 @@ class SAEService(APLService):
         super().__init__()
         self.first_year = None
         self.last_year = 24
+        self.last_year_pharma_ehpad = 24
         self.years = None
         self.bors = ["urgence_gen", "urgence_ped", "psy", "pharma", "ehpad"]
 
@@ -34,9 +35,12 @@ class SAEService(APLService):
     def get_first_year(self, bor: str):
         return 13 if bor not in ["pharma", "ehpad"] else 4
 
+    def get_last_year(self, bor: str):
+        return self.last_year if bor not in ["pharma", "ehpad"] else self.last_year_pharma_ehpad
+
     def years_list(self, bor: str):
         years = []
-        for y in range(self.get_first_year(bor), self.last_year + 1):
+        for y in range(self.get_first_year(bor), self.get_last_year(bor) + 1):
             years.append(y)
         return years
 
@@ -55,10 +59,15 @@ class SAEService(APLService):
     def get_sae_studies_by_years(self, bor: str, time: int, time_type: str, years: Iterable[int]) -> pd.DataFrame:
         df = None
         for year in years:
+            result = self.get_sae_study_by_year(bor, time, time_type, year)
+            if len(result) == 0:
+                logger.warning(f"No value for {bor} in year {year}")
             if df is None:
-                df = self.get_sae_study_by_year(bor, time, time_type, year)
+                # df = self.get_sae_study_by_year(bor, time, time_type, year)
+                df = result
             else:
-                df = pd.concat([df, self.get_sae_study_by_year(bor, time, time_type, year)], ignore_index=True)
+                # df = pd.concat([df, self.get_sae_study_by_year(bor, time, time_type, year)], ignore_index=True)
+                df = pd.concat([df, result], ignore_index=True)
         return df
 
     def get_sae_by_keys(self, keys: list[int], code: str, id: str):
@@ -362,22 +371,27 @@ class SAEService(APLService):
             etab_df["p1_mean"] = etab_df["p1_mean"].fillna(-1)
         export_etab = etab_df[cols]
         for year in years:
-            meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
-            if meanw is None:
-                meanw = 1
-            dico["meanws"].append(meanw)
-            export_year = export[export["year"] == year + 2000]
-            export_etab_year = export_etab[export_etab["year"] == year + 2000]
-            dico_year = {}
-            etab_year = {}
-            for col in export.columns:
-                if col != "geometry":
-                    dico_year[col] = export_year[col].values.tolist()
-            for col in export_etab.columns:
-                etab_year[col] = export_etab_year[col].values.tolist()
-            if len(etab_year["rs"]) > 500:  # 576 urgence_gen in france
+            # meanw = studies_df[studies_df["year"] == year + 2000]["meanw"].iloc[0]
+            study_year = studies_df[studies_df["year"] == year]
+            if len(study_year) == 0:
+                logger.warning(f"Year {year} does not exist")
+            else:
+                meanw = study_year["meanw"].iloc[0]
+                if meanw is None:
+                    meanw = 1
+                dico["meanws"].append(meanw)
+                export_year = export[export["year"] == year + 2000]
+                export_etab_year = export_etab[export_etab["year"] == year + 2000]
+                dico_year = {}
+                etab_year = {}
+                for col in export.columns:
+                    if col != "geometry":
+                        dico_year[col] = export_year[col].values.tolist()
                 for col in export_etab.columns:
-                    etab_year[col] = []
+                    etab_year[col] = export_etab_year[col].values.tolist()
+                if len(etab_year["rs"]) > 500:  # 576 urgence_gen in france
+                    for col in export_etab.columns:
+                        etab_year[col] = []
             dico_year["etab"] = etab_year
             dico["years"][year + 2000] = dico_year
         first_year = years[0]

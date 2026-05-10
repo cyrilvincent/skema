@@ -46,7 +46,7 @@
     Comparer avant & après pickle : ok
 
 8/ filo_parser.py : ok
-    Télécharger 2022 : pas dispo
+    Télécharger 2022 : pas dispo : ok
     filo_parser.py
     filo_france.sql
     modif apl_service.py (normalement rien à faire)
@@ -54,7 +54,7 @@
     verif
 
 9/ SAE : ok
-    Importer SAE : pas dispo
+    Importer SAE : pas dispo : ok
     Verif
 
 10/ Etalab
@@ -62,12 +62,14 @@
     Verif
 
 11/ sae_dist.py : tenter de ne pas faire 25 : ok?
-    Modifier for year in range (adapter pour ehpad et pharma)
+    Modifier for year in range: ok
+    Modifier if bor not in ["pharma", "ehpad"] and year == : ok?
     Executer
     Executer l'update indiqué en fin de .py
 
 12/ sae_service.py : tenter de ne pas faire 25 : ok?
-    self.last_year (créer un last_year_pharma_ehpad et un get_last_year puis modifier years_list)
+    self.last_year : ok
+    self.last_year_pharma_ehpad : ok?
     Effacer les .pickle
     Front rien à faire mais verif sauf ehpad
 
@@ -86,6 +88,8 @@
 
 Benj :
     Word
-    pas_stats
+    Serveur restart 2 fois
+    ps_stats augmentation de 2% (cf xlsx)
     filo absent
     sae absent
+    + rapide pour apl
