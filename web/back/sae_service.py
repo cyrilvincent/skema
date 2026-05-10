@@ -236,6 +236,7 @@ class SAEService(APLService):
     def get_filo_by_iriss(self, iriss: list[str]) -> pd.DataFrame:
         df = super().get_filo_by_iriss(iriss)
         if len(df) > 0:
+            df = df.sort_values(by="year")
             first_year = df.iloc[0]["year"]
             for year in range(4, first_year):
                 df = self.clone_df_year(df, first_year, year)
@@ -489,7 +490,9 @@ if __name__ == '__main__':
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
+    # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
+    export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
+    # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
     print(export)
 
 
