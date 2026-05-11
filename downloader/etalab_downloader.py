@@ -11,9 +11,8 @@ from sqlentities import Context, File, BAN
 from BAN_parser import AdresseParser
 import shutil
 
-# Le lien change chaque année
-# Impossible d'automatiser le zip
-# Le fichier de l'année en cours est corrompu
+# Télécharger l'historique et copier l'étalab de l'année en cours à la main
+# Ensuite le downloader fonctionne
 
 class EtalabDownloader(BaseDownloader):
 
@@ -101,6 +100,6 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo, expire_on_commit=False)
     d = EtalabDownloader(context, args.echo, True, args.no_commit, True, args.no_parsing)
-    d.dezips()
+    # d.dezips()
     d.load()
     print(f"Nb new files: {d.nb_new_file}")

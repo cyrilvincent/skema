@@ -45,7 +45,7 @@ class EtalabParser(BaseParser):
             e.rs = row["rs"]
             e.rslongue = row["rslongue"]
             e.complrs = self.get_nullable(row["complrs"])
-            e.mft = self.get_nullable(row["mft"])
+            e.mft = self.get_nullable(row["mft"], 10)
             try:
                 e.sph = self.get_nullable_int(row["sph"])
                 e.categetab = self.get_nullable_int(row["categetab"])

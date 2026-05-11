@@ -42,7 +42,7 @@
     Afficher des dataviz en gardant les .pickle : ok
     git pull : ok
     Effacer les .pickle : ok
-    Front rien à faire mais verif : todo
+    Front rien à faire mais verif : en cours
     Comparer avant & après pickle : ok
 
 8/ filo_parser.py : ok
@@ -58,7 +58,10 @@
     Verif
 
 10/ Etalab
-    Importer Etablissement : normalement déjà fait
+    Télécharger l'historique et dézipper : ok
+    Importer Etablissement via downloader en local : ok
+    MAJ downloader + parsrr + base parser + sqlentities sur serveur
+    Downloader : todo
     Verif
 
 11/ sae_dist.py : tenter de ne pas faire 25 : ok?
@@ -87,16 +90,11 @@
     ...
 
 Benj :
-    Word
-    Serveur restart 2 fois
     ps_stats augmentation de 2% (cf xlsx)
     filo absent
     sae absent
     + rapide pour apl
     bug 42 urg 2018 & 19 : ok
+    mentions légales : todo
     422790201 17 min en 18 & 19 vs 5 et 0 min en 18 & 19 au niveau dept (en bd c'est bon !)
-    SELECT * FROM sae.dist_study
-where year=2018 and bor='urgence_gen'
-    SELECT * FROM sae.dist
-where iris=422790201 and year=2018 and study_key=106503198758
-    Même bug en local
+
