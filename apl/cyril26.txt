@@ -54,15 +54,14 @@
     verif
 
 9/ SAE : ok
-    Importer SAE : pas dispo : ok
+    Importer SAE : pas dispo
     Verif
 
-10/ Etalab
+10/ Etalab : ok
     Télécharger l'historique et dézipper : ok
     Importer Etablissement via downloader en local : ok
-    MAJ downloader + parsrr + base parser + sqlentities sur serveur
-    Downloader : todo
-    Verif
+    Downloader : ok
+    Verif : ok
 
 11/ sae_dist.py : tenter de ne pas faire 25 : ok?
     Modifier for year in range: ok
@@ -76,13 +75,11 @@
     Effacer les .pickle
     Front rien à faire mais verif sauf ehpad
 
-13/ ehpad_parser.py
-    Import ehpad 25 : normalement déjà fait
-    Verif
+13/ ehpad_parser.py : ok
+    Verif : ok
 
-14/ ehpad_france.sql
-    Executer : normalement inutile
-    Tester Ehpad
+14/ ehpad_france.sql : ok
+    Executer : ok
 
 15/ Préparer export
     Préparer les tables à exporter
@@ -90,11 +87,9 @@
     ...
 
 Benj :
-    ps_stats augmentation de 2% (cf xlsx)
     filo absent
     sae absent
     + rapide pour apl
     bug 42 urg 2018 & 19 : ok
-    mentions légales : todo
     422790201 17 min en 18 & 19 vs 5 et 0 min en 18 & 19 au niveau dept (en bd c'est bon !)
 
