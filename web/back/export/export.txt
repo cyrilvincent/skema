@@ -1,0 +1,76 @@
+apl_service
+    iris.commune
+    iris.iris
+    iris.cp_insee
+    iris.filo
+    iris.filo_france
+    iris.pop_iris
+    iris.pop_france
+    dept
+    apl.apl_study
+        SELECT s.* FROM apl.apl_study s
+        JOIN (
+            SELECT MAX(s2.date) AS date, s2.key
+            FROM apl.apl_study s2
+            GROUP BY s2.specialite_id, s2.key
+        ) latest ON s.key = latest.key
+        ORDER BY s.specialite_id
+    apl.apl_s_study
+        Idem
+    apl.apl
+        SELECT a.* FROM apl.apl a
+        JOIN (
+            SELECT MAX(s.date) AS date, s.key
+            FROM apl.apl_study s
+            GROUP BY s.specialite_id, s.key
+        ) latest ON a.study_key = latest.key
+        ORDER BY a.date
+    apl.apl_s
+        Idem
+
+sae
+    sae.dist_study*
+    sae.dist*
+    sae.urgence_detail
+    sae.urgence_p
+    sae.psy
+    sae.ehpad_france
+    etablissement
+    etablissement_date_source
+    date_source
+    ehpad
+    adresse_raw 100Mo
+        select * from adresse_raw ar
+        join etablissement e on e.adresse_raw_id = ar.id
+    adresse_norm 787Mo Enlever les fkey
+        select * from adresse_norm an
+        join adresse_raw ar on ar.adresse_norm_id = an.id
+        join etablissement e on e.adresse_raw_id = ar.id
+
+Indexer
+    Si le pickle ne fonctionne pas prendre iris.cp_insee
+
+ Etape 0
+    DROP TABLE IF EXISTS temp_stuff;
+-- Etape 1
+-- Créer une table temporaire pour les exports
+-- CREATE TABLE apl.apl_study_export AS
+--SELECT s.*
+--FROM apl.apl_study s
+--JOIN (
+--    SELECT MAX(date) AS date, key
+--    FROM apl.apl_study
+--    GROUP BY key
+--) latest ON s.key = latest.key AND s.date = latest.date;
+
+-- Etape 2
+--Backup n tables
+--pg_dump -U monuser -d mabase \
+--  -t apl.apl_study_export \
+--  -t apl.apl_specialite \
+--  -t apl.apl_autre_table \
+--  > backup_multi.sql
+
+-- Etape 3 renommer les tables export
+-- wsl sed 's/apl_study_export/apl_study/g' backup_export.sql > backup_temp.sql
+-- wsl sed 's/apl_export/apl/g' backup_temp.sql > backup_final.sql

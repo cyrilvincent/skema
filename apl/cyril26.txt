@@ -82,14 +82,7 @@
     Executer : ok
 
 15/ Préparer export
-    Préparer les tables à exporter
-    Index
-    ...
+    Créer le script : ok
+    Executer
 
-Benj :
-    filo absent
-    sae absent
-    + rapide pour apl
-    bug 42 urg 2018 & 19 : ok
-    422790201 17 min en 18 & 19 vs 5 et 0 min en 18 & 19 au niveau dept (en bd c'est bon !)
 
