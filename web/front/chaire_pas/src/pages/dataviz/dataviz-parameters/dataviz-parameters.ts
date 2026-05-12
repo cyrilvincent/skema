@@ -13,6 +13,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { GeoService } from '../geo-dataviz/geo-service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { AccountService } from '../../../shared/account/account.service';
 
 @Component({
   selector: 'app-dataviz-parameters',
@@ -50,6 +51,7 @@ export class DatavizParameters {
   label = input<string | null>(null);
   aplTypeControl = new FormControl<string>("APL_S");
   aplType = signal("APL_S");
+  accountService = inject(AccountService);
 
   constructor() {
     effect(() => this.onCodeChanged(this.code()));

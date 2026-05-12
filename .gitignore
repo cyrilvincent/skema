@@ -3,18 +3,17 @@ config.py
 georef*
 *.zip
 *.7z
-**/.idea/**
+**/.idea/
 *.pickle
 **/data/**
 **/chromedriver_win32/**
 .venv
 /data/adresse
-*.log
 /web/nginx/windows/html/**
 **/temp/**
+**/__pycache__/
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
 *.py[cod]
 *$py.class
 
