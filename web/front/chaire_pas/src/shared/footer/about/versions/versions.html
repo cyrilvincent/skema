@@ -1,6 +1,7 @@
 <div id="versions" class="anchor"> 
     <button type="button" mat-fab extended (click)="isVisible.set(!isVisible())">Paramètres</button>
     @if(isVisible()) {
+        <p>Production: {{production}}</p>
         <p>Version: {{version}}</p>
         <p>Copyright: {{copyright}}</p>
         <p>Angular: {{angularVersion}}</p>

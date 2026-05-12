@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, VERSION } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import pkg from 'angular-plotly.js/package.json' assert { type: 'json' }
-import pkg2 from 'plotly.js-dist-min/package.json' assert { type: 'json' }
+import pkg from 'angular-plotly.js/package.json' //assert { type: 'json' }
+import pkg2 from 'plotly.js-dist-min/package.json' //assert { type: 'json' }
 import { AboutService } from './versions.service';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -16,6 +16,7 @@ export class Versions {
   isVisible = signal(false);
   version = environment.version;
   copyright = environment.copyright;
+  production = environment.production;
   plotlyVersion =  pkg2.version;
   angularPlotlyVersion = pkg.version;
   angularVersion = VERSION.full;

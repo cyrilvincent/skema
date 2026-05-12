@@ -1,7 +1,7 @@
 word v5
 filosofi commune
 Les pickles risquent de ne pas fonctionner sous linux : d'après copilot si même version python ca va fonctionner : pb pour indexer => il suffit d'exporter iris.commune et distinct(code_postal, code_insee) from ban
-Server : Linux + Repasser en lazy
+Server : Repasser en lazy ?
 
 
 
