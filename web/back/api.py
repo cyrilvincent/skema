@@ -14,11 +14,20 @@ import logger_config
 logger_config.config()
 logger = logging.getLogger(__name__)
 logger.info(f"Starting on {sys.platform}")
-
-app = FastAPI()
+is_prod = sys.platform != "win32"
+app = FastAPI(
+    docs_url=None if is_prod else "/docs",
+    redoc_url=None,
+    openapi_url=None if is_prod else "/openapi.json",
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
+    allow_origins=["http://localhost:4200",
+                   "http://127.0.0.1:4200",
+                   "http://chaire_paas.com",
+                   "http://www.chaire_paas.com",
+                   "https://chaire_paas.com",
+                   "https://www.chaire_paas.com",],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -122,4 +131,4 @@ async def sae_commune_csv(dto: GeoInputDTO):
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", workers=1, reload=False)
+    uvicorn.run("api:app", workers=1, reload=False)  #, root_path="/api")

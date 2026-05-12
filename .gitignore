@@ -9,6 +9,9 @@ georef*
 **/chromedriver_win32/**
 .venv
 /data/adresse
+*.log
+/web/nginx/windows/html/**
+**/temp/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

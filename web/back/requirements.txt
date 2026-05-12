@@ -7,3 +7,4 @@ pyproj==3.6.1
 fastapi[standard]==0.128.0
 uvicorn[standard]==0.40.0
 geopandas==1.0.1
+
