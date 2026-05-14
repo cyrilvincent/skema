@@ -1,4 +1,4 @@
-ng build -c staging
-del ..\..\nginx\windows\html\*.js
-del ..\..\nginx\windows\html\*.css
-copy -Y dist\chaire_pas\browser\*.* ..\..\nginx\windows\html
+cmd /c ng build -c staging
+del /Q ..\..\nginx\windows\html\*.js
+del /Q ..\..\nginx\windows\html\*.css
+xcopy /Y dist\chaire_pas\browser\*.* ..\..\nginx\windows\html

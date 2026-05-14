@@ -12,6 +12,7 @@ georef*
 /web/nginx/windows/html/**
 **/temp/**
 **/__pycache__/
+**/certs/**
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]

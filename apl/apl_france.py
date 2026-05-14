@@ -158,7 +158,7 @@ for with_s in [True]:  # [True, False]
                                     (time > 45 and accessibilite_exp < -0.06)):
                                 continue
 
-                            print(f"Compute APL specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
+                            print(f"Compute APL{"_S" if with_s else ""} specialite {specialite} in 20{year} from {source} in {time}min {time_type}, e={accessibilite_exp}")
                             ps_df = get_by_source(year, specialite, source)
                             if len(ps_df) == 0:
                                 raise ValueError(f"Dataframe is empty for year {year} and specialite {specialite}")
