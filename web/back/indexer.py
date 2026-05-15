@@ -54,14 +54,13 @@ class Indexer(threading.Thread):
         duration = time.perf_counter() - self.time0
         print(self.df.columns)
         print(f"Found {len(self.df)} communes in {duration:.0f}s")
-        # TODO Join sur iris ou commune en fonction de la cible, par exemple 75101 est présent en iris mais pas en commune
 
     def load_ban(self):
-        sql = "select distinct(code_postal, code_insee) from ban"
+        sql = "select distinct(code_postal, code_insee) from ban" # A porter sur la table iris.cp_insee
         print("Querying BAN")
         self.ban = pd.read_sql(sql, config.connection_string)
         duration = time.perf_counter() - self.time0
-        self.ban["cp"] = self.ban["row"].apply(lambda x: f"{int(x[1:-1].split(",")[0]):05d}")
+        self.ban["cp"] = self.ban["row"].apply(lambda x: f"{int(x[1:-1].split(",")[0]):05d}")  # Le -1 ne marchera plus
         self.ban["code"] = self.ban["row"].apply(lambda x: x[1:-1].split(",")[1])
         print(f"Found {len(self.ban)} CP in {duration:.0f}s")
 

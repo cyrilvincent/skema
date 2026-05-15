@@ -78,6 +78,10 @@ class CommuneLoader(threading.Thread):
 
 
 if __name__ == '__main__':
+    import logger_config
+    logger_config.config(True)
     s = CommuneLoader()
     s.run()
+    gdf = s.gdfs["HD"]
+    print(gdf[gdf["code"] == "38185"])
     # s.load_gdf(1000, False)
