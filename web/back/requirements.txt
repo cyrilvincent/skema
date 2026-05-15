@@ -1,10 +1,11 @@
 art
-pandas==2.0.0
 numpy==1.26.4
-sqlalchemy==1.4.29
 psycopg2==2.9.10
+sqlalchemy==1.4.29
+pandas==2.0.0
 pyproj==3.6.1
+geopandas==1.0.1
 fastapi[standard]==0.128.0
 uvicorn[standard]==0.40.0
-geopandas==1.0.1
+
 
