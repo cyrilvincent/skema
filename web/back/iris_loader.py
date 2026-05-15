@@ -63,5 +63,8 @@ class IrisLoader(threading.Thread):
 
 
 if __name__ == '__main__':
+    import logger_config
+    logger_config.config(True)
     s = IrisLoader()
     s.load()
+    print(s.gdf[s.gdf["code_insee"] == "38205"])
