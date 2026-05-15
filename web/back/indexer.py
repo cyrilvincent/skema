@@ -213,6 +213,8 @@ class Indexer(threading.Thread):
 
 
 if __name__ == '__main__':
+    import logger_config
+    logger_config.config()
     s = Indexer()
     # s.indexer()
     s.load_or_index()
