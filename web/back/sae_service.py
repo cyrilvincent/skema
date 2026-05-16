@@ -482,16 +482,18 @@ class SAEService(APLService):
 
 
 if __name__ == '__main__':
+    import logger_config
+    logger_config.config(True)
     pd.set_option('display.max_columns', None)
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    # export = s.compute_sae_iris("CC-38185", 5, 60, "HC", "HD")
+    export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
     # s = json.dumps(export)
     # print(s[:5000])
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
     # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
-    export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
+    # export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
     # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
     print(export)
 

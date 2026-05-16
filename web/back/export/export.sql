@@ -53,15 +53,27 @@ create table sae.dist_export as
     join sae.dist_study_export e on a.study_key=e.key
     order by a.study_key
 
--- ok 151k
-DROP TABLE IF EXISTS adresse_raw_export;
-create table adresse_raw_export as
-    select ar.* from adresse_raw ar join etablissement e on e.adresse_raw_id = ar.id;
-
---
+-- ok 127371
 DROP TABLE IF EXISTS adresse_norm_export;
 create table adresse_norm_export as
-    select an.* from adresse_norm an
+    select distinct(an.*) from adresse_norm an
     join adresse_raw ar on ar.adresse_norm_id = an.id
     join etablissement e on e.adresse_raw_id = ar.id;
+
+ALTER TABLE adresse_norm_export ADD PRIMARY KEY (id);
+ALTER TABLE adresse_norm_export ADD CONSTRAINT adresse_norm_dept_id_fk FOREIGN KEY (dept_id) REFERENCES dept(id);
+CREATE UNIQUE INDEX adresse_norm_export_numero_rue1_rue2_cp_commune_key ON adresse_norm_export (numero, rue1, rue2, cp, commune);
+
+-- ok 129039k
+DROP TABLE IF EXISTS adresse_raw_export;
+create table adresse_raw_export as
+    select distinct(ar.*) from adresse_raw ar join etablissement e on e.adresse_raw_id = ar.id;
+
+ALTER TABLE adresse_raw_export ADD PRIMARY KEY (id);
+CREATE UNIQUE INDEX adresse_raw_export_adresse2_adresse3_adresse4_cp_commune_key ON adresse_raw_export (adresse2, adresse3, adresse4, cp, commune);
+ALTER TABLE adresse_raw_export ADD CONSTRAINT adresse_raw_adresse_norm_id_fk FOREIGN KEY (adresse_norm_id) REFERENCES adresse_norm_export(id);
+ALTER TABLE adresse_raw_export ADD CONSTRAINT adresse_raw_dept_id_fk FOREIGN KEY (dept_id) REFERENCES dept(id);
+
+
+
 

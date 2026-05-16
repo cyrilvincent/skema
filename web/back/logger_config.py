@@ -11,9 +11,9 @@ def config(stdout=False):
     if not stdout and sys.platform != "win32":
         handler = TimedRotatingFileHandler(
             filename="logs/app.log",
-            when="midnight",  # rotation à minuit
+            when="midnight",
             interval=1,  # toutes les 24h
-            backupCount=30,  # garde 30 fichiers
+            backupCount=10,
             encoding="utf-8",
         )
         handler.suffix = "%Y-%m-%d"

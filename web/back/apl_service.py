@@ -572,6 +572,8 @@ class APLService:
 
 
 if __name__ == '__main__':
+    import logger_config
+    logger_config.config(True)
     pd.set_option('display.max_columns', None)
     pd.options.display.width = 0
     s = APLService()
@@ -579,7 +581,7 @@ if __name__ == '__main__':
     # export = s.compute_iris("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)  # Ne fonctionne pas pour Autrans 38021
+    export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)
     s = json.dumps(export)
     print(s[:5000])
 
