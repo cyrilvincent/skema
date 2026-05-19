@@ -494,7 +494,7 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    s.no_pickle = True
+    # s.no_pickle = True
     export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
     s = json.dumps(export)
     print(s[:5000])
