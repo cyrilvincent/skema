@@ -17,4 +17,6 @@ def config(stdout=False):
             encoding="utf-8",
         )
         handler.suffix = "%Y-%m-%d"
-        logging.handlers = [handler]
+        logger = logging.getLogger()
+        logger.addHandler(handler)
+
