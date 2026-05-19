@@ -10,11 +10,10 @@ from sae_service import SAEService
 import logging
 import sys
 import logger_config
+import os
 
-logger_config.config()
-logger = logging.getLogger(__name__)
-logger.info(f"Starting on {sys.platform}")
-is_prod = sys.platform != "win32"
+env = os.environ['CHAIRE_PAAS'] if "CHAIRE_PAAS" in os.environ else "dev"
+is_prod = env == "prod"
 app = FastAPI(
     docs_url=None if is_prod else "/docs",
     redoc_url=None,
@@ -132,5 +131,7 @@ async def sae_commune_csv(dto: GeoInputDTO):
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
+    logger_config.config()
+    logger = logging.getLogger(__name__)
     import uvicorn
     uvicorn.run("api:app", workers=1, reload=False)  #, root_path="/api")
