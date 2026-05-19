@@ -1,6 +1,6 @@
 SELECT pg_size_pretty(pg_total_relation_size('apl.apl')) AS taille_totale -- 116Go
 
--- ok
+-- ok 3320 normalement 2772 mais y"a de vieilles studies
 DROP TABLE IF EXISTS apl.apl_study_export;
 create table apl.apl_study_export as
 	select s.* from apl.apl_study s
@@ -11,7 +11,10 @@ create table apl.apl_study_export as
 		) latest on s.date = latest.date_latest
 	order by s.year, s.specialite_id, s.time, s.time_type, s.exp
 
--- ok
+CREATE UNIQUE INDEX apl_apl_study_export_key ON apl.apl_study_export (key);
+create index ix_apl_apl_study_export_year_specialite_id on apl.apl_study_export (year, specialite_id);
+
+-- ok 3416 normalement 2772 mais y'a de vieilles studies
 DROP TABLE IF EXISTS apl.apl_s_study_export;
 create table apl.apl_s_study_export as
 	select s.* from apl.apl_s_study s
@@ -22,19 +25,31 @@ create table apl.apl_s_study_export as
 		) latest on s.date = latest.date_latest
 	order by s.year, s.specialite_id, s.time, s.time_type, s.exp
 
--- ok
+CREATE UNIQUE INDEX apl_apl_s_study_export_key ON apl.apl_s_study_export (key);
+create index ix_apl_apl_s_study_export_year_specialite_id on apl.apl_s_study_export (year, specialite_id);
+
+-- ok 161151942 1h09
 DROP TABLE IF EXISTS apl.apl_export;
 create table apl.apl_export as
     select a.* from apl.apl a
     join apl.apl_study_export e on a.study_key=e.key
     order by a.study_key
 
--- ok
+CREATE UNIQUE INDEX apl_apl_export_iris_year_study_key_key ON apl.apl_export (iris, year, study_key); -- 12 min
+create index ix_apl_apl_export_study_key on apl.apl_export (study_key); -- 2.5 min
+create index ix_apl_apl_export_code_commune on apl.apl_export (code_commune); -- 7 min
+
+-- ok 165911704 1h09
 DROP TABLE IF EXISTS apl.apl_s_export;
 create table apl.apl_s_export as
     select a.* from apl.apl_s a
     join apl.apl_s_study_export e on a.study_key=e.key
     order by a.study_key
+
+CREATE UNIQUE INDEX apl_apl_s_export_iris_year_study_key_key ON apl.apl_s_export (iris, year, study_key);
+create index ix_apl_apl_s_export_study_key on apl.apl_s_export (study_key);
+create index ix_apl_apl_s_export_code_commune on apl.apl_export (code_commune);
+
 
 -- ok 78
 DROP TABLE IF EXISTS sae.dist_study_export;
@@ -46,12 +61,18 @@ create table sae.dist_study_export as
 		) latest on s.date = latest.date_latest
 	order by s.year, s.bor, s.time, s.time_type
 
+CREATE UNIQUE INDEX sae_dist_study_export_key ON sae.dist_study_export (key);
+create index ix_sae_dist_study_export_year_bor on sae.dist_study_export (year, bor);
+
 -- ok 78*48000
 DROP TABLE IF EXISTS sae.dist_export;
 create table sae.dist_export as
     select a.* from sae.dist a
     join sae.dist_study_export e on a.study_key=e.key
     order by a.study_key
+
+create index ix_sae_dist_export_key on sae.dist_export (study_key);
+CREATE UNIQUE INDEX sae_dist_export_iris_year_study_key_key ON sae.dist_export (iris, year, study_key);
 
 -- ok 127371
 DROP TABLE IF EXISTS adresse_norm_export;

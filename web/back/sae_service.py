@@ -495,7 +495,7 @@ if __name__ == '__main__':
     # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
     # export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
     # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
-    print(export)
+    print(export[:500])
 
 
 

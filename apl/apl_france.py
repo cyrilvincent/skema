@@ -146,8 +146,8 @@ for with_s in [True]:  # [True, False]
             iris_matrix["iris"] = iris_matrix["iris2"].astype("int64")
             iris_matrix["time"] = iris_matrix[f"time_{time_type.lower()}"].copy()
             for source in ["PA"]:  # ["PA", "PS"]:
-                for year in range(20, 27):  # Last year changed in 2605
-                    pop_iris = get_pop_iris(year)
+                for year in range(20, 27):  # 3*7*22*3=2772
+                    pop_iris = get_pop_iris(year) # 924
                     for specialite in [10]:  # range(1, 29):
                         if specialite in [9, 14, 18, 20, 26, 28]:
                             continue
