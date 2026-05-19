@@ -135,7 +135,5 @@ async def sae_commune_csv(dto: GeoInputDTO):
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    print(f"Before {logging.getLogger().handlers}")
-    uvicorn.run("api:app", workers=1, reload=False)  #, root_path="/api")
-    print(f"After {logging.getLogger().handlers}")
+    uvicorn.run("api:app", workers=1, reload=False, log_config=None)  #, root_path="/api")
 
