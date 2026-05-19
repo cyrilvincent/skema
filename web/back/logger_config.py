@@ -23,7 +23,7 @@ def config(stdout=False):
         handler.suffix = "%Y-%m-%d"
         logging.getLogger("uvicorn.error").addHandler(handler)
         logging.getLogger("uvicorn.access").addHandler(handler)
-        logger = logging.getLogger()
+        logger = logging.getLogger(__name__)
         logger.addHandler(handler)
 
 
