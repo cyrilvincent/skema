@@ -2,17 +2,18 @@ import asyncio
 from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import config
-from commune_service import CommuneService
-from apl_service import APLService
 from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
-from sae_service import SAEService
 import logging
 import sys
 import logger_config
 import os
 
 logger_config.config()
+from commune_service import CommuneService
+from apl_service import APLService
+from sae_service import SAEService
+
 logger = logging.getLogger(__name__)
 env = os.environ['CHAIRE_PAAS'] if "CHAIRE_PAAS" in os.environ else "dev"
 is_prod = env == "prod"
