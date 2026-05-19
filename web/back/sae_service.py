@@ -68,10 +68,12 @@ class SAEService(APLService):
                 df = result
             else:
                 # df = pd.concat([df, self.get_sae_study_by_year(bor, time, time_type, year)], ignore_index=True)
+                # FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation. df = pd.concat([df, result], ignore_index=True)
+                result["etpsal_mean"] = result["etpsal_mean"].fillna(0)
+                result["efflib_mean"] = result["efflib_mean"].fillna(0)
+                result["etp_mean"] = result["etp_mean"].fillna(0)
+                result["tension_mean"] = result["tension_mean"].fillna(0)
                 df = pd.concat([df, result], ignore_index=True)
-                print(year)
-                print(result)
-                print(df)
         return df
 
     def get_sae_by_keys(self, keys: list[int], code: str, id: str):
@@ -492,6 +494,7 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
+    s.no_pickle = True
     export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
     s = json.dumps(export)
     print(s[:5000])

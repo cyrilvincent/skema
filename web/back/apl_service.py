@@ -30,6 +30,7 @@ class APLService:
         self.last_year = 26
         self.years = list(range(self.first_year, self.last_year + 1))
         self.regex = re.compile(r"^C[CDRAEFP]-\d[\dAB]\d*$")
+        self.no_pickle = False
         warnings.filterwarnings('ignore', category=UserWarning)
         warnings.filterwarnings('ignore', category=SettingWithCopyWarning)
 
@@ -472,11 +473,14 @@ class APLService:
                     aexp: float,
                     resolution: str,
                     with_sal: bool):
-        path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
-        if not os.path.exists(path):
-            with open(path, "wb") as f:
-                logger.info(f"Save {path}")
-                pickle.dump(export, f)
+        if self.no_pickle:
+            logger.warning("No pickle, only for test")
+        else:
+            path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+            if not os.path.exists(path):
+                with open(path, "wb") as f:
+                    logger.info(f"Save {path}")
+                    pickle.dump(export, f)
 
     def load_pickle(self,
                     apl_or_sae: str,
@@ -487,12 +491,15 @@ class APLService:
                     aexp: float,
                     resolution: str,
                     with_sal: bool) -> tuple[dict, any] | None:
-        path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                logger.info(f"Load {path}")
-                export: tuple[dict, any] = pickle.load(f)
-                return export
+        if self.no_pickle:
+            logger.warning("No pickle, only for test")
+        else:
+            path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    logger.info(f"Load {path}")
+                    export: tuple[dict, any] = pickle.load(f)
+                    return export
         return None
 
     def compute_iris(self,
