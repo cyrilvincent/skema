@@ -21,6 +21,10 @@ def config(stdout=False):
             encoding="utf-8",
         )
         handler.suffix = "%Y-%m-%d"
+        logging.getLogger("uvicorn.error").addHandler(handler)
+        logging.getLogger("uvicorn.access").addHandler(handler)
         logger = logging.getLogger()
         logger.addHandler(handler)
+
+
 
