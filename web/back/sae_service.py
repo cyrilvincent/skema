@@ -68,6 +68,8 @@ class SAEService(APLService):
                 df = result
             else:
                 # df = pd.concat([df, self.get_sae_study_by_year(bor, time, time_type, year)], ignore_index=True)
+                print(year)
+                print(df)
                 df = pd.concat([df, result], ignore_index=True)
         return df
 
