@@ -12,6 +12,8 @@ import sys
 import logger_config
 import os
 
+logger_config.config()
+logger = logging.getLogger(__name__)
 env = os.environ['CHAIRE_PAAS'] if "CHAIRE_PAAS" in os.environ else "dev"
 is_prod = env == "prod"
 app = FastAPI(
@@ -131,7 +133,5 @@ async def sae_commune_csv(dto: GeoInputDTO):
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
-    logger_config.config()
-    logger = logging.getLogger(__name__)
     import uvicorn
     uvicorn.run("api:app", workers=1, reload=False)  #, root_path="/api")
