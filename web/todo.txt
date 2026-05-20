@@ -3,7 +3,7 @@ filosofi commune
 Server : Repasser en lazy ?
 Server 8 cores
 Linux = consomme très peu 0
-PG = 6
+PG = 6 pg.conf
 Gunicorn = --workers 4 (ne pas toucher aux threads car async)
 NGINX = auto (consomme très peu de CPU) = 0
 

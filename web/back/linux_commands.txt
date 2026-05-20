@@ -1,0 +1,2 @@
+pgrep python
+kill -2 pid (kill propre)

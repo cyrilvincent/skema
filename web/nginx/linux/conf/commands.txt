@@ -1,0 +1,5 @@
+Jamais sudo nginx => sinon faire sudo pkill nginx
+sudo systemctl start nginx
+sudo systemctl status nginx
+sudo nginx -t
+sudo nginx -s reload
