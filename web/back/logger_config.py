@@ -13,6 +13,7 @@ def config(stdout=False):
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
                         datefmt='%y-%m-%d %H:%M:%S')
     if not stdout and is_prod:
+        print("TimedRotatingFileHandler")
         handler = TimedRotatingFileHandler(
             filename="logs/app.log",
             when="midnight",
