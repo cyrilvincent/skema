@@ -22,22 +22,21 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None if is_prod else "/openapi.json",
 )
+cors = ["http://chaire_paas.com", # A virer à terme après redirection https
+        "http://www.chaire_paas.com",  # A virer à terme apres redirection nginx
+        "https://chaire_paas.com",
+        "https://www.chaire_paas.com",  # Il faudrait rediriger www sur chaire_paas
+        "http://chaire-paas.dev.skema.edu", # A virer à terme
+        "https://chaire-paas.dev.skema.edu"] # A virer à term
+if not is_prod:
+    cors += ["http://localhost:4200",
+             "http://127.0.0.1:4200",
+             "http://localhost",
+             "https://localhost"]
+print(f"CORS: {cors}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200",
-                   "http://127.0.0.1:4200",  # A virer
-                   "http://localhost",
-                   "https://localhost",
-                   "http://127.0.0.1",  # A virer
-                   "http://chaire_paas.com", # A virer à terme après redirection https
-                   "http://www.chaire_paas.com",  # A virer à terme apres redirection nginx
-                   "https://chaire_paas.com",
-                   "https://www.chaire_paas.com",  # Il faudrait rediriger www sur chaire_paas
-                   "http://chaire-paas.dev.skema.edu", # A virer à terme
-                   "https://chaire-paas.dev.skema.edu", # A virer à terme
-                   "http://82.97.33.133", # A virer à terme
-                   "https://82.97.33.133", #
-                   ],
+    allow_origins=cors,
     allow_credentials=True,  # Normalement inutile tant qu'il n'y a pas JWT
     allow_methods=["*"],  # A terme mettre allow_methods=["GET", "POST],
     allow_headers=["*"],  # A Terme mettre allow_headers=["Authorization", "Content-Type"],
