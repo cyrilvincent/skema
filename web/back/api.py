@@ -21,12 +21,7 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None if is_prod else "/openapi.json",
 )
-cors = ["http://chaire-paas.com", # A virer à terme après redirection https
-        "http://www.chaire-paas.com",  # A virer à terme apres redirection nginx
-        "https://chaire-paas.com",
-        "https://www.chaire-paas.com",  # Il faudrait rediriger www sur chaire_paas
-        "http://chaire-paas.dev.skema.edu", # A virer à terme
-        "https://chaire-paas.dev.skema.edu"] # A virer à term
+cors = ["https://chaire-paas.com", "https://www.chaire-paas.com", "https://chaire-paas.dev.skema.edu"] # Virer à terme www et dev
 if not is_prod:
     cors += ["http://localhost:4200", "http://127.0.0.1:4200", "http://localhost", "https://localhost"]
 print(f"CORS: {cors}")
