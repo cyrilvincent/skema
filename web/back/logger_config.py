@@ -11,6 +11,7 @@ def config(stdout=False):
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     root.handlers.clear()
+    root.propagate = False
 
     formatter = logging.Formatter(
         "%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -31,6 +32,15 @@ def config(stdout=False):
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(formatter)
         root.addHandler(stream_handler)
+
+    for name in [
+        "uvicorn", "uvicorn.error", "uvicorn.access",
+        "gunicorn", "gunicorn.error", "gunicorn.access"
+    ]:
+        logger = logging.getLogger(name)
+        logger.handlers.clear()
+        logger.propagate = False
+
 
 
 
