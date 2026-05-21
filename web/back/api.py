@@ -65,6 +65,7 @@ async def apl_iris(dto: GeoInputDTO):
     if len(data[1]["features"]) == 0:
         logger.warning(f"Get /apl/iris 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    logger.info(f"Sending data from /apl/iris")
     return data
 
 
@@ -76,6 +77,7 @@ async def apl_commune(dto: GeoInputDTO):
     if len(data[1]["features"]) == 0:
         logger.warning(f"Get /apl/commune 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    logger.info(f"Sending data from /apl/commune")
     return data
 
 
@@ -84,6 +86,7 @@ async def apl_iris_csv(dto: GeoInputDTO):
     logger.info(f"Get /apl/iris/csv")
     data = await run_in_threadpool(apl_service.compute_iris_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
+    logger.info(f"Sending data from /apl/iris/csv")
     return data.to_csv(index=False)
 
 
@@ -92,6 +95,7 @@ async def apl_commune_csv(dto: GeoInputDTO):
     logger.info(f"Get /apl/commune/csv")
     data = await run_in_threadpool(apl_service.compute_commune_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
+    logger.info(f"Sending data from /apl/commune/csv")
     return data.to_csv(index=False)
 
 
@@ -102,6 +106,7 @@ async def sae_iris(dto: GeoInputDTO):
     if len(data[1]["features"]) == 0:
         logger.warning(f"Get /sae/iris 404 {dto.code} {dto.id} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    logger.info(f"Sending data from /sae/iris")
     return data
 
 
@@ -109,6 +114,7 @@ async def sae_iris(dto: GeoInputDTO):
 async def sae_iris_csv(dto: GeoInputDTO):
     logger.info(f"Get /sae/iris/csv")
     data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
+    logger.info(f"Sending data from /sae/iris/csv")
     return data.to_csv(index=False)
 
 
@@ -119,6 +125,7 @@ async def sae_commune(dto: GeoInputDTO):
     if len(data[1]["features"]) == 0:
         logger.warning(f"Get /sae/commune 404 {dto.code} {dto.id} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    logger.info(f"Sending data from /sae/commune")
     return data
 
 
@@ -126,6 +133,7 @@ async def sae_commune(dto: GeoInputDTO):
 async def sae_commune_csv(dto: GeoInputDTO):
     logger.info(f"Get /sae/commune/csv")
     data = await run_in_threadpool(sae_service.compute_sae_commune_csv, dto.code, dto.id, dto.time, dto.hc)
+    logger.info(f"Sending data from /sae/commune/csv")
     return data.to_csv(index=False)
 
 if __name__ == '__main__':
