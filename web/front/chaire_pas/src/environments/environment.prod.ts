@@ -1,7 +1,7 @@
 export const environment = {
   title: "Chaire Prévention et Accès aux soins",
   production: true,
-  version: "0.1.0.Beta",
+  version: "1.0.0.Beta",
   copyright: "SKEMA Business School & Université Côte d'Azur 2026",
   baseUrl: "http://chaire-paas.dev.skema.edu/api", // TODO put httpS
   loading: "En cours de chargement",

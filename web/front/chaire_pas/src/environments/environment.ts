@@ -5,7 +5,7 @@
 export const environment = {
   title: "Chaire Prévention et Accès aux soins",
   production: false,
-  version: "0.0.2.Dev",
+  version: "1.0.0.Dev",
   copyright: "SKEMA Business School & Université Côte d'Azur 2026",
   baseUrl: "http://127.0.0.1:8000",
   loading: "En cours de chargement",
