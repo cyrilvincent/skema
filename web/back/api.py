@@ -5,7 +5,6 @@ import config
 from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
 import logging
-import sys
 import logger_config
 import os
 
@@ -22,17 +21,14 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None if is_prod else "/openapi.json",
 )
-cors = ["http://chaire_paas.com", # A virer à terme après redirection https
-        "http://www.chaire_paas.com",  # A virer à terme apres redirection nginx
-        "https://chaire_paas.com",
-        "https://www.chaire_paas.com",  # Il faudrait rediriger www sur chaire_paas
+cors = ["http://chaire-paas.com", # A virer à terme après redirection https
+        "http://www.chaire-paas.com",  # A virer à terme apres redirection nginx
+        "https://chaire-paas.com",
+        "https://www.chaire-paas.com",  # Il faudrait rediriger www sur chaire_paas
         "http://chaire-paas.dev.skema.edu", # A virer à terme
         "https://chaire-paas.dev.skema.edu"] # A virer à term
 if not is_prod:
-    cors += ["http://localhost:4200",
-             "http://127.0.0.1:4200",
-             "http://localhost",
-             "https://localhost"]
+    cors += ["http://localhost:4200", "http://127.0.0.1:4200", "http://localhost", "https://localhost"]
 print(f"CORS: {cors}")
 app.add_middleware(
     CORSMiddleware,
