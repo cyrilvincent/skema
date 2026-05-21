@@ -5,26 +5,32 @@ import os
 
 
 def config(stdout=False):
-    env = os.environ['CHAIRE_PAAS'] if "CHAIRE_PAAS" in os.environ else "dev"
-    print(f"CHAIRE_PAAS {env} on {sys.platform}")
+    env = os.environ.get("CHAIRE_PAAS", "dev")
     is_prod = env == "prod"
-    print(f"Create logging config prod=={is_prod}")
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-                        datefmt='%y-%m-%d %H:%M:%S')
+
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    root.handlers.clear()
+
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(name)s: %(message)s",
+        datefmt='%y-%m-%d %H:%M:%S'
+    )
+
     if not stdout and is_prod:
-        print("TimedRotatingFileHandler")
         handler = TimedRotatingFileHandler(
             filename="logs/app.log",
             when="midnight",
-            interval=1,  # toutes les 24h
+            interval=1,
             backupCount=10,
             encoding="utf-8",
         )
-        handler.suffix = "%Y-%m-%d"
-        logging.getLogger().addHandler(handler)
-        # logging.getLogger("uvicorn.error").addHandler(handler)
-        # logging.getLogger("uvicorn.access").addHandler(handler)
+        handler.setFormatter(formatter)
+        root.addHandler(handler)
+    else:
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(formatter)
+        root.addHandler(stream_handler)
 
 
 
