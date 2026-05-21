@@ -38,8 +38,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=cors,
     allow_credentials=True,  # Normalement inutile tant qu'il n'y a pas JWT
-    allow_methods=["*"],  # A terme mettre allow_methods=["GET", "POST],
-    allow_headers=["*"],  # A Terme mettre allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 commune_service: CommuneService = CommuneService.factory()
