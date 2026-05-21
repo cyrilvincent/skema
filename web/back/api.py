@@ -21,7 +21,7 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None if is_prod else "/openapi.json",
 )
-cors = ["https://chaire-paas.com", "https://www.chaire-paas.com", "https://chaire-paas.dev.skema.edu"] # Virer à terme www et dev
+cors = ["https://chaire-paas.com", "https://www.chaire-paas.com", "https://chaire-paas.dev.skema.edu", "http://www.chaire-paas.com"] # Virer à terme www et dev
 if not is_prod:
     cors += ["http://localhost:4200", "http://127.0.0.1:4200", "http://localhost", "https://localhost"]
 print(f"CORS: {cors}")
