@@ -1,9 +1,13 @@
 server {
+
+	listen 80 default_server; # default_server = fallback à enlever quand il y aura chaire_paas
+	listen [::]:80 default_server; #IPv6
 	server_name chaire-paas.dev.skema.edu; # A changer, gérer le www
 
 	access_log  /home/cyrilvincent/skema/web/nginx/linux/logs/host.access.log  main;
 	error_log  /home/cyrilvincent/skema/web/nginx/linux/logs/host.access.log  error;
 
+    # 	root /var/www/html;
     root /home/cyrilvincent/skema/web/nginx/linux/html;
 
 	index index.html index.htm;
@@ -34,24 +38,6 @@ server {
 
 	error_page  404              /404.html;
 	error_page  500 502 503 504  /50x.html;
-
-    listen [::]:443 ssl ipv6only=on; # managed by Certbot
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/chaire-paas.dev.skema.edu/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/chaire-paas.dev.skema.edu/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-}
-
-server {
-    if ($host = chaire-paas.dev.skema.edu) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-	listen 80 default_server;
-	listen [::]:80 default_server;
-	server_name chaire-paas.dev.skema.edu;
-    return 404; # managed by Certbot
 }
 
 # TODO
