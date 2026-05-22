@@ -7,6 +7,7 @@ import logging
 import logging.config
 import os
 
+# Gérer le export CHAIRE-PAAS
 logging.config.fileConfig("logging.ini")
 #logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt='%y-%m-%d %H:%M:%S')
 from commune_service import CommuneService
