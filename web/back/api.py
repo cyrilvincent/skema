@@ -57,7 +57,10 @@ def versions():
 @app.get("/charge")
 def charge():
     logger.info("Get /garge")
-    return {"charge_pc": charge_manager.charge_pc, "req_min": charge_manager.req_min}
+    return {"charge_pc": charge_manager.charge_pc,
+            "req_min": charge_manager.req_min,
+            "charge": charge_manager.charge,
+            "last_charge": charge_manager.last_charge}
 
 
 @app.get("/find/{q}")

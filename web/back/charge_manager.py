@@ -42,6 +42,11 @@ class ChargeManager:
     def req_min(self) -> int:
         return int(len(self.mesures) * 60 / self.interval)
 
+    @property
+    def last_charge(self) -> int:
+        return int(self.mesures[-1][1])
+
+
 
 
 
