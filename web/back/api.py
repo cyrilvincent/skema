@@ -1,14 +1,14 @@
-import asyncio
 from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import config
 from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
 import logging
-import logger_config
+import logging.config
 import os
 
-logger_config.config()
+logging.config.fileConfig("logging.ini")
+#logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt='%y-%m-%d %H:%M:%S')
 from commune_service import CommuneService
 from apl_service import APLService
 from sae_service import SAEService

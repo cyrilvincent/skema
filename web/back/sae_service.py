@@ -488,8 +488,7 @@ class SAEService(APLService):
 
 
 if __name__ == '__main__':
-    import logger_config
-    logger_config.config(True)
+    logging.basicConfig(level=logging.INFO)
     pd.set_option('display.max_columns', None)
     pd.options.display.width = 0
     s = SAEService()

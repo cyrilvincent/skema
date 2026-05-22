@@ -78,8 +78,7 @@ class CommuneLoader(threading.Thread):
 
 
 if __name__ == '__main__':
-    import logger_config
-    logger_config.config(True)
+    logging.basicConfig(level=logging.INFO)
     s = CommuneLoader()
     s.run()
     gdf = s.gdfs["HD"]

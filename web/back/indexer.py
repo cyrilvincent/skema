@@ -212,8 +212,7 @@ class Indexer(threading.Thread):
 
 
 if __name__ == '__main__':
-    import logger_config
-    logger_config.config(True)
+    logging.basicConfig(level=logging.INFO)
     s = Indexer()
     # s.indexer()
     s.load_or_index()
