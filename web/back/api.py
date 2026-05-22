@@ -54,6 +54,12 @@ def versions():
     return {"icip": config.version, "back": config.web}
 
 
+@app.get("/charge")
+def charge():
+    logger.info("Get /garge")
+    return {"charge_pc": charge_manager.charge_pc, "req_min": charge_manager.req_min}
+
+
 @app.get("/find/{q}")
 async def find(q: str):
     logger.info(f"Get /find/{q}")

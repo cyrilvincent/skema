@@ -33,6 +33,15 @@ class ChargeManager:
         res = (m[1] for m in self.mesures)
         return int(sum(res))
 
+    @property
+    def charge_pc(self) -> int:
+        res = (m[1] for m in self.mesures)
+        return int(sum(res) / self.interval)
+
+    @property
+    def req_min(self) -> int:
+        return int(len(self.mesures) * 60 / self.interval)
+
 
 
 
