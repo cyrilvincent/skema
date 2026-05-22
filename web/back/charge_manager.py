@@ -74,6 +74,8 @@ if __name__ == '__main__':
     for _ in range(10):
         start = m.start()
         time.sleep(1)
+        for __ in range(10000):
+            m.mesures.append((0, 0))
         duration = m.stop(start)
         print(duration, m.charge, m.mesures)
 
