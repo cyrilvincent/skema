@@ -73,7 +73,7 @@ and pands.adresse_norm_id is not null
 group by pa.id, an.id, i.id, ps.code
 """
     # print(f"Quering PA for year {year} and specialite {specialite} for is_medecin={is_medecin}")
-    # print(sql)
+    print(sql)
     return pd.read_sql(sql, config.connection_string)
 
 
@@ -170,12 +170,14 @@ for with_s in [True]:  # [True, False]
 
                             if with_s:
                                 ps_df = ps_df[(ps_df["code"] == "L") | (ps_df["code"] == "M")]
+                                # cols = ps_df.columns.drop("code") # bug 1 ps apparait 2 fois si L + M
+                                # ps_df = ps_df.drop_duplicates(subset=cols) # Ces 2 lignes seraient à ajouter elles n'ont pas tourner pour le calcul
                             else:
                                 ps_df = ps_df[ps_df["code"] == "L"]
                             ps_df["weight"] = (1 / ps_df["nb_cabinet"]).replace(np.inf, 0)
                             ps_df["nb"] = ps_df.groupby("iris")["weight"].transform("sum")
                             ps_df = ps_df.sort_values(by='iris')
-                            ps_df2 = ps_df.drop_duplicates(subset=['iris', 'nb'])
+                            ps_df2 = ps_df.drop_duplicates(subset=['iris', 'nb']) # Pourquoi nb ?
 
                             iris_matrix_pop_df = iris_matrix.merge(pop_iris, on="iris", how="left", suffixes=('', ''))
 

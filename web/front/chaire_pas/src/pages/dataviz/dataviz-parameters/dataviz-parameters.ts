@@ -49,8 +49,8 @@ export class DatavizParameters {
   geoService = inject(GeoService);
   lastCode = signal<string>("");
   label = input<string | null>(null);
-  aplTypeControl = new FormControl<string>("APL_S");
-  aplType = signal("APL_S");
+  aplTypeControl = new FormControl<string>("APL");
+  aplType = signal("APL");
   accountService = inject(AccountService);
 
   constructor() {
