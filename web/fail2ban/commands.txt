@@ -1,0 +1,5 @@
+# Banned ssh
+fail2ban-client status sshd
+
+# Banned nginx 404
+fail2ban-client status nginx-404
