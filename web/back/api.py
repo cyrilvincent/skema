@@ -8,8 +8,9 @@ import logging.config
 import os
 
 # Gérer le export CHAIRE-PAAS
-logging.config.fileConfig("logging.ini")
+
 #logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt='%y-%m-%d %H:%M:%S')
+logging.config.fileConfig("logging.ini",  disable_existing_loggers=False)
 from commune_service import CommuneService
 from apl_service import APLService
 from sae_service import SAEService
