@@ -1,0 +1,21 @@
+[Unit]
+Description=Gunicorn FastAPI service
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/cyrilvincent/skema/web/back
+
+ExecStart=/home/cyrilvincent/venv/bin/gunicorn \
+    -k uvicorn.workers.UvicornWorker \
+    api:app \
+    --workers 1 \
+    --bind 127.0.0.1:8000 \
+    --timeout 300
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

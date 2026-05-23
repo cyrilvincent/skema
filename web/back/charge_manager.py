@@ -2,65 +2,79 @@ import datetime
 import threading
 import time
 
+
 class ChargeManager:
     _instance = None
     lock = threading.RLock()
 
-    def __init__(self):
+    def __init__(self, interval):
         self.time0 = datetime.datetime.now().timestamp()
-        self.interval = 600
+        self.interval = interval
         self.mesures: list[tuple[float, float]] = [(0, 0)]
+
+    @staticmethod
+    def factory(interval=600):
+        with ChargeManager.lock:
+            if ChargeManager._instance is None:
+                ChargeManager._instance = ChargeManager(interval)
+        return ChargeManager._instance
 
     def start(self) -> float:
         return datetime.datetime.now().timestamp() - self.time0
 
     def stop(self, start: float) -> float:
-        duration = self.start() - start
-        if duration > 0.1:
-            with ChargeManager.lock:
-                self.mesures.append((int(datetime.datetime.now().timestamp() - self.time0), duration))
-            self._remove_old_mesures(self.interval)
-        return duration
+        try:
+            duration = self.start() - start
+            if duration > 0.1:
+                with ChargeManager.lock:
+                    self.mesures.append((int(datetime.datetime.now().timestamp() - self.time0), duration))
+                self._remove_old_mesures(self.interval)
+            return duration
+        except:
+            return 0
 
     def _remove_old_mesures(self, interval: int):
-        last = self.mesures[-1][0]
-        filtered = [m for m in self.mesures if m[0] > last - interval][:10000]
-        with ChargeManager.lock:
-            self.mesures = filtered
+        if len(self.mesures) > 0:
+            last = self.mesures[-1][0]
+            filtered = [m for m in self.mesures if m[0] > last - interval][:10000]
+            with ChargeManager.lock:
+                self.mesures = filtered
 
     @property
     def charge(self) -> int:
-        res = (m[1] for m in self.mesures)
-        return int(sum(res))
+        try:
+            res = (m[1] for m in self.mesures)
+            return int(sum(res))
+        except:
+            return 0
 
     @property
     def charge_pc(self) -> int:
-        res = (m[1] for m in self.mesures)
-        return int(sum(res) / self.interval)
+        try:
+            res = (m[1] for m in self.mesures)
+            return int(sum(res) * 100 / self.interval)
+        except:
+            return 0
 
     @property
     def req_min(self) -> int:
-        return int(len(self.mesures) * 60 / self.interval)
+        try:
+            return int(len(self.mesures) * 60 / self.interval)
+        except:
+            return 0
 
     @property
     def last_charge(self) -> int:
-        return int(self.mesures[-1][1])
-
-
-
-
-
-    @staticmethod
-    def factory():
-        with ChargeManager.lock:
-            if ChargeManager._instance is None:
-                ChargeManager._instance = ChargeManager()
-        return ChargeManager._instance
+        try:
+            if len(self.mesures) > 0:
+                return int(self.mesures[-1][1])
+            return 0
+        except:
+            return 0
 
 
 if __name__ == '__main__':
-    m = ChargeManager.factory()
-    m.interval = 8
+    m = ChargeManager.factory(8)
     start = m.start()
     time.sleep(1)
     duration = m.stop(start)

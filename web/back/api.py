@@ -1,3 +1,5 @@
+import platform
+import time
 from fastapi import FastAPI, __version__, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import config
@@ -5,20 +7,22 @@ from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
 import logging
 import logging.config
-import os
 from charge_manager import ChargeManager
 
-# Gérer le export CHAIRE-PAAS
-
-# logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt='%y-%m-%d %H:%M:%S')
-logging.config.fileConfig("logging.ini",  disable_existing_loggers=False)
+is_prod = platform.system() != "Windows"
+print(f"Starting FastAPI {__version__} on {platform.system()} on prod: {is_prod}")
+if is_prod:
+    logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
+else:
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+                        datefmt='%y-%m-%d %H:%M:%S')
 from commune_service import CommuneService
 from apl_service import APLService
 from sae_service import SAEService
 
 logger = logging.getLogger(__name__)
-env = os.environ['CHAIRE_PAAS'] if "CHAIRE_PAAS" in os.environ else "dev"
-is_prod = env == "prod"
+logger.info(f"Starting FastAPI logger on prod: {is_prod}")
 app = FastAPI(
     docs_url=None if is_prod else "/docs",
     redoc_url=None,
@@ -27,7 +31,7 @@ app = FastAPI(
 cors = ["https://chaire-paas.com", "https://www.chaire-paas.com"]
 if not is_prod:
     cors += ["http://localhost:4200", "http://127.0.0.1:4200", "http://localhost", "https://localhost"]
-print(f"CORS: {cors}")
+logger.info(f"CORS: {cors}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors,
@@ -56,11 +60,20 @@ def versions():
 
 @app.get("/charge")
 def charge():
-    logger.info("Get /garge")
+    logger.info("Get /charge")
     return {"charge_pc": charge_manager.charge_pc,
-            "req_min": charge_manager.req_min,
             "charge": charge_manager.charge,
+            "req_min": charge_manager.req_min,
             "last_charge": charge_manager.last_charge}
+
+
+@app.get("/sleep/{i}")
+def sleep(i: float):
+    logger.info(f"Get /sleep/{i}")
+    start = charge_manager.start()
+    time.sleep(i)
+    charge_manager.stop(start)
+    return charge()
 
 
 @app.get("/find/{q}")
@@ -171,5 +184,4 @@ async def sae_commune_csv(dto: GeoInputDTO):
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")
     import uvicorn
-    uvicorn.run("api:app", workers=1, reload=False)  #, root_path="/api")
-
+    uvicorn.run("api:app", workers=1, reload=False)

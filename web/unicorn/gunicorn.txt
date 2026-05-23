@@ -1,0 +1,2 @@
+Faire systemd avec 1 seul worker (2 max)
+pkill gunicorn
