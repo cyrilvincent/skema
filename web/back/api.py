@@ -1,3 +1,4 @@
+import datetime
 import platform
 import time
 from fastapi import FastAPI, __version__, HTTPException
@@ -61,7 +62,8 @@ def versions():
 @app.get("/charge")
 def charge():
     logger.info("Get /charge")
-    return {"charge_pc": charge_manager.charge_pc,
+    return {"dt": str(datetime.datetime.now()),
+            "charge_pc": charge_manager.charge_pc,
             "charge": charge_manager.charge,
             "req_min": charge_manager.req_min,
             "last_charge": charge_manager.last_charge}
@@ -82,7 +84,7 @@ async def find(q: str):
     start = charge_manager.start()
     data = await run_in_threadpool(commune_service.find, q)
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /find/ in {int(duration)}s")
+    log_charge("/find/", duration)
     return data
 
 
@@ -96,7 +98,7 @@ async def apl_iris(dto: GeoInputDTO):
         logger.warning(f"Get /apl/iris 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /apl/iris in {int(duration)}s")
+    log_charge("/apl/iris", duration)
     return data
 
 
@@ -110,7 +112,7 @@ async def apl_commune(dto: GeoInputDTO):
         logger.warning(f"Get /apl/commune 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /apl/commune in {int(duration)}s")
+    log_charge("/apl/commune", duration)
     return data
 
 
@@ -121,7 +123,7 @@ async def apl_iris_csv(dto: GeoInputDTO):
     data = await run_in_threadpool(apl_service.compute_iris_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /apl/iris/csv in {int(duration)}s")
+    log_charge("/apl/iris/csv", duration)
     return data.to_csv(index=False)
 
 
@@ -132,7 +134,7 @@ async def apl_commune_csv(dto: GeoInputDTO):
     data = await run_in_threadpool(apl_service.compute_commune_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /apl/commune/csv in {int(duration)}s")
+    log_charge("/apl/commune/csv", duration)
     return data.to_csv(index=False)
 
 
@@ -145,7 +147,7 @@ async def sae_iris(dto: GeoInputDTO):
         logger.warning(f"Get /sae/iris 404 {dto.code} {dto.id} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /sae/iris in {int(duration)}s")
+    log_charge("/sae/iris", duration)
     return data
 
 
@@ -155,7 +157,7 @@ async def sae_iris_csv(dto: GeoInputDTO):
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /sae/iris/csv in {int(duration)}s")
+    log_charge("/sae/iris/csv", duration)
     return data.to_csv(index=False)
 
 
@@ -168,7 +170,7 @@ async def sae_commune(dto: GeoInputDTO):
         logger.warning(f"Get /sae/commune 404 {dto.code} {dto.id} {dto.resolution}")
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /sae/commune in {int(duration)}s")
+    log_charge("/sae/commune", duration)
     return data
 
 
@@ -178,8 +180,19 @@ async def sae_commune_csv(dto: GeoInputDTO):
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_commune_csv, dto.code, dto.id, dto.time, dto.hc)
     duration = charge_manager.stop(start)
-    logger.info(f"Sending data from /sae/commune/csv in {int(duration)}s")
+    log_charge("/sae/commune/csv", duration)
     return data.to_csv(index=False)
+
+
+def log_charge(route: str, duration: float):
+    s = f"Sending data from {route} in {int(duration)}s with charge {charge_manager.charge_pc}%"
+    if charge_manager.charge_pc > 100:
+        logger.error(s)
+    elif charge_manager.charge_pc > 50:
+        logger.warning(s)
+    else:
+        logger.info(s)
+
 
 if __name__ == '__main__':
     print(f"FastAPI version: {__version__}")

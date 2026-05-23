@@ -25,10 +25,9 @@ class ChargeManager:
     def stop(self, start: float) -> float:
         try:
             duration = self.start() - start
-            if duration > 0.1:
-                with ChargeManager.lock:
-                    self.mesures.append((int(datetime.datetime.now().timestamp() - self.time0), duration))
-                self._remove_old_mesures(self.interval)
+            with ChargeManager.lock:
+                self.mesures.append((int(datetime.datetime.now().timestamp() - self.time0), duration))
+            self._remove_old_mesures(self.interval)
             return duration
         except:
             return 0
@@ -106,4 +105,10 @@ if __name__ == '__main__':
             m.mesures.append((0, 0))
         duration = m.stop(start)
         print(duration, m.charge, m.mesures)
+    print(m.charge, m.req_min, m.last_charge)
+    m.mesures = []
+    print(m.charge, m.req_min, m.last_charge)
+    start = m.start()
+    m.stop(start)
+    print(m.mesures)
 

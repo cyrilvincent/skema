@@ -1,0 +1,59 @@
+geo $blocked_ip {
+	default 0;
+
+	45.88.138.44	1;	# BG dexdc.com 2026-05-22
+	45.94.31.112	1;	# NL rdp.sh 2026-05-22
+	45.130.203.129	1;	# DE globalsecurelayer.com 2026-05-22
+	45.130.203.156	1;	# DE globalsecurelayer.com 2026-05-22
+	45.139.122.80	1;	# NL koddos.net 2026-05-22
+	45.148.10.5	1;	# NL dmzhost.co 2026-05-22
+	45.148.10.62	1;	# NL dmzhost.co 2026-05-22
+	45.148.10.95	1;	# NL dmzhost.co 2026-05-22
+	45.148.10.120	1;	# NL dmzhost.co 2026-05-22
+	45.148.10.231	1;	# NL dmzhost.co 2026-05-22
+	61.111.250.85	1;	# KR moack.co.kr 2026-05-22
+	64.50.191.33	1;	# US breezehost.io 2026-05-22
+	64.62.197.32	1;	# US he.net 2026-05-22
+	64.62.197.137	1;	# US he.net 2026-05-22
+	65.109.15.249	1;	# FI hetzner.de 2026-05-22
+	66.245.172.13	1;	# US elitework.com 2026-05-22
+	72.14.147.208	1;	# US m247global.com 2026-05-22
+	77.83.39.94	1;	# NL  2026-05-22
+	77.83.39.159	1;	# NL  2026-05-22
+	79.124.40.174	1;	# BG 4vendeta.com 2026-05-22
+	80.94.95.211	1;	# RO ssnet.eu 2026-05-22
+	85.137.57.233	1;	# UA v-sys.org 2026-05-22
+	89.93.194.143	1;	# FR bouyguestelecom.fr 2026-05-22
+	101.47.8.187	1;	# SG byteplus.com 2026-05-22
+	103.252.127.200	1;	# BD btlbd.net 2026-05-22
+	104.23.217.100	1;	# SE cloudflare.com 2026-05-22
+	104.23.217.101	1;	# SE cloudflare.com 2026-05-22
+	104.23.221.62	1;	# SE cloudflare.com 2026-05-22
+	104.23.221.63	1;	# SE cloudflare.com 2026-05-22
+	104.23.223.30	1;	# SE cloudflare.com 2026-05-22
+	104.23.223.31	1;	# SE cloudflare.com 2026-05-22
+	104.28.157.139	1;	# IN cloudflare.com 2026-05-22
+	104.28.159.62	1;	# SG cloudflare.com 2026-05-22
+	104.28.164.65	1;	# IN cloudflare.com 2026-05-22
+	107.172.35.195	1;	# US colocrossing.com 2026-05-22
+	128.199.182.55	1;	# SG digitalocean.com 2026-05-22
+	136.144.35.61	1;	# US latitude.sh 2026-05-22
+	139.59.228.172	1;	# SG digitalocean.com 2026-05-22
+	144.172.116.30	1;	# US cloudzy.com 2026-05-22
+	152.32.192.176	1;	# HK ucloud.cn 2026-05-22
+	152.42.173.211	1;	# SG digitalocean.com 2026-05-22
+	157.143.84.87	1;	# CH iway.ch 2026-05-22
+	159.89.127.165	1;	# CA digitalocean.com 2026-05-22
+	161.35.9.43	1;	# US digitalocean.com 2026-05-22
+	162.158.110.221	1;	# DE cloudflare.com 2026-05-22
+	162.158.182.130	1;	# SE cloudflare.com 2026-05-22
+	165.22.34.189	1;	# US digitalocean.com 2026-05-22
+	168.144.101.237	1;	# SG digitalocean.com 2026-05-22
+	168.144.105.169	1;	# SG digitalocean.com 2026-05-22
+	188.166.234.218	1;	# SG digitalocean.com 2026-05-22
+	195.178.110.246	1;	# NL dmzhost.co 2026-05-22
+	213.209.159.175	1;	# DE feoprest.life 2026-05-22
+	# END
+	31.59.129.193	1;	# NL chunkserve.com 2026-05-23
+	34.163.144.35	1;	# FR google.com 2026-05-23
+}
