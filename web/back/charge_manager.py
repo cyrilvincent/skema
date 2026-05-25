@@ -11,6 +11,8 @@ class ChargeManager:
         self.time0 = datetime.datetime.now().timestamp()
         self.interval = interval
         self.mesures: list[tuple[float, float]] = [(0, 0)]
+        self.warning_alert = 50
+        self.error_alert = 100
 
     @staticmethod
     def factory(interval=600):
@@ -71,44 +73,71 @@ class ChargeManager:
         except:
             return 0
 
+    def check_and_delay(self) -> bool:
+        if self.charge_pc > self.error_alert * 2:
+            self.stop(self.start())
+            print("Charge too high")
+            return False
+        if self.charge_pc > self.error_alert:
+            self.stop(self.start())
+            print("Charge high delay 1s")
+            time.sleep(1)
+        if self.charge_pc > self.error_alert:
+            self.stop(self.start())
+            print("Charge high delay 10s")
+            time.sleep(10)
+        return self.charge_pc <= self.error_alert
+
 
 if __name__ == '__main__':
     m = ChargeManager.factory(8)
     start = m.start()
     time.sleep(1)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     start = m.start()
     time.sleep(2)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     start = m.start()
     time.sleep(0.01)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     start = m.start()
     time.sleep(0.2)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     start = m.start()
     time.sleep(4)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     start = m.start()
     time.sleep(6)
     duration = m.stop(start)
-    print(duration, m.charge, m.mesures)
+    print(duration, m.charge, m.charge_pc, m.mesures)
     for _ in range(10):
         start = m.start()
         time.sleep(1)
         for __ in range(10000):
             m.mesures.append((0, 0))
         duration = m.stop(start)
-        print(duration, m.charge, m.mesures)
-    print(m.charge, m.req_min, m.last_charge)
+        print(duration, m.charge, m.charge_pc, m.mesures)
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
+    print(f"Delay: {m.check_and_delay()}")
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
+    m.mesures.append((25, 10))
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
+    print(f"Delay: {m.check_and_delay()}")
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
+    m.mesures.append((26, -9))
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
+    print(f"Delay: {m.check_and_delay()}")
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
     m.mesures = []
-    print(m.charge, m.req_min, m.last_charge)
+    print(m.charge, m.charge_pc, m.req_min, m.last_charge)
     start = m.start()
     m.stop(start)
     print(m.mesures)
+
+    # /!\ Si charge élevée et qu'on ne fait rien elle ne décroit jamais
 

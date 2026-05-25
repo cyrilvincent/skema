@@ -186,12 +186,19 @@ async def sae_commune_csv(dto: GeoInputDTO):
 
 def log_charge(route: str, duration: float):
     s = f"Sending data from {route} in {int(duration)}s with charge {charge_manager.charge_pc}%"
-    if charge_manager.charge_pc > 100:
+    if charge_manager.charge_pc > charge_manager.error_alert:
         logger.error(s)
-    elif charge_manager.charge_pc > 50:
+    elif charge_manager.charge_pc > charge_manager.warning_alert:
         logger.warning(s)
     else:
         logger.info(s)
+
+
+def check_charge():
+    ok = charge_manager.check_and_delay()
+    if not ok:
+        logger.error(f"To many charge {charge_manager.charge_pc}%")
+        raise HTTPException(status_code=503, detail=f"To many charge {charge_manager.charge_pc}%")
 
 
 if __name__ == '__main__':

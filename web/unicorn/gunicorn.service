@@ -3,8 +3,8 @@ Description=Gunicorn FastAPI service
 After=network.target
 
 [Service]
-User=root
-Group=root
+User=cyrilvincent
+Group=users
 WorkingDirectory=/home/cyrilvincent/skema/web/back
 
 ExecStart=/home/cyrilvincent/venv/bin/gunicorn \
@@ -15,7 +15,7 @@ ExecStart=/home/cyrilvincent/venv/bin/gunicorn \
     --timeout 300
 
 Restart=always
-RestartSec=3
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
