@@ -43,7 +43,9 @@ class PSLibreAccesRawParser:
 
         mask = self.df['rs'].str.match(regex, na=False)
         self.df.loc[mask, 'code'] = 'M'
+        self.df.loc[self.df['cp'].isna(), 'code'] = 'H'
 
+        # self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
         self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
 
     def commit(self):
@@ -89,4 +91,4 @@ if __name__ == '__main__':
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_small_202010071006.txt -e
     # data/ps_libreacces/PS_LibreAcces_Personne_activite_202010071006.txt
     # PS_LibreAcces_Personne_activite_202112020908.txt
-    # {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9}
+    # {20: 10, 21: 12, 22: 7, 23: 5, 24: 12, 25: 9, 26: 5}

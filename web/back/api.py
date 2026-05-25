@@ -66,6 +66,7 @@ def charge():
             "charge_pc": charge_manager.charge_pc,
             "charge": charge_manager.charge,
             "req_min": charge_manager.req_min,
+            "nb_req": len(charge_manager.mesures),
             "last_charge": charge_manager.last_charge}
 
 
