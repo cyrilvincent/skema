@@ -48,7 +48,6 @@ join adresse_norm an on an.id=pands.adresse_norm_id
 join date_source ds on ds.id=pands.date_source_id
 join iris.iris i on i.code=an.geo_iris
 where sp.specialite_id={specialite}
---and ps.code_mode_exercice='L'
 and ds.annee={year}
 and ds.mois={pa_months[year]}
 and pands.adresse_norm_id is not null
@@ -167,6 +166,9 @@ for with_s in [True]:  # [True, False]
                             nb_cabinet_ps = ps_df.groupby(["id", "lon", "lat"])
                             ps_df["key"] = ps_df["id"].astype(str) + "_" + ps_df["code"] + "_" + ps_df["lat"].astype(str) + "_" + ps_df["lon"].astype(str)
                             ps_df["nb_cabinet"] = ps_df.groupby("id")["key"].transform("nunique")
+
+                            # /!\ Avant il y avait : # self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
+                            # Donc maintenant y'a une joiture interne qui ne fonctionnera plus
 
                             if with_s:
                                 ps_df = ps_df[(ps_df["code"] == "L") | (ps_df["code"] == "M")]
