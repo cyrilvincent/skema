@@ -13,7 +13,7 @@ from fastapi.concurrency import run_in_threadpool
 import logging
 import logging.config
 from charge_manager import ChargeManager
-from web.back.auth_service import AuthService
+from auth_service import AuthService
 
 is_prod = platform.system() != "Windows"
 print(f"Starting FastAPI {__version__} on {platform.system()} on prod: {is_prod}")
