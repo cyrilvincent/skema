@@ -292,25 +292,26 @@ export class GeoDataviz implements OnInit {
   }
 
   getColorscale(): (string | number)[][] {
-    const apl = [[0.0, "rgb(64,64,127)"],
-                  [0.1, "rgb(112,112,127)"],
-                  [0.25, "rgb(159,159,127)"],
-                  [0.5, "rgb(255,255,127)"],
-                  [0.75, "rgb(209,127,79)"],
-                  [0.90, "rgb(187,64,55)"],
-                  [0.95, "rgb(165,0,32)"],
-                  [1.0, "rgb(127,0,0)"]];
-    const meanw = this.df()["meanws"][0]
+    const meanw = (this.type() == "APL" && !this.normColorBar()) ?  this.years()[this.firstYear()]["apl_mean"]![0] : this.df()["meanws"][0]
     const max = this.getZMax();
+    const min = this.getZMin();
     let q25 = 0.25;
     let q50 = 0.5;
     let q75 = 0.75;
     if (!this.normColorBar()) {
-      q50 = this.clip(meanw / max, 0.25, 0.75);
-      q25 = this.clip((meanw / max) / 2, 0.11, 0.5);
-      q75 = this.clip(((meanw / max) + 1) / 2, 0.5, 0.89);
+      q50 = this.clip((meanw - min) / (max - min), 0.26, 0.74);
+      q25 = this.clip(((meanw - min) / (max - min)) / 2, 0.11, 0.49);
+      q75 = this.clip((((meanw - min) / (max - min)) + 1) / 2, 0.51, 0.89);
     }
-    console.log("meanw "+meanw + " " + q50 + " " + max);
+    console.log("meanw "+meanw + " " + q50 + " " + max + " " + min);
+    const apl = [[0.0, "rgb(64,64,127)"],
+                  [0.1, "rgb(112,112,127)"],
+                  [q25, "rgb(159,159,127)"],
+                  [q50, "rgb(255,255,127)"],
+                  [q75, "rgb(209,127,79)"],
+                  [0.90, "rgb(187,64,55)"],
+                  [0.95, "rgb(165,0,32)"],
+                  [1.0, "rgb(127,0,0)"]];
     const sae = [[0.0, "rgb(127,0,0)"],
                   [0.1, "rgb(187,64,55)"],
                   [q25, "rgb(209,127,79)"],

@@ -1,14 +1,19 @@
 import datetime
 import platform
 import time
-from fastapi import FastAPI, __version__, HTTPException
+from fastapi import FastAPI, __version__, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
+from starlette.responses import JSONResponse
+
 import config
 from interfaces import GeoInputDTO
 from fastapi.concurrency import run_in_threadpool
 import logging
 import logging.config
 from charge_manager import ChargeManager
+from web.back.auth_service import AuthService
 
 is_prod = platform.system() != "Windows"
 print(f"Starting FastAPI {__version__} on {platform.system()} on prod: {is_prod}")
@@ -40,11 +45,22 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+if is_prod:
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        logging.error(f"Pydantic error: {request} {exc}")
+        return JSONResponse(status_code=400, content={"detail": "Bad request"})
 
 commune_service: CommuneService = CommuneService.factory()
 apl_service: APLService = APLService.factory()
 sae_service: SAEService = SAEService.factory()
 charge_manager: ChargeManager = ChargeManager.factory()
+auth_service = AuthService()
+
+users: dict[str, dict[str, str]] = {
+    "admin": {"hash": "$2b$12$uTgTW58M1/yXWsWEcwZp6edUe9EQycrdOJD5NMiBkP6CT9c2Urbwa", "role": "admin"}
+}
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 @app.get("/")

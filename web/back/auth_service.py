@@ -36,3 +36,4 @@ if __name__ == '__main__':
     print(d)
     dt = datetime.fromtimestamp(d["exp"], tz=timezone.utc)
     print(dt)
+    print(s.hash_password("EMla!t$!A$o2o6o622o51o"))

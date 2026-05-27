@@ -72,6 +72,7 @@ export interface GeoYearDTO {
     pop_ajustee?: number[];
     apl_max?: number[];
     apl_min?: number[];
+    apl_mean?: number[];
     km?: number[];  // SAE
     time_hc?: number[];
     time_hp?: number[];

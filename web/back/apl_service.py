@@ -373,8 +373,9 @@ class APLService:
         else:
             gdf["pop_ajustee"] = gdf['pop_gp'].fillna(0)
             gdf["pop"] = gdf["pop"].fillna(0)
-        gdf["apl_max"] = gdf["apl"].max()
-        gdf["apl_min"] = gdf["apl"].min()
+        gdf["apl_max"] = gdf[gdf["year"] == self.first_year]["apl"].max()
+        gdf["apl_min"] = gdf[gdf["year"] == self.first_year]["apl"].min()
+        gdf["apl_mean"] = gdf[gdf["year"] == self.first_year]["apl"].mean()
         return gdf
 
     def get_export(self, code: str, studies_df: pd.DataFrame, gdf: pd.DataFrame) -> tuple[dict, any]:
@@ -382,7 +383,7 @@ class APLService:
         center_lon = gdf.geometry.centroid.x.mean()
         dico = {"center_lat": center_lat, "center_lon": center_lon, "q": code, "meanws": [], "years": {}}
         cols = ['code_insee', 'nom_commune', 'lon', 'lat', 'fid', 'year', 'nb', 'apl', 'swpop', 'pop', 'pop_ajustee',
-                'apl_max', "apl_min", 'code_iris', 'nom_iris', "geometry"]
+                'apl_max', "apl_min", "apl_mean", 'code_iris', 'nom_iris', "geometry"]
         if "tp60" in gdf:
             cols += ['filo_year', 'tp60', 'med', 'gi', 'tp60_france', 'med_france', 'gi_france', "pop_year",
                      "pop65p_ratio_france"]
@@ -600,12 +601,13 @@ if __name__ == '__main__':
     # export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)
     # s = json.dumps(export)
     # print(s[:5000])
-    # s.no_pickle = True
+    s.no_pickle = True
     # export = s.compute_iris("CC-02302", 10, 30, "HC", -0.12, "HD",
     #                         with_sal=True)  # CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
-    export = s.compute_commune("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
+    # export = s.compute_commune("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
+    export = s.compute_iris("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
     s = json.dumps(export)
     print(s[:5000])
 
