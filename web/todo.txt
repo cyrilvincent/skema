@@ -1,6 +1,6 @@
 word v5
 filosofi commune
-
+/!\ Prochaine mise en prod => front + back + remove pickle apl
 
 
 
