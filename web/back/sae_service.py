@@ -420,6 +420,7 @@ class SAEService(APLService):
             return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
         logger.info(f"Found {len(gdf)} gdfs")
@@ -454,8 +455,12 @@ class SAEService(APLService):
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         logger.info(f"Compute Commune SAE for {code} {bor}")
+        export = self.load_pickle("sae_commune", code, specialite, time, time_type, 0, resolution, False)
+        if export is not None:
+            return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
         sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         logger.info(f"Found {len(gdf)} gdfs")
@@ -473,6 +478,7 @@ class SAEService(APLService):
         gdf_commune = self.df_corrections(bor, gdf_commune)
         gdf_commune = self.gdf_commune_add_columns(gdf_commune)
         export = self.get_sae_export(code, studies_df, gdf_commune, etab_df, years)
+        self.save_pickle(export, "sae_commune", code, specialite, time, time_type, 0, resolution, False)
         return export
 
     def compute_sae_commune_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
@@ -494,13 +500,15 @@ if __name__ == '__main__':
     s = SAEService()
     time.sleep(1)
     # s.no_pickle = True
-    export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
-    s = json.dumps(export)
-    print(s[:5000])
+    # export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
+
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
+    export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
     # export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
     # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
+
+    s = json.dumps(export)
+    print(s[:5000])
 
 
 

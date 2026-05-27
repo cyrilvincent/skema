@@ -64,6 +64,10 @@ class APLService:
             return code[:2], code[3:]
         raise ServiceError(f"Bad code {code}")
 
+    def check_resolution(self, time_type: str):
+        if time_type not in ["HD", "MD", "LD"]:
+            raise ServiceError(f"Bad resolution {time_type}")
+
     def get_iriss_cc(self, id: str) -> list[str]:
         sql = f"""
         select i.code from iris.commune c
@@ -516,6 +520,7 @@ class APLService:
             return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
         logger.info(f"Found {len(gdf)} gdfs")
@@ -550,8 +555,12 @@ class APLService:
                         resolution: str,
                         with_sal: bool) -> tuple[dict, any]:
         logger.info(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
+        export = self.load_pickle("apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
+        if export is not None:
+            return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
         apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
         logger.info(f"Found {len(gdf)} gdfs")
@@ -562,6 +571,7 @@ class APLService:
         gdf_commune = self.group_apl_by_commune(gdf_merged)
         gdf_commune = self.gdf_merge_add_columns(gdf_commune)
         export = self.get_export(code, studies_df, gdf_commune)
+        self.save_pickle(export, "apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
     def compute_commune_csv(self,
@@ -590,7 +600,7 @@ if __name__ == '__main__':
     # export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)
     # s = json.dumps(export)
     # print(s[:5000])
-    s.no_pickle = True
+    # s.no_pickle = True
     # export = s.compute_iris("CC-02302", 10, 30, "HC", -0.12, "HD",
     #                         with_sal=True)  # CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
