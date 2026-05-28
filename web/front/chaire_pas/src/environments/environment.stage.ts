@@ -3,7 +3,7 @@ export const environment = {
   production: true,
   version: "1.0.0.Stage",
   copyright: "SKEMA Business School & Université Côte d'Azur 2026",
-  baseUrl: "http://localhost/api",
+  baseUrl: "http://localhost/api1",
   loading: "En cours de chargement",
   dns: "chaire_paas.com",
   accessibilite: 83,

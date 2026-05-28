@@ -37,7 +37,7 @@ export class Login {
 
   buttonClicked() {
     this.service.login(this.login(), this.pwd());
-    this.badLogin.set(!this.service.isLogged());
+    this.badLogin.set(!this.service.isLogged())!
   }
 
   

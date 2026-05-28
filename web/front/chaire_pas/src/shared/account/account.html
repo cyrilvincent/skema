@@ -1,8 +1,8 @@
 <div class="container">
     <div class="sub-title">Compte utilisateur</div>
-    @if (service.isLogged()) {
+    @if (service.isLogged()) { 
         <div class="center">Vous êtes connectés<br>
-            <button type="button" mat-fab extended (click)="service.isLogged.set(false)">Se déconnecter</button>
+            <button type="button" mat-fab extended (click)="service.logout()">Se déconnecter</button>
         </div><br>
     }
     @else {

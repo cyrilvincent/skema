@@ -31,6 +31,7 @@
     "@angular/material": "^21.1.2",
     "@angular/platform-browser": "^21.1.2",
     "@angular/router": "^21.1.2",
+    "@auth0/angular-jwt": "^5.2.0",
     "angular-plotly.js": "^20.0.0",
     "file-saver": "^2.0.5",
     "ngx-filesaver": "^21.0.0",

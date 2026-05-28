@@ -1,13 +1,14 @@
 import datetime
 import platform
 import time
-from fastapi import FastAPI, __version__, HTTPException, Request
+from fastapi import FastAPI, __version__, HTTPException, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError
 from starlette.responses import JSONResponse
 import config
-from interfaces import GeoInputDTO
+from interfaces import GeoInputDTO, TokenResponse, LoginRequest
 from fastapi.concurrency import run_in_threadpool
 import logging
 import logging.config
@@ -40,7 +41,7 @@ logger.info(f"CORS: {cors}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors,
-    allow_credentials=True,  # Normalement inutile tant qu'il n'y a pas JWT
+    allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
@@ -92,6 +93,34 @@ def sleep(i: float):
     time.sleep(i)
     charge_manager.stop(start)
     return charge()
+
+
+@app.post("/auth/login", response_model=TokenResponse)
+def login(body: LoginRequest):
+    logger.info(f"Get /auth/login for {body.username}")
+    start = charge_manager.start()
+    user = users.get(body.username)
+    if not user or not auth_service.verify_password(body.password, user["hash"]):
+        logging.warning("Bad password") if user else logging.warning(f"Bad user: {body.username}")
+        raise HTTPException(status_code=401, detail="Identifiants invalides")
+    token = auth_service.create_access_token({"sub": body.username, "role": user["role"]})
+    duration = charge_manager.stop(start)
+    log_charge("/auth/login", duration)
+    return TokenResponse(access_token=token)
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = auth_service.decode_token(token)
+        return payload
+    except JWTError:
+        logger.error(f"get_current_user bad token {token}")
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+
+@app.get("/user")
+def user(user=Depends(get_current_user)):
+    return user
 
 
 @app.get("/find/{q}")
