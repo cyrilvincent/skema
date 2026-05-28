@@ -721,7 +721,9 @@ export class GeoDataviz implements OnInit {
           title: "Normaliser localement - nationalement",
           name: 'Normalize',
           icon: Plotly.Icons.zoombox,
-          click: (() => this.normColorBar.set(!this.normColorBar())),  // Idem
+          click: (() => {
+            if (this.dto()?.code != "CF-00") this.normColorBar.set(!this.normColorBar());
+          }),
         },
         {
           title: "Contours",

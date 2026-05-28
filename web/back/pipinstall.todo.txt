@@ -1,2 +1,2 @@
 pip install python-jose[cryptography] bcrypt python-multipart
-Cyril uniquement
+ok partout
