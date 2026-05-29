@@ -22,6 +22,15 @@ class AuthService:
     def decode_token(self, token: str) -> dict:
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
+    def create_anonymous_token(self) -> str:
+        import uuid
+        expire = datetime.now(timezone.utc) + timedelta(hours=24*30)
+        return jwt.encode(
+            {"sub": f"anonymous_{uuid.uuid4().hex}", "role": "anonymous", "exp": expire},
+            SECRET_KEY,
+            algorithm=ALGORITHM
+        )
+
 
 if __name__ == '__main__':
     s = AuthService()

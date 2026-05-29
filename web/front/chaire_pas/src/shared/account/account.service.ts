@@ -9,16 +9,14 @@ export class AccountService extends CommonService {
   
   isLogged = signal(this.isLoggedIn());
 
-  // login(login: string, pwd: string) { // A rempalcer par la méthode ci dessous
-  //   if(login == "admin" && pwd == "EMlait$iA$0610") {
-  //     console.log("Login ok")
-  //     this.isLogged.set(true);
-  //   }
-  //   else console.log("Login ko");
-  // }
-
   login(user: string, password: string) {
     this.fetchLogin(user, password);
+  }
+
+  anonymous() {
+    if (!this.isValidAnonymousToken()) {
+      this.fetchAnonymous();
+    }
   }
 
   private fetchLogin(user: string, password: string) {
@@ -40,6 +38,25 @@ export class AccountService extends CommonService {
     });
   }
 
+  private fetchAnonymous() {
+    console.log("fetchAnonymous");
+    this.fetchLoading();
+    this.http.post<{ access_token: string }>(`${environment.baseUrl}/auth/guest`, {}).subscribe({
+      next: (res) => {
+        console.log("fetchAnonymous ok " + res.access_token);
+        localStorage.setItem('anonymousToken', res.access_token);
+        this.isLogged.set(true);
+      },
+      error: (err) => {
+        console.log("fetchAnonymous ko");
+        this.isLogged.set(false);
+        if(err.status == 404) console.log("Not found ");
+        else this.catchError(err);        
+      },
+      complete: () => this._loading.set(false),
+    });
+  }
+
   logout() {
     this.isLogged.set(false);
     localStorage.removeItem('token');
@@ -49,13 +66,26 @@ export class AccountService extends CommonService {
     return localStorage.getItem('token');
   }
 
+  getAnonymousToken(): string | null {
+    return localStorage.getItem('anonymousToken');
+  }
+
   isLoggedIn(): boolean {
     const token = this.getToken();
+    return this.isValidToken(token);
+  }
+
+  isValidAnonymousToken(): boolean {
+    const token = this.getAnonymousToken();
+    return this.isValidToken(token);
+  }
+
+  private isValidToken(token: string | null): boolean {
     if (!token) {
       return false;
     }
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const valid = payload.exp * 1000 > Date.now();
+    let valid = payload.exp * 1000 > Date.now();
     if (!valid) console.log("Token expired");
     return valid;
   }

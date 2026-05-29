@@ -109,6 +109,14 @@ def login(body: LoginRequest):
     return TokenResponse(access_token=token)
 
 
+@app.post("/auth/guest", response_model=TokenResponse)
+def guest():
+    logger.info(f"Get /auth/guest")
+    token = auth_service.create_anonymous_token()
+    return TokenResponse(access_token=token)
+
+
+
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = auth_service.decode_token(token)
