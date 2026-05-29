@@ -121,7 +121,7 @@ export const routes: Routes = [
     path: 'admin',
     title: "Admin: "+environment.title,
     component: Admin,
-    //canActivate: [accountGuard], 
+    canActivate: [accountGuard], 
   },
 
 ]

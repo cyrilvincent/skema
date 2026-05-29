@@ -54,6 +54,4 @@ geo $blocked_ip {
 	195.178.110.246	1;	# NL dmzhost.co 2026-05-22
 	213.209.159.175	1;	# DE feoprest.life 2026-05-22
 	# END
-	31.59.129.193	1;	# NL chunkserve.com 2026-05-23
-	34.163.144.35	1;	# FR google.com 2026-05-23
 }

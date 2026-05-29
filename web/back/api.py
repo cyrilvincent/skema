@@ -147,7 +147,7 @@ async def find(q: str):
     return data
 
 
-@app.post("/apl/iris")
+@app.post("/apl/iris")  # Passer en guest + isValidAnonymousToken en front au click du bouton
 async def apl_iris(dto: GeoInputDTO):
     logger.info(f"Get /apl/iris")
     start = charge_manager.start()

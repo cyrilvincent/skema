@@ -1,6 +1,6 @@
 word v5
 filosofi commune
-Puis protéger les api avec CSV => interceptor & ...
+back : guest
 
 
 

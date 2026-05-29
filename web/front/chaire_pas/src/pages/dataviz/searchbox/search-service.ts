@@ -1,6 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { CommonService } from '../../../shared/common.service';
 import { environment } from '../../../environments/environment';
+import { AccountService } from '../../../shared/account/account.service';
 
 @Injectable({
   providedIn: 'root',
@@ -8,6 +9,14 @@ import { environment } from '../../../environments/environment';
 export class SearchService extends CommonService {
 
   codes = signal<[string, string][]>([]);
+  accountService = inject(AccountService);
+
+  constructor() {
+    super();
+    this.accountService.anonymous();
+    this.accountService.checkLogged();
+  }
+
 
   fetchFind(q: string | null): void {
     let query = q?.trim() ?? '';
