@@ -1,6 +1,5 @@
-import time
 from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
+from jose import jwt
 import bcrypt
 
 SECRET_KEY = "e3df716efcc8b8e146ad3124a9fd79cd016a2d9e3309275aaf220bb12b928417"

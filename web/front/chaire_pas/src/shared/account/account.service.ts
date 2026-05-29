@@ -45,11 +45,11 @@ export class AccountService extends CommonService {
     localStorage.removeItem('token');
   }
 
-  private getToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  private isLoggedIn(): boolean {
+  isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) {
       return false;

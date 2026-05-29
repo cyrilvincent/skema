@@ -1,7 +1,5 @@
 word v5
 filosofi commune
-/!\ Nginx sur Cyril MAJ conf, par exemple je suis passé à api1
-/!\ Prod
 Puis protéger les api avec CSV => interceptor & ...
 
 

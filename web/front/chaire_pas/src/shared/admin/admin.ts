@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { UserService } from '../user.service';
+import { AccountService } from '../account/account.service';
 
 @Component({
   selector: 'app-admin',
@@ -9,10 +9,7 @@ import { UserService } from '../user.service';
 })
 export class Admin {
 
-  userService = inject(UserService);
-
-  constructor() {
-    this.userService.isAdmin.set(true);
-  }
+  service = inject(AccountService);
+  
 
 }

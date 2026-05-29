@@ -162,8 +162,8 @@ async def apl_commune(dto: GeoInputDTO):
 
 
 @app.post("/apl/iris/csv")
-async def apl_iris_csv(dto: GeoInputDTO):
-    logger.info(f"Get /apl/iris/csv")
+async def apl_iris_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+    logger.info(f"Get /apl/iris/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_iris_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
@@ -173,8 +173,8 @@ async def apl_iris_csv(dto: GeoInputDTO):
 
 
 @app.post("/apl/commune/csv")
-async def apl_commune_csv(dto: GeoInputDTO):
-    logger.info(f"Get /apl/commune/csv")
+async def apl_commune_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+    logger.info(f"Get /apl/commune/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_commune_csv,
                                    dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
@@ -184,8 +184,8 @@ async def apl_commune_csv(dto: GeoInputDTO):
 
 
 @app.post("/sae/iris")
-async def sae_iris(dto: GeoInputDTO):
-    logger.info(f"Get /sae/iris")
+async def sae_iris(dto: GeoInputDTO, user=Depends(get_current_user)):
+    logger.info(f"Get /sae/iris for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
     if len(data[1]["features"]) == 0:
@@ -197,8 +197,8 @@ async def sae_iris(dto: GeoInputDTO):
 
 
 @app.post("/sae/iris/csv")
-async def sae_iris_csv(dto: GeoInputDTO):
-    logger.info(f"Get /sae/iris/csv")
+async def sae_iris_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+    logger.info(f"Get /sae/iris/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
     duration = charge_manager.stop(start)

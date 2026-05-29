@@ -12,6 +12,7 @@ import { Partners } from '../pages/partners/partners';
 import { Legal } from '../shared/footer/legal/legal';
 import { Cookies } from '../shared/footer/cookies/cookies';
 import { Studies } from '../pages/research/studies/studies';
+import { accountGuard } from '../shared/account/account.guard';
 //import { Sae } from '../pages/sae/sae';
 //import { Apl } from '../pages/apl/apl';
 
@@ -115,6 +116,12 @@ export const routes: Routes = [
     title: "Data: "+environment.title,
     loadComponent: () =>
       import('../pages/observatoire/data/data').then((m) => m.Data),
+  },
+  {
+    path: 'admin',
+    title: "Admin: "+environment.title,
+    component: Admin,
+    canActivate: [accountGuard], 
   },
 
 ]

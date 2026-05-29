@@ -1,9 +1,0 @@
-pgrep python
-kill -2 pid (kill propre)
-Faire un systemd
-# tmux new -s myapp
-# python script.py
-# tmux attach -t myapp
-# CTRL + B D
-# ou
-# nohup python script.py > logs/nohup.log 2>&1 &
