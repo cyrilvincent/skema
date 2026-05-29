@@ -63,6 +63,27 @@ users: dict[str, dict[str, str]] = {
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
+def guest(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = auth_service.decode_token(token)
+        return payload
+    except JWTError:
+        logger.error(f"Guest bad token {token}")
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+
+def admin_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = auth_service.decode_token(token)
+        if payload["role"] != "admin":
+            logger.error(f"User {payload} not admin")
+            raise JWTError("User not an admin")
+        return payload
+    except JWTError:
+        logger.error(f"admin_user bad token {token}")
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+
 @app.get("/")
 def root():
     logger.info("Get /")
@@ -116,21 +137,6 @@ def guest():
     return TokenResponse(access_token=token)
 
 
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = auth_service.decode_token(token)
-        return payload
-    except JWTError:
-        logger.error(f"get_current_user bad token {token}")
-        raise HTTPException(status_code=401, detail="Token invalide")
-
-
-@app.get("/user")
-def user(user=Depends(get_current_user)):
-    return user
-
-
 @app.get("/find/{q}")
 async def find(q: str):
     logger.info(f"Get /find/{q}")
@@ -170,7 +176,7 @@ async def apl_commune(dto: GeoInputDTO):
 
 
 @app.post("/apl/iris/csv")
-async def apl_iris_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+async def apl_iris_csv(dto: GeoInputDTO, user=Depends(admin_user)):
     logger.info(f"Get /apl/iris/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_iris_csv,
@@ -181,7 +187,7 @@ async def apl_iris_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
 
 
 @app.post("/apl/commune/csv")
-async def apl_commune_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+async def apl_commune_csv(dto: GeoInputDTO, user=Depends(admin_user)):
     logger.info(f"Get /apl/commune/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_commune_csv,
@@ -192,7 +198,7 @@ async def apl_commune_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
 
 
 @app.post("/sae/iris")
-async def sae_iris(dto: GeoInputDTO, user=Depends(get_current_user)):
+async def sae_iris(dto: GeoInputDTO, user=Depends(admin_user)):
     logger.info(f"Get /sae/iris for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
@@ -205,7 +211,7 @@ async def sae_iris(dto: GeoInputDTO, user=Depends(get_current_user)):
 
 
 @app.post("/sae/iris/csv")
-async def sae_iris_csv(dto: GeoInputDTO, user=Depends(get_current_user)):
+async def sae_iris_csv(dto: GeoInputDTO, user=Depends(admin_user)):
     logger.info(f"Get /sae/iris/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
