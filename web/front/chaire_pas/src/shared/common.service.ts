@@ -24,6 +24,7 @@ export class CommonService {
 
   catchError(err: any) {
     const msg = (typeof err?.error === 'string' && err.error) || err?.error?.message || err?.error?.detail || `HTTP ${err?.status ?? '??'}`;
+    console.error(msg);
     this._error.set(msg);
     this._loading.set(false);
   }

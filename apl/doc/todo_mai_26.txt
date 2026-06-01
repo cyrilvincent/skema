@@ -1,0 +1,24 @@
+Suite à notre appel, voici ce qu'il faudrait modifier dans le calcul APL
+
+1.	Conserver toutes les lignes d'un même PS dès lors qu'une adresse est renseignée sur au moins une ligne. (je ne sais pas s'il y en aura beaucoup ou pas, faire une vérification). Si c'est le cas enlever 0.2 ETP par ligne sans adresse pour ce PS. Donc si un PS a deux lignes, une ligne avec une adresse, une ligne sans adresse, mettre un ETP de 0.8 pour la ligne avec adresse.
+
+Ca serait + propre et plus robuste (s’il y a + de 5 lignes sans adresses) de mettre des poids
+Poids = 4 pour 1 ligne avec adresse
+Poids = 1 pour une ligne sans adresse
+Ex de 2 lignes dont 1 seule avec adresse => ETP = 4 / 5 = 0.8
+Ex 3 lignes dont 1 seule avec adresse => ETP = 4 / 6 = 0.66
+Etc
+
+2.	Pour chaque adresse identifier si elle correspond à un hôpital / une maison de santé ou une autre structure de ce type et coder 0 si ce n'est pas le cas et 1 si c'est le cas
+
+Ca revient à dire que c’est pareil à une adresse vide
+
+3.	Pour les personnes bossant en libéral et en salarié en maison de santé à la même adresse, faire un duplicate drop et ne conserver que la ligne libéral
+
+OK
+
+4.	Pour les personnes travaillant à la fois dans un hôpital ou une maison de santé et également dans un cabinet individuel mettre un ETP par défaut de 0.2 sur la ligne correspondant à un hopital et/ou une maison de santé. Bien s'assurer que pour ces PS la somme des ETP soit de 1.
+
+Même remarque de 1. Ca serait plus propre de gérer avec des poids 4 vs 1, comme cela la somme est toujours = 1
+
+Voilà, j'espère que c'est assez clair. Dis-moi si tu as besoin de précision

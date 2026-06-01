@@ -133,7 +133,10 @@ def login(body: LoginRequest):
 @app.post("/auth/guest", response_model=TokenResponse)
 def guest():
     logger.info(f"Get /auth/guest")
+    start = charge_manager.start()
     token = auth_service.create_anonymous_token()
+    duration = charge_manager.stop(start)
+    log_charge("/auth/guest", duration)
     return TokenResponse(access_token=token)
 
 
@@ -198,8 +201,8 @@ async def apl_commune_csv(dto: GeoInputDTO, user=Depends(admin_user)):
 
 
 @app.post("/sae/iris")
-async def sae_iris(dto: GeoInputDTO, user=Depends(admin_user)):
-    logger.info(f"Get /sae/iris for user {user}")
+async def sae_iris(dto: GeoInputDTO):
+    logger.info(f"Get /sae/iris")
     start = charge_manager.start()
     data = await run_in_threadpool(sae_service.compute_sae_iris, dto.code, dto.id, dto.time, dto.hc, dto.resolution)
     if len(data[1]["features"]) == 0:

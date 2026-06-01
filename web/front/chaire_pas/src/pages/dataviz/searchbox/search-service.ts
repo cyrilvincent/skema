@@ -26,6 +26,10 @@ export class SearchService extends CommonService {
       this.http.get<[string, string][]>(`${environment.baseUrl}/find/${encodeURIComponent(query)}`).subscribe({
         next: (res) => { this.codes.set(res);},
         error: (err) => { 
+          if (err.status == 401) {
+            console.log("fetchFind 401 anonymous");
+            this.accountService.removeAnymous();
+          }
           this.catchError(err); 
           this.codes.set([]);
         },

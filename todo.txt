@@ -15,6 +15,7 @@ Projet 6 = Nominatim OSM en local
     https://nominatim.org/release-docs/latest/admin/Installation/
     https://github.com/mediagis/nominatim-docker
     Manque virtualisation UEFI
+    Mettre sur serveur Web ?
 Projet 7 = Documentation APL
     En cours
 

@@ -45,11 +45,9 @@ export class AccountService extends CommonService {
       next: (res) => {
         console.log("fetchAnonymous ok " + res.access_token);
         localStorage.setItem('anonymousToken', res.access_token);
-        this.isLogged.set(true);
       },
       error: (err) => {
         console.log("fetchAnonymous ko");
-        this.isLogged.set(false);
         if(err.status == 404) console.log("Not found ");
         else this.catchError(err);        
       },
@@ -60,6 +58,10 @@ export class AccountService extends CommonService {
   logout() {
     this.isLogged.set(false);
     localStorage.removeItem('token');
+  }
+
+  removeAnymous() {
+    localStorage.removeItem('anonymousToken');
   }
 
   getToken(): string | null {
@@ -87,6 +89,11 @@ export class AccountService extends CommonService {
     const payload = JSON.parse(atob(token.split('.')[1]));
     let valid = payload.exp * 1000 > Date.now();
     if (!valid) console.log("Token expired");
+    // if (valid && payload.version) {
+    //   valid = payload.version == "1.0";
+    //   if (!valid) console.log("Token bad version " + payload.version);
+    //   this.removeAnymous();
+    // }
     return valid;
   }
 

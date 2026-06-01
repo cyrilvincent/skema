@@ -24,9 +24,9 @@ class AuthService:
 
     def create_anonymous_token(self) -> str:
         import uuid
-        expire = datetime.now(timezone.utc) + timedelta(hours=24*30)
+        expire = datetime.now(timezone.utc) + timedelta(hours=24*7)
         return jwt.encode(
-            {"sub": f"anonymous_{uuid.uuid4().hex}", "role": "anonymous", "exp": expire},
+            {"sub": f"anonymous_{uuid.uuid4().hex}", "role": "anonymous", "exp": expire, "version": "1.0"},
             SECRET_KEY,
             algorithm=ALGORITHM
         )
