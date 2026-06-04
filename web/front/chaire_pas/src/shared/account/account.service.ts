@@ -83,9 +83,7 @@ export class AccountService extends CommonService {
   }
 
   private isValidToken(token: string | null): boolean {
-    if (!token) {
-      return false;
-    }
+    if (!token) return false;
     const payload = JSON.parse(atob(token.split('.')[1]));
     let valid = payload.exp * 1000 > Date.now();
     if (!valid) console.log("Token expired");

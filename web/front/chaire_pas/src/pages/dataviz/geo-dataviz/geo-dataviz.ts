@@ -88,10 +88,10 @@ export class GeoDataviz implements OnInit {
   //   // }
   // }
 
-  // onSliderChange(event: any) {
-  //   // this.sliderYear.set(event.step.label);
-  //   // console.log("Slider "+this.sliderYear())
-  // }
+  onSliderChange(event: any) {
+    this.sliderYear.set(event.step.label);
+    console.log("Slider "+this.sliderYear() + " " + event.step.label)
+  }
 
   onSliderClicked(event: any) {
     if (event.active == 0) {
