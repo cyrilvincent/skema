@@ -43,9 +43,9 @@ class PSLibreAccesRawParser:
 
         mask = self.df['rs'].str.match(regex, na=False)
         self.df.loc[mask, 'code'] = 'M'
-        self.df.loc[self.df['cp'].isna(), 'code'] = 'H'
+        # self.df.loc[self.df['cp'].isna(), 'code'] = 'H'
 
-        # self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
+        self.df = self.df.dropna(subset=["cp", "code_mode_exercice"])
 
     def commit(self):
         print("Deleting old values")
