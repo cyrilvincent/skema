@@ -3,6 +3,7 @@ import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js'
 import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
 import { specialites } from '../dataviz.data';
+import { AccountService } from '../../../shared/account/account.service';
 //import Plotly from 'plotly.js-dist-min'
 
 @Component({
@@ -16,6 +17,7 @@ import { specialites } from '../dataviz.data';
 export class GeoDataviz implements OnInit {
   plotlyReady = signal(true); // false for lazy loading
   service = inject(GeoService);
+  accountService = inject(AccountService);
   values = this.service.geoTupleDTO;
   loading = this.service.loading;
   dto = input<GeoInputDTO | null>(null);
@@ -90,7 +92,7 @@ export class GeoDataviz implements OnInit {
 
   onSliderChange(event: any) {
     this.sliderYear.set(event.step.label);
-    console.log("Slider "+this.sliderYear() + " " + event.step.label)
+    console.log("Slider "+this.sliderYear());
   }
 
   onSliderClicked(event: any) {
@@ -110,8 +112,13 @@ export class GeoDataviz implements OnInit {
     }
   }
 
+  getPlotlyEl(): HTMLElement {
+    return this.plotEl.nativeElement.querySelector('.js-plotly-plot') 
+        ?? this.plotEl.nativeElement;
+  }
+
   play(interval: number) {
-    const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
+    const el = this.getPlotlyEl();
     this.animInterval = setInterval(() => {
       const step = this.currentStep();
       if (step >= this.frames().length) {
@@ -133,8 +140,28 @@ export class GeoDataviz implements OnInit {
       clearInterval(this.animInterval);
       this.animInterval = null;
       this.isPlaying.set(false);
+      // this.goToStep(0);
+      const el = this.getPlotlyEl();
+      this.updateFrameHover(el);
+   }
+  }
+
+  updateFrameHover(el: any) {
+    const step = this.currentStep();
+    const frame = this.frames()[Math.max(0, step - 1)];
+    if (el && (el as any)._fullLayout && frame?.data) {
+      Plotly.restyle(el, { 
+        z: [(frame.data[0] as any).z],
+        text: [(frame.data[0] as any).text]
+      }, [0]);
     }
   }
+
+  // goToStep(step: number) {
+  //   const el = this.getPlotlyEl();
+  //   if (!el || !(el as any)._fullLayout) return; // guard : plotly pas encore init
+  //   Plotly.relayout(el, { 'sliders[0].active': step } as any);
+  // }
 
   onInputDTOChanged(dto: GeoInputDTO | null) {
     if (dto != null) {
@@ -705,7 +732,7 @@ export class GeoDataviz implements OnInit {
       displayModeBar: true,
       displaylogo: false,
       locale: 'fr',
-      modeBarButtonsToRemove: ['lasso2d', 'select2d'],  //, 'toImage'],
+      modeBarButtonsToRemove: this.accountService.isLogged() ? ['lasso2d', 'select2d'] : ['lasso2d', 'select2d', 'toImage'],
       modeBarButtonsToAdd: [
         {
           title: "Afficher les labels",
