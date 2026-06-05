@@ -566,7 +566,7 @@ export class GeoDataviz implements OnInit {
     let s = etab["rs"][i];
     if (this.dto()!.id <= 3) {
       s += "<br>";
-      s += `NB passage ${etab["year"][i]}: ${etab["passu"][i] < 0 || etab["passu"][i] == null ? "N/A" : etab["passu"][i]}<br>`;
+      s += `NB passages ${etab["year"][i]}: ${etab["passu"][i] < 0 || etab["passu"][i] == null ? "N/A" : etab["passu"][i]}<br>`;
       s += `ETP: ${etab["etp"][i] < 0 ? "N/A" : etab["etp"][i].toFixed(1)}<br>`
       s += `Dont salarié: ${etab["etpsal"][i] < 0 ? "N/A" : etab["etpsal"][i].toFixed(1)}<br>`
       s += `Dont libéraux: ${etab["efflib"][i] < 0 ? "N/A" : etab["efflib"][i].toFixed(1)}<br>`
