@@ -43,10 +43,10 @@
                 <p>
                     <mat-icon>manage_accounts</mat-icon> Type d'APL:
                     <mat-button-toggle-group name="aplType" [formControl]="aplTypeControl">
-                        <mat-button-toggle value="APL_S">Standard</mat-button-toggle>
-                        <mat-button-toggle value="APL">Sans les salariés</mat-button-toggle>
+                        <mat-button-toggle value="APL">Standard</mat-button-toggle>
+                        <mat-button-toggle value="APL_S">Avec les salariés</mat-button-toggle>
                     </mat-button-toggle-group>
-                    <mat-icon matTooltip="Le calcul de l'APL est basé sur les practiciens exerçant en libéral et les salariés de structures de type maison de santé.">help</mat-icon>
+                    <mat-icon matTooltip="Le calcul de l'APL est basé sur les practiciens exerçant en libéral et éventuellement avec les salariés de structures de type maison de santé.">help</mat-icon>
                 </p>
             }
             <p>

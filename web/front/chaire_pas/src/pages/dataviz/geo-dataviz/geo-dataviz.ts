@@ -76,20 +76,6 @@ export class GeoDataviz implements OnInit {
     return [this.getGeo()];
   }
 
-  // autoPlay() {
-  //   //         (animated)="autoPlay()"
-  //   //    (sliderChange)="onSliderChange($event)"
-  //   // const el = this.plotEl.nativeElement.querySelector('.js-plotly-plot');
-  //   // const frames = el._transitionData._frames;
-  //   // const activeStep = el._fullLayout.sliders[0].active;
-  //   // const lastIndex = frames.length - 1;
-  //   // const active = (el as any).layout.updatemenus[0].active
-  //   // if (activeStep === lastIndex && active <= 1) {
-  //   //   const buttons = this.plotEl.nativeElement.querySelectorAll('.updatemenu-button');
-  //   //   setTimeout(() => buttons[active]?.dispatchEvent(new MouseEvent('click', { bubbles: true })), active == 0 ? 1000 : 400);
-  //   // }
-  // }
-
   onSliderChange(event: any) {
     this.sliderYear.set(event.step.label);
     console.log("Slider "+this.sliderYear());
@@ -594,11 +580,11 @@ export class GeoDataviz implements OnInit {
         else {
           s += `Prix en chambre seule: ${p1.toFixed(0)}€<br>`;
           s += `  Δ à la moyenne nationale: ${this.variation(p1, etab["p1_mean"]![i])}%<br>`;
-          const etab20 = this.years()["2020"]["etab"]!
+          const etab20 = this.years()["2018"]["etab"]!
           const i20 = etab20["fi"].indexOf(etab["fi"][i])
           if (i20 >= 0 && etab20["p1"]) {
             const p120 = etab20["p1"]![i20]
-            s += `  Δ 2020: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%`
+            s += `  Δ 2018: ${p120 < 0 ? "N/A" : this.variation(p1, p120)}%`
           }
         }
       }
@@ -643,36 +629,6 @@ export class GeoDataviz implements OnInit {
     };
     return scatter;
   }
-
-  // getSteps(): Plotly.SliderStep[] {
-  //   const steps: Plotly.SliderStep[] = [];
-  //   for (const year of Object.keys(this.years())) {
-  //     if (+year < 2020 && this.dto()?.code == "CF-00") continue;
-  //     const df_year = this.years()[year];
-  //     const etab = this.years()[year]["etab"]!;
-  //     const step: Plotly.SliderStep = {
-  //       label: year, 
-  //       value: year,
-  //       execute: true,
-  //       visible: true,
-  //       method: 'update',
-  //       args: [
-  //         {
-  //           z: [df_year[this.type()=="APL" ? "apl": "time_hc"]],
-  //           text: [this.getTexts()[+year - +this.firstYear()], this.type() == "APL" ? df_year["apl"]!.map((a, i) => `${a.toFixed(0)}`) : this.getScatterGeoText(etab)],
-  //           lon: [null, this.type() == "APL" ? df_year["lon"] : etab["lon"]],
-  //           lat: [null, this.type() == "APL" ? df_year["lat"] : etab["lat"]],
-  //           marker: {
-  //             color: this.type() == "APL" ? undefined : this.getScatterColor(etab["tension"]),
-  //             size: this.type() == "APL" ? undefined : this.getScatterSize(etab["passu"])
-  //           }
-  //         }
-  //       ]
-  //     };
-  //     steps.push(step);
-  //   }
-  //   return steps;
-  // }
 
   getSteps(): Plotly.SliderStep[] {
     return Object.keys(this.years())

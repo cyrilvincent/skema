@@ -1,6 +1,5 @@
 Projet 1 = Site Web
     En cours
-    Refaire tourner ps_libreacces_raw_parser pour enlever les H
 Projet 2 = Doctolib scraper
     En cours
 Projet 3 = New PS (downloader + parser)

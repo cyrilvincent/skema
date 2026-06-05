@@ -543,9 +543,20 @@ class APLService:
                          aexp: float,
                          with_sal: bool) -> pd.DataFrame:
         logger.info(f"Compute IRIS APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
-        apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
-        apl["year"] = apl["year"]+2000
-        return apl[["specialite", "year", "iris_string", "iris_label", "apl", "code_commune", "commune_label"]]
+        # apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+        # apl["year"] = apl["year"]+2000
+        # return apl[["specialite", "year", "time", "time_type", "exp", "iris_string", "iris_label", "nb", "pop",  "apl", "code_commune", "commune_label"]]
+        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+        type_code, id = self.check_code(code)
+        gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
+        gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
+        gdf_merged = self.gdf_merge_add_columns(gdf_merged)
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
+        gdf_merged["year"] = gdf_merged["year"] + 2000
+        return gdf_merged[['code_insee', 'nom_commune', 'code_iris', 'nom_iris', 'year', 'nb', 'apl', 'pop', 'tp60', 'med', 'gi', 'pop65p', 'pop65p_ratio_france']]
+
+
 
     def compute_commune(self,
                         code: str,
@@ -607,9 +618,11 @@ if __name__ == '__main__':
     # s = json.dumps(export)
     # print(s[:5000])
     # export = s.compute_commune("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
-    export = s.compute_iris("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
-    s = json.dumps(export)
-    print(s[:5000])
+    # export = s.compute_iris("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
+    # s = json.dumps(export)
+    # print(s[:5000])
+    df = s.compute_iris_csv("CC-38185", 10, 30, "HC", -0.12, False)
+    print(df)
 
 
 
