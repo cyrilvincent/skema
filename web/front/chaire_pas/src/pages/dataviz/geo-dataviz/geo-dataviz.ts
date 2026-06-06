@@ -441,41 +441,16 @@ export class GeoDataviz implements OnInit {
             label: '▶',
             method: "skip",
             args: [],
-            //method: 'animate',
-            // args: [
-            //   null,
-            //   {
-            //     // fromcurrent: true,
-            //     // mode: 'immediate',
-            //     // transition: { duration: 300, easing: 'linear' },
-            //     // frame: { duration: 1000, redraw: true },
-            //   },
-            // ],
           },
           {
             label: '⏭',
             method: "skip",
             args: [],
-            // method: 'animate',
-            // args: [
-            //   null,
-            //   {
-            //     fromcurrent: true,
-            //     mode: 'immediate',
-            //     transition: { duration: 300, easing: 'linear' },
-            //     frame: { duration: 200, redraw: true },
-            //   },
-            // ],
           },
           {
             label: '⏸',
             method: "skip",
             args: [],
-            // method: 'animate',
-            // args: [
-            //   [null],
-            //   { mode: 'immediate',} //frame: { duration: 0, redraw: true } },
-            // ],
           },
         ],
       }]
