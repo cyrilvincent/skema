@@ -4,6 +4,7 @@ import os
 import time
 import art
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
+from playwright._impl._errors import TimeoutError
 from bs4 import BeautifulSoup, PageElement
 import json
 import datetime
@@ -101,13 +102,18 @@ class DoctolibScraper:
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.content)
 
+    def ps_exist(self, dir: str, dto: PS):
+        path = f"{dir}/ps_{dto.nick}_{dto.speciality}.html"
+        return os.path.isfile(path)
+
 
 class DoctolibParser:
 
-    def __init__(self, dir="out"):
+    def __init__(self, dir="out", now: datetime.date | None=None):
         self.content = ""
         self.dir = dir
         self.name = ""
+        self.now = now
         self.dto: UrlDTO | None = None
         self.html: BeautifulSoup | None = None
         self.json = {}
@@ -129,6 +135,16 @@ class DoctolibParser:
         path = f"{self.dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
         return self._load(path)
 
+    def check_date(self, name: str, dto: UrlDTO):
+        path = f"{self.dir}/{name}_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
+        ctime = os.path.getctime(path)
+        self.now = datetime.datetime.fromtimestamp(ctime).date()
+        print(f"Setting date to {self.now}")
+
+    def home_exist(self, dir: str, dto: UrlDTO):
+        path = f"{dir}/home_{dto.keyword}_{dto.location}_{dto.avaibilities}_{dto.page}.html"
+        return os.path.isfile(path)
+
     def find_json(self):
         node = self.html.find("script", attrs={"data-id": "removable-json-ld"})
         self.json = json.loads(node.text)
@@ -138,8 +154,11 @@ class DoctolibParser:
         pss: list[PS] = []
         nodes = self.html.find_all("h2")
         for node in nodes:
-            ps = PS(dto.keyword)
+            ps = PS(dto.keyword, self.now)
             ps.name = node.text
+            ps.video = "vidéo" in ps.name
+            if "," in ps.name:
+                ps.name = ps.name[:ps.name.index(",")]
             if "href" in node.parent.attrs.keys():
                 ps.url = node.parent.attrs["href"]
                 ps.short_url = f"https://www.doctolib.fr{ps.url[:ps.url.index("?")]}"
@@ -156,6 +175,7 @@ class DoctolibParser:
     def join_ps_json(self, ps: PS):
         item = self.get_item_json_by_pid(ps.pid)
         if item is not None:
+            ps.medical_speciality = item["medicalSpecialty"]
             ps.type = item["@type"]
             ps.street = item["address"]["streetAddress"]
             ps.cp = item["address"]["postalCode"]
@@ -217,12 +237,11 @@ class DoctolibParser:
     def get_date_from_text(self, text: str) -> datetime.date | None:
         short_regex = r"^\w{3}\. (\d?\d$)"
         groups = re.match(short_regex, text)
-        today = datetime.date.today()
         if groups is not None:
             day = int(groups[1])
-            month = today.month
-            year = today.year
-            if day < today.day:
+            month = self.now.month
+            year = self.now.year
+            if day < self.now.day:
                 month += 1
                 if month > 12:
                     month = 1
@@ -233,7 +252,7 @@ class DoctolibParser:
         if groups is not None:
             day = int(groups[1])
             month = int(self.months[groups[2]])
-            year = today.year if month >= today.month else today.year + 1
+            year = self.now.year if month >= self.now.month else self.now.year + 1
             return datetime.date(year, month, day)
         return None
 
@@ -257,67 +276,75 @@ class DoctolibPSParser(DoctolibParser):
         return self._load(path)
 
     def find_infos(self):
-        node = self.html.find(string=lambda t: t and "Tarifs et remboursement" in t)
-        if node is not None:
-            parent = node.parent
-            p = parent.find("p")
-            if p is not None:
-                if "dépassement" in p.text:
-                    self.dto.convention = "C2"
-                elif "secteur 1" in p.text:
-                    self.dto.convention = "C1"
-                elif "secteur 2" in p.text:
-                    self.dto.convention = "C3"
-                elif "non" in p.text:
-                    self.dto.convention = "NC"
-            if parent.parent.find(string="Carte Vitale acceptée"):
-                self.dto.carte_vitale = True
-            elif parent.parent.find(string="Carte Vitale non acceptée"):
-                self.dto.carte = False
-        node = self.html.find(string="Carte et informations d'accès")
-        if node is not None:
-            parent = node.parent.parent
-            h2 = parent.find("h2", class_="dl-profile-practice-name")
-            if h2 is not None:
-                self.dto.address_name = h2.text
-            div = parent.find("div", id=True)
-            if div is not None:
-                self.dto.address = div.text
-        self.find_tarifs()
-        self.find_legals()
+        if self.html:
+            node = self.html.find(string=lambda t: t and "Tarifs et remboursement" in t)
+            if node is not None:
+                p = node.parent.parent.parent.parent.parent
+                if p is not None:
+                    if "dépassement" in p.text:
+                        self.dto.convention = "C2"
+                    elif "secteur 1" in p.text:
+                        self.dto.convention = "C1"
+                    elif "secteur 2" in p.text:
+                        self.dto.convention = "C3"
+                    elif "non" in p.text:
+                        self.dto.convention = "NC"
+                    if p.find(string="Carte Vitale acceptée"):
+                        self.dto.carte_vitale = True
+                    elif p.find(string="Carte Vitale non acceptée"):
+                        self.dto.carte = False
+            nodes = self.html.find_all(string="Adresses")
+            if len(nodes) > 0:
+                node = nodes[-1]
+                p = node.parent.parent.parent.parent
+                span = p.find("span", class_="break-all")
+                if span is not None:
+                    self.dto.address = span.text
+            self.dto.new_patient = self.html.find("p", string=lambda t: t and "Ce soignant réserve la prise" in t) is None
+            if self.dto.new_patient:
+                self.dto.new_patient = self.html.find("p", string=lambda t: t and "pas de nouveau patient" in t) is None
+            self.find_tarifs()
+            self.find_legals()
+        else:
+            print("No HTML")
 
     def find_tarifs(self):
-        nodes = self.html.find_all("div", class_="dl-profile-fee")
-        for node in nodes:
-            name = node.find("span", class_="dl-profile-fee-name")
-            if name is not None:
-                tarif = Tarif()
-                tarif.label = name.text
-                tarif.datesource_id = self.datesource_id
-                tag = node.find("span", class_="dl-profile-fee-tag")
-                tarif.tarif_string = tag.text
-                regex = r'\d{1,3}(?:\s\d{3})*(?:,\d+)?'  # r"\d+(?:,\d+)?"
-                groups = re.findall(regex, tarif.tarif_string)
-                if len(groups) > 0:
-                    tarif.tarif = float(groups[0].replace(",", ".").replace(" ", ""))
-                    if len(groups) > 1:
-                        tarif.tarif_max = float(groups[1].replace(",", ".").replace(" ", ""))
-                self.dto.tarifs.append(tarif)
-                print(tarif)
+        node = self.html.find("h2", string="Tarifs et remboursement")
+        if node is not None:
+            p = node.parent.parent.parent.parent
+            ul = p.find("ul")
+            if ul is not None:
+                lis = ul.find_all("li")
+                for li in lis:
+                    div = li.find("div", attrs={"data-test": "profiles-details-fees-name"})
+                    if div is not None:
+                        tarif = Tarif()
+                        tarif.label = div.text
+                        tarif.datesource_id = self.datesource_id
+                        tag = li.find("div", attrs={"data-test": "profiles-details-fees-price"})
+                        tarif.tarif_string = tag.text
+                        regex = r'\d{1,3}(?:\s\d{3})*(?:,\d+)?'  # r"\d+(?:,\d+)?"
+                        groups = re.findall(regex, tarif.tarif_string)
+                        if len(groups) > 0:
+                            tarif.tarif = float(groups[0].replace(",", ".").replace(" ", ""))
+                            if len(groups) > 1:
+                                tarif.tarif_max = float(groups[1].replace(",", ".").replace(" ", ""))
+                        self.dto.tarifs.append(tarif)
+                        print(tarif)
 
     def find_legals(self):
         node = self.html.find(string="Informations légales")
         if node is not None:
-            node = node.parent.parent
-            rpps = node.find(string="Numéro RPPS")
+            node = node.parent.parent.parent
+            rpps = node.find(string="Numéro RPPS : ")
             if rpps is not None:
-                self.dto.rpps = rpps.parent.parent.find_all("p")[-1].text
-            adeli = node.find(string="Numéro ADELI")
+                self.dto.rpps = rpps.parent.parent.find_all("span")[-1].text
+            adeli = node.find(string="Numéro ADELI : ")
             if adeli is not None:
-                self.dto.adeli = adeli.parent.parent.find_all("p")[-1].text
+                self.dto.adeli = adeli.parent.parent.find_all("span")[-1].text
             siren = node.find(string="SIREN")
             if siren is not None:
-                self.dto.siren = siren.parent.parent.find_all("p")[-1].text
+                self.dto.siren = siren.parent.parent.find_all("span")[-1].text
 
 
 class DoctolibEngine:
@@ -344,18 +371,27 @@ class DoctolibEngine:
         await self.scraper.get_content()
         self.scraper.save("out", "home", dto)
 
-    async def scrap_ps(self, dto: PS):
-        await self.scraper.goto_ps(dto)
-        await self.scraper.get_content()
-        self.scraper.save_ps("out", dto)
+    async def scrap_ps(self, dto: PS) -> bool:
+        exist = self.scraper.ps_exist("out", dto)
+        if not exist:
+            try:
+                await self.scraper.goto_ps(dto)
+            except TimeoutError as ex:
+                print(ex)
+                time.sleep(30)
+                await self.scraper.goto_ps(dto)
+            time.sleep(3)
+            await self.scraper.get_content()
+            self.scraper.save_ps("out", dto)
+        return exist
 
 
 class DoctolibWorkflow:
 
-    def __init__(self, context):
-        self.parser = DoctolibParser()
+    def __init__(self, context, datesource_id: int):
+        self.parser = DoctolibParser("out")
         self.context = context
-        self.datesource_id = (datetime.date.today().year - 2000) * 100 + datetime.date.today().month
+        self.datesource_id = datesource_id
         self.pss: dict[str, PS] = {}
         self.tarifs: dict[tuple[int, str], Tarif] = {}  # ps_id, label
         self.nb_ram = 0
@@ -379,8 +415,10 @@ class DoctolibWorkflow:
             while True:
                 self.parser.load("home", dto)
                 if self.parser.has_next_page():
-                    time.sleep(4)
+                    # exist = self.parser.home_exist("out", dto)
                     dto.page += 1
+                    # if not exist:
+                    time.sleep(5)
                     await e.scrap_page(dto)
                 else:
                     break
@@ -396,10 +434,13 @@ class DoctolibWorkflow:
                     break
                 self.parser.find_json()
                 pss = self.parser.find_h2_dr()
+                sleep = 3
                 for ps in pss:
-                    time.sleep(3.5)
-                    await e.scrap_ps(ps)
+                    time.sleep(sleep)
+                    exist = await e.scrap_ps(ps)
+                    sleep = 0 if exist else 3
                 dto.page += 1
+                time.sleep(sleep)
 
     def parse_all(self, dto: UrlDTO):
         dto.page = 1
@@ -408,14 +449,17 @@ class DoctolibWorkflow:
             ok = self.parser.load("home", dto)
             if not ok:
                 break
+            self.parser.check_date("home", dto)
             w.parser.find_json()
             pss = w.parser.find_h2_dr()
             for ps in pss:
                 print(ps)
+                if ps.rdv_text is None and ps.rdv_days is not None:
+                    input()
                 if ps.rdv_text is not None:
-                    print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
+                    print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.now, ps.rdv_days)
+                    print()
                 self.parse_ps(ps)
-                # ps.url_dto = dto move to scraper not in bd
                 self.ps_results.append(ps)
             dto.page += 1
 
@@ -425,7 +469,7 @@ class DoctolibWorkflow:
         pps.find_infos()
 
     def commit(self):
-        print("Commit")
+        print(f"Commit {len(self.ps_results)} PS in {self.datesource_id}")
         for ps in self.ps_results:
             if ps.nick not in self.pss.keys():
                 self.pss[ps.nick] = ps
@@ -446,28 +490,53 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo)
 
-    # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 14, "KIRSTEN")
-    # dto = UrlDTO("dermatologue", "france", 1, 14, "Baratte")
-    dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "")
-    w = DoctolibWorkflow(context)
-    # asyncio.run(w.go(dto))  # Do the scrap & parse_all & commit the same day
-    # time.sleep(4)  # Never test go + scrap_pss at the same time
-    # asyncio.run(w.scrap_pss(dto))
-    w.make_cache()
-    w.parse_all(dto)  # Never test parse_all & go & scrap_pss at the same time
+    dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "") # /!\ ps avec l'ancien parser
+    dto = UrlDTO("pediatre", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("medecin-generaliste", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("psychiatre", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("gastro-enterologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("gynecologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("ophtalmologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("cardiologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("neurologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("orl-oto-rhino-laryngologie", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("pneumologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("rhumatologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("stomatologue", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("infirmier", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("sage-femme", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("masseur-kinesitherapeute", "alpes-maritimes", 1, 0, "")
+    dto = UrlDTO("psychologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("dentiste", "alpes-maritimes", 1, 0, "")
+
+    w = DoctolibWorkflow(context, 2606)
+    #
+    # asyncio.run(w.go(dto))  # Do the scrap & parse_all & commit the same time
+    # time.sleep(5)  # Never test go + scrap_pss at the same time
+    #
+    # try:
+    #     asyncio.run(w.scrap_pss(dto))
+    # except:
+    #     try:
+    #         asyncio.run(w.scrap_pss(dto))
+    #     except:
+    #         asyncio.run(w.scrap_pss(dto))
+
+    w.make_cache()  # Never test parse_all & go & scrap_pss at the same time
+    w.parse_all(dto)
+    input("Commit ?")
     w.commit()
 
     # Debug for one PS
-    # ps_dto = PS("dermatologue")
-    # ps_dto.nick = "buhas-buhas"
-    # ps_dto.nick = "abdallah-khemis"
-    # pps = DoctolibPSParser()
+    # ps_dto = PS("pediatre")
+    # ps_dto.nick = "cathijean-suf"  # Ce soignant réserve la prise de rendez-vous en ligne aux patients déjà suivis.
+    # pps = DoctolibPSParser(2606)
     # pps.load(ps_dto)
     # pps.find_infos()
     # w.parse_ps(ps_dto)
 
     # Debug for one home page
-    # dto.page = 3
+    # dto.page = 1
     # w.parser.load("home", dto)
     # w.parser.find_json()
     # pss = w.parser.find_h2_dr()
@@ -476,11 +545,3 @@ if __name__ == '__main__':
     #     print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.rdv_days)
     # print(w.parser.has_next_page())
 
-    # If scraping date != parsing date
-    # update doctolib.ps
-    # set now = '2026-04-23'
-    # where now is not null
-    #
-    # update doctolib.ps
-    # set rdv_days = rdv_days + 7
-    # where rdv_days is not null

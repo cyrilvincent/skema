@@ -1,7 +1,5 @@
-word v5
-filosofi commune
 back : guest
-word to pdf
+Split dataviz
 
 
 

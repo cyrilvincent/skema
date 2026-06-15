@@ -1,3 +1,0 @@
-https://community.jeedom.com/t/tuto-scruter-le-prochain-rdv-doctolib-disponible/140969
-
-Octoparse : https://www.octoparse.fr/blog/extraction-de-donnees-medicales-sur-doctolib#cr%C3%A9er-lextracteur-de-donn%C3%A9es-m%C3%A9dicales

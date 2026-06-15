@@ -59,6 +59,7 @@ class PS(Base):
     pid = Column(String(255), nullable=False)
     nick = Column(String(255), nullable=False, unique=True)
     speciality = Column(String(255), nullable=False)
+    medical_speciality = Column(String(255), nullable=False)
     type = Column(String(50))
     street = Column(String(255))
     city = Column(String(255))
@@ -76,12 +77,14 @@ class PS(Base):
     rpps = Column(String(50))
     adeli = Column(String(50))
     siren = Column(String(50))
+    new_patient = Column(Boolean)
+    video = Column(Boolean)
 
     __table_args__ = ({"schema": "doctolib"},)
 
-    def __init__(self, speciality):
+    def __init__(self, speciality, now=datetime.date.today()):
         super().__init__()
-        self.now = datetime.date.today()
+        self.now = now
         self.rdv_type = 0
         self.speciality = speciality
 
