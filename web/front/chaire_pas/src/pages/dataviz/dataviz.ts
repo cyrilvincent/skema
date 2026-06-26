@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { Searchbox } from './searchbox/searchbox';
+import { Searchbox2 } from './searchbox/searchbox2';
 import { DatavizParameters } from "./dataviz-parameters/dataviz-parameters";
 import {MatDividerModule} from '@angular/material/divider';
 import { GeoDataviz } from "./geo-dataviz/geo-dataviz";
@@ -7,7 +8,7 @@ import { Specialite, GeoInputDTO } from './dataviz.interfaces';
 
 @Component({
   selector: 'app-dataviz',
-  imports: [Searchbox, DatavizParameters, MatDividerModule, GeoDataviz],
+  imports: [Searchbox, Searchbox2, DatavizParameters, MatDividerModule, GeoDataviz],
   templateUrl: './dataviz.html',
   styleUrl: './dataviz.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,9 +21,15 @@ export class Dataviz {
   geoType = signal<string>("iris");
   label = signal<string | null>(null);
   sae2 = input<boolean>(false);
+  codes = signal<[string, string][]>([]);
+
 
   optionSelected(code: [string, string] | null) {
     this.selectedCode.set(code);
+  }
+
+  selectedCodes(codes: [string, string][]) {
+    this.codes.set(codes)
   }
 
   ok(params: [Specialite, number, number, string, boolean, string, string, string | null, string]): void {

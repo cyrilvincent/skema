@@ -2,10 +2,11 @@
     <div>
         <form>
             <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [type]="type()"></app-searchbox></p>
+            <p><app-searchbox2 (selectedCodesEvent)="selectedCodes($event)"  [type]="type()"></app-searchbox2></p>
             <p><app-dataviz-parameters 
                     [type]="type()" 
                     [code]="selectedCode()?.[0] ?? null" 
-                    [disabled]="selectedCode() == null" 
+                    [disabled]="selectedCode() == null && codes().length == 0" 
                     (okEvent)="ok($event)" 
                     [sae2]="sae2()"
                     [label]="selectedCode()?.[1] ?? null">

@@ -1,0 +1,46 @@
+<div>
+    <form class="example-form">
+        <mat-form-field class="example-full-width">
+            <mat-label>
+                <mat-icon>location_on</mat-icon>
+                Commune, communauté de commune, département, région, code insee, code postal  
+                <mat-icon matTooltip="Choisir une commune, communauté de commune, département ou région en saisissant un nom, un code insee ou un code postal puis en sélectionnant la bonne valeur. Il est possible de choisir plusieurs lieux à condition que ces lieux soients adjacents les uns aux autres.">help</mat-icon>
+            </mat-label> 
+            <mat-chip-grid #chipGrid>
+                @for (code of selectedCodes(); track code[0]) {
+                    <mat-chip-row (removed)="remove(code[0])">
+                        {{code[1]}}
+                        <button matChipRemove><mat-icon>cancel</mat-icon></button>
+                    </mat-chip-row>
+                }
+            </mat-chip-grid>  
+            <input #input
+                type="text"
+                placeholder="Choisir un lieu"
+                matInput
+                [formControl]="searchControl"
+                [matAutocomplete]="auto"
+                [matChipInputFor]="chipGrid"
+                autocomplete="off"
+                required
+            >
+            <a (click)="input.value=''" matSuffix matTooltip="Effacer"><mat-icon>close</mat-icon> </a>
+            <mat-autocomplete  
+                #auto="matAutocomplete"
+                (optionSelected)="onSelectedCodes($event.option.value);"
+                [displayWith]="displayTuple"
+                autoActiveFirstOption   
+            >
+                @for (option of options(); track option[0]) {
+                    <mat-option [value]="option">
+                        <span>{{option[1]}}</span> |
+                        <small>{{displayCode(option[0])}}</small>
+                    </mat-option>
+                }
+                @if (!searchLoading() && options().length === 0 && input.value.length > 0) {
+                    <mat-option disabled>Aucun résultat</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+    </form>
+</div>
