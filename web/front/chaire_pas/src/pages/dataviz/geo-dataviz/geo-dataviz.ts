@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
-import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO } from '../dataviz.interfaces';
+import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO, GeoInput2DTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
 import { specialites } from '../dataviz.data';
 import { AccountService } from '../../../shared/account/account.service';
@@ -21,6 +21,7 @@ export class GeoDataviz implements OnInit {
   values = this.service.geoTupleDTO;
   loading = this.service.loading;
   dto = input<GeoInputDTO | null>(null);
+  dto2 = input<GeoInput2DTO | null>(null);
   type = input<string>("APL");
   geoType = input<string>("iris");
   df = computed<GeoDTO>(() => this.values()[0]);

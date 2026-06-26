@@ -4,7 +4,7 @@ import { Searchbox2 } from './searchbox/searchbox2';
 import { DatavizParameters } from "./dataviz-parameters/dataviz-parameters";
 import {MatDividerModule} from '@angular/material/divider';
 import { GeoDataviz } from "./geo-dataviz/geo-dataviz";
-import { Specialite, GeoInputDTO } from './dataviz.interfaces';
+import { Specialite, GeoInputDTO, GeoInput2DTO } from './dataviz.interfaces';
 
 @Component({
   selector: 'app-dataviz',
@@ -22,6 +22,7 @@ export class Dataviz {
   label = signal<string | null>(null);
   sae2 = input<boolean>(false);
   codes = signal<[string, string][]>([]);
+  dto2 = signal<GeoInput2DTO | null>(null);
 
 
   optionSelected(code: [string, string] | null) {
@@ -47,6 +48,23 @@ export class Dataviz {
     this.geoType.set(params[6])
     this.label.set(params[7]);
     console.log(this.dto());
+  }
+
+  ok2(params: [Specialite, number, number, string, boolean, string, string, string | null, string]): void {
+    const s: GeoInput2DTO = {
+      codes: this.codes().map(c => c[0]),
+      id: params[0].id, 
+      bor: params[0].shortLabel, 
+      time: params[1],
+      exp: params[2],
+      hc: params[3],
+      resolution: params[5],
+      apl_type: params[8],
+    };
+    this.dto2.set(s);
+    this.geoType.set(params[6])
+    this.label.set(params[7]);
+    console.log(this.dto2());
   }
 
 }

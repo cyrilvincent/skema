@@ -16,6 +16,17 @@ export interface GeoInputDTO {
     apl_type: string;
 }
 
+export interface GeoInput2DTO {
+    codes: string[];
+    id: number;
+    bor: string;
+    time: number;
+    exp: number;
+    hc: string;
+    resolution: string;
+    apl_type: string;
+}
+
 export interface GeometryDTO {
     type: string;
     coordinates: any[][];
