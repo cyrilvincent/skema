@@ -159,7 +159,7 @@ export class DatavizParameters {
           }, this.type(), this.renderType(), this.geoType());
     }
     else if (this.fullScreen()) {
-      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.codes()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)+"&geoType="+this.geoType()+"&aplType="+this.aplType()+"&sae2="+this.sae2();
+      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&codes="+this.codes().join("|")+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)+"&geoType="+this.geoType()+"&aplType="+this.aplType()+"&sae2="+this.sae2();
       window.open(url, "_blank");
     }
     else {
