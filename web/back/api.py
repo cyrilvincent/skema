@@ -194,11 +194,11 @@ async def apl_commune(dto: GeoInputDTO):
 
 
 @app.post("/apl/iris/csv")
-async def apl_iris_csv(dto: GeoInputDTO, user=Depends(admin_user)):
+async def apl_iris_csv(dto: GeoInput2DTO, user=Depends(admin_user)):
     logger.info(f"Get /apl/iris/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_iris_csv,
-                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
+                                   dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     duration = charge_manager.stop(start)
     log_charge("/apl/iris/csv", duration)
     return data.to_csv(index=False)

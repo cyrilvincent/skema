@@ -8,7 +8,7 @@ import { Specialite, GeoInputDTO, GeoInput2DTO } from './dataviz.interfaces';
 
 @Component({
   selector: 'app-dataviz',
-  imports: [Searchbox, Searchbox2, DatavizParameters, MatDividerModule, GeoDataviz],
+  imports: [Searchbox2, DatavizParameters, MatDividerModule, GeoDataviz],
   templateUrl: './dataviz.html',
   styleUrl: './dataviz.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +65,10 @@ export class Dataviz {
     this.geoType.set(params[6])
     this.label.set(params[7]);
     console.log(this.dto2());
+  }
+
+  getCodes(): string[] {
+    return this.codes().map(x => x[0])
   }
 
 }

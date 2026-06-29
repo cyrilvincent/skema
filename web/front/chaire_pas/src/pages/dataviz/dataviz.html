@@ -1,11 +1,11 @@
 <div>
     <div>
         <form>
-            <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [type]="type()"></app-searchbox></p>
+            <!-- <p><app-searchbox (optionSelectedEvent)="optionSelected($event)" [type]="type()"></app-searchbox></p> -->
             <p><app-searchbox2 (selectedCodesEvent)="selectedCodes($event)"  [type]="type()"></app-searchbox2></p>
             <p><app-dataviz-parameters 
-                    [type]="type()" 
-                    [code]="selectedCode()?.[0] ?? null" 
+                    [type]="type()"
+                    [codes]="getCodes()"
                     [disabled]="selectedCode() == null && codes().length == 0" 
                     (okEvent)="ok2($event)" 
                     [sae2]="sae2()"

@@ -26,7 +26,7 @@ export class DatavizParameters {
   type = input<string>("APL");
   geoType = signal<string>("iris");
   geoTypeControl = new FormControl<string>("iris");
-  code = input<string | null>(null);
+  codes = input<string[]>([]);
   sae2 = input<boolean>(false);
   specialites = computed(() => this.sae2() ? specialites["SAE2"] : specialites[this.type()]);
   generaliste = computed(() => this.specialites().filter(p => p.id === 10)[0])
@@ -47,14 +47,14 @@ export class DatavizParameters {
   renderType = signal<string>("dataviz");
   renderTypeControl = new FormControl<string>("dataviz");
   geoService = inject(GeoService);
-  lastCode = signal<string>("");
+  lastCodes = signal<string[]>([]);
   label = input<string | null>(null);
   aplTypeControl = new FormControl<string>("APL");
   aplType = signal("APL");
   accountService = inject(AccountService);
 
   constructor() {
-    effect(() => this.onCodeChanged(this.code()));
+    effect(() => this.onCodeChanged(this.codes()));
   }
 
   ngOnInit() {
@@ -113,10 +113,10 @@ export class DatavizParameters {
     );
   }
 
-  onCodeChanged(code: string | null) { // Warning recursive function
-    if (code != null && code != this.lastCode()) { // lastCode for prevent infinite loop not necessary
-      console.log("CodeChanged "+ code); 
-      const c = this.code()!.slice(0, 2);
+  onCodeChanged(codes: string[]) { // Warning recursive function
+    if (codes.length > 0 && codes != this.lastCodes()) { // lastCode for prevent infinite loop not necessary
+      console.log("CodeChanged "+ codes); 
+      const c = this.codes()[0]!.slice(0, 2);
       if (c == "CF") {
         this.resolutionControl.setValue("LD");
       }
@@ -129,12 +129,12 @@ export class DatavizParameters {
       else if (c == "CC" && this.resolution() != "HD") {
         this.resolutionControl.setValue("HD");
       }
-      this.lastCode.set(code);
+      this.lastCodes.set(codes);
     }
   }
 
   isResolutionBlocked(res: string): boolean {
-    const code = this.code()?.slice(0, 2);
+    const code = this.codes()[0]?.slice(0, 2);
     if (res=="HD") return code == "CF"; // || code == "CR";
     else if (res=="MD") return code == "CF" || code == "CC";
     return code != "CF" && code != "CR";
@@ -148,7 +148,7 @@ export class DatavizParameters {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
     if (this.renderType() != "dataviz") {
       this.geoService.save({
-            codes: [], //todo this.code()!,
+            codes: this.codes(),
             id: this.selectedSpecialite().id, 
             bor: this.selectedSpecialite().shortLabel, 
             time: this.time(),
@@ -159,7 +159,7 @@ export class DatavizParameters {
           }, this.type(), this.renderType(), this.geoType());
     }
     else if (this.fullScreen()) {
-      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.code()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)+"&geoType="+this.geoType()+"&aplType="+this.aplType()+"&sae2="+this.sae2();
+      const url = window.location.href+"?fullscreen=true&type="+this.type()+"&code="+this.codes()+"&specialite="+this.selectedSpecialite().id+"&time="+String(this.time())+"&hc="+this.hc()+"&exp="+String(this.exp())+"&resolution="+this.resolution()+"&label="+encodeURIComponent(this.label()!)+"&geoType="+this.geoType()+"&aplType="+this.aplType()+"&sae2="+this.sae2();
       window.open(url, "_blank");
     }
     else {
@@ -174,7 +174,7 @@ export class DatavizParameters {
   }
 
   disableButton(): boolean {
-    return false && this.code() == "CF-00" && this.type() == "SAE" && this.selectedSpecialite().id > 2  && this.renderType() == "dataviz";
+    return false && this.codes()[0] == "CF-00" && this.type() == "SAE" && this.selectedSpecialite().id > 2  && this.renderType() == "dataviz";
     // J'ai du limiter à firstYear=2020 pour que ca marche
   }
 
