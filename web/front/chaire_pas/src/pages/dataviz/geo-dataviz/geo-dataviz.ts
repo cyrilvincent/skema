@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { PlotlyModule, PlotlyComponent, PlotlyService } from 'angular-plotly.js';
-import { GeoInputDTO, GeoTupleDTO, GeoDTO, GeoYearDTO, EtabDTO, GeoInput2DTO } from '../dataviz.interfaces';
+import { GeoInputDTO, GeoDTO, GeoYearDTO, EtabDTO, GeoInput2DTO } from '../dataviz.interfaces';
 import { GeoService } from './geo-service';
 import { specialites } from '../dataviz.data';
 import { AccountService } from '../../../shared/account/account.service';
@@ -20,13 +20,13 @@ export class GeoDataviz implements OnInit {
   accountService = inject(AccountService);
   values = this.service.geoTupleDTO;
   loading = this.service.loading;
-  dto = input<GeoInputDTO | null>(null);
-  dto2 = input<GeoInput2DTO | null>(null);
+  // dto = input<GeoInputDTO | null>(null);
+  dto = input<GeoInput2DTO | null>(null);
   type = input<string>("APL");
   geoType = input<string>("iris");
   df = computed<GeoDTO>(() => this.values()[0]);
   years = computed<{[key: string]: GeoYearDTO}>(() =>  this.df()["years"]);
-  firstYear = computed<string>(() => this.dto() && this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
+  firstYear = computed<string>(() => this.dto() &&  this.dto()?.codes[0] == "CF-00" ? "2020" : Object.keys(this.years())[0]); // this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading gituhub 22/02/2026
@@ -150,7 +150,7 @@ export class GeoDataviz implements OnInit {
   //   Plotly.relayout(el, { 'sliders[0].active': step } as any);
   // }
 
-  onInputDTOChanged(dto: GeoInputDTO | null) {
+  onInputDTOChanged(dto: GeoInput2DTO | null) {
     if (dto != null) {
       console.log("onInputDTOchanged "+ this.geoType());
       console.log(dto);
@@ -274,7 +274,7 @@ export class GeoDataviz implements OnInit {
 
   getTexts(): string[][] {
     const texts: string[][] = [];
-    if (this.dto()?.code == "CF") return texts;
+    if (this.dto()?.codes[0] == "CF") return texts;
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
       let text = df_year["pop"].map((_, i) => this.getText(i, df_year, year));
@@ -388,17 +388,18 @@ export class GeoDataviz implements OnInit {
   getTitle(): string {
     const codes: { [key: string]: string } = {"CC": "Commune de", "CD": "Département", "CR": "Région", "CP": "Commune(s) de", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"};
     if(this.dto() != null) {
-      const code = this.dto()!.code.slice(0, 2);
+      const code = this.dto()!.codes[0].slice(0, 2);
       let s = this.specialites().find(s => s.id == this.dto()!.id)!.label + "<br>";
       s += codes[code];
-      if (code != "CF") s += " "+this.label();
+      if (code != "CF") s += " " + this.label();
+      if (this.dto()!.codes.length > 1) s += " et autres ...";
       return s;
     }
     return "";
   }
 
   getZoom(): number {
-    const code: string = this.dto()!.code.slice(0,2)
+    const code: string = this.dto()!.codes[0].slice(0,2)
     return this.zooms[code];
   }
 
@@ -608,7 +609,7 @@ export class GeoDataviz implements OnInit {
 
   getSteps(): Plotly.SliderStep[] {
     return Object.keys(this.years())
-      .filter(year => !(+year < 2020 && this.dto()?.code == "CF-00"))
+      .filter(year => !(+year < 2020 && this.dto()?.codes[0] == "CF-00"))
       .map(year => ({
         label: year,
         value: year,
@@ -629,7 +630,7 @@ export class GeoDataviz implements OnInit {
   getFrames(): Partial<Plotly.Frame>[] {
     const frames: Partial<Plotly.Frame>[] = [];
     for (const year of Object.keys(this.years())) {
-      if (+year < 2020 && this.dto()?.code == "CF-00") continue;
+      if (+year < 2020 && this.dto()?.codes[0] == "CF-00") continue;
       const df_year = this.years()[year];
       const etab = this.years()[year]["etab"]!;
       const frame: Partial<Plotly.Frame> = {
@@ -659,11 +660,7 @@ export class GeoDataviz implements OnInit {
 
   getConfig(): Partial<Plotly.Config> {
     const config: Partial<Plotly.Config> = {
-      autosizable: true,
-      responsive: true,
-      displayModeBar: true,
-      displaylogo: false,
-      locale: 'fr',
+      autosizable: true, responsive: true, displayModeBar: true, displaylogo: false, locale: 'fr',
       modeBarButtonsToRemove: this.accountService.isLogged() ? ['lasso2d', 'select2d'] : ['lasso2d', 'select2d', 'toImage'],
       modeBarButtonsToAdd: [
         {
@@ -681,7 +678,7 @@ export class GeoDataviz implements OnInit {
           name: 'Normalize',
           icon: Plotly.Icons.zoombox,
           click: (() => {
-            if (this.dto()?.code != "CF-00") this.normColorBar.set(!this.normColorBar());
+            if (this.dto()?.codes[0] != "CF-00") this.normColorBar.set(!this.normColorBar());
           }),
         },
         {

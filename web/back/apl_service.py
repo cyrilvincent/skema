@@ -468,10 +468,14 @@ class APLService:
         self.corrections(apl)
         return apl, studies_df
 
+    def join_codes(self, codes: list[str]):
+        codes.sort()
+        return "_".join(codes)
+
     def save_pickle(self,
                     export:  tuple[dict, any],
                     apl_or_sae: str,
-                    code: str,
+                    codes: list[str],
                     specialite: int,
                     time: int,
                     time_type: str,
@@ -481,7 +485,8 @@ class APLService:
         if self.no_pickle:
             logger.warning("No pickle, only for test")
         else:
-            path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+            path = (f"cache/{apl_or_sae}_{self.join_codes(codes)}_{specialite}_{time}_{time_type}_{aexp}_{resolution}"
+                    f"_{with_sal}.pickle")
             if not os.path.exists(path):
                 with open(path, "wb") as f:
                     logger.info(f"Save {path}")
@@ -489,7 +494,7 @@ class APLService:
 
     def load_pickle(self,
                     apl_or_sae: str,
-                    code: str,
+                    codes: list[str],
                     specialite: int,
                     time: int,
                     time_type: str,
@@ -499,7 +504,8 @@ class APLService:
         if self.no_pickle:
             logger.warning("No pickle, only for test")
         else:
-            path = f"cache/{apl_or_sae}_{code}_{specialite}_{time}_{time_type}_{aexp}_{resolution}_{with_sal}.pickle"
+            path = (f"cache/{apl_or_sae}_{self.join_codes(codes)}_{specialite}_{time}_{time_type}_{aexp}_{resolution}"
+                    f"_{with_sal}.pickle")
             if os.path.exists(path):
                 with open(path, "rb") as f:
                     logger.info(f"Load {path}")
@@ -533,6 +539,47 @@ class APLService:
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
         self.save_pickle(export, "apl", code, specialite, time, time_type, aexp, resolution, with_sal)
+        return export
+
+    def compute2_iris(self,
+                     codes: list[str],
+                     specialite: int,
+                     time: int,
+                     time_type: str,
+                     aexp: float,
+                     resolution: str,
+                     with_sal: bool) -> tuple[dict, any]:
+        logger.info(f"Compute IRIS APL for {codes} {specialite} {time} {time_type} {aexp} {with_sal}")
+        export = self.load_pickle("apl", codes, specialite, time, time_type, aexp, resolution, with_sal)
+        if export is not None:
+            return export
+        if len(codes) == 0:
+            logger.warning("No codes")
+            raise ServiceError("No codes")
+        self.check_time_type(time_type)
+        self.check_resolution(resolution)
+        apl, studies_df = self.get_apl(codes[0], specialite, time, time_type, aexp, with_sal)
+        type_code, id = self.check_code(codes[0])
+        gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
+        logger.info(f"Found {len(gdf)} gdfs")
+        gdf_merged = self.merge_iris_gdf_apl(gdf, apl)
+        logger.info(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        for code in codes[1:]:
+            apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+            type_code, id = self.check_code(code)
+            gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
+            logger.info(f"Found more {len(gdf)} gdfs")
+            temp = self.merge_iris_gdf_apl(gdf, apl)
+            if len(temp) > 0:
+                gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
+                gdf_merged = gdf_merged.drop_duplicates(subset=["cleabs", "year"])
+                logger.info(f"Merged more {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        gdf_merged = self.gdf_merge_add_columns(gdf_merged)
+        gdf_merged = self.simplify(gdf_merged, resolution)
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
+        export = self.get_export(str(codes), studies_df, gdf_merged)
+        self.save_pickle(export, "apl", codes, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
     def compute_iris_csv(self,
@@ -602,20 +649,19 @@ class APLService:
                            'med', 'gi', 'pop65p', 'pop65p_ratio_france']]
 
 
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     pd.set_option('display.max_columns', None)
     pd.options.display.width = 0
     s = APLService()
     time.sleep(1)
+    # s.no_pickle = True
     # export = s.compute_iris("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)  #CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
     # print(s[:5000])
     # export = s.compute_commune("CC-38185", 10, 30, "HC", -0.12, "HD", with_sal=True)
     # s = json.dumps(export)
     # print(s[:5000])
-    s.no_pickle = True
     # export = s.compute_iris("CC-02302", 10, 30, "HC", -0.12, "HD",
     #                         with_sal=True)  # CC-38185 CC-38205 CC-38021 Autrans CC-38225 Autrans Meaudre CC-75101 CC-75056 CC-06088 CC-75101 CD-38 CD-06 CR-84 CR-93 CE-200040715 CA-381 CF-00
     # s = json.dumps(export)
@@ -624,8 +670,12 @@ if __name__ == '__main__':
     # export = s.compute_iris("CD-06", 10, 30, "HC", -0.12, "HD", with_sal=False)
     # s = json.dumps(export)
     # print(s[:5000])
-    df = s.compute_commune_csv("CC-38185", 10, 30, "HC", -0.12, False)
-    print(df)
+    # df = s.compute_commune_csv("CC-38185", 10, 30, "HC", -0.12, False)
+    # print(df)
+    export = s.compute2_iris(['CC-38225', 'CC-38205'], 10, 30, "HC", -0.12, "HD", with_sal=True)
+    # s = json.dumps(export)
+    # print(s[:5000])
+
 
 
 

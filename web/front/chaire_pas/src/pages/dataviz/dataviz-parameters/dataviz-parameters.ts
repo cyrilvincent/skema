@@ -148,7 +148,7 @@ export class DatavizParameters {
     console.log("Specialite: "+this.selectedSpecialite().id+" Time: "+this.time()+" exp: "+this.exp()+" heure : "+this.hc()+" fullscreen: "+this.fullScreen());
     if (this.renderType() != "dataviz") {
       this.geoService.save({
-            code: this.code()!,
+            codes: [], //todo this.code()!,
             id: this.selectedSpecialite().id, 
             bor: this.selectedSpecialite().shortLabel, 
             time: this.time(),

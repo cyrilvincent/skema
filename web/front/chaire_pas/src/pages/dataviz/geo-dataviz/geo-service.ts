@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { CommonService } from '../../../shared/common.service';
-import { GeoInputDTO, GeoTupleDTO } from '../dataviz.interfaces';
+import { GeoInput2DTO, GeoInputDTO, GeoTupleDTO } from '../dataviz.interfaces';
 import { environment } from '../../../environments/environment';
 import { emptyGeo } from '../dataviz.data';
 import { FileSaverService } from 'ngx-filesaver';
@@ -12,14 +12,14 @@ export class GeoService  extends CommonService {
   _geoTupleDTO = signal<GeoTupleDTO>(emptyGeo);
   geoTupleDTO = computed(() => this._geoTupleDTO());
   fileSaver = inject(FileSaverService);
-  chloroType = signal("chloroplethmap");
+  chloroType = signal("chloroplethmap");  // to remove
 
-  fetch(dto: GeoInputDTO, type: string, geoType: string): void {
+  fetch(dto: GeoInput2DTO, type: string, geoType: string): void {
     if (type == "APL") this.fetchAPL(dto, geoType);
     else this.fetchSAE(dto, geoType);
   }
 
-  save(dto: GeoInputDTO, type: string, render: string, geoType: string) {
+  save(dto: GeoInput2DTO, type: string, render: string, geoType: string) {
     if (type == "APL") {
       if (render == "json") this.saveAPLJSON(dto, geoType);
       else if (render == "csv") this.saveAPLCSV(dto, geoType);
@@ -34,14 +34,14 @@ export class GeoService  extends CommonService {
     this._geoTupleDTO.set(emptyGeo);
   }
 
-  private fetchAPL(dto: GeoInputDTO, geoType: string): void {
+  private fetchAPL(dto: GeoInput2DTO, geoType: string): void {
     console.log("FetchAPL "+geoType);
     console.log(dto);
     this.fetchLoading();
-    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl/${geoType}`, dto).subscribe({
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/apl2/${geoType}`, dto).subscribe({
       next: (res) => { this._geoTupleDTO.set(res); },
       error: (err) => {
-        if(err.status == 404) console.log("Not found "+dto.code);
+        if(err.status == 404) console.log("Not found "+dto.codes);
         else this.catchError(err);
         this._geoTupleDTO.set(emptyGeo);
       },
@@ -49,7 +49,7 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveAPLJSON(dto: GeoInputDTO, geoType: string): void {
+  private saveAPLJSON(dto: GeoInput2DTO, geoType: string): void {
     console.log("saveAPLJSON "+geoType);
     console.log(dto);
     this.fetchLoading();
@@ -63,7 +63,7 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveAPLCSV(dto: GeoInputDTO, geoType: string): void {
+  private saveAPLCSV(dto: GeoInput2DTO, geoType: string): void {
     console.log("SaveAPLCSV "+geoType);
     console.log(dto);
     this.fetchLoading();
@@ -77,7 +77,7 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private fetchSAE(dto: GeoInputDTO, geoType: string): void {
+  private fetchSAE(dto: GeoInput2DTO, geoType: string): void {
     console.log("FetchSAE "+geoType);
     dto.hc = "HC";
     dto.time = 60;
@@ -90,7 +90,7 @@ export class GeoService  extends CommonService {
         this._geoTupleDTO.set(res); 
       },
       error: (err) => {
-        if(err.status == 404) console.log("Not found "+dto.code);
+        if(err.status == 404) console.log("Not found "+dto.codes);
         else this.catchError(err);
         this._geoTupleDTO.set(emptyGeo);
       },
@@ -98,7 +98,7 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveSAEJSON(dto: GeoInputDTO, geoType: string): void {
+  private saveSAEJSON(dto: GeoInput2DTO, geoType: string): void {
     console.log("saveSAEJSON "+geoType);
     dto.hc = "HC";
     dto.time = 60;
@@ -114,7 +114,7 @@ export class GeoService  extends CommonService {
     });
   }
 
-  private saveSAECSV(dto: GeoInputDTO, geoType: string): void {
+  private saveSAECSV(dto: GeoInput2DTO, geoType: string): void {
     console.log("SaveSAECSV "+geoType);
     dto.hc = "HC";
     dto.time = 60;

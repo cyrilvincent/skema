@@ -10,7 +10,7 @@ export class SearchService extends CommonService {
 
   codes = signal<[string, string][]>([]);
   accountService = inject(AccountService);
-  nbChipMax = signal(10);
+  nbChipMax = signal(5);
 
   constructor() {
     super();

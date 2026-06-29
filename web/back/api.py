@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from starlette.responses import JSONResponse
 import config
-from interfaces import GeoInputDTO, TokenResponse, LoginRequest
+from interfaces import GeoInputDTO, TokenResponse, LoginRequest, GeoInput2DTO
 from fastapi.concurrency import run_in_threadpool
 import logging
 import logging.config
@@ -161,6 +161,21 @@ async def apl_iris(dto: GeoInputDTO):
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
     log_charge("/apl/iris", duration)
+    return data
+
+
+@app.post("/apl2/iris")  # Passer en guest + isValidAnonymousToken en front au click du bouton
+async def apl_iris2(dto: GeoInput2DTO):
+    logger.info(f"Get /apl2/iris")
+    start = charge_manager.start()
+    data = await run_in_threadpool(apl_service.compute2_iris,
+                                   dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.resolution,
+                                   dto.apl_type == "APL_S")
+    if len(data[1]["features"]) == 0:
+        logger.warning(f"Get /apl2/iris 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    duration = charge_manager.stop(start)
+    log_charge("/apl2/iris", duration)
     return data
 
 

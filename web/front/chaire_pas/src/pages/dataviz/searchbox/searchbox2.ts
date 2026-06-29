@@ -57,7 +57,11 @@ export class Searchbox2 {
   // }
 
   onSelectedCodes(v: [string, string]) {
-    if (v[0][0] === "C" && v[0][2] === "-") {
+    if (v[0] == "CF-00" || v[0].slice(0, 3) == "CR-"  || this.searchService.nbChipMax() == 1) {
+      this.selectedCodes.set([v]);
+      this.selectedCodesEvent.emit(this.selectedCodes());
+    }
+    else if (v[0][0] == "C" && v[0][2] == "-") {
       if (this.selectedCodes().length < this.searchService.nbChipMax()) {
         this.selectedCodes.update(l => l.some(([code]) => code == v[0]) ? l : [...l, v]);
         this.selectedCodesEvent.emit(this.selectedCodes());

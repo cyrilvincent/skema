@@ -24,7 +24,7 @@
                 autocomplete="off"
                 required
             >
-            <a (click)="input.value=''" matSuffix matTooltip="Effacer"><mat-icon>close</mat-icon> </a>
+            <a (click)="input.value='';selectedCodes.set([])" matSuffix matTooltip="Effacer"><mat-icon>close</mat-icon> </a>
             <mat-autocomplete  
                 #auto="matAutocomplete"
                 (optionSelected)="onSelectedCodes($event.option.value);"

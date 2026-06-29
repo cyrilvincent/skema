@@ -7,12 +7,12 @@
                     [type]="type()" 
                     [code]="selectedCode()?.[0] ?? null" 
                     [disabled]="selectedCode() == null && codes().length == 0" 
-                    (okEvent)="codes.length == 0 ? ok($event) : ok2($event)" 
+                    (okEvent)="ok2($event)" 
                     [sae2]="sae2()"
-                    [label]="selectedCode()?.[1] ?? null">
+                    [label]="codes().length > 0 ? codes()[0][1] : null">
                 </app-dataviz-parameters></p>
             <mat-divider></mat-divider>
-            <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto()" [dto2]="dto2()" [label]="label()" [sae2]="sae2()"></app-geo-dataviz>
+            <app-geo-dataviz [type]="type()" [geoType]="geoType()" [dto]="dto2()" [label]="label()" [sae2]="sae2()"></app-geo-dataviz>
         </form>
     </div>
 </div>
