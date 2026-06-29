@@ -165,7 +165,7 @@ async def apl_iris(dto: GeoInputDTO):
 
 
 @app.post("/apl2/iris")  # Passer en guest + isValidAnonymousToken en front au click du bouton
-async def apl_iris2(dto: GeoInput2DTO):
+async def apl2_iris(dto: GeoInput2DTO):
     logger.info(f"Get /apl2/iris")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute2_iris,
@@ -190,6 +190,21 @@ async def apl_commune(dto: GeoInputDTO):
         raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
     duration = charge_manager.stop(start)
     log_charge("/apl/commune", duration)
+    return data
+
+
+@app.post("/apl2/commune")
+async def apl2_commune(dto: GeoInput2DTO):
+    logger.info(f"Get /apl2/commune")
+    start = charge_manager.start()
+    data = await run_in_threadpool(apl_service.compute2_commune,
+                                   dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.resolution,
+                                   dto.apl_type == "APL_S")
+    if len(data[1]["features"]) == 0:
+        logger.warning(f"Get /apl2/commune 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+    duration = charge_manager.stop(start)
+    log_charge("/apl2/commune", duration)
     return data
 
 

@@ -522,9 +522,9 @@ class APLService:
                      resolution: str,
                      with_sal: bool) -> tuple[dict, any]:
         logger.info(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
-        export = self.load_pickle("apl", code, specialite, time, time_type, aexp, resolution, with_sal)
-        if export is not None:
-            return export
+        # export = self.load_pickle("apl", code, specialite, time, time_type, aexp, resolution, with_sal)
+        # if export is not None:
+        #     return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         self.check_resolution(resolution)
@@ -538,7 +538,7 @@ class APLService:
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         export = self.get_export(code, studies_df, gdf_merged)
-        self.save_pickle(export, "apl", code, specialite, time, time_type, aexp, resolution, with_sal)
+        # self.save_pickle(export, "apl", code, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
     def compute2_iris(self,
@@ -624,9 +624,9 @@ class APLService:
                         resolution: str,
                         with_sal: bool) -> tuple[dict, any]:
         logger.info(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
-        export = self.load_pickle("apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
-        if export is not None:
-            return export
+        # export = self.load_pickle("apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
+        # if export is not None:
+        #     return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         self.check_resolution(resolution)
@@ -640,7 +640,42 @@ class APLService:
         gdf_commune = self.group_apl_by_commune(gdf_merged)
         gdf_commune = self.gdf_merge_add_columns(gdf_commune)
         export = self.get_export(code, studies_df, gdf_commune)
-        self.save_pickle(export, "apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
+        # self.save_pickle(export, "apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
+        return export
+
+    def compute2_commune(self, codes: list[str], specialite: int, time: int, time_type: str, aexp: float,
+                         resolution: str, with_sal: bool) -> tuple[dict, any]:
+        logger.info(f"Compute Commune APL for {codes} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
+        export = self.load_pickle("apl_commune", codes, specialite, time, time_type, aexp, resolution, with_sal)
+        if export is not None:
+            return export
+        if len(codes) == 0:
+            logger.warning("No codes")
+            raise ServiceError("No codes")
+        self.check_time_type(time_type)
+        self.check_resolution(resolution)
+        apl, studies_df = self.get_apl(codes[0], specialite, time, time_type, aexp, with_sal)
+        type_code, id = self.check_code(codes[0])
+        gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+        logger.info(f"Found {len(gdf)} gdfs")
+        gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
+        logger.info(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        for code in codes[1:]:
+            apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+            type_code, id = self.check_code(code)
+            gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+            logger.info(f"Found more {len(gdf)} gdfs")
+            temp = self.merge_commune_gdf_apl(gdf, apl)
+            if len(temp) > 0:
+                gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
+                gdf_merged = gdf_merged.drop_duplicates(subset=["code", "year"])
+                logger.info(f"Merged {len(gdf_merged) / len(self.years):.0f} gdf-apls by year")
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
+        gdf_commune = self.group_apl_by_commune(gdf_merged)
+        gdf_commune = self.gdf_merge_add_columns(gdf_commune)
+        export = self.get_export(str(codes), studies_df, gdf_commune)
+        self.save_pickle(export, "apl_commune", codes, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
     def compute_commune_csv(self,
@@ -686,7 +721,8 @@ if __name__ == '__main__':
     # print(s[:5000])
     # df = s.compute_commune_csv("CC-38185", 10, 30, "HC", -0.12, False)
     # print(df)
-    export = s.compute2_iris(['CC-38225', 'CC-38205'], 10, 30, "HC", -0.12, "HD", with_sal=True)
+    # export = s.compute2_iris(['CC-38225', 'CC-38205'], 10, 30, "HC", -0.12, "HD", with_sal=True)
+    export = s.compute2_commune(['CC-38225', 'CC-38205'], 10, 30, "HC", -0.12, "HD", with_sal=True)
     # s = json.dumps(export)
     # print(s[:5000])
 
