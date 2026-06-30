@@ -83,7 +83,7 @@ export class GeoService  extends CommonService {
     dto.time = 60;
     console.log(dto);
     this.fetchLoading();
-    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae/${geoType}`, dto).subscribe({
+    this.http.post<GeoTupleDTO>(`${environment.baseUrl}/sae2/${geoType}`, dto).subscribe({
       next: (res) => { 
         console.log("fetchSAE");
         console.log(res);

@@ -272,9 +272,21 @@ export class GeoDataviz implements OnInit {
     else return this.getSaeTexts(i, df_year, year, false);
   }
 
+  maxCode(): string {
+    if (!this.dto) return ""
+    const codes = this.dto()!.codes.map(s => s.slice(0, 2))
+    if (codes.includes("CF")) return "CF";
+    if (codes.includes("CR")) return "CR";
+    if (codes.includes("CD")) return "CD";
+    if (codes.includes("CE")) return "CE";
+    if (codes.includes("CA")) return "CA";
+    return "CC"
+  }
+
   getTexts(): string[][] {
     const texts: string[][] = [];
-    if (this.dto()?.codes[0] == "CF") return texts;
+    //if (this.dto()?.codes[0] == "CF") return texts;
+    if (this.maxCode() == "CF") return texts;
     for (const year of Object.keys(this.years())) {
       const df_year = this.years()[year];
       let text = df_year["pop"].map((_, i) => this.getText(i, df_year, year));
@@ -388,7 +400,8 @@ export class GeoDataviz implements OnInit {
   getTitle(): string {
     const codes: { [key: string]: string } = {"CC": "Commune de", "CD": "Département", "CR": "Région", "CP": "Commune(s) de", "CE": "Communauté de commune", "CA": "Arrondissement de département", "CF": "France"};
     if(this.dto() != null) {
-      const code = this.dto()!.codes[0].slice(0, 2);
+      //const code = this.dto()!.codes[0].slice(0, 2);
+      const code = this.maxCode();
       let s = this.specialites().find(s => s.id == this.dto()!.id)!.label + "<br>";
       s += codes[code];
       if (code != "CF") s += " " + this.label();
@@ -399,7 +412,8 @@ export class GeoDataviz implements OnInit {
   }
 
   getZoom(): number {
-    const code: string = this.dto()!.codes[0].slice(0,2)
+    //const code: string = this.dto()!.codes[0].slice(0,2)
+    const code = this.maxCode();
     return this.zooms[code];
   }
 

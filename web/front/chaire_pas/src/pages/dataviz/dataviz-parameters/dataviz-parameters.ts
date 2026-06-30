@@ -113,10 +113,21 @@ export class DatavizParameters {
     );
   }
 
+  maxCode(codes: string[]): string {
+    const cs = codes.map(s => s.slice(0, 2))
+    if (cs.includes("CF")) return "CF";
+    if (cs.includes("CR")) return "CR";
+    if (cs.includes("CD")) return "CD";
+    if (cs.includes("CE")) return "CE";
+    if (cs.includes("CA")) return "CA";
+    return "CC"
+  }
+
   onCodeChanged(codes: string[]) { // Warning recursive function
     if (codes.length > 0 && codes != this.lastCodes()) { // lastCode for prevent infinite loop not necessary
       console.log("CodeChanged "+ codes); 
-      const c = this.codes()[0]!.slice(0, 2);
+      //const c = this.codes()[0]!.slice(0, 2);
+      const c = this.maxCode(codes);
       if (c == "CF") {
         this.resolutionControl.setValue("LD");
       }
@@ -134,7 +145,8 @@ export class DatavizParameters {
   }
 
   isResolutionBlocked(res: string): boolean {
-    const code = this.codes()[0]?.slice(0, 2);
+    //const code = this.codes()[0]?.slice(0, 2);
+    const code = this.maxCode(this.codes());
     if (res=="HD") return code == "CF"; // || code == "CR";
     else if (res=="MD") return code == "CF" || code == "CC";
     return code != "CF" && code != "CR";

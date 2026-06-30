@@ -541,14 +541,8 @@ class APLService:
         # self.save_pickle(export, "apl", code, specialite, time, time_type, aexp, resolution, with_sal)
         return export
 
-    def compute2_iris(self,
-                     codes: list[str],
-                     specialite: int,
-                     time: int,
-                     time_type: str,
-                     aexp: float,
-                     resolution: str,
-                     with_sal: bool) -> tuple[dict, any]:
+    def compute2_iris(self, codes: list[str], specialite: int, time: int, time_type: str, aexp: float,
+                      resolution: str, with_sal: bool) -> tuple[dict, any]:
         logger.info(f"Compute IRIS APL for {codes} {specialite} {time} {time_type} {aexp} {with_sal}")
         export = self.load_pickle("apl", codes, specialite, time, time_type, aexp, resolution, with_sal)
         if export is not None:
@@ -607,7 +601,6 @@ class APLService:
             if len(temp) > 0:
                 gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
                 gdf_merged = gdf_merged.drop_duplicates(subset=["cleabs", "year"])
-
         gdf_merged = self.gdf_merge_add_columns(gdf_merged)
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
@@ -679,17 +672,25 @@ class APLService:
         return export
 
     def compute_commune_csv(self,
-                            code: str,
+                            codes: list[str],
                             specialite: int,
                             time: int,
                             time_type: str,
                             aexp: float,
                             with_sal: bool) -> pd.DataFrame:
-        logger.info(f"Compute Commune APL CSV for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
-        type_code, id = self.check_code(code)
-        apl, studies_df = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+        logger.info(f"Compute Commune APL CSV for {codes} {specialite} {time} {time_type} {aexp} {with_sal}")
+        type_code, id = self.check_code(codes[0])
+        apl, studies_df = self.get_apl(codes[0], specialite, time, time_type, aexp, with_sal)
         gdf = self.get_commune_gdf_by_type_code_id(type_code, id, "LD")
         gdf_merged = self.merge_commune_gdf_apl(gdf, apl)
+        for code in codes[1:]:
+            apl, _ = self.get_apl(code, specialite, time, time_type, aexp, with_sal)
+            type_code, id = self.check_code(code)
+            gdf = self.get_commune_gdf_by_type_code_id(type_code, id, "LD")
+            temp = self.merge_commune_gdf_apl(gdf, apl)
+            if len(temp) > 0:
+                gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
+                gdf_merged = gdf_merged.drop_duplicates(subset=["code", "year"])
         gdf_merged = self.merge_filo(gdf_merged)
         gdf_merged = self.merge_pop(gdf_merged)
         gdf_commune = self.group_apl_by_commune(gdf_merged)

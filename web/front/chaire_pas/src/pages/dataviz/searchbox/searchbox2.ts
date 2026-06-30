@@ -7,7 +7,8 @@ import { SearchService } from './search-service';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-searchbox2',
@@ -26,6 +27,7 @@ export class Searchbox2 {
   type = input<string>("APL");
   selectedCodes = signal<[string, string][]>([]);
   selectedCodesEvent = output<[string, string][]>();
+  snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     //this.searchService.init();
@@ -56,16 +58,35 @@ export class Searchbox2 {
   //   }
   // }
 
+    maxCode(): string {
+      if (this.selectedCodes().length == 0) return "";
+      const cs = this.selectedCodes().map(s => s[0].slice(0, 2));
+      if (cs.includes("CF")) return "CF";
+      if (cs.includes("CR")) return "CR";
+      if (cs.includes("CD")) return "CD";
+      if (cs.includes("CE")) return "CE";
+      if (cs.includes("CA")) return "CA";
+      return "CC"
+    }
+
   onSelectedCodes(v: [string, string]) {
     if (v[0] == "CF-00" || v[0].slice(0, 3) == "CR-"  || this.searchService.nbChipMax() == 1) {
       this.selectedCodes.set([v]);
       this.selectedCodesEvent.emit(this.selectedCodes());
+      this.snackBar.open(`Ajout et remplace de ${v[1]}`, "OK", {duration: 1500})
     }
     else if (v[0][0] == "C" && v[0][2] == "-") {
       if (this.selectedCodes().length < this.searchService.nbChipMax()) {
-        this.selectedCodes.update(l => l.some(([code]) => code == v[0]) ? l : [...l, v]);
-        this.selectedCodesEvent.emit(this.selectedCodes());
+        if (this.maxCode() == "CF" || this.maxCode() == "CR") {
+          this.snackBar.open(`Une seule région autorisée`, "OK", {duration: 2000})
+        }
+        else {
+          this.selectedCodes.update(l => l.some(([code]) => code == v[0]) ? l : [...l, v]);
+          this.selectedCodesEvent.emit(this.selectedCodes());
+          this.snackBar.open(`Ajout de ${v[1]}`, "OK", {duration: 1000})
+        }
       }
+      else {this.snackBar.open(`Barre de sélection pleine ${this.searchService.nbChipMax()}/${this.searchService.nbChipMax()}`, "OK", {duration: 2000})}
     }
   }
   

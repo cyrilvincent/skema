@@ -9,6 +9,8 @@ from apl_service import APLService
 import logging
 import json
 
+from web.back.service_error import ServiceError
+
 logger = logging.getLogger(__name__)
 
 
@@ -440,13 +442,68 @@ class SAEService(APLService):
         # self.save_pickle(export, "sae", code, specialite, time, time_type, 0, resolution, False)
         return export
 
-    def compute_sae_iris_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
+    def compute2_sae_iris(self, codes: list[str], specialite: int, time: int, time_type: str, resolution: str)\
+            -> tuple[dict, any]:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        logger.info(f"Compute IRIS SAE CSV for {code} {specialite}")
+        logger.info(f"Compute IRIS SAE for {codes} {bor}")
+        export = self.load_pickle("sae", codes, specialite, time, time_type, 0, resolution, False)
+        if export is not None:
+            return export
+        if len(codes) == 0:
+            logger.warning("No codes")
+            raise ServiceError("No codes")
         self.check_time_type(time_type)
-        type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
+        type_code, id = self.check_code(codes[0])
+        sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
+        gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
+        logger.info(f"Found {len(gdf)} gdfs")
+        etab_df = self.get_sae_by_bor(bor, gdf)
+        etab_df = self.etab_tension(etab_df)
+        etab_df = self.etab_corrections(bor, etab_df)
+        if specialite == 5:
+            etab_df = self.merge_ehpad(etab_df)
+        logger.info(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        gdf_merged = self.merge_iris_gdf_apl(gdf, sae)
+        logger.info(f"Merged more {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        for code in codes[1:]:
+            type_code, id = self.check_code(code)
+            sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+            gdf = self.get_iris_gdf_by_type_code_id(type_code, id)
+            logger.info(f"Found more {len(gdf)} gdfs")
+            etab_temp = self.get_sae_by_bor(bor, gdf)
+            etab_temp = self.etab_tension(etab_temp)
+            etab_temp = self.etab_corrections(bor, etab_temp)
+            if specialite == 5:
+                etab_temp = self.merge_ehpad(etab_temp)
+            if len(etab_temp) > 0:
+                logger.info(f"Found more {len(etab_temp) / len(years):.0f} etab by year")
+                etab_df = pd.concat([etab_df, etab_temp], ignore_index=True)
+            temp = self.merge_iris_gdf_apl(gdf, sae)
+            if len(temp) > 0:
+                gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
+                gdf_merged = gdf_merged.drop_duplicates(subset=["cleabs", "year"])
+                logger.info(f"Merged more {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        gdf_merged = self.df_corrections(bor, gdf_merged)
+        gdf_merged = self.simplify(gdf_merged, resolution)
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
+        export = self.get_sae_export(str(codes), studies_df, gdf_merged, etab_df, years)
+        self.save_pickle(export, "sae", codes, specialite, time, time_type, 0, resolution, False)
+        return export
+
+    def compute_sae_iris_csv(self, codes: list[str], specialite: int, time: int, time_type: str) -> pd.DataFrame:
+        bor = self.bors[specialite - 1]
+        logger.info(f"Compute IRIS SAE CSV for {codes} {specialite}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(codes[0])
         sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+        for code in codes[1:]:
+            type_code, id = self.check_code(code)
+            temp, _ = self.get_sae(type_code, id, bor, time, time_type)
+            if len(temp) > 0:
+                sae = pd.concat([sae, temp], ignore_index=True)
         return sae[["km", "time_hc", "time_hp", "fi", "rs", "lon", "lat", "passu", "etpsal", "efflib", "etp",
                     "tension", "iris_string", "iris_label", "code_commune", "commune_label", "pop", "meanw", "year"]]
 
@@ -455,9 +512,9 @@ class SAEService(APLService):
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         logger.info(f"Compute Commune SAE for {code} {bor}")
-        export = self.load_pickle("sae_commune", code, specialite, time, time_type, 0, resolution, False)
-        if export is not None:
-            return export
+        # export = self.load_pickle("sae_commune", code, specialite, time, time_type, 0, resolution, False)
+        # if export is not None:
+        #     return export
         self.check_time_type(time_type)
         type_code, id = self.check_code(code)
         self.check_resolution(resolution)
@@ -478,16 +535,72 @@ class SAEService(APLService):
         gdf_commune = self.df_corrections(bor, gdf_commune)
         gdf_commune = self.gdf_commune_add_columns(gdf_commune)
         export = self.get_sae_export(code, studies_df, gdf_commune, etab_df, years)
-        self.save_pickle(export, "sae_commune", code, specialite, time, time_type, 0, resolution, False)
+        # self.save_pickle(export, "sae_commune", code, specialite, time, time_type, 0, resolution, False)
         return export
 
-    def compute_sae_commune_csv(self, code: str, specialite: int, time: int, time_type: str) -> pd.DataFrame:
+    def compute2_sae_commune(self, codes: list[str], specialite: int, time: int, time_type: str, resolution: str) \
+            -> tuple[dict, any]:
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
-        logger.info(f"Compute Commune SAE CSV for {code} {specialite}")
+        logger.info(f"Compute Commune SAE for {codes} {bor}")
+        export = self.load_pickle("sae_commune", codes, specialite, time, time_type, 0, resolution, False)
+        if export is not None:
+            return export
+        if len(codes) == 0:
+            logger.warning("No codes")
+            raise ServiceError("No codes")
         self.check_time_type(time_type)
-        type_code, id = self.check_code(code)
+        self.check_resolution(resolution)
+        type_code, id = self.check_code(codes[0])
+        sae, studies_df = self.get_sae(type_code, id, bor, time, time_type)
+        gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+        logger.info(f"Found {len(gdf)} gdfs")
+        etab_df = self.get_sae_commune_by_bor(bor, gdf)
+        etab_df = self.etab_tension(etab_df)
+        etab_df = self.df_corrections(bor, etab_df)
+        if specialite == 5:
+            etab_df = self.merge_ehpad(etab_df)
+        logger.info(f"Found {len(etab_df) / len(years):.0f} etab by year")
+        gdf_merged = self.merge_commune_gdf_apl(gdf, sae)
+        logger.info(f"Merged {len(gdf_merged) / len(years):.0f} gdf-apls by year")
+        for code in codes[1:]:
+            type_code, id = self.check_code(code)
+            sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+            gdf = self.get_commune_gdf_by_type_code_id(type_code, id, resolution)
+            logger.info(f"Found more {len(gdf)} gdfs")
+            etab_temp = self.get_sae_commune_by_bor(bor, gdf)
+            etab_temp = self.etab_tension(etab_temp)
+            etab_temp = self.df_corrections(bor, etab_temp)
+            if specialite == 5:
+                etab_temp = self.merge_ehpad(etab_temp)
+            if len(etab_temp) > 0:
+                logger.info(f"Found more {len(etab_temp) / len(years):.0f} etab by year")
+                etab_df = pd.concat([etab_df, etab_temp], ignore_index=True)
+            temp = self.merge_commune_gdf_apl(gdf, sae)
+            if len(temp) > 0:
+                gdf_merged = pd.concat([gdf_merged, temp], ignore_index=True)
+                gdf_merged = gdf_merged.drop_duplicates(subset=["code", "year"])
+                logger.info(f"Merged more {len(gdf_merged) / len(years):.0f} gdf-saes by year")
+        gdf_merged = self.merge_filo(gdf_merged)
+        gdf_merged = self.merge_pop(gdf_merged)
+        gdf_commune = self.group_sae_by_commune(gdf_merged)
+        gdf_commune = self.df_corrections(bor, gdf_commune)
+        gdf_commune = self.gdf_commune_add_columns(gdf_commune)
+        export = self.get_sae_export(str(codes), studies_df, gdf_commune, etab_df, years)
+        self.save_pickle(export, "sae_commune", codes, specialite, time, time_type, 0, resolution, False)
+        return export
+
+    def compute_sae_commune_csv(self, codes: list[str], specialite: int, time: int, time_type: str) -> pd.DataFrame:
+        bor = self.bors[specialite - 1]
+        logger.info(f"Compute Commune SAE CSV for {codes} {specialite}")
+        self.check_time_type(time_type)
+        type_code, id = self.check_code(codes[0])
         sae, _ = self.get_sae(type_code, id, bor, time, time_type)
+        for code in codes[1:]:
+            type_code, id = self.check_code(code)
+            temp, _ = self.get_sae(type_code, id, bor, time, time_type)
+            if len(temp) > 0:
+                sae = pd.concat([sae, temp], ignore_index=True)
         sae = self.group_sae_by_commune(sae)
         return sae[["km_mean", "time_hc_mean", "time_hp_mean", "fi", "rs", "lon", "lat", "passu_sum", "etpsal_sum",
                     "efflib_sum", "etp_sum", "tension_sum", "code_commune", "commune_label", "year"]]
@@ -499,16 +612,17 @@ if __name__ == '__main__':
     pd.options.display.width = 0
     s = SAEService()
     time.sleep(1)
-    # s.no_pickle = True
+    s.no_pickle = True
     # export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
 
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
+    # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
     # export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
     # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
-
-    s = json.dumps(export)
-    print(s[:5000])
+    # export = s.compute2_sae_iris(['CC-38225', 'CC-38205'], 1, 60, "HC", "HD")
+    export = s.compute2_sae_iris(['CC-06', 'CD-83'], 1, 60, "HC", "HD")
+    # s = json.dumps(export)
+    # print(s[:5000])
 
 
 

@@ -172,8 +172,8 @@ async def apl2_iris(dto: GeoInput2DTO):
                                    dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.resolution,
                                    dto.apl_type == "APL_S")
     if len(data[1]["features"]) == 0:
-        logger.warning(f"Get /apl2/iris 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
-        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+        logger.warning(f"Get /apl2/iris 404 {dto.codes} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.codes}")
     duration = charge_manager.stop(start)
     log_charge("/apl2/iris", duration)
     return data
@@ -201,8 +201,8 @@ async def apl2_commune(dto: GeoInput2DTO):
                                    dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.resolution,
                                    dto.apl_type == "APL_S")
     if len(data[1]["features"]) == 0:
-        logger.warning(f"Get /apl2/commune 404 {dto.code} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
-        raise HTTPException(status_code=404, detail=f"Item not found {dto.code}")
+        logger.warning(f"Get /apl2/commune 404 {dto.codes} {dto.id} {dto.time} {dto.hc} {dto.exp} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.codes}")
     duration = charge_manager.stop(start)
     log_charge("/apl2/commune", duration)
     return data
@@ -220,11 +220,11 @@ async def apl_iris_csv(dto: GeoInput2DTO, user=Depends(admin_user)):
 
 
 @app.post("/apl/commune/csv")
-async def apl_commune_csv(dto: GeoInputDTO, user=Depends(admin_user)):
+async def apl_commune_csv(dto: GeoInput2DTO, user=Depends(admin_user)):
     logger.info(f"Get /apl/commune/csv for user {user}")
     start = charge_manager.start()
     data = await run_in_threadpool(apl_service.compute_commune_csv,
-                                   dto.code, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
+                                   dto.codes, dto.id, dto.time, dto.hc, dto.exp, dto.apl_type == "APL_S")
     duration = charge_manager.stop(start)
     log_charge("/apl/commune/csv", duration)
     return data.to_csv(index=False)
@@ -243,11 +243,24 @@ async def sae_iris(dto: GeoInputDTO):
     return data
 
 
+@app.post("/sae2/iris")
+async def sae2_iris(dto: GeoInput2DTO):
+    logger.info(f"Get /sae2/iris")
+    start = charge_manager.start()
+    data = await run_in_threadpool(sae_service.compute2_sae_iris, dto.codes, dto.id, dto.time, dto.hc, dto.resolution)
+    if len(data[1]["features"]) == 0:
+        logger.warning(f"Get /sae2/iris 404 {dto.codes} {dto.id} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.codes}")
+    duration = charge_manager.stop(start)
+    log_charge("/sae2/iris", duration)
+    return data
+
+
 @app.post("/sae/iris/csv")
-async def sae_iris_csv(dto: GeoInputDTO, user=Depends(admin_user)):
+async def sae_iris_csv(dto: GeoInput2DTO, user=Depends(admin_user)):
     logger.info(f"Get /sae/iris/csv for user {user}")
     start = charge_manager.start()
-    data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.code, dto.id, dto.time, dto.hc)
+    data = await run_in_threadpool(sae_service.compute_sae_iris_csv, dto.codes, dto.id, dto.time, dto.hc)
     duration = charge_manager.stop(start)
     log_charge("/sae/iris/csv", duration)
     return data.to_csv(index=False)
@@ -266,11 +279,24 @@ async def sae_commune(dto: GeoInputDTO):
     return data
 
 
+@app.post("/sae2/commune")
+async def sae2_commune(dto: GeoInput2DTO):
+    logger.info(f"Get /sae2/commune")
+    start = charge_manager.start()
+    data = await run_in_threadpool(sae_service.compute2_sae_commune, dto.codes, dto.id, dto.time, dto.hc, dto.resolution)
+    if len(data[1]["features"]) == 0:
+        logger.warning(f"Get /sae2/commune 404 {dto.codes} {dto.id} {dto.resolution}")
+        raise HTTPException(status_code=404, detail=f"Item not found {dto.codes}")
+    duration = charge_manager.stop(start)
+    log_charge("/sae2/commune", duration)
+    return data
+
+
 @app.post("/sae/commune/csv")
-async def sae_commune_csv(dto: GeoInputDTO):
+async def sae_commune_csv(dto: GeoInput2DTO):
     logger.info(f"Get /sae/commune/csv")
     start = charge_manager.start()
-    data = await run_in_threadpool(sae_service.compute_sae_commune_csv, dto.code, dto.id, dto.time, dto.hc)
+    data = await run_in_threadpool(sae_service.compute_sae_commune_csv, dto.codes, dto.id, dto.time, dto.hc)
     duration = charge_manager.stop(start)
     log_charge("/sae/commune/csv", duration)
     return data.to_csv(index=False)
