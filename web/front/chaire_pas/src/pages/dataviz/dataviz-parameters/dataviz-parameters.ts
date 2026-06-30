@@ -114,12 +114,10 @@ export class DatavizParameters {
   }
 
   maxCode(codes: string[]): string {
+    if (codes.length == 0) return "";
     const cs = codes.map(s => s.slice(0, 2))
     if (cs.includes("CF")) return "CF";
     if (cs.includes("CR")) return "CR";
-    if (cs.includes("CD")) return "CD";
-    if (cs.includes("CE")) return "CE";
-    if (cs.includes("CA")) return "CA";
     return "CC"
   }
 

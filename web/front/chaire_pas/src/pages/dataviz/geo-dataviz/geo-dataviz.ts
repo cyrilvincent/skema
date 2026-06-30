@@ -273,10 +273,11 @@ export class GeoDataviz implements OnInit {
   }
 
   maxCode(): string {
-    if (!this.dto) return ""
+    if (!this.dto) return "CC"
     const codes = this.dto()!.codes.map(s => s.slice(0, 2))
     if (codes.includes("CF")) return "CF";
     if (codes.includes("CR")) return "CR";
+    if (codes.includes("CP")) return "CP";
     if (codes.includes("CD")) return "CD";
     if (codes.includes("CE")) return "CE";
     if (codes.includes("CA")) return "CA";

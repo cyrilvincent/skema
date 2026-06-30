@@ -63,9 +63,6 @@ export class Searchbox2 {
       const cs = this.selectedCodes().map(s => s[0].slice(0, 2));
       if (cs.includes("CF")) return "CF";
       if (cs.includes("CR")) return "CR";
-      if (cs.includes("CD")) return "CD";
-      if (cs.includes("CE")) return "CE";
-      if (cs.includes("CA")) return "CA";
       return "CC"
     }
 
@@ -73,7 +70,7 @@ export class Searchbox2 {
     if (v[0] == "CF-00" || v[0].slice(0, 3) == "CR-"  || this.searchService.nbChipMax() == 1) {
       this.selectedCodes.set([v]);
       this.selectedCodesEvent.emit(this.selectedCodes());
-      this.snackBar.open(`Ajout et remplace de ${v[1]}`, "OK", {duration: 1500})
+      this.snackBar.open(`Ajoute et remplace ${v[1]}`, "OK", {duration: 1500})
     }
     else if (v[0][0] == "C" && v[0][2] == "-") {
       if (this.selectedCodes().length < this.searchService.nbChipMax()) {
@@ -86,7 +83,7 @@ export class Searchbox2 {
           this.snackBar.open(`Ajout de ${v[1]}`, "OK", {duration: 1000})
         }
       }
-      else {this.snackBar.open(`Barre de sélection pleine ${this.searchService.nbChipMax()}/${this.searchService.nbChipMax()}`, "OK", {duration: 2000})}
+      else {this.snackBar.open(`Sélections pleines ${this.searchService.nbChipMax()}/${this.searchService.nbChipMax()}`, "OK", {duration: 2000})}
     }
   }
   
