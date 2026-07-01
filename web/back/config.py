@@ -1,5 +1,5 @@
 name = "ICIP"
-version = "3.2.0.RC"
+version = "3.2.1.RC"
 copyright = "(c) Skema 2021 - 2026"
 adresse_path = "data/adresse"
 connection_string = "postgresql://postgres:sa@localhost/icip"
@@ -8,4 +8,4 @@ ban_std = 0.054
 osm_nb_std = 1
 tarif_datesource_back = 3
 source_rpps_win_etab = 0.9
-web = "1.0.0.RC"
+web = "1.0.1.RC"

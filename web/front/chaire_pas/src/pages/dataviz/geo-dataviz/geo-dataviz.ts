@@ -30,7 +30,6 @@ export class GeoDataviz implements OnInit {
   sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
   config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading gituhub 22/02/2026
-  //data = computed<any[]>(() =>  this.showLabel() ? [this.getGeo(), this.type()=="APL" ? this.getScatter() as any : this.getScatterGeo() as any] : [this.getGeo()]); 
   data = computed<any[]>(() => this.getData());
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
@@ -51,7 +50,6 @@ export class GeoDataviz implements OnInit {
 
   constructor() {
     effect(() => this.onInputDTOChanged(this.dto()));
-    //effect(() => this.onValuesChanged(this.values()));
   }
 
   async ngOnInit() {

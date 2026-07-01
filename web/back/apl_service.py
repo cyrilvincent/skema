@@ -520,7 +520,7 @@ class APLService:
                      time_type: str,
                      aexp: float,
                      resolution: str,
-                     with_sal: bool) -> tuple[dict, any]:
+                     with_sal: bool) -> tuple[dict, any]:  # TO REMOVE
         logger.info(f"Compute IRIS APL for {code} {specialite} {time} {time_type} {aexp} {with_sal}")
         # export = self.load_pickle("apl", code, specialite, time, time_type, aexp, resolution, with_sal)
         # if export is not None:
@@ -615,7 +615,7 @@ class APLService:
                         time_type: str,
                         aexp: float,
                         resolution: str,
-                        with_sal: bool) -> tuple[dict, any]:
+                        with_sal: bool) -> tuple[dict, any]:  # todo TO REMOVE
         logger.info(f"Compute Commune APL for {code} {specialite} {time} {time_type} {aexp} {resolution} {with_sal}")
         # export = self.load_pickle("apl_commune", code, specialite, time, time_type, aexp, resolution, with_sal)
         # if export is not None:

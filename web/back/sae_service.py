@@ -8,8 +8,7 @@ import config
 from apl_service import APLService
 import logging
 import json
-
-from web.back.service_error import ServiceError
+from service_error import ServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -413,7 +412,7 @@ class SAEService(APLService):
         return dico, geojson
 
     def compute_sae_iris(self, code: str, specialite: int, time: int, time_type: str, resolution: str)\
-            -> tuple[dict, any]:
+            -> tuple[dict, any]:  # TODO to remove
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         logger.info(f"Compute IRIS SAE for {code} {bor}")
@@ -508,7 +507,7 @@ class SAEService(APLService):
                     "tension", "iris_string", "iris_label", "code_commune", "commune_label", "pop", "meanw", "year"]]
 
     def compute_sae_commune(self, code: str, specialite: int, time: int, time_type: str, resolution: str) \
-            -> tuple[dict, any]:
+            -> tuple[dict, any]: # TO remove
         bor = self.bors[specialite - 1]
         years = self.years_list(bor)
         logger.info(f"Compute Commune SAE for {code} {bor}")
