@@ -11,7 +11,7 @@ export class PublicationService {
   studies = signal<PublicationDTO[]>([]);
 
   getPublications() {
-    this.publications.set(publications.sort((a, b) => b.year! - a.year!));
+    this.publications.set(publications.sort((a, b) => b.year! - a.year! + (b.id - a.id) / 100));
   }
 
   getWorks() {

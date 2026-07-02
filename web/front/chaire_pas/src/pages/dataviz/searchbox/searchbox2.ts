@@ -77,16 +77,16 @@ export class Searchbox2 {
     else if (v[0][0] == "C" && v[0][2] == "-") {
       if (this.selectedCodes().length < this.searchService.nbChipMax()) {
         if (this.maxCode() == "CF" || this.maxCode() == "CR") {
-          this.snackBar.open(`Une seule région autorisée`, "OK", {duration: 2000})
+          this.snackBar.open(`Une seule région autorisée`, "OK", {duration: 2000});
         }
         else {
           this.selectedCodes.update(l => l.some(([code]) => code == v[0]) ? l : [...l, v]);
           this.selectedCodesEvent.emit(this.selectedCodes());
           this.inputEl.nativeElement.value = "";
-          this.snackBar.open(`Ajout de ${v[1]}`, "OK", {duration: 1000})
+          this.snackBar.open(`Ajout de ${v[1]}`, "OK", {duration: 1000});
         }
       }
-      else {this.snackBar.open(`Sélections pleines ${this.searchService.nbChipMax()}/${this.searchService.nbChipMax()}`, "OK", {duration: 2000})}
+      else this.snackBar.open(`Sélections pleines ${this.searchService.nbChipMax()}/${this.searchService.nbChipMax()}`, "OK", {duration: 2000});
     }
   }
   

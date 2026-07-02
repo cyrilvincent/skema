@@ -64,6 +64,15 @@ export const publications: PublicationDTO[] = [
         url: "https://journals.lww.com/cjasn/fulltext/2022/11000/toxic_occupational_exposures_and_membranous.8.aspx",
         type: "P"
     },
+    {
+        id:17,
+        title: "Central sensitization in patients with chronic pelvic pain resistant to hormonal therapy: A cross-sectional study of prevalence and clinical correlates in a tertiary referral cohort",
+        authors: "Alawadi H, Cid M, Delotte J, Gauci P-A.",
+        year: 2026,
+        source: "Acta Obstetricia et Gynecologica Scandinavica. doi:10.1111/aogs.70266",
+        url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/aogs.70266",
+        type: "P"
+    },
 ]
 
 export const works: PublicationDTO[] = [
@@ -85,18 +94,18 @@ export const works: PublicationDTO[] = [
         authors: "Montmartin B., Laffineur C. & Gauci P.A.",
         type: "W"
     },
-        {
+    {
         id:16,
         title: "Implementation of discharge within 24 hours after birth in France: safety, satisfaction, and feasibility trial supported by a connected home monitoring application (NICE-BIRTH study)",
         authors: "Gauci P.A., Adrados C., Albouy C., Roy M., Walrave Y., Marioli S., Benamer L. & Delotte J.",
         type: "W"
     },
-        {
-        id:17,
-        title: "Central sensitization in patients with chronic pelvic pain resistant to hormonal therapy: a cross-sectional study of prevalence and clinical correlates in a tertiary referral cohort",
-        authors: "Alawi H., Cid M., Delotte J. & Gauci P.A.",
-        type: "W"
-    },
+    // {
+    //     id:17,
+    //     title: "Central sensitization in patients with chronic pelvic pain resistant to hormonal therapy: a cross-sectional study of prevalence and clinical correlates in a tertiary referral cohort",
+    //     authors: "Alawi H., Cid M., Delotte J. & Gauci P.A.",
+    //     type: "W"
+    // },
 ]
 
 export const studies: PublicationDTO[] = [
