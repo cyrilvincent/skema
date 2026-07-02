@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, output, signal, ViewChild } from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
@@ -28,6 +28,7 @@ export class Searchbox2 {
   selectedCodes = signal<[string, string][]>([]);
   selectedCodesEvent = output<[string, string][]>();
   snackBar = inject(MatSnackBar);
+  @ViewChild('input') inputEl!: ElementRef<HTMLInputElement>;
 
   ngOnInit() {
     //this.searchService.init();
@@ -70,6 +71,7 @@ export class Searchbox2 {
     if (v[0] == "CF-00" || v[0].slice(0, 3) == "CR-"  || this.searchService.nbChipMax() == 1) {
       this.selectedCodes.set([v]);
       this.selectedCodesEvent.emit(this.selectedCodes());
+      this.inputEl.nativeElement.value = "";
       this.snackBar.open(`Ajoute et remplace ${v[1]}`, "OK", {duration: 1500})
     }
     else if (v[0][0] == "C" && v[0][2] == "-") {
@@ -80,6 +82,7 @@ export class Searchbox2 {
         else {
           this.selectedCodes.update(l => l.some(([code]) => code == v[0]) ? l : [...l, v]);
           this.selectedCodesEvent.emit(this.selectedCodes());
+          this.inputEl.nativeElement.value = "";
           this.snackBar.open(`Ajout de ${v[1]}`, "OK", {duration: 1000})
         }
       }
@@ -107,6 +110,11 @@ export class Searchbox2 {
       l.filter(tuple => tuple[0] != code)
     );
     this.selectedCodesEvent.emit(this.selectedCodes());
+  }
+
+  clear() {
+    this.inputEl.nativeElement.value = "";
+    this.selectedCodes.set([]);
   }
 }
 

@@ -1,5 +1,4 @@
 import datetime
-import json
 import pickle
 import threading
 import time
@@ -263,12 +262,7 @@ class APLService:
         else:
             return self.__getattribute__(f"get_commune_gdf_by_{type_code.lower()}")(id, resolution)
 
-    def get_study_by_year(self,
-                          specialite: int,
-                          time: int,
-                          time_type: str,
-                          aexp: float,
-                          year: int,
+    def get_study_by_year(self, specialite: int, time: int, time_type: str, aexp: float, year: int,
                           with_sal: bool) -> pd.DataFrame:
         table = "apl_s_study" if with_sal else "apl_study"
         sql = f"""
@@ -284,11 +278,7 @@ class APLService:
         """
         return pd.read_sql(sql, config.connection_string)
 
-    def get_studies_by_years(self, specialite: int,
-                             time: int,
-                             time_type: str,
-                             aexp: float,
-                             years: list[int],
+    def get_studies_by_years(self, specialite: int, time: int, time_type: str, aexp: float, years: list[int],
                              with_sal: bool) -> pd.DataFrame:
         df = None
         for year in years:
@@ -296,11 +286,8 @@ class APLService:
             if len(result) == 0:
                 logger.warning(f"No value for specialite {specialite} in {year}")
             if df is None:
-                # df = self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)
                 df = result
             else:
-                # df = pd.concat([df, self.get_study_by_year(specialite, time, time_type, aexp, year, with_sal)],
-                #                ignore_index=True)
                 df = pd.concat([df, result], ignore_index=True)
         return df
 

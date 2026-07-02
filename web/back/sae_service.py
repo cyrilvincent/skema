@@ -7,7 +7,6 @@ import pandas as pd
 import config
 from apl_service import APLService
 import logging
-import json
 from service_error import ServiceError
 
 logger = logging.getLogger(__name__)
@@ -400,7 +399,7 @@ class SAEService(APLService):
                 if len(etab_year["rs"]) > 500:  # 576 urgence_gen in france
                     for col in export_etab.columns:
                         etab_year[col] = []
-            dico_year["etab"] = etab_year
+            dico_year["etab"] = etab_year  # TODO verif indent
             dico["years"][year + 2000] = dico_year
         first_year = years[0]
         if len(gdf) > 0:

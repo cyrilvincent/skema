@@ -29,7 +29,7 @@ export class GeoDataviz implements OnInit {
   firstYear = computed<string>(() => this.dto() &&  this.dto()?.codes[0] == "CF-00" ? "2020" : Object.keys(this.years())[0]); // this.dto()?.code == "CF-00" ? "2020" : Object.keys(this.years())[0]);
   sliderYear = signal<string>(this.firstYear());
   layout = computed<Partial<Plotly.Layout>>(() => this.getLayout()); 
-  config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading gituhub 22/02/2026
+  config = signal<Partial<Plotly.Config>>(this.getConfig()); //({}); for lazy loading github 22/02/2026
   data = computed<any[]>(() => this.getData());
   visible = computed<boolean>(() => this.df()["center_lon"] != 0 && !this.loading());
   showLabel = signal<boolean>(false);
@@ -141,12 +141,6 @@ export class GeoDataviz implements OnInit {
       }, [0]);
     }
   }
-
-  // goToStep(step: number) {
-  //   const el = this.getPlotlyEl();
-  //   if (!el || !(el as any)._fullLayout) return; // guard : plotly pas encore init
-  //   Plotly.relayout(el, { 'sliders[0].active': step } as any);
-  // }
 
   onInputDTOChanged(dto: GeoInput2DTO | null) {
     if (dto != null) {
