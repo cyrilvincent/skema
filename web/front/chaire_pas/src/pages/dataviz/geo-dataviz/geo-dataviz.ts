@@ -359,7 +359,7 @@ export class GeoDataviz implements OnInit {
       zmin: this.getZMin(),
       zmax: this.getZMax(),
       //hoverinfo: "text",
-      hoverinfo: this.type() == "APL" || (this.years()[this.sliderYear()].etab!["lon"].length < 40) || !this.showLabel() ? "text" : "skip",
+      hoverinfo: "text", //this.type() == "APL" || (this.years()[this.sliderYear()].etab!["lon"].length < 40) || !this.showLabel() ? "text" : "skip",
       text: this.getTexts()[0],
       geojson: this.values()[1],
       featureidkey: "properties.fid",

@@ -8,6 +8,7 @@ import config
 from apl_service import APLService
 import logging
 from service_error import ServiceError
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -614,13 +615,13 @@ if __name__ == '__main__':
     # export = s.compute_sae_iris("CC-38185", 1, 60, "HC", "HD")
 
     # df = s.compute_sae_iris_csv("CC-38185",1,60,"HC")
-    # export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
+    export = s.compute_sae_commune("CC-06088", 5, 60, "HC", "HD")
     # export = s.compute_sae_iris("CD-42", 1, 60, "HC", "HD")
     # export = s.compute_sae_iris("CC-42279", 1, 60, "HC", "HD")
     # export = s.compute2_sae_iris(['CC-38225', 'CC-38205'], 1, 60, "HC", "HD")
-    export = s.compute2_sae_iris(['CC-06', 'CD-83'], 1, 60, "HC", "HD")
-    # s = json.dumps(export)
-    # print(s[:5000])
+    # export = s.compute2_sae_iris(['CC-06', 'CD-83'], 1, 60, "HC", "HD")
+    s = json.dumps(export)
+    print(s[:5000])
 
 
 
