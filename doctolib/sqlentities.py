@@ -59,7 +59,7 @@ class PS(Base):
     pid = Column(String(255), nullable=False)
     nick = Column(String(255), nullable=False, unique=True)
     speciality = Column(String(255), nullable=False)
-    medical_speciality = Column(String(255), nullable=False)
+    medical_speciality = Column(String(255))
     type = Column(String(50))
     street = Column(String(255))
     city = Column(String(255))

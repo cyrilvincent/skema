@@ -73,7 +73,6 @@ coverage.xml
 # Django stuff:
 *.log
 *.log.*
-~*.*
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -200,8 +199,4 @@ ca/*.html
 *.gpkg
 **/out/**
 communes-5m.geojson
-
-
-
-
-
+/doctolib/out*/

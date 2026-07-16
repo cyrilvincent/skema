@@ -175,7 +175,10 @@ class DoctolibParser:
     def join_ps_json(self, ps: PS):
         item = self.get_item_json_by_pid(ps.pid)
         if item is not None:
-            ps.medical_speciality = item["medicalSpecialty"]
+            if "medicalSpecialty" in item:
+                ps.medical_speciality = item["medicalSpecialty"]
+            # else:
+            #     ps.medical_speciality = ps.speciality
             ps.type = item["@type"]
             ps.street = item["address"]["streetAddress"]
             ps.cp = item["address"]["postalCode"]
@@ -224,7 +227,8 @@ class DoctolibParser:
                 ps.rdv_type = 2
             else:
                 ps.rdv_type = 3
-                spans = div.find_all("span", attrs={"data-design-system-component": "Text", "data-design-system": "oxygen"})
+                spans = div.find_all("span",
+                                     attrs={"data-design-system-component": "Text", "data-design-system": "oxygen"})
                 if len(spans) > 0:
                     ps.rdv_text = spans[0].text
                     if ps.rdv_text is not None:
@@ -233,8 +237,12 @@ class DoctolibParser:
                         ps.rdv_date = self.get_date_from_text(text)
                         if ps.rdv_date is not None:
                             ps.rdv_days = (ps.rdv_date - ps.now).days
+                            if ps.rdv_days < 0:
+                                ps.rdv_days = 366
 
     def get_date_from_text(self, text: str) -> datetime.date | None:
+        if "à partir du " in text:
+            text = text[12:-5]
         short_regex = r"^\w{3}\. (\d?\d$)"
         groups = re.match(short_regex, text)
         if groups is not None:
@@ -300,7 +308,8 @@ class DoctolibPSParser(DoctolibParser):
                 span = p.find("span", class_="break-all")
                 if span is not None:
                     self.dto.address = span.text
-            self.dto.new_patient = self.html.find("p", string=lambda t: t and "Ce soignant réserve la prise" in t) is None
+            self.dto.new_patient = self.html.find("p",
+                                                  string=lambda t: t and "Ce soignant réserve la prise" in t) is None
             if self.dto.new_patient:
                 self.dto.new_patient = self.html.find("p", string=lambda t: t and "pas de nouveau patient" in t) is None
             self.find_tarifs()
@@ -442,7 +451,7 @@ class DoctolibWorkflow:
                 dto.page += 1
                 time.sleep(sleep)
 
-    def parse_all(self, dto: UrlDTO):
+    def parse_all(self, dto: UrlDTO, with_ps: True):
         dto.page = 1
         self.ps_results = []
         while True:
@@ -457,9 +466,10 @@ class DoctolibWorkflow:
                 if ps.rdv_text is None and ps.rdv_days is not None:
                     input()
                 if ps.rdv_text is not None:
-                    print(ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.now, ps.rdv_days)
+                    print("RdV", ps.rdv_type, ps.rdv_text, ps.rdv_date, ps.now, ps.rdv_days)
                     print()
-                self.parse_ps(ps)
+                if with_ps:
+                    self.parse_ps(ps)
                 self.ps_results.append(ps)
             dto.page += 1
 
@@ -490,26 +500,29 @@ if __name__ == '__main__':
     context = Context()
     context.create(echo=args.echo)
 
-    dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "") # /!\ ps avec l'ancien parser
-    dto = UrlDTO("pediatre", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("medecin-generaliste", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("psychiatre", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("gastro-enterologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("gynecologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("ophtalmologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("cardiologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("neurologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("orl-oto-rhino-laryngologie", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("pneumologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("rhumatologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("stomatologue", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("infirmier", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("sage-femme", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("masseur-kinesitherapeute", "alpes-maritimes", 1, 0, "")
-    dto = UrlDTO("psychologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("dermatologue", "alpes-maritimes", 1, 0, "") # /!\ ps avec l'ancien parser
+    # dto = UrlDTO("pediatre", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("medecin-generaliste", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("psychiatre", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("gastro-enterologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("gynecologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("ophtalmologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("cardiologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("neurologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("orl-oto-rhino-laryngologie", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("pneumologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("rhumatologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("stomatologue", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("infirmier", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("sage-femme", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("masseur-kinesitherapeute", "alpes-maritimes", 1, 0, "")
+    # dto = UrlDTO("psychologue", "alpes-maritimes", 1, 0, "")
     # dto = UrlDTO("dentiste", "alpes-maritimes", 1, 0, "")
 
-    w = DoctolibWorkflow(context, 2606)
+    dto = UrlDTO("dermatologue", "france", 1, 0, "")  # 2589 ps => 130 pages
+    # dto = UrlDTO("ophtalmologue", "france", 1, 0, "")  # 9090 ps => 455 pages
+    dto.page = 315
+    w = DoctolibWorkflow(context, 2607)
     #
     # asyncio.run(w.go(dto))  # Do the scrap & parse_all & commit the same time
     # time.sleep(5)  # Never test go + scrap_pss at the same time
@@ -523,9 +536,14 @@ if __name__ == '__main__':
     #         asyncio.run(w.scrap_pss(dto))
 
     w.make_cache()  # Never test parse_all & go & scrap_pss at the same time
-    w.parse_all(dto)
-    input("Commit ?")
+    # w.parse_all(dto)
+    # input("Commit ?")
+    # w.commit()
+
+    w.parse_all(dto, with_ps=False)
+    input(f"Commit {len(w.ps_results)} PS ?")
     w.commit()
+
 
     # Debug for one PS
     # ps_dto = PS("pediatre")
