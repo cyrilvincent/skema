@@ -1,0 +1,12 @@
+Tables doctolib.ps*
+rdv_type
+0 = Pas d'information
+1 = Soignant réserve les RdV à ses clients
+2 = Aucune dispo
+3 = Dispo
+
+rdv_text = texte brut
+rdv_date = data parsée
+now = date du parsing
+rdv_days = nb jour d'attente pour un RdV
+

@@ -157,4 +157,12 @@ export const studies: PublicationDTO[] = [
         url: "https://www.quechoisir.org/action-ufc-que-choisir-l-ufc-que-choisir-devoile-la-carte-de-l-intolerable-fracture-sanitaire-les-pouvoirs-publics-vont-ils-engin-agir-pour-la-resorber-n103835/",
         type: "S"
     },
+    {
+        id:17,
+        year: 2026,
+        title: "Médecins spécialistes et déserts médicaux : leur présence sur un territoire ne suffit pas à garantir l'accès aux soins",
+        publisher: "The Conversation",
+        url: "https://theconversation.com/medecins-specialistes-et-deserts-medicaux-leur-presence-sur-un-territoire-ne-suffit-pas-a-garantir-lacces-aux-soins-284857",
+        type: "S"
+    },
 ]

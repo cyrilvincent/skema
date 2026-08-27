@@ -95,7 +95,7 @@ class PS(Base):
 class Tarif(Base):
     __tablename__ = "tarif"
 
-    id = Column(Integer, primary_key=True, )
+    id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False)
     tarif = Column(Float)
     tarif_max = Column(Float)

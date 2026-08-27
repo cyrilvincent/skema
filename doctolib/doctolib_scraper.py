@@ -238,7 +238,7 @@ class DoctolibParser:
                         if ps.rdv_date is not None:
                             ps.rdv_days = (ps.rdv_date - ps.now).days
                             if ps.rdv_days < 0:
-                                ps.rdv_days = 366
+                                ps.rdv_days += 365
 
     def get_date_from_text(self, text: str) -> datetime.date | None:
         if "à partir du " in text:
