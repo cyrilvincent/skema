@@ -246,7 +246,7 @@ class Etablissement(Base):
 
     def equals(self, other):
         return self.nom == other.nom and self.numero == other.numero and self.telephone == other.telephone \
-               and self.mail == other.mail and self.url == other.url
+               and self.mail == other.mail and self.url == other.from_url
 
 
 class Cabinet(Base):
